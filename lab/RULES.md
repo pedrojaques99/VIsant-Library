@@ -104,13 +104,51 @@ checkout (it holds the owner's uncommitted work and has `main` checked out).
    Build on the suggested combo. Deviate only with the reason written in
    `--rationale` (e.g. `desvio: ... porque ...`).
 6. Fill in the component and the meta. Status stays `candidate`.
-7. `pnpm lab:check && pnpm typecheck && pnpm lab:mobile`. All green, or
-   nothing ships (`lab:mobile` starts Vite itself and drives every card by touch).
-8. `cp -r Z:/Cursor/Vintageuiuxlibrary/.vercel .vercel` (if missing; the
+7. The component of the day (next section, steps C1–C5).
+8. `pnpm test:lab && pnpm lab:check && pnpm typecheck && pnpm lab:mobile`. All
+   green, or nothing ships (`lab:mobile` starts Vite itself and drives every
+   card, experiments and components, by touch).
+9. `cp -r Z:/Cursor/Vintageuiuxlibrary/.vercel .vercel` (if missing; the
    worktree has no Vercel link, see VISANT-REGISTRY-PLANO.md §8).
-9. `node scripts/ship.mjs --main --no-perf -m "lab: <LABEL> (<input>), candidate"`
+10. `node scripts/ship.mjs --main --no-perf -m "lab: <LABEL> (<input>) + <COMPONENT>, candidates"`
    (all ship gates, commit, push `HEAD:main`, `vercel deploy --prod`). If the
    push is refused (main moved), `git rebase origin/main` and run it again.
-10. Never touch `registry/`, never set `status: "kept"` by hand (only
-    `lab:sync` does, from the owner's verdict). A kept experiment only becomes
-    a registry item when the owner says so.
+11. Never touch `registry/`, never set `status: "kept"` by hand (only
+    `lab:sync` does, from the owner's verdict). A kept experiment or component
+    only becomes a registry item when the owner says so.
+
+## The component (one per run, from a featured Behance project)
+
+Besides the interaction, every run ships ONE refined, interactive component to
+`lab/components/<date>-<slug>.tsx`, inspired by a project featured in a curated
+Behance gallery. It goes through the same verdict (Aprovar / Descartar + chips);
+a kept one is listed under "Prontos pra colher" in `PREFERENCES.md` by
+`lab:sync`, and promotion to `registry/` is a separate step the owner asks for.
+
+- C1. `pnpm lab:behance`: picks a random featured project not used before
+  (`lab/behance-used.json`), downloads 3 refs into `lab/.refs/<date>-<slug>/`
+  (gitignored) and prints title, url, studio, gallery. It drives headless
+  Chromium (a plain fetch gets 403). If it fails, use the fallback in the
+  script's header (pick by hand, `--url <project>`); never block the run on it.
+- C2. Look at the refs yourself. Then the method, in this order:
+  - **A. Principle, not pixels.** Write `meta.inspiration`: ONE sentence on what
+    makes the project special. Design from that sentence, not from its layouts.
+  - **B. Collision.** Combine that principle with one physical metaphor from
+    the lab (a detent, a kaleidoscope, an abacus...), so the idea is ours.
+  - **C. Three sketches, one shipped.** Think through 3 concepts; score each
+    against `lab/taste.json` (what the owner keeps) plus craft, originality and
+    mobile; ship the best; write the 2 losers in `meta.sketches`, one line each
+    with why they lost.
+  - **D. Source taste.** `meta.source` = `{ title, url, studio, gallery, refs }`;
+    `gallery` lets the scoreboard learn which sources produce approvals.
+- C3. Build it: `kind: "component"`, the same `tags` / `rationale` / `hint` /
+  `hintTouch` / `formula` as an experiment, up to ~250 lines, `../hooks` for
+  touch/idle/tilt, `data-lab-target` on the primary control (lab:mobile drives
+  it). No source branding or text, no lifted layouts, no client names.
+- C4. Production craft: our tokens only (map the source's colors to `--casa-*`,
+  `--chart-*`, `--destructive` with `color-mix(in srgb, ...)`, never hex),
+  visant-motion springs/durations, reduced motion honored, a11y (real roles,
+  keyboard, `aria-valuetext` / live regions), mobile first (all Mobile rules).
+- C5. Distinct from the other components on the board in input and metaphor.
+  `lab:check` enforces the credit (`source.*`), the principle, the 2 sketches,
+  no literal colors and the size; `lab:mobile` drives it by touch.

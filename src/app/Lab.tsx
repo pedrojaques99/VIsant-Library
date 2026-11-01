@@ -19,7 +19,7 @@
 
 import * as React from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import type { LabMeta, LabModule } from "../../lab/types";
+import type { LabComponentMeta, LabComponentModule, LabMeta, LabModule } from "../../lab/types";
 import MOTIVOS from "../../lab/motivos.json";
 import { Aba } from "./casa-ui";
 import { useCoarse } from "../../lab/hooks";
@@ -29,6 +29,14 @@ const MODULES = import.meta.glob<LabModule>("../../lab/experiments/[0-9]*.tsx", 
 const EXPERIMENTS = Object.values(MODULES)
   .filter((m) => m.meta && typeof m.default === "function")
   .sort((a, b) => b.meta.id.localeCompare(a.meta.id));
+
+/* Components (lab/components/): refined pieces inspired by a featured Behance
+   project, credited on the card. Same verdict flow; kept ≠ published. */
+const COMPONENT_MODULES = import.meta.glob<LabComponentModule>("../../lab/components/[0-9]*.tsx", { eager: true });
+const COMPONENTS = Object.values(COMPONENT_MODULES)
+  .filter((m) => m.meta?.kind === "component" && typeof m.default === "function")
+  .sort((a, b) => b.meta.id.localeCompare(a.meta.id));
+const isComponent = (m: LabMeta): m is LabComponentMeta => (m as LabComponentMeta).kind === "component";
 
 type Action = "approve" | "discard";
 /** `GET /api/lab`: verdicts from the store + who is signed in (the cookie itself is HttpOnly). */
@@ -72,7 +80,7 @@ function Card({ meta, Experiment }: { meta: LabMeta; Experiment: LabModule["defa
     <div
       data-lab-id={meta.id}
       data-lab-input={meta.tags?.input}
-      className="flex aspect-square flex-col overflow-hidden rounded-tile bg-casa-tile p-4 [contain:paint] isolate"
+      className={`flex flex-col overflow-hidden rounded-tile bg-casa-tile p-4 [contain:paint] isolate ${isComponent(meta) ? "" : "aspect-square"}`}
     >
       <div className="flex items-start justify-between gap-3 font-casa-mono text-casa-sm">
         <span className="shrink-0 text-casa-fg-2">[ {meta.label} ]</span>
@@ -99,6 +107,16 @@ function Card({ meta, Experiment }: { meta: LabMeta; Experiment: LabModule["defa
           </span>
         ) : null}
       </div>
+      {isComponent(meta) ? (
+        <a
+          href={meta.source.url}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-2 font-casa-mono text-casa-sm text-casa-fg-3 underline-offset-4 focus-visible:underline"
+        >
+          inspirado em {meta.source.title} · {meta.source.studio}
+        </a>
+      ) : null}
     </div>
   );
 }
@@ -219,6 +237,21 @@ export function Lab() {
   const candidates = admin
     ? EXPERIMENTS.filter((e) => e.meta.status === "candidate" && !decided.has(e.meta.id))
     : [];
+  const pieces = COMPONENTS.filter((c) => isKept(c.meta));
+  const pieceCandidates = admin
+    ? COMPONENTS.filter((c) => c.meta.status === "candidate" && !decided.has(c.meta.id))
+    : [];
+  const judge = (meta: LabMeta, Experiment: LabModule["default"]) => (
+    <li key={meta.id}>
+      <Card meta={meta} Experiment={Experiment} />
+      {meta.rationale ? (
+        <p className="mt-2 font-casa-mono text-casa-sm text-casa-fg-3" title="pnpm lab:next">
+          {meta.rationale}
+        </p>
+      ) : null}
+      <Verdict id={meta.id} onDone={(a) => lab.decide(meta.id, a)} onLoggedOut={() => setLoggedOut(true)} />
+    </li>
+  );
 
   return (
     <main className="casa shell pb-24 pt-10">
@@ -236,21 +269,16 @@ export function Lab() {
         <section aria-label="Candidates" className="mt-8">
           <p className="font-casa-mono text-casa-sm text-casa-fg-2">[ CANDIDATES ] {candidates.length}</p>
           <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {candidates.map(({ meta, default: Experiment }) => (
-              <li key={meta.id}>
-                <Card meta={meta} Experiment={Experiment} />
-                {meta.rationale ? (
-                  <p className="mt-2 font-casa-mono text-casa-sm text-casa-fg-3" title="pnpm lab:next">
-                    {meta.rationale}
-                  </p>
-                ) : null}
-                <Verdict
-                  id={meta.id}
-                  onDone={(a) => lab.decide(meta.id, a)}
-                  onLoggedOut={() => setLoggedOut(true)}
-                />
-              </li>
-            ))}
+            {candidates.map(({ meta, default: Experiment }) => judge(meta, Experiment))}
+          </ul>
+        </section>
+      ) : null}
+
+      {pieceCandidates.length ? (
+        <section aria-label="Component candidates" className="mt-8">
+          <p className="font-casa-mono text-casa-sm text-casa-fg-2">[ COMPONENTES ] {pieceCandidates.length}</p>
+          <ul className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {pieceCandidates.map(({ meta, default: Experiment }) => judge(meta, Experiment))}
           </ul>
         </section>
       ) : null}
@@ -268,6 +296,22 @@ export function Lab() {
           ))}
         </ul>
       )}
+
+      {pieces.length ? (
+        <section aria-label="Componentes" className="mt-12">
+          <h2 className="text-casa-lg">Componentes</h2>
+          <p className="mt-1 text-casa-base text-casa-fg-2">
+            Peças refinadas a partir de um projeto em destaque no Behance: o princípio, não os pixels.
+          </p>
+          <ul className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {pieces.map(({ meta, default: Piece }) => (
+              <li key={meta.id}>
+                <Card meta={{ ...meta, status: "kept" }} Experiment={Piece} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </main>
   );
 }

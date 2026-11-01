@@ -15,3 +15,6 @@ test-results/
 
 # Medições locais de performance (scripts/perf-*.mjs): régua de antes/depois, não código.
 perf/
+
+# Referências do lab (pnpm lab:behance): pra olhar, nunca pro repo.
+lab/.refs/

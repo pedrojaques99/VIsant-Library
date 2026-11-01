@@ -30,8 +30,15 @@ export function scoreboard(decisions) {
     dims[dim] = Object.fromEntries(values.map((v) => [v, { kept: 0, discarded: 0, n: 0, rate: rate(0, 0) }]));
   }
   const motivos = { kept: {}, discarded: {} };
+  /** Which Behance gallery (or "lab" for daily interactions) produces approvals. */
+  const sources = {};
   for (const d of decisions) {
     if (d.status !== "kept" && d.status !== "discarded") continue;
+    const src = d.kind === "component" ? `behance/${d.gallery ?? "?"}` : "lab";
+    const cell = (sources[src] ??= { kept: 0, discarded: 0, n: 0, rate: rate(0, 0) });
+    cell[d.status]++;
+    cell.n++;
+    cell.rate = rate(cell.kept, cell.n);
     for (const m of d.motivos ?? []) motivos[d.status][m] = (motivos[d.status][m] ?? 0) + 1;
     if (!d.tags) continue;
     for (const dim of Object.keys(DIMENSIONS)) {
@@ -44,7 +51,7 @@ export function scoreboard(decisions) {
   }
   const n = decisions.filter((d) => d.status === "kept" || d.status === "discarded").length;
   const kept = decisions.filter((d) => d.status === "kept").length;
-  return { n, kept, dims, motivos };
+  return { n, kept, dims, motivos, sources };
 }
 
 const pct = (r) => `${Math.round(r * 100)}%`;
@@ -86,6 +93,12 @@ export function markdown(board) {
       : "_Tabela vazia: nenhum veredito com tags ainda._",
     "",
     `Motivos ao aprovar: ${chips("kept")}. Ao descartar: ${chips("discarded")}.`,
+    `Fontes: ${
+      Object.entries(board.sources ?? {})
+        .sort((a, b) => b[1].rate - a[1].rate)
+        .map(([k, c]) => `${k} ${c.kept}/${c.n} (${pct(c.rate)})`)
+        .join(", ") || "nenhuma ainda"
+    }.`,
   ].join("\n");
 }
 

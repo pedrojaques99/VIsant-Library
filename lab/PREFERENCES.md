@@ -16,7 +16,17 @@ locally. The taste block below is generated from the numbers; write by hand only
 _Tabela vazia: nenhum veredito com tags ainda._
 
 Motivos ao aprovar: nenhum. Ao descartar: nenhum.
+Fontes: nenhuma ainda.
 <!-- /lab:taste -->
+
+## Prontos pra colher
+
+Components the owner approved on `/lab`. Approval does NOT publish: moving one
+into `registry/` is a separate step, only when the owner asks.
+
+<!-- lab:colher (written by pnpm lab:sync) -->
+_Nenhum componente aprovado ainda._
+<!-- /lab:colher -->
 
 ## Log
 

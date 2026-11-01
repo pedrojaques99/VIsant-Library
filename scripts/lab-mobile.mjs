@@ -8,7 +8,7 @@
  * `touch-action` and pointer capture behave as on a phone) plus a 1440 desktop:
  *
  *   drag / pointer → a touch drag across the surface
- *   press          → a 600 ms touch hold, then release
+ *   press          → an 850 ms touch hold, then release
  *   scroll         → a touch swipe up (native scrolling, not the wheel)
  *   tilt           → a touch drag (the fallback when there is no gyroscope)
  *
@@ -84,12 +84,12 @@ async function act(page, cdp, input, box, touch) {
   if (input === "press") {
     if (touch) {
       await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y, id: 1 }] });
-      await sleep(600);
+      await sleep(850);
       return touchEnd(cdp);
     }
     await page.mouse.move(x, y);
     await page.mouse.down();
-    await sleep(600);
+    await sleep(850);
     return page.mouse.up();
   }
   // drag, pointer, tilt: a finger (or mouse) dragged across the surface
@@ -116,6 +116,8 @@ try {
     await page.route("**/api/lab", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify(ADMIN) }));
     await page.goto(`${base}/lab?admin`, { waitUntil: "load" });
     await page.waitForSelector("[data-lab-id]");
+    // Screenshots of a card, not of the sticky site header sitting on top of it.
+    if (SHOTS) await page.addStyleTag({ content: "header { visibility: hidden !important; }" });
     await sleep(800);
     const cdp = await ctx.newCDPSession(page);
     const fail = (id, m) => failures.push(`${name} ${id}: ${m}`);
@@ -129,7 +131,9 @@ try {
       await card.scrollIntoViewIfNeeded();
       await sleep(300);
       const surface = card.locator("[data-lab-surface]");
-      const box = await surface.boundingBox();
+      // A component names its primary control with data-lab-target; act on that.
+      const target = card.locator("[data-lab-target]").first();
+      const box = (await target.count()) ? await target.boundingBox() : await surface.boundingBox();
       if (!box) {
         fail(id, "no surface box");
         continue;
@@ -139,7 +143,9 @@ try {
         return h ? h.scrollWidth <= h.clientWidth + 1 : true;
       });
       if (!hintOk) fail(id, "hint overflows the card header");
+      const isPiece = (await target.count()) > 0;
       if (SHOTS && name === "iphone") await card.screenshot({ path: path.join(SHOTS, `${TAG}-${id}.png`) });
+      if (SHOTS && isPiece && name === "desktop") await card.screenshot({ path: path.join(SHOTS, `${TAG}-${id}-desktop.png`) });
 
       const sig = () => card.evaluate((el) => el.querySelector("[data-lab-surface]").innerHTML);
       const before = await sig();

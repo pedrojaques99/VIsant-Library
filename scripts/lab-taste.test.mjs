@@ -98,3 +98,16 @@ test("anti-repeat helpers", () => {
   assert.ok(!sameCombo(t("drag", "fluid", "bold", "snap"), t("drag", "fluid", "bold", "spring")));
   assert.ok(!sameCombo(undefined, t("drag", "fluid", "bold", "snap")));
 });
+
+test("sources: which gallery produces approvals (components) vs the daily lab", () => {
+  const b = scoreboard([
+    ...D,
+    { id: "c1", kind: "component", gallery: "ui-ux", status: "kept", tags: t("drag", "light", "medium", "snap") },
+    { id: "c2", kind: "component", gallery: "ui-ux", status: "discarded", tags: t("press", "material", "medium", "spring") },
+    { id: "c3", kind: "component", gallery: "graphic-design", status: "kept", tags: t("pointer", "typography", "subtle", "spring") },
+  ]);
+  assert.deepEqual([b.sources.lab.kept, b.sources.lab.n], [3, 5]);
+  assert.equal(b.sources["behance/ui-ux"].rate, 0.5);
+  assert.equal(b.sources["behance/graphic-design"].rate, 2 / 3);
+  assert.match(markdown(b), /Fontes: .*behance\/graphic-design 1\/1 \(67%\)/);
+});

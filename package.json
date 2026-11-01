@@ -51,6 +51,7 @@
     "lab:sync": "node scripts/lab.mjs sync",
     "lab:next": "node scripts/lab.mjs next",
     "lab:mobile": "node scripts/lab-mobile.mjs",
+    "lab:behance": "node scripts/lab-behance.mjs",
     "test:lab": "node --test scripts/lab-taste.test.mjs"
   },
   "dependencies": {

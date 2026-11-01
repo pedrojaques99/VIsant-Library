@@ -34,6 +34,7 @@ import { DIMENSIONS, jaccard, markdown, next, rng, sameCombo, scoreboard } from 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const LAB = path.join(ROOT, "lab");
 const DIR = path.join(LAB, "experiments");
+const CDIR = path.join(LAB, "components");
 const TEMPLATE = path.join(DIR, "_template.tsx");
 const RULES = path.join(LAB, "RULES.md");
 const PREFS = path.join(LAB, "PREFERENCES.md");
@@ -44,6 +45,9 @@ const TOO_CLOSE = 0.6;
 const IMPORTS_OK = ["react", "motion/react", "../types", "../hooks", "@/lib/utils"];
 const SOFT_MAX = 150;
 const HARD_MAX = 175;
+// Components are refined pieces (several controls, a11y, states): more room.
+const C_SOFT_MAX = 250;
+const C_HARD_MAX = 275;
 
 const today = () => new Date().toISOString().slice(0, 10);
 const die = (msg) => {
@@ -61,8 +65,15 @@ function args(argv) {
   return { pos, opt };
 }
 
-const files = () =>
-  fs.existsSync(DIR) ? fs.readdirSync(DIR).filter((f) => /^\d{4}-\d{2}-\d{2}-.+\.tsx$/.test(f)) : [];
+const datedIn = (dir) =>
+  fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => /^\d{4}-\d{2}-\d{2}-.+\.tsx$/.test(f)) : [];
+const files = () => datedIn(DIR);
+/** Experiments and components, each with its kind and absolute path. */
+const entries = () => [
+  ...datedIn(DIR).map((f) => ({ f, file: path.join(DIR, f), kind: "experiment" })),
+  ...datedIn(CDIR).map((f) => ({ f, file: path.join(CDIR, f), kind: "component" })),
+];
+const fileFor = (id) => [path.join(DIR, `${id}.tsx`), path.join(CDIR, `${id}.tsx`)].find((f) => fs.existsSync(f));
 
 const ruleIds = () =>
   new Set([...fs.readFileSync(RULES, "utf8").matchAll(/\*\*`([a-z0-9-]+)`\*\*/g)].map((m) => m[1]));
@@ -84,11 +95,31 @@ const loadTaste = () => (fs.existsSync(TASTE) ? JSON.parse(fs.readFileSync(TASTE
 
 function saveTaste(taste) {
   const board = scoreboard(taste.decisions);
-  const out = { updated: today(), n: board.n, kept: board.kept, decisions: taste.decisions, board: board.dims, motivos: board.motivos };
+  const out = {
+    updated: today(),
+    n: board.n,
+    kept: board.kept,
+    decisions: taste.decisions,
+    board: board.dims,
+    motivos: board.motivos,
+    sources: board.sources,
+  };
   fs.writeFileSync(TASTE, JSON.stringify(out, null, 2) + "\n");
   const prefs = fs.readFileSync(PREFS, "utf8");
   const block = `<!-- lab:taste (written by pnpm lab:sync; edits here are overwritten) -->\n${markdown(board)}\n<!-- /lab:taste -->`;
-  fs.writeFileSync(PREFS, prefs.replace(/<!-- lab:taste[\s\S]*?<!-- \/lab:taste -->/, () => block));
+  // Kept components are ready to harvest; promotion to registry/ is the owner's call.
+  const ready = taste.decisions.filter((d) => d.kind === "component" && d.status === "kept");
+  const colher = `<!-- lab:colher (written by pnpm lab:sync) -->\n${
+    ready.length
+      ? ready.map((d) => `- \`${d.id}\` · ${d.title ?? ""} · lab/components/${d.id}.tsx${d.source ? ` · ${d.source}` : ""}`).join("\n")
+      : "_Nenhum componente aprovado ainda._"
+  }\n<!-- /lab:colher -->`;
+  fs.writeFileSync(
+    PREFS,
+    prefs
+      .replace(/<!-- lab:taste[\s\S]*?<!-- \/lab:taste -->/, () => block)
+      .replace(/<!-- lab:colher[\s\S]*?<!-- \/lab:colher -->/, () => colher),
+  );
   return board;
 }
 
@@ -101,7 +132,15 @@ function record(taste, d) {
   else taste.decisions.push(merged);
 }
 
-const fromFile = (id, src) => ({ id, title: field(src, "title"), metaphor: metaphor(src), tags: readTags(src) });
+const fromFile = (id, src) => ({
+  id,
+  kind: /kind:\s*"component"/.test(src) ? "component" : "experiment",
+  title: field(src, "title"),
+  metaphor: metaphor(src),
+  tags: readTags(src),
+  gallery: field(src, "gallery"),
+  source: field(src, "url"),
+});
 
 function log(verb, id, why) {
   const line = `- ${today()} · ${verb} · \`${id}\` · ${why}\n`;
@@ -148,12 +187,11 @@ function cmdNew({ pos, opt }) {
 function cmdCheck() {
   const ids = ruleIds();
   const discarded = loadTaste().decisions.filter((d) => d.status === "discarded");
-  const all = files().map((f) => ({ f, src: fs.readFileSync(path.join(DIR, f), "utf8") }));
+  const all = entries().map((e) => ({ ...e, src: fs.readFileSync(e.file, "utf8") }));
   const labels = new Map();
   let errors = 0;
   let warnings = 0;
-  for (const f of files()) {
-    const src = fs.readFileSync(path.join(DIR, f), "utf8");
+  for (const { f, src, kind } of all) {
     const err = (m) => (errors++, console.error(`  ✗ ${f}: ${m}`));
     const warn = (m) => (warnings++, console.warn(`  ! ${f}: ${m}`));
     const id = f.replace(/\.tsx$/, "");
@@ -229,12 +267,27 @@ function cmdCheck() {
     if (/getContext\(/.test(src) && !/Math\.min\([^)]*devicePixelRatio[^)]*2\)|Math\.min\(2,\s*[^)]*devicePixelRatio/.test(src))
       err("canvas without DPR capped at 2: Math.min(devicePixelRatio, 2) (mobile-perf)");
 
+    // Components: credit the source, say the principle, keep the rejected sketches.
+    if (kind === "component") {
+      if (!/kind:\s*"component"/.test(src)) err('meta.kind must be "component"');
+      const block = src.match(/source:\s*\{([\s\S]*?)\n\s*\}/)?.[1] ?? "";
+      for (const k of ["title", "studio", "gallery"]) if (!field(block, k)?.trim()) err(`meta.source.${k} is empty (credit the source)`);
+      if (!/^https:\/\/www\.behance\.net\/gallery\/\d+/.test(field(block, "url") ?? "")) err("meta.source.url must be the Behance project URL");
+      if (!/refs:\s*\[\s*"/.test(block)) err("meta.source.refs is empty (the images you looked at)");
+      const insp = field(src, "inspiration") ?? "";
+      if (!insp.trim()) err("meta.inspiration is empty (one sentence: the principle)");
+      else if ((insp.match(/[.!?](\s|$)/g) ?? []).length > 1) warn("meta.inspiration should be ONE sentence");
+      const sketches = src.match(/sketches:\s*\[([\s\S]*?)\]/)?.[1].match(/"[^"]+"/g) ?? [];
+      if (sketches.length < 2) err("meta.sketches needs the 2 rejected concepts, one line each");
+    }
+
     const lines = src.split("\n").length;
-    if (lines > HARD_MAX) err(`${lines} lines (max ~${SOFT_MAX})`);
-    else if (lines > SOFT_MAX) warn(`${lines} lines (aim for < ${SOFT_MAX})`);
+    const [soft, hard] = kind === "component" ? [C_SOFT_MAX, C_HARD_MAX] : [SOFT_MAX, HARD_MAX];
+    if (lines > hard) err(`${lines} lines (max ~${soft})`);
+    else if (lines > soft) warn(`${lines} lines (aim for < ${soft})`);
   }
   const n = files().length;
-  console.log(`lab: ${n} experiment(s), ${errors} error(s), ${warnings} warning(s)`);
+  console.log(`lab: ${n} experiment(s), ${all.length - n} component(s), ${errors} error(s), ${warnings} warning(s)`);
   process.exit(errors ? 1 : 0);
 }
 
@@ -242,8 +295,8 @@ function verdict(verb, { pos }) {
   const [id, ...why] = pos;
   const reason = why.join(" ").trim();
   if (!id || !reason) die(`usage: lab:${verb} -- <id> "why"   (the why is what teaches the next run)`);
-  const file = path.join(DIR, `${id}.tsx`);
-  if (!fs.existsSync(file)) die(`no experiment ${id}`);
+  const file = fileFor(id);
+  if (!file) die(`no experiment or component ${id}`);
   const src = fs.readFileSync(file, "utf8");
   const taste = loadTaste();
   record(taste, { ...fromFile(id, src), status: verb === "keep" ? "kept" : "discarded", reason, at: today() });
@@ -270,8 +323,8 @@ async function cmdSync({ opt }) {
     if (!/^\d{4}-\d{2}-\d{2}-[a-z0-9-]+$/.test(v.id) || !["kept", "discarded"].includes(v.status)) continue;
     const motivos = Array.isArray(v.motivos) ? v.motivos : [];
     const decision = { id: v.id, status: v.status, motivos, reason: v.reason ?? "", at: String(v.at).slice(0, 10) };
-    const file = path.join(DIR, `${v.id}.tsx`);
-    if (!fs.existsSync(file)) {
+    const file = fileFor(v.id);
+    if (!file) {
       record(taste, decision); // already deleted: keep the tags we had, if any
       continue;
     }

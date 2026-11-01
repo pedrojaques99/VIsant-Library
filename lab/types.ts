@@ -45,3 +45,33 @@ export interface LabModule {
   meta: LabMeta;
   default: () => ReactElement;
 }
+
+/** Where a lab component came from: credited, linked, never copied. */
+export interface LabSource {
+  title: string;
+  url: string;
+  studio: string;
+  /** The Behance gallery it was featured in (ui-ux, graphic-design, motion): the taste learns which sources win. */
+  gallery: string;
+  /** Local reference images (lab/.refs/, gitignored) the run looked at. */
+  refs: string[];
+}
+
+/**
+ * A lab COMPONENT (lab/components/): a refined, interactive piece inspired by a
+ * featured Behance project. Same verdict flow as an experiment; a kept one is
+ * "pronto pra colher" and only reaches registry/ when the owner asks.
+ */
+export interface LabComponentMeta extends LabMeta {
+  kind: "component";
+  source: LabSource;
+  /** ONE sentence: what makes the source special. Designed from this, not from its pixels. */
+  inspiration: string;
+  /** The two concepts thought through and not shipped, one line each (why they lost). */
+  sketches: string[];
+}
+
+export interface LabComponentModule {
+  meta: LabComponentMeta;
+  default: () => ReactElement;
+}
