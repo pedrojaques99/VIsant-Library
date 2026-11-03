@@ -29,6 +29,7 @@
     }
   },
   "categories": [
+    "efeitos",
     "3d",
     "webgl",
     "shader",

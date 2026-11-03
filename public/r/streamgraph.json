@@ -24,8 +24,9 @@
     }
   },
   "categories": [
-    "dados",
+    "conteudo",
     "grafico",
+    "dados",
     "serie-temporal",
     "camadas",
     "dashboard"

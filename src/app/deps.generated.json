@@ -103,6 +103,9 @@
   "fold-motion": [
     "react"
   ],
+  "skeleton-medido": [
+    "skullet@0.0.3"
+  ],
   "use-local-search": [
     "react"
   ],

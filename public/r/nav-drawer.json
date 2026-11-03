@@ -173,10 +173,11 @@
     }
   },
   "categories": [
-    "navegacao",
+    "controles",
     "menu",
     "mobile",
     "drawer",
+    "navegacao",
     "acessibilidade"
   ],
   "type": "registry:ui"

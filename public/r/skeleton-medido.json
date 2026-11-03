@@ -1,0 +1,31 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "skeleton-medido",
+  "title": "Skeleton Medido",
+  "author": "Visant Labs <visantsupply@gmail.com>",
+  "description": "Esqueleto medido do conteúdo real, sem escrever as medidas à mão. Experimental: usa o Skullet 0.0.x.",
+  "dependencies": [
+    "skullet@0.0.3"
+  ],
+  "files": [
+    {
+      "path": "registry/visant/ui/skeleton-medido.tsx",
+      "content": "\"use client\";\n\nimport \"skullet/styles.css\";\n\nimport * as React from \"react\";\nimport { Skeleton, type SkeletonProps } from \"skullet/react\";\n\n/**\n * Skeleton Medido: o esqueleto desenhado a partir do conteúdo real.\n *\n * Experimental: embrulha o Skullet 0.0.x (lochie/skullet, MIT). A API de lá ainda\n * pode mudar, por isso a versão fica presa no item. `skeleton-rail` continua sendo\n * a opção sem dependência, com as medidas escritas à mão.\n *\n * Esta peça só veste o Skullet com os tokens da marca.\n */\n\nconst TOKENS = {\n  \"--skullet-base\": \"var(--muted)\",\n  \"--skullet-highlight\": \"color-mix(in oklab, var(--foreground) 8%, transparent)\",\n  \"--skullet-radius\": \"var(--r-control, 0.375rem)\",\n  display: \"contents\",\n} as React.CSSProperties;\n\nexport function SkeletonMedido<T>(props: SkeletonProps<T>) {\n  return (\n    <div style={TOKENS}>\n      <Skeleton {...props} />\n    </div>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "meta": {
+    "uso": {
+      "quando": "Conteúdo que muda de forma e cujo esqueleto não vale manter à mão",
+      "evite": "Projeto que não aceita dependência 0.0.x: skeleton-rail"
+    }
+  },
+  "categories": [
+    "feedback",
+    "skeleton",
+    "carregando",
+    "espera",
+    "experimental"
+  ],
+  "type": "registry:ui"
+}

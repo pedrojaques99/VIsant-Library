@@ -44,6 +44,7 @@
     }
   },
   "categories": [
+    "conteudo",
     "3d",
     "webgl",
     "scroll",

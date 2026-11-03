@@ -3,7 +3,7 @@
   "name": "kanban",
   "title": "Kanban",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Board com drag-and-drop, seleção por marquee sobre o vazio e multi-seleção com shift/ctrl.",
+  "description": "Quadro de tarefas por etapa: arraste o cartão de uma coluna para outra. No celular as colunas empilham.",
   "dependencies": [
     "@dnd-kit/core",
     "@dnd-kit/sortable",
@@ -59,7 +59,7 @@
     }
   },
   "categories": [
-    "dados",
+    "conteudo",
     "board",
     "dnd",
     "selecao"
