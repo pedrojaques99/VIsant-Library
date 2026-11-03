@@ -235,6 +235,12 @@ if (!familias.length || vazias.length) {
   process.exit(1);
 }
 
+/* A Vercel serve este arquivo, com status 404, em todo endereço sem página: o app sobe e mostra a tela dele. */
+writeFileSync(
+  join(DIST, "404.html"),
+  comMeta({ titulo: "Página não encontrada — @visant/ui", descricao: HOME.descricao, url: `${SITE}/`, imagem: `${SITE}/og/home.png`, noindex: true }),
+);
+
 for (const s of [...SECOES, ...FAMILIAS, ...KITS]) {
   escrever(s.slug, comMeta({ titulo: s.titulo, descricao: s.descricao, url: `${SITE}/${s.slug}`, imagem: `${SITE}/og/home.png`, noindex: s.noindex }));
 }
