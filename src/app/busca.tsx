@@ -208,7 +208,7 @@ export function BotaoDeBusca({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       aria-label="Buscar"
-      className="alvo-toque flex h-8 items-center gap-2 rounded-control px-2 text-casa-fg-2 transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:text-casa-fg md:w-56 md:bg-casa-tile md:px-3 md:hover:bg-casa-tile-2"
+      className="alvo-toque flex h-8 items-center gap-2 rounded-control px-2 text-casa-fg-2 transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:text-casa-fg md:w-40 md:bg-casa-tile lg:w-56 md:px-3 md:hover:bg-casa-tile-2"
     >
       <Search className="h-4 w-4 shrink-0" />
       {/* O campo largo é a afordância de busca no desktop. No celular fica o

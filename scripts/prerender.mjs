@@ -122,6 +122,21 @@ const SECOES = [
     descricao: `As ${registry.items.length} peças do registry, divididas por categoria — cada fatia com demo viva e comando de instalação.`,
   },
   {
+    slug: "skills",
+    titulo: "Skills — Visant",
+    descricao: "As skills públicas da Visant para Claude Code: interface, motion, copy e vídeo, mostradas em uso.",
+  },
+  {
+    slug: "skills/filme",
+    titulo: "Skills em filme — Visant",
+    descricao: "O que cada skill da Visant faz, em filme: telas fictícias, montadas para mostrar cada passada.",
+  },
+  {
+    slug: "skills/killer",
+    titulo: "visant-killer e visant-design — Visant",
+    descricao: "A auditoria que reprova tela com cara de IA e a porta que leva a tela até o fim.",
+  },
+  {
     slug: "docs",
     titulo: "Docs — @visant/ui",
     descricao: "Libs, hooks, temas e regras do registry, sem interface própria.",

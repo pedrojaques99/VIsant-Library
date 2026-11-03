@@ -54,9 +54,10 @@ import { Aba } from "./casa-ui";
 import { LogoAgente, abrirConectar } from "./conectar";
 import { Miniatura } from "./miniatura";
 import { nivelDoAparelho, pesoGpu, useVaga } from "./aparelho";
+import DESTAQUES from "../../curadoria/destaques.json";
 import { BugButton } from "./bug-report";
 import { ShaderLab } from "./ShaderLab";
-import { CURADORIA_ATIVA, arquivada, useNotas } from "./curadoria";
+import { CURADORIA_ATIVA, arquivada, useNotas, type Notas } from "./curadoria";
 import LANG from "./lang.generated.json";
 import { siClaude, siCursor, siOpenai } from "simple-icons";
 
@@ -110,6 +111,20 @@ const PERTO = "100% 0px";
  * A ordem do arquivo é a ordem em que as peças foram escritas, que não diz nada
  * a quem lê. Quem volta à vitrine volta pra ver o que mudou.
  */
+/**
+ * A aba Tudo abre pelo que o admin escolheu mostrar: a ordem de
+ * `curadoria/destaques.json`, depois nota 4 ou 5, depois novidade.
+ * Sem Web Analytics no projeto não há "mais vistos" para ler.
+ */
+const destaquesPrimeiro = (notas: Notas) => (lista: CatalogItem[]) => {
+  const posicao = (i: CatalogItem) => {
+    const d = (DESTAQUES as string[]).indexOf(i.name);
+    return d >= 0 ? d : DESTAQUES.length;
+  };
+  const nota = (i: CatalogItem) => ((notas[i.name]?.nota ?? 0) >= 4 ? notas[i.name].nota : 0);
+  return [...porNovidade(lista)].sort((a, b) => posicao(a) - posicao(b) || nota(b) - nota(a));
+};
+
 const porNovidade = (lista: CatalogItem[]) =>
   [...lista].sort((a, b) => Number(ehNovo(b.name)) - Number(ehNovo(a.name)));
 
@@ -470,10 +485,10 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
 
   const pool = React.useMemo(
     () =>
-      porNovidade(
+      (familia ? porNovidade : destaquesPrimeiro(notas))(
         CATALOG.filter((i) => ehPecaVisual(i) && (familia ? i.family === familia : i.family !== "shaders")).filter(naVitrine),
       ),
-    [familia, naVitrine],
+    [familia, naVitrine, notas],
   );
 
   const results = React.useMemo(
@@ -639,7 +654,7 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
           <p className="mt-3 max-w-xl text-casa-lg text-casa-fg-2">
             {/* Conta componente (fora Fundação e Anatomia): o mesmo número da aba
                 "Tudo" e da descrição de SEO (`prerender.mjs`). */}
-            {CATALOG.filter((i) => contaComoComponente(i) && !arquivada(notas[i.name])).length} componentes pra React. Cada um
+            {CATALOG.filter((i) => contaComoComponente(i) && i.family !== "shaders" && !arquivada(notas[i.name])).length} componentes e {CATALOG.filter((i) => i.family === "shaders" && !arquivada(notas[i.name])).length} shaders pra React. Cada um
             veste a marca que você escolher.
           </p>
         )}

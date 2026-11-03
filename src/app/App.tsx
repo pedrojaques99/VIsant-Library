@@ -59,13 +59,16 @@ if (typeof window !== "undefined") {
 /* O laboratório de interações (`/lab`): só quem abre a rota paga pelo chunk. */
 const Lab = React.lazy(() => import("./Lab").then((m) => ({ default: m.Lab })));
 const Docs = React.lazy(() => import("./Docs").then((m) => ({ default: m.Docs })));
+const SkillsHub = React.lazy(() => import("./skills/Hub").then((m) => ({ default: m.Hub })));
+const SkillsFilme = React.lazy(() => import("./skills/Filme").then((m) => ({ default: m.Filme })));
+const SkillsCarroChefe = React.lazy(() => import("./skills/CarroChefe").then((m) => ({ default: m.CarroChefe })));
 import { KitRoom } from "./KitRoom";
 import { KITS } from "./kits";
 import { DEFAULT_BRAND, REGISTRY_URL } from "./registry-meta";
 import { VisantAuthProvider } from "./visant-auth";
 import { MinhasMarcas } from "./MinhasMarcas";
 
-type View = "kits" | "catalogo" | "marca" | "lab" | "docs";
+type View = "kits" | "catalogo" | "marca" | "lab" | "docs" | "skills" | "404";
 
 interface Route {
   view: View;
@@ -113,11 +116,27 @@ const familiaDaPeca = (nome: string | null): Family | null =>
 const VIEWS: { value: View; label: string }[] = [
   { value: "catalogo", label: "Catálogo" },
   { value: "marca", label: "Marca" },
+  { value: "skills", label: "Skills" },
 ];
 
 /* Kits saíram do cabeçalho em 2026-11-03: as salas seguem abrindo por link, sem
    porta na navegação e com noindex no prerender. */
 const ROTAS_SEM_PORTA: View[] = ["kits", "docs"];
+const SUBPAGINAS_DE_SKILLS = ["filme", "killer"];
+/* `callback` é a volta do OAuth (`visant-auth.tsx`), que cai no catálogo. */
+const ROTAS_CONHECIDAS = ["catalogo", "marca", "skills", "kits", "kit", "c", "rig", "lab", "docs", "callback"];
+
+const TITULO_DA_VIEW: Partial<Record<View, string>> = {
+  marca: "Marca — @visant/ui",
+  docs: "Docs — @visant/ui",
+  kits: "Kits — @visant/ui",
+  lab: "Lab — @visant/ui",
+  "404": "Página não encontrada — @visant/ui",
+};
+const TITULO_DA_SKILL: Record<string, string> = {
+  filme: "Skills em filme — Visant",
+  killer: "visant-killer e visant-design — Visant",
+};
 
 // --- rota --------------------------------------------------------------------
 
@@ -136,6 +155,13 @@ function parsePath(loc: Location): Route {
   if (loc.hash.startsWith("#/")) return parseLegacyHash(loc.hash);
 
   const partes = loc.pathname.split("/").filter(Boolean);
+  /* As landings das skills: `kit` guarda a subpágina, `/skills/filme` ou `/skills/killer`. */
+  if (partes[0] === "skills") {
+    if (partes[1] && !SUBPAGINAS_DE_SKILLS.includes(partes[1])) return { view: "404", focus: null, kit: null, familia: null };
+    return { view: "skills", focus: null, kit: partes[1] ?? null, familia: null };
+  }
+  /* Endereço errado precisa parecer errado: abrir o catálogo faz link quebrado passar por link certo. */
+  if (partes[0] && !ROTAS_CONHECIDAS.includes(partes[0])) return { view: "404", focus: null, kit: null, familia: null };
   if (partes[0] === "c" && partes[1]) {
     const focus = decodeURIComponent(partes[1]);
     return { view: "catalogo", focus, kit: null, familia: familiaDaPeca(focus) };
@@ -179,6 +205,7 @@ function parseLegacyHash(hash: string): Route {
 
 function formatPath({ view, focus, kit, familia }: Route): string {
   if (focus) return `/c/${encodeURIComponent(focus)}`;
+  if (view === "skills") return kit ? `/skills/${kit}` : "/skills";
   if (view === "kits") return kit ? `/kit/${encodeURIComponent(kit)}` : "/kits";
   if (view === "catalogo") return familia ? `/catalogo/${familia}` : "/";
   return `/${view}`;
@@ -247,6 +274,16 @@ function useDarkMode() {
 
 function Shell() {
   const [route, navigate] = useRoute();
+
+  /* O prerender só cuida da primeira carga: navegar por dentro precisa trocar o título também. */
+  React.useEffect(() => {
+    const peca = route.focus ? CATALOG.find((i) => i.name === route.focus) : null;
+    document.title = peca
+      ? `${peca.title} — @visant/ui`
+      : route.view === "skills"
+        ? (TITULO_DA_SKILL[route.kit ?? ""] ?? "Skills — Visant")
+        : (TITULO_DA_VIEW[route.view] ?? "@visant/ui — a library da Visant");
+  }, [route.focus, route.view, route.kit]);
   const [dark, setDark] = useDarkMode();
   /*
    * O som da casa: só clique, nunca hover. Passar o ponteiro pela grade não é
@@ -339,7 +376,7 @@ function Shell() {
             className="flex shrink-0 items-center gap-2 rounded-control text-casa-base font-medium"
           >
             <span className="h-4 w-4 rounded-[5px] bg-casa-fg" aria-hidden />
-            visant/ui
+            <span className="max-[359px]:sr-only">visant/ui</span>
           </button>
 
           {/*
@@ -429,6 +466,20 @@ function Shell() {
         {route.view === "marca" && <BrandStudioBody />}
         {route.view === "lab" && <Lab />}
         {route.view === "docs" && <Docs />}
+        {route.view === "404" && (
+          <main className="shell casa min-h-[60vh] pt-24">
+            <h1 className="text-casa-xl font-medium">Essa página não existe.</h1>
+            <button
+              type="button"
+              onClick={() => setView("catalogo")}
+              className="alvo-toque mt-3 cursor-pointer rounded-control text-casa-lg text-casa-fg-2 underline underline-offset-4 outline-none hover:text-casa-fg focus-visible:[box-shadow:var(--focus)]"
+            >
+              Voltar ao catálogo
+            </button>
+          </main>
+        )}
+        {route.view === "skills" &&
+          (route.kit === "filme" ? <SkillsFilme /> : route.kit === "killer" ? <SkillsCarroChefe /> : <SkillsHub />)}
       </React.Suspense>
 
       <Busca aberto={buscando} onAberto={setBuscando} onEscolher={escolherNaBusca} />

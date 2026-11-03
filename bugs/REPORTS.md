@@ -2,12 +2,7 @@
 
 <!-- Gerado por scripts/vite-bug-report.mjs. Não edite à mão: use `npm run bugs -- --resolve <id>`. -->
 
-**17 aberto(s)** · 245 resolvido(s)
-
-## mesa-de-trabalho (1)
-
-- **mesa-de-trabalho-3** — a tab de "marca" deve ser reorganizada e redesenhada pra ser um modelo de "brand system guidelines" ou branding book, que mostra o sistema de marca e identidade visual completo interativo e pesquisável, assim como já existe na visantlabs.com/brand-guidelines
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 15:32</sub>
+**16 aberto(s)** · 246 resolvido(s)
 
 ## slide-to-confirm (1)
 
@@ -339,5 +334,6 @@ mais respiro visual, cards mais óbvcios~~
 - ~~marquee-2 · marquee — categoria inteira de seções poderia estar junto com conteúdo~~
 - ~~assignee-stack-4 · assignee-stack — categoria inteira de dados poderia estar junto com conteúdo~~
 - ~~mesa-de-trabalho-2 · mesa-de-trabalho — pode esconder completamente toda a tab e rota dos "kits"~~
+- ~~mesa-de-trabalho-3 · mesa-de-trabalho — a tab de "marca" deve ser reorganizada e redesenhada pra ser um modelo de "brand system guidelines" ou branding book, que mostra o sistema de marca e identidade visual completo interativo e pesquisável, assim como já existe na visantlabs.com/brand-guidelines~~
 
 </details>
