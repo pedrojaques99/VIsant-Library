@@ -284,6 +284,8 @@ export function ComponentFocus({
     const onKey = (e: KeyboardEvent) => {
       const el = document.activeElement;
       if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return;
+      // Controle que anda com seta (knob do painel, slider da demo, seletor): a seta é dele.
+      if (el?.closest('[role="slider"],[role="radiogroup"],[role="tablist"],[role="listbox"],[role="menu"],select')) return;
       if (e.key === "ArrowLeft") {
         e.preventDefault();
         onPrev();

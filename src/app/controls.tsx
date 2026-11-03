@@ -53,6 +53,8 @@ export interface Controle {
   max?: number;
   step?: number;
   rotulo?: string;
+  /** Unidade do número, um tom abaixo do valor: `px`, `min`, `%`. Vem do override. */
+  unidade?: string;
   secundario?: boolean;
 }
 
@@ -163,9 +165,9 @@ function Chave({
       <span
         className={cn(
           // casa-lint/pilula: o botão do interruptor acompanha o trilho redondo
-          "absolute top-1/2 block h-3.5 w-3.5 -translate-y-1/2 rounded-full transition-[left]",
+          "absolute top-1/2 block h-3.5 w-3.5 -translate-y-1/2 rounded-full transition-transform",
           "[transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
-          valor ? "left-[1.125rem] bg-casa-tile" : "left-0.5 bg-casa-fg-2",
+          valor ? "left-0.5 translate-x-4 bg-casa-tile" : "left-0.5 bg-casa-fg-2",
         )}
       />
     </button>
@@ -210,6 +212,7 @@ function Numero({
         <Rotulo controle={controle} mexido={mexido} />
         <span className="shrink-0 text-casa-base tabular-nums text-casa-fg">
           {Number.isInteger(step) ? valor : valor.toFixed(2)}
+          {controle.unidade ? <span className="text-casa-fg-2"> {controle.unidade}</span> : null}
         </span>
       </span>
     </SliderPrimitive.Root>
@@ -247,7 +250,7 @@ function Escolha({
       value={valor}
       onChange={(e) => onChange(e.target.value)}
       aria-label={controle.prop}
-      className="h-8 min-w-0 max-w-[60%] rounded-control bg-casa-tile-2 px-2.5 text-casa-sm text-casa-fg outline-none"
+      className="h-8 min-w-0 max-w-[60%] rounded-control bg-casa-tile-2 px-2.5 text-casa-sm text-casa-fg"
     >
       {valores.map((v) => (
         <option key={v} value={v}>
@@ -272,8 +275,9 @@ function Texto({
       type="text"
       value={valor}
       onChange={(e) => onChange(e.target.value)}
+      onFocus={(e) => e.target.select()}
       aria-label={controle.prop}
-      className="h-8 w-28 min-w-0 shrink-0 rounded-control bg-casa-tile-2 px-2.5 text-casa-sm text-casa-fg outline-none"
+      className="h-8 w-28 min-w-0 shrink-0 rounded-control bg-casa-tile-2 px-2.5 text-casa-sm text-casa-fg"
     />
   );
 }

@@ -36,9 +36,37 @@ import { cn } from "@/lib/utils";
  * sem número mágico de largura. `path` e `children` continuam valendo e têm
  * precedência sobre `text`.
  *
+ * ── Seis efeitos, um caminho só ─────────────────────────────────────────────
+ *
+ * `fx` troca o que a tinta faz enquanto condensa; o progresso, a respiração e o
+ * ponteiro continuam sendo os mesmos. `tinta` é a fumaça original, `escorrer`
+ * desloca só na vertical, `fatias` corta em tiras horizontais, `gota` funde as
+ * letras (desfoque com limiar), `grao` nasce de pó (ruído fino como máscara) e
+ * `neon` assenta com halo na cor da marca. Todos usam só primitivas de `<filter>`,
+ * sem canvas. Cada um deixa um resíduo próprio na marca assentada (`resto`): sem
+ * isso, seis efeitos terminariam na mesma palavra chapada, e a diferença só
+ * existiria durante a transição. Todos terminam legíveis.
+ *
  * `prefers-reduced-motion`: a marca nasce assentada (opacidade 1, deslocamento
  * 1.2, sem desfoque) e o laço de quadros nem começa.
  */
+
+export type InkWordmarkFx = "tinta" | "escorrer" | "fatias" | "gota" | "grao" | "neon";
+
+/**
+ * Parâmetros de cada efeito. `freq` é a frequência da turbulência em x e y,
+ * `abre` quanto ela cresce enquanto é fumaça, `eixo` por onde o deslocamento
+ * anda, `forca` multiplica a fumaça, `veu` é o desfoque máximo e `resto` o
+ * deslocamento que sobra com a marca assentada.
+ */
+const FX: Record<InkWordmarkFx, { freq: [number, number]; abre: number; eixo: "xy" | "x" | "y"; forca: number; veu: number; resto: number }> = {
+  tinta: { freq: [0.018, 0.029], abre: 0.02, eixo: "xy", forca: 1, veu: 4.5, resto: 1.2 },
+  escorrer: { freq: [0.05, 0.0018], abre: 0, eixo: "y", forca: 3.6, veu: 1, resto: 9 },
+  fatias: { freq: [0.0006, 0.09], abre: 0, eixo: "x", forca: 4, veu: 0, resto: 11 },
+  gota: { freq: [0.01, 0.014], abre: 0.006, eixo: "xy", forca: 0.8, veu: 9, resto: 3 },
+  grao: { freq: [0.85, 0.85], abre: 0, eixo: "xy", forca: 0.25, veu: 0, resto: 1.2 },
+  neon: { freq: [0.012, 0.02], abre: 0.012, eixo: "xy", forca: 0.5, veu: 3, resto: 0.6 },
+};
 
 export interface InkWordmarkProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
@@ -65,6 +93,8 @@ export interface InkWordmarkProps
   tracking?: number;
   /** Traço de pincel embaixo do `text`. */
   underline?: boolean;
+  /** O que a tinta faz ao condensar. Ver a nota do cabeçalho. */
+  fx?: InkWordmarkFx;
   /** Nome acessível da marca. Sem ele o SVG é só desenho para o leitor de tela. */
   "aria-label": string;
   /** Deslocamento máximo, em unidades do `viewBox`, quando a marca ainda é fumaça. */
@@ -99,6 +129,7 @@ export function InkWordmark({
   textCase = "as-is",
   tracking = -0.03,
   underline = false,
+  fx = "tinta",
   "aria-label": ariaLabel,
   smoke = 34,
   container,
@@ -114,6 +145,8 @@ export function InkWordmark({
   const turb = React.useRef<SVGFETurbulenceElement>(null);
   const desl = React.useRef<SVGFEDisplacementMapElement>(null);
   const desfoque = React.useRef<SVGFEGaussianBlurElement>(null);
+  const limiar = React.useRef<SVGFEColorMatrixElement>(null);
+  const halo = React.useRef<SVGFEGaussianBlurElement>(null);
   const energia = React.useRef(0);
   const ultimo = React.useRef<{ x: number; y: number } | null>(null);
   const reduce = useReducedMotion() ?? false;
@@ -208,18 +241,30 @@ export function InkWordmark({
       // fumaça: 1 longe, 0 quando a marca já assentou (aos 85% do percurso)
       const fumaca = 1 - Math.min(1, Math.max(0, prog.get() / 0.85));
       const s = (agora - t0) / 1000;
+      const p = FX[fx];
       // A turbulência também abre um pouco enquanto é fumaça: grão maior lê
       // como vapor, grão fino lê como borda de tinta.
-      const f = 0.018 + Math.sin(s * 0.25) * 0.004 + fumaca * 0.02;
+      const onda = 1 + Math.sin(s * 0.25) * 0.2;
+      const fx0 = p.freq[0] * onda + fumaca * p.abre;
+      const fy0 = p.freq[1] * onda + fumaca * p.abre * 1.6;
       // setAttribute direto, fora do React: re-render a 60fps por causa de três
       // atributos de filtro seria o componente inteiro reconciliado à toa.
-      turb.current.setAttribute("baseFrequency", `${f.toFixed(4)} ${(f * 1.6).toFixed(4)}`);
-      desl.current.setAttribute("scale", (1.2 + fumaca * smoke + energia.current * 9).toFixed(2));
-      desfoque.current.setAttribute("stdDeviation", (fumaca * 4.5).toFixed(2));
+      turb.current.setAttribute("baseFrequency", `${fx0.toFixed(4)} ${fy0.toFixed(4)}`);
+      desl.current.setAttribute("scale", (p.resto + fumaca * smoke * p.forca + energia.current * 9).toFixed(2));
+      // `gota` nunca zera o desfoque: é ele, com o limiar, que arredonda a letra.
+      desfoque.current.setAttribute("stdDeviation", (fumaca * p.veu + (fx === "gota" ? 3.4 : 0)).toFixed(2));
+      if (limiar.current) {
+        // `grao`: o limiar do ruído sobe com a fumaça, e a marca se desfaz em pó.
+        // O teto fica abaixo do total de propósito: sobra o pontilhado de tinta gasta.
+        const corte = -2.4 + 3.4 * (1 - fumaca);
+        limiar.current.setAttribute("values", `0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  14 0 0 0 ${(-7 + corte).toFixed(2)}`);
+      }
+      // `neon`: o halo abre longe e assenta curto, sem nunca apagar.
+      if (halo.current) halo.current.setAttribute("stdDeviation", (11 + fumaca * 22).toFixed(2));
     };
     raf = requestAnimationFrame(quadro);
     return () => cancelAnimationFrame(raf);
-  }, [visivel, reduce, prog, smoke]);
+  }, [visivel, reduce, prog, smoke, fx]);
 
   const mover = (e: React.PointerEvent<HTMLDivElement>) => {
     onPointerMove?.(e);
@@ -254,25 +299,73 @@ export function InkWordmark({
         <defs>
           {/* Região folgada: o deslocamento empurra a tinta para fora da caixa
               do desenho, e o filtro recorta tudo que passar da região. */}
-          <filter id={filterId} x="-15%" y="-40%" width="130%" height="180%">
+          <filter id={filterId} x="-15%" y="-40%" width="130%" height="180%" colorInterpolationFilters="sRGB">
             <feTurbulence
               ref={turb}
               type="fractalNoise"
-              baseFrequency="0.018 0.029"
-              numOctaves={2}
+              baseFrequency={`${FX[fx].freq[0]} ${FX[fx].freq[1]}`}
+              numOctaves={fx === "fatias" ? 1 : 2}
               seed={7}
               result="ruido"
             />
+            {/* Eixo único: o outro canal vira 0,5, que é deslocamento nenhum. */}
+            {FX[fx].eixo !== "xy" ? (
+              <feColorMatrix
+                in="ruido"
+                type="matrix"
+                values={
+                  FX[fx].eixo === "y"
+                    ? "0 0 0 0 0.5  0 1.6 0 0 -0.3  0 0 1 0 0  0 0 0 0 1"
+                    : "1.6 0 0 0 -0.3  0 0 0 0 0.5  0 0 1 0 0  0 0 0 0 1"
+                }
+                result="ruido"
+              />
+            ) : null}
             <feDisplacementMap
               ref={desl}
               in="SourceGraphic"
               in2="ruido"
-              scale={reduce ? 1.2 : 1.2 + smoke}
+              scale={reduce ? FX[fx].resto : FX[fx].resto + smoke * FX[fx].forca}
               xChannelSelector="R"
               yChannelSelector="G"
               result="tinta"
             />
-            <feGaussianBlur ref={desfoque} in="tinta" stdDeviation={reduce ? 0 : 4.5} />
+            <feGaussianBlur
+              ref={desfoque}
+              in="tinta"
+              stdDeviation={fx === "gota" ? 3.4 : reduce ? 0 : FX[fx].veu}
+              result="veu"
+            />
+            {/* `gota`: alfa com ganho alto vira borda dura; letras próximas se fundem. */}
+            {fx === "gota" ? (
+              <feColorMatrix in="veu" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 14 -6" />
+            ) : null}
+            {/* `grao`: ruído fino com limiar vira máscara; ela fecha conforme assenta. */}
+            {fx === "grao" ? (
+              <>
+                <feColorMatrix
+                  ref={limiar}
+                  in="ruido"
+                  type="matrix"
+                  values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  14 0 0 0 -6"
+                  result="mascara"
+                />
+                <feComposite in="veu" in2="mascara" operator="in" />
+              </>
+            ) : null}
+            {/* `neon`: a marca nítida por cima de um halo na cor da marca (forma, não texto). */}
+            {fx === "neon" ? (
+              <>
+                <feGaussianBlur ref={halo} in="veu" stdDeviation={reduce ? 11 : 33} result="largo" />
+                <feFlood style={{ floodColor: "var(--brand, currentColor)" }} result="cor" />
+                <feComposite in="cor" in2="largo" operator="in" result="brilho" />
+                <feMerge>
+                  <feMergeNode in="brilho" />
+                  <feMergeNode in="brilho" />
+                  <feMergeNode in="veu" />
+                </feMerge>
+              </>
+            ) : null}
           </filter>
         </defs>
         <g fill="currentColor" filter={`url(#${filterId})`}>

@@ -28,9 +28,9 @@ import { CountUp } from "../../../registry/visant/ui/count-up";
 import type { DemoProps } from "../catalog";
 
 const NUMEROS = [
-  { valor: "R$450k", rotulo: "faturado", delay: 0 },
-  { valor: "1.200", rotulo: "contratos", delay: 120 },
-  { valor: "98%", rotulo: "renovação", delay: 240 },
+  { valor: "R$450", rotulo: "no carrinho", delay: 0 },
+  { valor: "1.200", rotulo: "passos hoje", delay: 120 },
+  { valor: "98%", rotulo: "de bateria", delay: 240 },
 ];
 
 export default function CountUpDemo({ props }: DemoProps) {

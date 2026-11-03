@@ -11,10 +11,10 @@
 import * as React from "react";
 
 export const FILA = [
-  { id: "1", nome: "Identidade Café Norte", status: "producao", prioridade: "urgente" },
-  { id: "2", nome: "Landing Ateliê Sol", status: "revisao", prioridade: "alta" },
-  { id: "3", nome: "Kit de mockups Visant", status: "producao", prioridade: "media" },
-  { id: "4", nome: "Guideline Estúdio Vale", status: "backlog", prioridade: "alta" },
+  { id: "1", nome: "Relatório do trimestre", status: "producao", prioridade: "urgente" },
+  { id: "2", nome: "Página de preços", status: "revisao", prioridade: "alta" },
+  { id: "3", nome: "Kit de imagens", status: "producao", prioridade: "media" },
+  { id: "4", nome: "Guia de estilo", status: "backlog", prioridade: "alta" },
   { id: "5", nome: "Catálogo de peças", status: "backlog", prioridade: "media" },
 ];
 

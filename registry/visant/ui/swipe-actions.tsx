@@ -448,6 +448,7 @@ export function SwipeActionsRow({
       ref={linhaRef}
       className={cn("group/linha relative isolate overflow-hidden", className)}
       initial={reduzido ? { opacity: 0 } : { height: 0, opacity: 0 }}
+      // motion-lint-disable-next-line layout-property-animation  a linha entra e a lista abaixo precisa descer junto
       animate={{ height: "auto", opacity: 1 }}
       exit={recolher}
       transition={reduzido ? { duration: 0.15 } : { height: MOLA_LISA, opacity: { duration: 0.2 } }}

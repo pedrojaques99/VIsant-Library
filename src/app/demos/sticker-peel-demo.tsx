@@ -2,28 +2,66 @@
 
 /**
  * Uma prancheta com quatro adesivos espalhados, como tampa de notebook. Clique
- * descola, arrastar muda de lugar. Os
- * knobs pilotam o primeiro (o redondo da marca); os outros mostram que a dobra
- * vale para pílula e quadrado. "Recomeçar" remonta a prancheta.
+ * descola, arrastar muda de lugar. Os knobs pilotam o primeiro (o redondo da
+ * marca); os outros mostram que a dobra vale para pílula e quadrado. "Recomeçar"
+ * remonta a prancheta.
+ *
+ * A prancheta não recorta e tem folga em volta. Ao descolar por inteiro, o verso
+ * refletido sai pela diagonal até um corpo de adesivo além da posição dele: com
+ * `overflow-hidden` aqui, a promessa de "descola inteiro da página" terminava
+ * numa borda reta. A folga do lado de fora é do tamanho desse percurso.
+ *
+ * No celular a prancheta perde 60px de largura, e as posições são outras: as de
+ * desktop deixavam a pílula meio para fora.
  */
 
 import * as React from "react";
 import { RotateCcw, Sparkles, Star } from "lucide-react";
+import { useElementWidth } from "../stage";
 import { StickerPeel } from "../../../registry/visant/ui/sticker-peel";
 import type { DemoProps } from "../catalog";
+
+/*
+ * As posições levam em conta para onde cada um descola: o verso sobe e vai à
+ * esquerda, medido, até ~105px no redondo e ~136px na pílula. Daí a pílula longe
+ * da quina de cima e o redondo longe da esquerda no celular.
+ */
+const LARGA = {
+  selo: { x: 56, y: 68 },
+  calma: { x: 190, y: 98 },
+  manda: { x: 84, y: 182 },
+  brilho: { x: 258, y: 160 },
+};
+
+const ESTREITA = {
+  selo: { x: 92, y: 36 },
+  calma: { x: 140, y: 130 },
+  manda: { x: 104, y: 190 },
+  brilho: { x: 226, y: 42 },
+};
 
 export default function StickerPeelDemo({ props }: DemoProps) {
   const [rodada, setRodada] = React.useState(0);
   const [mexeu, setMexeu] = React.useState(false);
   const marcar = () => setMexeu(true);
+  const [caixa, largura] = useElementWidth<HTMLDivElement>();
+  const estreita = largura > 0 && largura < 380;
+  const pos = estreita ? ESTREITA : LARGA;
 
   return (
-    <div className="flex h-full w-full items-center justify-center">
-      <div className="relative h-[280px] w-[380px] max-w-full overflow-hidden rounded-[var(--r-surface)] bg-muted">
-        <div key={rodada} className="absolute inset-0">
+    // `overflow: clip` com margem: o adesivo pode pintar fora da caixa sem criar
+    // barra de rolagem em quem hospeda a demo. O piso é o `preview` do catálogo: no
+    // preset de celular (iframe) ninguém dá altura à demo, e sem ele a folga some.
+    <div
+      ref={caixa}
+      className="flex h-full min-h-[400px] w-full items-center justify-center [overflow-clip-margin:20px] [overflow:clip] sm:[overflow-clip-margin:32px]"
+    >
+      <div className="relative h-[280px] w-[380px] max-w-full rounded-[var(--r-surface)] bg-muted">
+        {/* A largura entra na chave: `defaultPosition` só vale ao montar. */}
+        <div key={`${rodada}-${estreita}`} className="absolute inset-0">
           <StickerPeel
             label="Selo da marca"
-            defaultPosition={{ x: 56, y: 44 }}
+            defaultPosition={pos.selo}
             rotate={-6}
             radius="9999px"
             peelOff
@@ -37,33 +75,33 @@ export default function StickerPeelDemo({ props }: DemoProps) {
           </StickerPeel>
           <StickerPeel
             label="Feito com calma"
-            defaultPosition={{ x: 200, y: 52 }}
+            defaultPosition={pos.calma}
             rotate={5}
             radius="var(--r-pill)"
             peelOff
             onPeelOff={marcar}
             onPositionChange={marcar}
           >
-            <span className="block rounded-[inherit] border-4 border-background bg-card px-4 py-2 text-sm font-medium text-foreground">
+            <span className="block whitespace-nowrap rounded-[inherit] border-4 border-background bg-card px-4 py-2 text-sm font-medium text-foreground">
               Feito com calma
             </span>
           </StickerPeel>
           <StickerPeel
             label="Manda ver"
-            defaultPosition={{ x: 84, y: 168 }}
+            defaultPosition={pos.manda}
             rotate={-3}
             radius="var(--r-pill)"
             peelOff
             onPeelOff={marcar}
             onPositionChange={marcar}
           >
-            <span className="block rounded-[inherit] border-4 border-background bg-foreground px-4 py-2 text-sm font-medium text-background">
+            <span className="block whitespace-nowrap rounded-[inherit] border-4 border-background bg-foreground px-4 py-2 text-sm font-medium text-background">
               Manda ver
             </span>
           </StickerPeel>
           <StickerPeel
             label="Brilho"
-            defaultPosition={{ x: 236, y: 140 }}
+            defaultPosition={pos.brilho}
             rotate={8}
             radius="var(--r-surface)"
             peelOff

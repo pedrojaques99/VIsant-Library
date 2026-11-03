@@ -117,7 +117,7 @@ export function SearchField({
             "rounded-[var(--r-control,0.5rem)] border border-[var(--input,var(--border))]",
             "bg-[var(--background)] pl-9 pr-9 text-sm text-[var(--foreground)]",
             "placeholder:text-[var(--muted-foreground)]",
-            "outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
+            "outline-none focus-visible:border-[color-mix(in_oklab,var(--ring)_60%,var(--foreground))] focus-visible:[box-shadow:0_0_0_1px_color-mix(in_oklab,var(--ring)_30%,transparent)]",
             "transition-[border-color,box-shadow]",
             "[transition-duration:var(--dur-fast,160ms)]",
             "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
@@ -135,8 +135,11 @@ export function SearchField({
             className={cn(
               "absolute right-1.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center",
               "rounded-[var(--r-control,0.375rem)] text-[var(--muted-foreground)]",
-              "hover:text-[var(--foreground)]",
-              "outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
+              "hover:text-[var(--foreground)] focus-visible:bg-[var(--muted)]",
+              "outline-none focus-visible:[box-shadow:0_0_0_1px_color-mix(in_oklab,var(--ring)_60%,var(--foreground))]",
+              // Aparece sem saltar: o × nasce com a primeira tecla, bem debaixo do olho.
+              "transition-[color,background-color,opacity] [transition-duration:var(--dur-fast,160ms)]",
+              "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))] starting:opacity-0",
             )}
           >
             <svg

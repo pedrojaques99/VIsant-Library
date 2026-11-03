@@ -112,6 +112,11 @@ export interface PhotoCompareProps extends Omit<React.HTMLAttributes<HTMLDivElem
   after: React.ReactNode;
   beforeLabel?: React.ReactNode;
   afterLabel?: React.ReactNode;
+  /**
+   * De que lado fica o "antes". `left` é a ordem de leitura: antes, depois.
+   * O padrão continua `right` para não trocar as fotos de quem já instalou.
+   */
+  beforeSide?: "left" | "right";
   /** Proporção da caixa, formato CSS. Obrigatória na prática: ver decisão 5. */
   ratio?: string;
   /** Posição inicial da cortina, 0 a 100. */
@@ -128,6 +133,7 @@ export function PhotoCompare({
   after,
   beforeLabel = "antes",
   afterLabel = "depois",
+  beforeSide = "right",
   ratio = "3/2",
   defaultValue = 50,
   peek = true,
@@ -137,6 +143,7 @@ export function PhotoCompare({
   style,
   ...props
 }: PhotoCompareProps) {
+  const antesEsquerda = beforeSide === "left";
   const [pos, setPos] = React.useState(defaultValue);
   const raizRef = React.useRef<HTMLDivElement>(null);
   const tocado = React.useRef(false);
@@ -188,18 +195,24 @@ export function PhotoCompare({
       style={{ "--ratio": ratio, "--p": `${pos}%`, ...style } as React.CSSProperties}
       {...props}
     >
+      {/* A cortina recorta sempre a camada de cima pela esquerda: quem fica de
+          que lado é só uma questão de qual foto vai em qual camada. */}
       <div className="photo-compare-layer">
-        {before}
-        {beforeLabel ? (
-          <span className="photo-compare-label photo-compare-label-before">{beforeLabel}</span>
+        {antesEsquerda ? after : before}
+        {(antesEsquerda ? afterLabel : beforeLabel) ? (
+          <span className="photo-compare-label photo-compare-label-before">
+            {antesEsquerda ? afterLabel : beforeLabel}
+          </span>
         ) : null}
       </div>
 
       {/* A camada de cima tem a caixa INTEIRA e é recortada — nunca redimensionada. */}
       <div className="photo-compare-layer photo-compare-after" aria-hidden="true">
-        {after}
-        {afterLabel ? (
-          <span className="photo-compare-label photo-compare-label-after">{afterLabel}</span>
+        {antesEsquerda ? before : after}
+        {(antesEsquerda ? beforeLabel : afterLabel) ? (
+          <span className="photo-compare-label photo-compare-label-after">
+            {antesEsquerda ? beforeLabel : afterLabel}
+          </span>
         ) : null}
       </div>
 
@@ -224,7 +237,7 @@ export function PhotoCompare({
         onPointerDown={() => (tocado.current = true)}
         className="photo-compare-input"
         aria-label={label}
-        aria-valuetext={`${Math.round(pos)}% do depois`}
+        aria-valuetext={`${Math.round(pos)}% do ${antesEsquerda ? "antes" : "depois"}`}
       />
     </div>
   );

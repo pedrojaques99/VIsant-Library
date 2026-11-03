@@ -83,8 +83,8 @@ function VaultMeter({ value }: { value: number | null }) {
     <span className="flex items-center gap-1.5" title={`Guideline ${v}% preenchida`}>
       <span className="h-1 w-10 overflow-hidden rounded-full bg-muted">
         <span
-          className="block h-full rounded-full transition-[width] duration-500"
-          style={{ width: `${v}%`, background: "var(--accent-ink, var(--foreground))" }}
+          className="block h-full origin-left transition-transform [transition-duration:var(--dur-slow,300ms)] [transition-timing-function:var(--ease-out)] motion-reduce:transition-none"
+          style={{ transform: `scaleX(${v / 100})`, background: "var(--accent-ink, var(--foreground))" }}
         />
       </span>
       <span className="tabular-nums text-[10px] text-muted-foreground">{v}%</span>

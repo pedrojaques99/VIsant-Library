@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Chip } from "@/components/ui/chip";
 
@@ -29,9 +30,10 @@ import { Chip } from "@/components/ui/chip";
  * 2. **A contagem é `aria-live="polite"`.** Filtrar é uma mudança que acontece
  *    longe do foco — sem isso, quem usa leitor de tela digita na busca e não
  *    recebe nenhum sinal de que a lista encolheu.
- * 3. **A segunda linha só existe com chips.** Reservar altura para uma fila
- *    vazia faz o conteúdo pular quando o primeiro filtro entra; renderizar
- *    condicionalmente empurra uma vez só, quando há motivo.
+ * 3. **A segunda linha abre e fecha, não pula.** Sem chips ela tem altura zero, e
+ *    o `grid-template-rows` de `0fr` para `1fr` empurra o conteúdo no mesmo
+ *    compasso do chip que entra. Chip entra e sai com a mesma curva curta, e os
+ *    vizinhos deslizam para o vão (`layout`), em vez de saltar.
  * 4. **A busca ocupa a sobra.** É o controle que recebe texto de tamanho
  *    imprevisível; os outros têm largura de rótulo.
  *
@@ -83,9 +85,11 @@ export function FilterBar({
     filteredCount !== totalCount;
 
   const hasChips = chips.length > 0;
+  const reduzir = useReducedMotion();
+  const passo = reduzir ? { duration: 0 } : { duration: 0.16, ease: [0.23, 1, 0.32, 1] as const };
 
   return (
-    <div className={cn("flex w-full flex-col gap-2", className)} {...props}>
+    <div className={cn("flex w-full flex-col", className)} {...props}>
       <div className="flex items-center gap-2 sm:gap-3">
         {/* A busca recebe texto de tamanho imprevisível — fica com a sobra. */}
         {search ? <div className="min-w-0 flex-1">{search}</div> : null}
@@ -95,41 +99,64 @@ export function FilterBar({
         {extras}
       </div>
 
-      {hasChips || showCount ? (
-        <div className="flex flex-wrap items-center gap-1.5">
-          {chips.map((chip) => (
-            <Chip key={chip.key} size="sm" pressed onRemove={chip.onRemove}>
-              {chip.label}
-            </Chip>
-          ))}
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows,opacity]",
+          "[transition-duration:var(--dur-base,200ms)]",
+          "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+          "motion-reduce:transition-none",
+          hasChips || showCount ? "grid-rows-[1fr]" : "grid-rows-[0fr] opacity-0",
+        )}
+      >
+        {/* `-m-1 p-1`: o recorte que dobra a linha não pode comer o anel de foco do chip. */}
+        <div className="-m-1 min-h-0 overflow-hidden p-1">
+          <div className="flex flex-wrap items-center gap-1.5 pt-2">
+            <AnimatePresence initial={false} mode="popLayout">
+              {chips.map((chip) => (
+                <motion.span
+                  key={chip.key}
+                  layout={reduzir ? false : "position"}
+                  className="inline-flex"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={passo}
+                >
+                  <Chip size="sm" pressed onRemove={chip.onRemove}>
+                    {chip.label}
+                  </Chip>
+                </motion.span>
+              ))}
+            </AnimatePresence>
 
-          {hasChips && onClearAll ? (
-            <button
-              type="button"
-              onClick={onClearAll}
-              className={cn(
-                "px-1.5 py-1 text-xs font-semibold text-[var(--muted-foreground)] underline-offset-4",
-                "hover:text-[var(--foreground)] hover:underline",
-                "outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
-                "rounded-[var(--r-control,0.375rem)]",
-              )}
-            >
-              {clearAllLabel}
-            </button>
-          ) : null}
+            {hasChips && onClearAll ? (
+              <button
+                type="button"
+                onClick={onClearAll}
+                className={cn(
+                  "px-1.5 py-1 text-xs font-semibold text-[var(--muted-foreground)] underline-offset-4",
+                  "hover:text-[var(--foreground)] hover:underline",
+                  "outline-none focus-visible:[box-shadow:0_0_0_1px_color-mix(in_oklab,var(--ring)_60%,var(--foreground))]",
+                  "rounded-[var(--r-control,0.375rem)]",
+                )}
+              >
+                {clearAllLabel}
+              </button>
+            ) : null}
 
-          {showCount ? (
-            // Filtrar muda a lista longe do foco. Sem `aria-live`, quem usa
-            // leitor de tela digita e não recebe sinal nenhum de que encolheu.
-            <span
-              aria-live="polite"
-              className="ml-auto shrink-0 text-xs tabular-nums text-[var(--muted-foreground)]"
-            >
-              {countLabel(filteredCount as number, totalCount as number)}
-            </span>
-          ) : null}
+            {showCount ? (
+              // Filtrar muda a lista longe do foco. Sem `aria-live`, quem usa
+              // leitor de tela digita e não recebe sinal nenhum de que encolheu.
+              <span
+                aria-live="polite"
+                className="ml-auto shrink-0 text-xs tabular-nums text-[var(--muted-foreground)]"
+              >
+                {countLabel(filteredCount as number, totalCount as number)}
+              </span>
+            ) : null}
+          </div>
         </div>
-      ) : null}
+      </div>
     </div>
   );
 }

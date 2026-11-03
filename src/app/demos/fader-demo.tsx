@@ -37,7 +37,7 @@ export default function FaderDemo() {
     <div className="flex h-full w-full items-center justify-center p-6">
       <div ref={ref} className="flex w-[280px] max-w-full flex-col gap-1">
         {PARAMS.map((p) =>
-          React.createElement("visant-fader", { key: p.label, label: p.label, min: 0, max: 100, value: p.value, default: p.def }),
+          React.createElement("visant-fader", { key: p.label, label: p.label, min: 0, max: 100, value: p.value, default: p.def, unit: "%" }),
         )}
         <p className="mt-3 h-4 font-mono text-[11px] text-muted-foreground">{read}</p>
       </div>

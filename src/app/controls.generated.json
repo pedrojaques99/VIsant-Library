@@ -175,7 +175,8 @@
           "max": 100,
           "step": 1,
           "padrao": null,
-          "resumo": "Controlado. Sem ele o medidor guarda o próprio nível."
+          "resumo": "Controlado. Sem ele o medidor guarda o próprio nível.",
+          "inicial": 4
         },
         {
           "prop": "label",
@@ -714,7 +715,8 @@
             "grid"
           ],
           "padrao": "wave",
-          "resumo": null
+          "resumo": null,
+          "inicial": "scope"
         },
         {
           "prop": "active",
@@ -1125,7 +1127,6 @@
           "step": 1,
           "padrao": 16,
           "resumo": null,
-          "inicial": 20,
           "secundario": true
         },
         {
@@ -1136,7 +1137,6 @@
           "step": 10,
           "padrao": 260,
           "resumo": "Largura de cada card, em px. 9:16 em 260px dá ~462px de altura.",
-          "inicial": 280,
           "secundario": true
         },
         {
@@ -1323,7 +1323,7 @@
           "tipo": "texto",
           "padrao": "header",
           "resumo": "Seletor do cabeçalho grudado a medir.",
-          "inicial": "[data-demo-header]"
+          "inicial": "[data-demo-sem-cabecalho]"
         }
       ],
       "FilterRow": [
@@ -1430,10 +1430,11 @@
           "prop": "value",
           "tipo": "numero",
           "min": 0,
-          "max": 100,
+          "max": 250,
           "step": 1,
           "padrao": null,
-          "resumo": null
+          "resumo": null,
+          "inicial": 163
         },
         {
           "prop": "label",
@@ -1700,7 +1701,8 @@
             "signed-in"
           ],
           "padrao": null,
-          "resumo": "Os três estados de verdade. `loading` nunca desenha texto de conta."
+          "resumo": "Os três estados de verdade. `loading` nunca desenha texto de conta.",
+          "inicial": "loading"
         }
       ]
     },
@@ -1735,7 +1737,8 @@
           "prop": "emailVerified",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Verificação do e-mail salvo. Muda o e-mail, o selo cai sozinho."
+          "resumo": "Verificação do e-mail salvo. Muda o e-mail, o selo cai sozinho.",
+          "inicial": true
         },
         {
           "prop": "undoWindowMs",
@@ -2253,7 +2256,7 @@
           "step": 0.05,
           "padrao": 0.07,
           "resumo": "0–1. Acima de ~0.1 vira ruído.",
-          "inicial": 0.11
+          "inicial": 0.16
         },
         {
           "prop": "spacing",
@@ -2269,11 +2272,11 @@
           "prop": "spotlight",
           "tipo": "numero",
           "min": 0,
-          "max": 260,
+          "max": 230,
           "step": 1,
           "padrao": null,
           "resumo": "Raio em px do halo que segue o ponteiro. Sem isto a malha é estática —",
-          "inicial": 170
+          "inicial": 150
         },
         {
           "prop": "spotlightOpacity",
@@ -2282,7 +2285,8 @@
           "max": 1,
           "step": 0.05,
           "padrao": 0.55,
-          "resumo": "0–1. Alpha dos pontos acesos dentro do halo."
+          "resumo": "0–1. Alpha dos pontos acesos dentro do halo.",
+          "inicial": 0.9
         }
       ]
     },
@@ -2324,7 +2328,8 @@
             "drop"
           ],
           "padrao": null,
-          "resumo": "Quando presente, manda em `visible`."
+          "resumo": "Quando presente, manda em `visible`.",
+          "inicial": "idle"
         },
         {
           "prop": "visible",
@@ -2583,7 +2588,8 @@
           "max": 100,
           "step": 1,
           "padrao": null,
-          "resumo": "Índice do passo em foco. Os outros recuam. Sem valor, todos iguais."
+          "resumo": "Índice do passo em foco. Os outros recuam. Sem valor, todos iguais.",
+          "inicial": 0
         },
         {
           "prop": "visualHeight",
@@ -2697,7 +2703,7 @@
           "tipo": "texto",
           "padrao": null,
           "resumo": "URL da fonte da citação (case, post, entrevista). Vai no `cite` do HTML.",
-          "inicial": "https://exemplo.com/cases/aloro"
+          "inicial": "https://exemplo.com"
         }
       ]
     },
@@ -3497,7 +3503,8 @@
           "max": 20,
           "step": 1,
           "padrao": 5,
-          "resumo": "Graus de inclinação no canto. Acima de ~8 o card lê como brinquedo."
+          "resumo": "Graus de inclinação no canto. Acima de ~8 o card lê como brinquedo.",
+          "inicial": 9
         },
         {
           "prop": "tint",
@@ -3964,6 +3971,17 @@
     "componentes": {
       "PhotoCompare": [
         {
+          "prop": "beforeSide",
+          "tipo": "escolha",
+          "valores": [
+            "left",
+            "right"
+          ],
+          "padrao": "right",
+          "resumo": "De que lado fica o \"antes\". `left` é a ordem de leitura: antes, depois.",
+          "inicial": "left"
+        },
+        {
           "prop": "peek",
           "tipo": "chave",
           "padrao": true,
@@ -4242,6 +4260,20 @@
     "componentes": {
       "InkWordmark": [
         {
+          "prop": "fx",
+          "tipo": "escolha",
+          "valores": [
+            "tinta",
+            "escorrer",
+            "fatias",
+            "gota",
+            "grao",
+            "neon"
+          ],
+          "padrao": "tinta",
+          "resumo": "O que a tinta faz ao condensar. Ver a nota do cabeçalho."
+        },
+        {
           "prop": "textCase",
           "tipo": "escolha",
           "valores": [
@@ -4250,7 +4282,8 @@
             "as-is"
           ],
           "padrao": "as-is",
-          "resumo": "Caixa do `text`."
+          "resumo": "Caixa do `text`.",
+          "inicial": "upper"
         },
         {
           "prop": "underline",
@@ -4270,11 +4303,12 @@
         {
           "prop": "tracking",
           "tipo": "numero",
-          "min": 0,
+          "min": -1,
           "max": 1,
           "step": 0.05,
           "padrao": -0.03,
-          "resumo": "Espaço entre letras do `text`, em em. Negativo aperta."
+          "resumo": "Espaço entre letras do `text`, em em. Negativo aperta.",
+          "inicial": -0.02
         },
         {
           "prop": "weight",
@@ -4283,13 +4317,16 @@
           "max": 1200,
           "step": 10,
           "padrao": 600,
-          "resumo": "Peso do `text`, 100 a 900."
+          "resumo": "Peso do `text`, 100 a 900.",
+          "inicial": 700
         },
         {
           "prop": "mark",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "Sinal pequeno no alto, depois do texto: \"®\", \"™\"."
+          "resumo": "Sinal pequeno no alto, depois do texto: \"®\", \"™\".",
+          "inicial": "®",
+          "secundario": true
         },
         {
           "prop": "path",
@@ -4303,6 +4340,7 @@
           "tipo": "texto",
           "padrao": null,
           "resumo": "A marca escrita, em texto vivo. Ignorado quando há `path` ou `children`.",
+          "inicial": "Visant",
           "secundario": true
         },
         {
@@ -4963,6 +5001,7 @@
           "tipo": "texto",
           "padrao": "var(--foreground)",
           "resumo": "Cor das sombras. O padrão é o token de texto.",
+          "inicial": "color-mix(in oklch, var(--brand, var(--foreground)) 75%, var(--foreground))",
           "secundario": true
         },
         {
@@ -4989,7 +5028,8 @@
           "prop": "counter",
           "tipo": "chave",
           "padrao": true,
-          "resumo": "Contador \"01 / 05\" no canto."
+          "resumo": "Contador \"01 / 05\" no canto.",
+          "inicial": false
         },
         {
           "prop": "density",
@@ -5039,6 +5079,7 @@
           "tipo": "texto",
           "padrao": "var(--foreground)",
           "resumo": null,
+          "inicial": "color-mix(in oklch, var(--brand, var(--foreground)) 75%, var(--foreground))",
           "secundario": true
         },
         {
@@ -5122,7 +5163,8 @@
           "prop": "value",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "Período escolhido. Controlado: guarde no estado do pai."
+          "resumo": "Período escolhido. Controlado: guarde no estado do pai.",
+          "inicial": "mensal"
         }
       ],
       "BillingPrice": [
@@ -5342,6 +5384,7 @@
           "step": 1,
           "padrao": null,
           "resumo": "Valor controlado. Sem ele, o slider guarda o próprio estado.",
+          "inicial": 64,
           "secundario": true
         },
         {
@@ -5458,13 +5501,28 @@
     "componentes": {
       "Gauge": [
         {
-          "prop": "max",
+          "prop": "value",
           "tipo": "numero",
           "min": 0,
-          "max": 250,
+          "max": 100,
           "step": 1,
-          "padrao": 100,
-          "resumo": null
+          "padrao": null,
+          "resumo": "Valor atual, entre `min` e `max`.",
+          "inicial": 84
+        },
+        {
+          "prop": "detail",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "Qualificador: a régua em palavras (\"360 de 500 GB\").",
+          "inicial": "de 500 GB"
+        },
+        {
+          "prop": "label",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "O que está sendo medido. Vira o nome acessível.",
+          "inicial": "Espaço do plano"
         },
         {
           "prop": "min",
@@ -5476,35 +5534,24 @@
           "resumo": null
         },
         {
+          "prop": "max",
+          "tipo": "numero",
+          "min": 0,
+          "max": 250,
+          "step": 1,
+          "padrao": 100,
+          "resumo": null
+        },
+        {
           "prop": "size",
           "tipo": "numero",
           "min": 10,
           "max": 400,
           "step": 10,
           "padrao": 176,
-          "resumo": "Largura máxima do anel, em px."
-        },
-        {
-          "prop": "value",
-          "tipo": "numero",
-          "min": 0,
-          "max": 100,
-          "step": 1,
-          "padrao": null,
-          "resumo": "Valor atual, entre `min` e `max`."
-        },
-        {
-          "prop": "detail",
-          "tipo": "texto",
-          "padrao": null,
-          "resumo": "Qualificador: a régua em palavras (\"360 de 500 GB\")."
-        },
-        {
-          "prop": "label",
-          "tipo": "texto",
-          "padrao": null,
-          "resumo": "O que está sendo medido. Vira o nome acessível.",
-          "inicial": "Espaço do plano"
+          "resumo": "Largura máxima do anel, em px.",
+          "unidade": "px",
+          "inicial": 208
         }
       ]
     }
@@ -5669,6 +5716,7 @@
           "tipo": "texto",
           "padrao": null,
           "resumo": "Valor controlado. Sem ele, o select guarda o próprio estado.",
+          "inicial": "andamento",
           "secundario": true
         }
       ]
@@ -5857,7 +5905,8 @@
           "prop": "expanded",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Aberta ou recolhida, controlado."
+          "resumo": "Aberta ou recolhida, controlado.",
+          "inicial": true
         },
         {
           "prop": "bounce",
@@ -5872,7 +5921,8 @@
           "prop": "activityKey",
           "tipo": "texto",
           "padrao": "atividade",
-          "resumo": "Chave da atividade. Trocar a chave morfa a ilha para a nova forma."
+          "resumo": "Chave da atividade. Trocar a chave morfa a ilha para a nova forma.",
+          "inicial": "timer"
         },
         {
           "prop": "label",
@@ -6147,7 +6197,8 @@
           "prop": "active",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "Item marcado como atual (ganha o ponto embaixo)."
+          "resumo": "Item marcado como atual (ganha o ponto embaixo).",
+          "inicial": "inicio"
         }
       ]
     }
@@ -6208,7 +6259,8 @@
           "max": 100,
           "step": 1,
           "padrao": null,
-          "resumo": "Valor controlado. Sem ele, o slider guarda o próprio estado."
+          "resumo": "Valor controlado. Sem ele, o slider guarda o próprio estado.",
+          "inicial": 60
         },
         {
           "prop": "viscosity",
@@ -6291,7 +6343,8 @@
             "dark"
           ],
           "padrao": null,
-          "resumo": "Tema atual. Passe para controlar; omita para a chave guardar o próprio estado."
+          "resumo": "Tema atual. Passe para controlar; omita para a chave guardar o próprio estado.",
+          "inicial": "light"
         },
         {
           "prop": "iconOnly",
@@ -6703,7 +6756,7 @@
           "tipo": "texto",
           "padrao": null,
           "resumo": "Impresso embaixo da linha, como o nome de quem assina.",
-          "inicial": "Marina Duarte, Estúdio Orla"
+          "inicial": "Marina, responsável"
         }
       ]
     }
@@ -6851,6 +6904,7 @@
           "step": 10,
           "padrao": 260,
           "resumo": "Altura do gráfico em px. A largura segue o contêiner.",
+          "unidade": "px",
           "inicial": 200
         },
         {
@@ -6904,7 +6958,8 @@
           "max": 500,
           "step": 10,
           "padrao": 240,
-          "resumo": "Diâmetro em px."
+          "resumo": "Diâmetro em px.",
+          "unidade": "px"
         },
         {
           "prop": "step",
@@ -6913,16 +6968,19 @@
           "max": 40,
           "step": 1,
           "padrao": 15,
-          "resumo": "Passo em minutos, no gesto e nas setas."
+          "resumo": "Passo em minutos, no gesto e nas setas.",
+          "unidade": "min"
         },
         {
           "prop": "value",
           "tipo": "numero",
           "min": 0,
-          "max": 100,
-          "step": 1,
+          "max": 1425,
+          "step": 15,
           "padrao": null,
-          "resumo": "Minutos desde 00:00 (0 a 1439). Controlado."
+          "resumo": "Minutos desde 00:00 (0 a 1439). Controlado.",
+          "unidade": "min",
+          "inicial": 780
         },
         {
           "prop": "label",
@@ -7033,15 +7091,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem em caracteres",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Globo em caracteres"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A imagem a redesenhar. Fundo branco ou transparente vira célula vazia.",
-          "inicial": "/media/cena-terra.webp"
+          "resumo": "A imagem a redesenhar. Fundo branco ou transparente vira célula vazia."
         }
       ]
     }
@@ -7097,15 +7153,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem em retícula",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante em retícula"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
           "resumo": "A imagem a reticular. Fundo branco ou transparente vira papel.",
-          "inicial": "/media/cena-produto.webp",
           "secundario": true
         }
       ]
@@ -7204,15 +7258,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem em risografia",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Rádio impresso em risografia"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
           "resumo": "A imagem a imprimir. Fundo branco ou transparente vira papel.",
-          "inicial": "/media/cena-radio.webp",
           "secundario": true
         }
       ]
@@ -7694,15 +7746,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem com as cores fora do registro",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante com as cores fora do registro"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A imagem a separar. Fundo transparente vira papel.",
-          "inicial": "/media/cena-produto.webp"
+          "resumo": "A imagem a separar. Fundo transparente vira papel."
         }
       ]
     }
@@ -7759,15 +7809,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem num monitor de tubo",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante num monitor de tubo"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
           "resumo": "A imagem a pôr no tubo. Fundo transparente vira papel.",
-          "inicial": "/media/cena-produto.webp",
           "secundario": true
         }
       ]
@@ -7816,15 +7864,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem pontilhada em poucos tons",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante em poucos tons pontilhados"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A imagem a pontilhar. Fundo branco ou transparente vira papel.",
-          "inicial": "/media/cena-produto.webp"
+          "resumo": "A imagem a pontilhar. Fundo branco ou transparente vira papel."
         }
       ]
     }
@@ -7863,15 +7909,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem em duotone",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante em duas cores"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A imagem a refazer em duas cores. Fundo transparente vira papel.",
-          "inicial": "/media/cena-produto.webp"
+          "resumo": "A imagem a refazer em duas cores. Fundo transparente vira papel."
         }
       ]
     }
@@ -7910,15 +7954,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Contornos da imagem",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Contornos da caixa e do diamante"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A imagem a traçar. Fundo transparente vira papel.",
-          "inicial": "/media/cena-produto.webp"
+          "resumo": "A imagem a traçar. Fundo transparente vira papel."
         }
       ]
     }
@@ -7954,15 +7996,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem com grão de filme",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante com grão de filme"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A imagem a granular. Fundo transparente vira papel.",
-          "inicial": "/media/cena-produto.webp"
+          "resumo": "A imagem a granular. Fundo transparente vira papel."
         }
       ]
     }
@@ -8001,15 +8041,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem com falha de sinal",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante com falha de sinal"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A imagem a estragar. Fundo transparente vira papel.",
-          "inicial": "/media/cena-produto.webp"
+          "resumo": "A imagem a estragar. Fundo transparente vira papel."
         }
       ]
     }
@@ -8050,15 +8088,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem pontilhada em 1 bit",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante pontilhados em 1 bit"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A imagem a pontilhar. Fundo branco ou transparente vira papel.",
-          "inicial": "/media/cena-produto.webp"
+          "resumo": "A imagem a pontilhar. Fundo branco ou transparente vira papel."
         }
       ]
     }
@@ -8085,15 +8121,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem pixelada",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante em blocos de cor"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A imagem a pixelar. Fundo transparente vira papel.",
-          "inicial": "/media/cena-produto.webp"
+          "resumo": "A imagem a pixelar. Fundo transparente vira papel."
         }
       ]
     }
@@ -8114,15 +8148,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem posterizada",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante posterizados"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A imagem a posterizar. Fundo transparente vira papel.",
-          "inicial": "/media/cena-produto.webp"
+          "resumo": "A imagem a posterizar. Fundo transparente vira papel."
         }
       ]
     }
@@ -8158,15 +8190,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem pequena ampliada",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante ampliados de uma versão pequena"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A imagem a reduzir e ampliar de volta. Fundo transparente vira papel.",
-          "inicial": "/media/cena-produto.webp"
+          "resumo": "A imagem a reduzir e ampliar de volta. Fundo transparente vira papel."
         }
       ]
     }
@@ -8233,7 +8263,6 @@
           "tipo": "texto",
           "padrao": "Imagem tocada de fita VHS",
           "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante tocados de fita VHS",
           "secundario": true
         },
         {
@@ -8241,7 +8270,6 @@
           "tipo": "texto",
           "padrao": null,
           "resumo": "A imagem a tocar na fita. Fundo transparente vira papel.",
-          "inicial": "/media/cena-produto.webp",
           "secundario": true
         }
       ]
@@ -8250,6 +8278,13 @@
   "textura-pinch": {
     "componentes": {
       "TexturaPinch": [
+        {
+          "prop": "resting",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai.",
+          "inicial": true
+        },
         {
           "prop": "radius",
           "tipo": "numero",
@@ -8272,15 +8307,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem beliscada pelo cursor",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante beliscados pelo cursor"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A imagem a beliscar. Fundo transparente vira papel.",
-          "inicial": "/media/cena-produto.webp"
+          "resumo": "A imagem a beliscar. Fundo transparente vira papel."
         }
       ]
     }
@@ -8288,6 +8321,13 @@
   "textura-sphere": {
     "componentes": {
       "TexturaSphere": [
+        {
+          "prop": "resting",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai.",
+          "inicial": true
+        },
         {
           "prop": "radius",
           "tipo": "numero",
@@ -8310,15 +8350,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem sob uma bolha de vidro",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante sob uma bolha de vidro"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A imagem debaixo da bolha. Fundo transparente vira papel.",
-          "inicial": "/media/cena-produto.webp"
+          "resumo": "A imagem debaixo da bolha. Fundo transparente vira papel."
         }
       ]
     }
@@ -8326,6 +8364,13 @@
   "textura-twist": {
     "componentes": {
       "TexturaTwist": [
+        {
+          "prop": "resting",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai.",
+          "inicial": true
+        },
         {
           "prop": "angle",
           "tipo": "numero",
@@ -8348,15 +8393,13 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem em redemoinho",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante torcidos em redemoinho"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A imagem a torcer. Fundo transparente vira papel.",
-          "inicial": "/media/cena-produto.webp"
+          "resumo": "A imagem a torcer. Fundo transparente vira papel."
         }
       ]
     }
@@ -8364,6 +8407,13 @@
   "textura-tiles": {
     "componentes": {
       "TexturaTiles": [
+        {
+          "prop": "resting",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai.",
+          "inicial": true
+        },
         {
           "prop": "gap",
           "tipo": "numero",
@@ -8404,15 +8454,14 @@
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem em ladrilhos",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante em ladrilhos"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
           "resumo": "A imagem a ladrilhar. Fundo transparente vira papel.",
-          "inicial": "/media/cena-produto.webp"
+          "secundario": true
         }
       ]
     }
@@ -8445,21 +8494,20 @@
           "max": 40,
           "step": 1,
           "padrao": 10,
-          "resumo": "Quanto a imagem escorre em repouso, em px."
+          "resumo": "Quanto a imagem escorre em repouso, em px.",
+          "inicial": 26
         },
         {
           "prop": "alt",
           "tipo": "texto",
           "padrao": "Imagem escorrendo em ruído",
-          "resumo": "Texto alternativo da imagem.",
-          "inicial": "Caixa e diamante escorrendo em ruído"
+          "resumo": "Texto alternativo da imagem."
         },
         {
           "prop": "src",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A imagem a escorrer. Fundo transparente vira papel.",
-          "inicial": "/media/cena-produto.webp"
+          "resumo": "A imagem a escorrer. Fundo transparente vira papel."
         }
       ]
     }
@@ -8473,7 +8521,7 @@
           "min": 2,
           "max": 12,
           "step": 1,
-          "padrao": 5,
+          "padrao": 4,
           "resumo": "Quantos mostradores cabem na altura."
         },
         {
@@ -8525,7 +8573,7 @@
           "max": 100,
           "step": 1,
           "padrao": 50,
-          "resumo": "Tamanho da íris."
+          "resumo": "Tamanho do disco."
         },
         {
           "prop": "rows",
@@ -8559,6 +8607,15 @@
           "step": 1,
           "padrao": 55,
           "resumo": "Comprimento de cada traço."
+        },
+        {
+          "prop": "scatter",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": 0,
+          "resumo": "Bagunça: 0 é malha regular com todo traço girando pelo campo; 100 é limalha"
         },
         {
           "prop": "strength",

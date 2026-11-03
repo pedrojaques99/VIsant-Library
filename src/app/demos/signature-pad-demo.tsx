@@ -20,7 +20,7 @@ export default function SignaturePadDemo({ props }: DemoProps) {
     <div className="flex h-full w-full items-center justify-center">
       <div className="flex w-[420px] max-w-full flex-col gap-3">
         <p className="text-corpo text-muted-foreground">Li a proposta e aceito os termos.</p>
-        <SignaturePad signer="Marina Duarte, Estúdio Orla" onChange={(s) => setTracos(s.length)} {...props} />
+        <SignaturePad signer="Marina, responsável" onChange={(s) => setTracos(s.length)} {...props} />
         <button
           type="button"
           disabled={tracos === 0}

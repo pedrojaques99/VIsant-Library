@@ -23,13 +23,13 @@ export default function StatusTickerDemo({ props }: DemoProps) {
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-6 p-6">
-      <div className="flex w-[360px] max-w-full items-center">
+      <div className="flex w-[400px] max-w-full items-center">
         {ativo ? (
           <StatusTicker
             key={`${atual}-${rodada}`}
             variant={atual}
             steps={atual === "etapas" ? PASSOS : undefined}
-            className="w-full"
+            className="w-full text-xl"
           />
         ) : null}
       </div>

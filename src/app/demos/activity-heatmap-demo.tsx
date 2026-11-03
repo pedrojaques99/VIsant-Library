@@ -59,7 +59,7 @@ export default function ActivityHeatmapDemo({ props }: DemoProps) {
         <p className="m-0 h-5 text-apoio text-muted-foreground" aria-live="polite">
           {escolhido
             ? `${formato.format(Date.parse(`${escolhido.date}T00:00:00Z`))}: ${escolhido.count} ${escolhido.count === 1 ? "entrega" : "entregas"}`
-            : "Toque num dia pra ver a conta."}
+            : null}
         </p>
       </div>
     </div>

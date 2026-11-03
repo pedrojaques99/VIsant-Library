@@ -13,7 +13,7 @@ import type { DemoProps } from "../catalog";
 const EXPEDIENTE: [number, number] = [9 * 60, 18 * 60];
 
 export default function TimeDialDemo({ props }: DemoProps) {
-  const [min, setMin] = React.useState(17 * 60);
+  const [min, setMin] = React.useState(13 * 60);
 
   return (
     <div className="flex h-full w-full items-center justify-center p-4">

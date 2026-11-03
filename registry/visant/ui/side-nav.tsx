@@ -209,6 +209,7 @@ export function SideNav({
           "bg-[var(--card,var(--background))] py-4 text-[var(--foreground)]",
           // Só `width`, nunca `transition-all`: numa barra com trinta itens o
           // `all` arrasta cor, sombra e transform de cada um deles junto.
+          // motion-lint-disable-next-line layout-property-animation  a barra precisa empurrar o conteúdo da página ao recolher
           "transition-[width] [transition-duration:var(--dur-base,220ms)]",
           "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
           "motion-reduce:transition-none",

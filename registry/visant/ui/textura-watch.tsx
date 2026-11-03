@@ -23,13 +23,16 @@ import { onThemeChange, resolveCssColor } from "@/lib/css-color";
  *    parado sendo redesenhado: o laço só vive enquanto um dos ponteiros ainda
  *    está chegando, e desliga sozinho quando os dois assentam. Com movimento
  *    reduzido eles pulam direto pro alvo.
- * 3. **Escala pela altura.** `rows` conta mostradores na altura; a largura
+ * 3. **Disco chapado e dois traços.** Sem aro, sem marcas de hora, sem pino e sem
+ *    cauda atrás do centro: em grade, cada detalhe a mais vira textura de fundo e
+ *    apaga o gesto, que é a grade inteira virando para o cursor.
+ * 4. **Escala pela altura.** `rows` conta mostradores na altura; a largura
  *    mostra quantos couberem, centrados. Card largo ganha relógio, não
  *    relógio oval.
- * 4. **Ponteiro em px locais.** A vitrine escala o palco com transform; o
+ * 5. **Ponteiro em px locais.** A vitrine escala o palco com transform; o
  *    cursor é convertido pela razão entre o tamanho de layout e o desenhado,
  *    senão os ponteiros mirariam ao lado da seta.
- * 5. **Em repouso, o centro.** Sem cursor, todos apontam pro meio do palco: o
+ * 6. **Em repouso, o centro.** Sem cursor, todos apontam pro meio do palco: o
  *    primeiro quadro já é um desenho (um leque radial), não uma grade morta.
  */
 
@@ -76,18 +79,13 @@ void main(){
 
   vec3 col=uFundo;
   col=mix(col,uFace,1.-smoothstep(r-aa,r,d));
-  float aro=1.-smoothstep(w*.5,w*.5+aa,abs(d-r));
-  col=mix(col,mix(uFace,uCurto,.55),aro);
-  float marca=(1.-smoothstep(w*.5,w*.5+aa,min(abs(f.x),abs(f.y))))*step(r*.74,d)*step(d,r*.88);
-  col=mix(col,mix(uFace,uCurto,.7),marca);
 
   vec2 uh=rumo(uHora,c);
   vec2 um=rumo(uMin,c);
-  float curto=seg(px,c-uh*r*.12,c+uh*r*.52);
-  float longo=seg(px,c-um*r*.16,c+um*r*.82);
-  col=mix(col,uCurto,1.-smoothstep(w*.9,w*.9+aa,curto));
-  col=mix(col,uLongo,1.-smoothstep(w*.5,w*.5+aa,longo));
-  col=mix(col,uLongo,1.-smoothstep(w*1.4,w*1.4+aa,d));
+  float curto=seg(px,c,c+uh*r*.52);
+  float longo=seg(px,c,c+um*r*.8);
+  col=mix(col,uCurto,1.-smoothstep(w-aa*.5,w+aa*.5,curto));
+  col=mix(col,uLongo,1.-smoothstep(w-aa*.5,w+aa*.5,longo));
   gl_FragColor=vec4(col,1.);
 }
 `;
@@ -95,9 +93,9 @@ void main(){
 /** Paradas padrão: fundo, mostrador, ponteiro longo, ponteiro curto. Tudo token. */
 const CORES_PADRAO = [
   "var(--background)",
-  "color-mix(in oklab, var(--brand) 12%, var(--background))",
-  "var(--brand)",
-  "color-mix(in oklab, var(--brand) 55%, var(--foreground))",
+  "color-mix(in oklab, var(--foreground) 8%, var(--background))",
+  "var(--foreground)",
+  "color-mix(in oklab, var(--foreground) 55%, var(--background))",
 ];
 
 export interface TexturaWatchProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
@@ -147,7 +145,7 @@ function compilar(gl: WebGLRenderingContext, frag: string): WebGLProgram | null 
 }
 
 export function TexturaWatch({
-  rows = 5,
+  rows = 4,
   trail = 60,
   weight = 40,
   colors,

@@ -1,12 +1,13 @@
 "use client";
 
 /**
- * A pilha no centro do palco, com o botão que a alimenta quieto em cima.
+ * A pilha no centro do palco, com o botão que a alimenta quieto logo abaixo.
  *
  * Antes a pilha ia pro canto de uma janela desenhada dentro do card, e o botão
  * de marca no canto oposto ganhava a briga pelo olho: janela dentro de card,
  * pilha espremida no canto, peça fora de foco. Agora o próprio palco é a tela,
- * a pilha fica embaixo e no meio (`bottom-center`), e o botão é contorno.
+ * a pilha e o botão formam um grupo só no meio do palco, sem vão entre eles, e o
+ * leque abre para cima, no espaço que sobra.
  *
  * Ela já começa com três avisos para o leque ter o que abrir: passar o
  * ponteiro sobre a pilha é o gesto que a peça vende. "Publicar" mostra a
@@ -25,7 +26,7 @@ function Painel() {
   const { toast, update, count } = useToastStack();
 
   const semear = React.useCallback(() => {
-    toast({ type: "info", title: "Marina comentou no rascunho", description: "Ajustar o título da dobra." });
+    toast({ type: "info", title: "Marina comentou no rascunho" });
     toast({ type: "warning", title: "Cartão vence semana que vem" });
     toast({
       type: "success",
@@ -53,7 +54,7 @@ function Painel() {
     <button
       type="button"
       onClick={publicar}
-      className="absolute left-1/2 top-8 inline-flex h-9 -translate-x-1/2 items-center gap-2 rounded-[var(--r-control)] border border-border bg-card px-3.5 text-sm font-medium text-foreground outline-none transition-[background-color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:bg-muted focus-visible:[box-shadow:var(--focus)]"
+      className="absolute left-1/2 top-[calc(50%+38px)] inline-flex h-9 -translate-x-1/2 items-center gap-2 rounded-[var(--r-control)] border border-border bg-card px-3.5 text-sm font-medium text-foreground outline-none transition-[background-color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:bg-muted focus-visible:[box-shadow:var(--focus)]"
     >
       <Send className="size-4 text-muted-foreground" aria-hidden="true" />
       Publicar
@@ -65,11 +66,11 @@ export default function ToastStackDemo({ props }: DemoProps) {
   return (
     // Altura própria, e não `h-full`: aberta sozinha (`?solo=1`) a ficha não dá
     // altura ao palco, e com `h-full` a tela da pilha colapsava pra 32px.
-    <div className="relative mx-auto h-[340px] w-[480px] max-w-full overflow-hidden">
+    <div className="relative mx-auto h-[360px] w-[480px] max-w-full overflow-hidden">
       <ToastStackProvider duration={6000}>
         <Painel />
         {/* `contained` depois dos knobs: solta na janela, a pilha fugiria do palco. */}
-        <ToastStack position="bottom-center" {...props} contained className="bottom-8" />
+        <ToastStack position="bottom-center" {...props} contained className="bottom-[calc(50%-22px)]" />
       </ToastStackProvider>
     </div>
   );

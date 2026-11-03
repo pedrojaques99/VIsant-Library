@@ -218,11 +218,11 @@ export function CommandSearch({
           "group flex h-[var(--control-h,2.25rem)] items-center",
           "rounded-[var(--r-control,0.5rem)] border border-[var(--border)]",
           "text-[var(--muted-foreground)]",
-          "transition-[background-color,border-color,color]",
+          "transition-[background-color,border-color,color,box-shadow]",
           "[transition-duration:var(--dur-fast,160ms)]",
           "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
           "hover:bg-[var(--muted)] hover:text-[var(--foreground)]",
-          "outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
+          "outline-none focus-visible:border-[color-mix(in_oklab,var(--ring)_60%,var(--foreground))] focus-visible:[box-shadow:0_0_0_1px_color-mix(in_oklab,var(--ring)_30%,transparent)]",
           compact ? "w-9 justify-center" : "w-full gap-2.5 px-3 text-sm",
           className,
         )}

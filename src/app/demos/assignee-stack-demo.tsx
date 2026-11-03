@@ -34,8 +34,8 @@ const EQUIPE = [
 ];
 
 const FILA = [
-  { titulo: "Rebrand Ribalta", coluna: "Revisão", pessoas: [0, 1, 2, 3, 4], foto: true },
-  { titulo: "Landing Casa Vinte", coluna: "Fazendo", pessoas: [1, 5], foto: true },
+  { titulo: "Rebrand", coluna: "Revisão", pessoas: [0, 1, 2, 3, 4], foto: true },
+  { titulo: "Landing nova", coluna: "Fazendo", pessoas: [1, 5], foto: true },
   { titulo: "Manual de marca v2", coluna: "Fazendo", pessoas: [2, 3, 0, 6, 4, 5], foto: true },
   { titulo: "Naming da linha nova", coluna: "Fila", pessoas: [4, 6, 3], foto: false },
 ];

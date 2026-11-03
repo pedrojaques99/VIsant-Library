@@ -9,6 +9,8 @@
  */
 
 import * as React from "react";
+
+import { Trocador } from "./um-por-vez";
 import { Marquee } from "../../../registry/visant/ui/marquee";
 
 /**
@@ -40,23 +42,24 @@ import { Marquee } from "../../../registry/visant/ui/marquee";
  *
  * A "solta" é a inicial porque é ela que o report pediu e é ela que responde
  * "por que eu instalaria isto" em um segundo.
+ *
+ * O seletor é texto miúdo no pé, sem caixa, sem nota e sem contador: as setas e a
+ * legenda mono em cima da fita disputavam com ela. E a fita sai da caixa em vez
+ * de parar nela: um corte reto a poucos pixels da borda do cartão lê como acidente.
  */
 
 interface Modo {
   chave: string;
-  nota: string;
   faixa: (itens: React.ReactNode[], marca: React.ReactNode) => React.ReactNode;
 }
 
-/* `bleed={12}` em todos: o palco tem respiro lateral e faixa que para antes da
-   borda denuncia a caixa. Este é o `full width` do report, e agora ele é uma
-   prop da peça em vez de margem negativa escrita à mão por quem consome. */
-const SANGRIA = 12;
+/* Maior que o respiro lateral de qualquer palco (32px na ficha): quem corta a fita
+   é a borda do cartão, nunca a caixa da demo. Quem deixa pintar fora é o `overflow: clip` lá embaixo. */
+const SANGRIA = 64;
 
 const MODOS: Modo[] = [
   {
-    chave: "solta",
-    nota: "rápida, torta e com a marca no meio",
+    chave: "Solta",
     faixa: (itens, marca) => (
       <Marquee
         band
@@ -75,13 +78,11 @@ const MODOS: Modo[] = [
     ),
   },
   {
-    chave: "boost",
-    nota: "anda sozinha, e o scroll empurra e inverte o sentido",
+    chave: "Empurra",
     faixa: (itens) => <Marquee band speed={40} bleed={SANGRIA} items={itens} />,
   },
   {
-    chave: "drive",
-    nota: "só anda com o scroll, sempre pro mesmo lado",
+    chave: "Esteira",
     faixa: (itens) => (
       <Marquee
         scroll="drive"
@@ -94,8 +95,7 @@ const MODOS: Modo[] = [
     ),
   },
   {
-    chave: "scrub",
-    nota: "a posição É o scroll: rolar de volta traz a faixa de volta",
+    chave: "Amarrada",
     faixa: (itens) => (
       <Marquee
         scroll="scrub"
@@ -108,36 +108,6 @@ const MODOS: Modo[] = [
     ),
   },
 ];
-
-function Seta({
-  dir,
-  onClick,
-}: {
-  dir: "prev" | "next";
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={dir === "prev" ? "Modo anterior" : "Próximo modo"}
-      className="alvo-toque inline-flex size-8 shrink-0 items-center justify-center rounded-[var(--r-control,0.5rem)] border border-border text-muted-foreground outline-none transition-[color,border-color,transform] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:border-[var(--brand)] hover:text-foreground focus-visible:border-[var(--brand)] focus-visible:[box-shadow:var(--focus)] focus-visible:text-foreground active:scale-[0.94] active:[transition-duration:var(--dur-press)] motion-reduce:active:scale-100"
-    >
-      <svg
-        viewBox="0 0 24 24"
-        width="15"
-        height="15"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        aria-hidden="true"
-      >
-        <path d={dir === "prev" ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7"} />
-      </svg>
-    </button>
-  );
-}
 
 export default function MarqueeDemo() {
   const palavras = ["FRETE GRÁTIS", "NOVA COLEÇÃO", "ESTOQUE REAL", "TROCA EM 30 DIAS"];
@@ -163,33 +133,12 @@ export default function MarqueeDemo() {
     </svg>
   );
 
-  const anda = (d: 1 | -1) => setI((v) => (v + d + MODOS.length) % MODOS.length);
-
   return (
-    <div className="flex h-full w-full flex-col justify-center gap-4 overflow-hidden px-3">
-      {/*
-       * A barra fica FORA da faixa e acima dela. Dentro, o rótulo viraria
-       * conteúdo da esteira e andaria junto — foi assim na versão anterior e é
-       * por isso que o rótulo já morava fora lá também.
-       */}
-      <div className="flex items-center gap-3">
-        <Seta dir="prev" onClick={() => anda(-1)} />
-        <Seta dir="next" onClick={() => anda(1)} />
-        <div className="flex min-w-0 items-baseline gap-2">
-          <span className="font-mono text-rotulo uppercase tracking-[0.14em] text-foreground">
-            {modo.chave}
-          </span>
-          <span className="truncate font-mono text-micro text-muted-foreground">
-            {modo.nota}
-          </span>
-        </div>
-        {/* O qualificador: onde a pessoa está na lista de modos. Sem ele as
-            setas não dizem quantas opções existem nem se dão a volta. */}
-        <span className="ml-auto shrink-0 font-mono text-micro tabular-nums text-muted-foreground">
-          {i + 1}/{MODOS.length}
-        </span>
-      </div>
-
+    /*
+     * `overflow: clip` com margem no lugar de `hidden`: a fita pinta além da caixa
+     * até a borda do cartão, sem criar barra de rolagem em quem hospeda a demo.
+     */
+    <div className="flex h-full w-full flex-col justify-center gap-10 [overflow-clip-margin:20px] [overflow:clip] sm:[overflow-clip-margin:32px]">
       {/*
        * `key` no modo: cada troca REMONTA a faixa.
        *
@@ -199,17 +148,16 @@ export default function MarqueeDemo() {
        * a faixa continua andando, surda, com dois motores discutindo o mesmo
        * `x`. Remontar é barato e é a única forma honesta de trocar de motor.
        */}
-      {/*
-       * A faixa mora numa fileira própria, com folga vertical e corte.
-       *
-       * `tilt` gira a caixa inteira, e a subida nas pontas cresce com a largura:
-       * a 1500px, 2,5° levantam ~33px de cada lado. Sem folga a ponta de cima
-       * subia por cima da barra de controle e comia o contador "1/4" — visto na
-       * tela, não deduzido. A folga dá espaço pra inclinação e o corte garante
-       * que ela nunca alcance a barra, em qualquer largura.
-       */}
-      <div key={modo.chave} className="min-w-0 overflow-hidden py-10">
+      <div key={modo.chave} className="min-w-0">
         {modo.faixa(itens, marca)}
+      </div>
+
+      <div className="flex justify-center">
+        <Trocador
+          nome={modo.chave}
+          onPasso={(d) => setI((v) => (v + d + MODOS.length) % MODOS.length)}
+          rotulo="variação"
+        />
       </div>
     </div>
   );

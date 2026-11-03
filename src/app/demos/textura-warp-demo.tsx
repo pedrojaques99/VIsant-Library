@@ -6,16 +6,19 @@
 
 import { TexturaWarp } from "../../../registry/visant/ui/textura-warp";
 import type { DemoProps } from "../catalog";
+import { PalcoDoShader, useImagemDoShader } from "./imagem-do-shader";
 
 export default function TexturaWarpDemo({ props }: DemoProps) {
+  const imagem = useImagemDoShader((props as { src?: unknown } | undefined)?.src);
   return (
-    <div className="flex h-full w-full items-center justify-center">
+    <PalcoDoShader>
       <TexturaWarp
-        src="/media/cena-produto.webp"
-        alt="Caixa e diamante escorrendo em ruído"
-        className="w-[400px] max-w-full rounded-[var(--r-surface)]"
+        alt={imagem.alt}
+        strength={26}
+        className="w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
         {...props}
+        src={imagem.src}
       />
-    </div>
+    </PalcoDoShader>
   );
 }

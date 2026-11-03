@@ -13,13 +13,13 @@ export default function SearchableSelectDemo() {
   const grupos = React.useMemo(
     () => [
       {
-        label: "Clientes",
+        label: "Times",
         options: [
-          { value: "cafe-norte", label: "Café Norte", keywords: "café loja" },
-          { value: "atelie-sol", label: "Ateliê Sol", keywords: "moda" },
+          { value: "produto", label: "Produto", keywords: "app roadmap" },
+          { value: "marketing", label: "Marketing", keywords: "campanha" },
         ],
       },
-      { label: "Internos", options: [{ value: "visant", label: "Visant Labs" }, ...extras] },
+      { label: "Geral", options: [{ value: "financeiro", label: "Financeiro" }, ...extras] },
     ],
     [extras],
   );

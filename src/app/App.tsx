@@ -58,13 +58,14 @@ if (typeof window !== "undefined") {
 }
 /* O laboratório de interações (`/lab`): só quem abre a rota paga pelo chunk. */
 const Lab = React.lazy(() => import("./Lab").then((m) => ({ default: m.Lab })));
+const Docs = React.lazy(() => import("./Docs").then((m) => ({ default: m.Docs })));
 import { KitRoom } from "./KitRoom";
 import { KITS } from "./kits";
 import { DEFAULT_BRAND, REGISTRY_URL } from "./registry-meta";
 import { VisantAuthProvider } from "./visant-auth";
 import { MinhasMarcas } from "./MinhasMarcas";
 
-type View = "kits" | "catalogo" | "marca" | "lab";
+type View = "kits" | "catalogo" | "marca" | "lab" | "docs";
 
 interface Route {
   view: View;
@@ -111,9 +112,12 @@ const familiaDaPeca = (nome: string | null): Family | null =>
  */
 const VIEWS: { value: View; label: string }[] = [
   { value: "catalogo", label: "Catálogo" },
-  { value: "kits", label: "Kits" },
   { value: "marca", label: "Marca" },
 ];
+
+/* Kits saíram do cabeçalho em 2026-11-03: as salas seguem abrindo por link, sem
+   porta na navegação e com noindex no prerender. */
+const ROTAS_SEM_PORTA: View[] = ["kits", "docs"];
 
 // --- rota --------------------------------------------------------------------
 
@@ -148,11 +152,15 @@ function parsePath(loc: Location): Route {
     return { view: "kits", focus: null, kit: "rig-vintage", familia: null };
   /* `/` é o catálogo. Os kits ficam em `/kits` enquanto não forem redesenhados:
      eram a porta de entrada e ainda não se explicam sozinhos. */
+  if (ROTAS_SEM_PORTA.includes(partes[0] as View))
+    return { view: partes[0] as View, focus: null, kit: null, familia: null };
   const view = VIEWS.find((v) => v.value === partes[0]);
   /* A família só é lida sob `catalogo`: é o que mantém `/marca` (o estúdio)
      separado de `/catalogo/marca` (a fatia do catálogo). Nome de família que não
      existe cai no índice, em vez de mostrar uma fatia vazia. */
   const familia = view?.value === "catalogo" ? familiaDe(partes[1]) : null;
+  /* Fundação não tem fatia: é o conteúdo de `/docs`. */
+  if (familia === "fundacao") return { view: "docs", focus: null, kit: null, familia: null };
   return { view: view?.value ?? "catalogo", focus: null, kit: null, familia };
 }
 
@@ -163,7 +171,7 @@ function parseLegacyHash(hash: string): Route {
   }
   if (hash.startsWith("#/rig"))
     return { view: "kits", focus: null, kit: "rig-vintage", familia: null };
-  const view = VIEWS.find((v) => v.value !== "kits" && hash.startsWith(`#/${v.value}`));
+  const view = VIEWS.find((v) => hash.startsWith(`#/${v.value}`));
   const familia =
     view?.value === "catalogo" ? familiaDe(hash.replace(/^#\//, "").split("/")[1]) : null;
   return { view: view?.value ?? "catalogo", focus: null, kit: null, familia };
@@ -420,6 +428,7 @@ function Shell() {
       <React.Suspense fallback={<div className="min-h-screen" aria-busy="true" />}>
         {route.view === "marca" && <BrandStudioBody />}
         {route.view === "lab" && <Lab />}
+        {route.view === "docs" && <Docs />}
       </React.Suspense>
 
       <Busca aberto={buscando} onAberto={setBuscando} onEscolher={escolherNaBusca} />

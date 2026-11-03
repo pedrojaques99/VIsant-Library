@@ -334,6 +334,7 @@
     "react"
   ],
   "filter-bar": [
+    "motion",
     "react"
   ],
   "searchable-select": [

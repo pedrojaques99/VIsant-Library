@@ -13,6 +13,9 @@
  * O marco das clareiras é um vaso torneado em `LatheGeometry`, construído aqui
  * mesmo: a prova de que o bloco aceita o objeto de qualquer marca sem saber o
  * que ele é. Cinzas numéricos, porque o duotone pinta depois.
+ *
+ * Sem contador, sem rótulo e sem moldura. A tinta sai da marca do seletor, com um
+ * quarto de `--foreground` para segurar o contraste também no tema claro.
  */
 
 import * as React from "react";
@@ -55,33 +58,10 @@ function vasoNoToco() {
   return g;
 }
 
-const Eyebrow = ({ children }: { children: React.ReactNode }) => (
-  <p className="mb-4 text-[11px] uppercase tracking-[0.14em] opacity-70">{children}</p>
-);
-
+// Sem texto no card: as paradas seguem existindo porque é delas que saem as clareiras.
 const STOPS: FogGardenStop[] = [
-  {
-    id: "abre",
-    content: (
-      <>
-        <Eyebrow>01</Eyebrow>
-        <h3 className="max-w-[14ch] text-4xl font-normal leading-[0.98] tracking-tight">
-          Um título curto pra abrir
-        </h3>
-      </>
-    ),
-  },
-  {
-    id: "fecha",
-    content: (
-      <>
-        <Eyebrow>02</Eyebrow>
-        <h3 className="max-w-[14ch] text-4xl font-normal leading-[0.98] tracking-tight">
-          E outro pra fechar
-        </h3>
-      </>
-    ),
-  },
+  { id: "abre", content: null },
+  { id: "fecha", content: null },
 ];
 
 export default function FogGardenDemo({ props }: DemoProps) {
@@ -90,19 +70,18 @@ export default function FogGardenDemo({ props }: DemoProps) {
   // max-h: na rota solo o palco não tem altura, e sem teto o contêiner de rolagem
   // crescia até o conteúdo (canvas de 2240px, capa em branco).
   return (
-    <div className="relative h-[min(440px,100%)] min-h-[360px] w-full overflow-hidden rounded-[var(--r-surface,0.875rem)] border border-border">
+    <div className="relative h-[min(400px,100%)] min-h-[360px] w-full overflow-hidden">
       <div ref={scrollerRef} className="absolute inset-0 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <FogGarden
           container={scrollerRef}
           heightPerStop="420px"
           stops={STOPS}
           landmark={vasoNoToco}
+          counter={false}
+          ink="color-mix(in oklch, var(--brand, var(--foreground)) 75%, var(--foreground))"
           {...props}
         />
       </div>
-      <span className="pointer-events-none absolute inset-x-0 top-3 text-center text-[length:var(--text-micro,0.68rem)] text-muted-foreground">
-        role dentro do quadro
-      </span>
     </div>
   );
 }

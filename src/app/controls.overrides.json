@@ -547,5 +547,43 @@
         }
       }
     ]
+  },
+  "gauge": {
+    "ordem": [
+      "value",
+      "detail",
+      "label",
+      "min",
+      "max",
+      "size"
+    ],
+    "ajustes": {
+      "size": {
+        "unidade": "px"
+      }
+    }
+  },
+  "time-dial": {
+    "ajustes": {
+      "size": {
+        "unidade": "px"
+      },
+      "step": {
+        "unidade": "min"
+      },
+      "value": {
+        "unidade": "min",
+        "min": 0,
+        "max": 1425,
+        "step": 15
+      }
+    }
+  },
+  "streamgraph": {
+    "ajustes": {
+      "height": {
+        "unidade": "px"
+      }
+    }
   }
 }

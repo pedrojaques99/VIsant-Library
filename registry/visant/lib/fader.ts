@@ -60,7 +60,7 @@ let sheet: CSSStyleSheet | null = null;
 const ElementoBase = (typeof HTMLElement === "undefined" ? class {} : HTMLElement) as typeof HTMLElement;
 
 export class VisantFader extends ElementoBase {
-  static observedAttributes = ["label", "min", "max", "step", "value", "disabled"];
+  static observedAttributes = ["label", "min", "max", "step", "value", "unit", "disabled"];
   #input!: HTMLInputElement;
   #out!: HTMLOutputElement;
   #label!: HTMLSpanElement;
@@ -130,7 +130,7 @@ export class VisantFader extends ElementoBase {
     const i = this.#input;
     const p = ((Number(i.value) - Number(i.min)) / (Number(i.max) - Number(i.min) || 1)) * 100;
     i.style.setProperty("--p", `${p}%`);
-    this.#out.value = i.value;
+    this.#out.value = i.value + (this.getAttribute("unit") ?? "");
   }
 
   #emit(type: "valuechange" | "valuecommit") {

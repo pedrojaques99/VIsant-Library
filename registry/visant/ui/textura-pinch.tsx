@@ -84,6 +84,11 @@ export interface TexturaPinchProps extends Omit<React.HTMLAttributes<HTMLDivElem
    * @step 1
    */
   radius?: number;
+  /**
+   * Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai.
+   * Sem isto, a peça parada é a foto pura: o efeito só existe com ponteiro.
+   */
+  resting?: boolean;
 }
 
 function compilar(gl: WebGLRenderingContext, frag: string): WebGLProgram | null {
@@ -111,13 +116,17 @@ export function TexturaPinch({
   alt = "Imagem beliscada pelo cursor",
   strength = 70,
   radius = 32,
+  resting = false,
   className,
   ...props
 }: TexturaPinchProps) {
   const wrapRef = React.useRef<HTMLDivElement>(null);
   const params = React.useRef({ strength, radius });
   params.current = { strength, radius };
+  const descanso = React.useRef(resting);
+  descanso.current = resting;
   const redesenhar = React.useRef<() => void>(() => {});
+  const armar = React.useRef<() => void>(() => {});
 
   React.useEffect(() => {
     const wrap = wrapRef.current;
@@ -213,11 +222,26 @@ export function TexturaPinch({
       } else if (!raf) raf = requestAnimationFrame(quadro);
     };
 
+    // O repouso armado: o efeito fica no centro, sem ponteiro nenhum.
+    let dentro = false;
+    const repousar = () => {
+      ponto.ax = wrap.offsetWidth / 2;
+      ponto.ay = wrap.offsetHeight / 2;
+      ponto.alvo = 1;
+    };
+    armar.current = () => {
+      if (dentro) return;
+      if (descanso.current) repousar();
+      else ponto.alvo = 0;
+      pedirQuadro();
+    };
+
     redesenhar.current = () => {
       if (!raf) desenhar();
     };
 
     const mover = (e: PointerEvent) => {
+      dentro = true;
       // Ponteiro em px locais: a vitrine escala o palco com transform.
       const r = wrap.getBoundingClientRect();
       const k = r.width ? wrap.offsetWidth / r.width : 1;
@@ -231,8 +255,8 @@ export function TexturaPinch({
       pedirQuadro();
     };
     const sair = () => {
-      ponto.alvo = 0;
-      pedirQuadro();
+      dentro = false;
+      armar.current();
     };
 
     let vivo = true;
@@ -250,10 +274,18 @@ export function TexturaPinch({
 
     cores();
     medir();
+    if (descanso.current) {
+      repousar();
+      assentar();
+    }
     desenhar();
 
     const ro = new ResizeObserver(() => {
       medir();
+      if (descanso.current && !dentro) {
+        repousar();
+        assentar();
+      }
       desenhar();
     });
     ro.observe(wrap);
@@ -273,6 +305,7 @@ export function TexturaPinch({
       wrap.removeEventListener("pointermove", mover);
       wrap.removeEventListener("pointerleave", sair);
       redesenhar.current = () => {};
+      armar.current = () => {};
       gl.deleteTexture(tex);
       gl.deleteBuffer(buf);
       gl.deleteProgram(prog);
@@ -284,6 +317,10 @@ export function TexturaPinch({
   React.useEffect(() => {
     redesenhar.current();
   }, [strength, radius]);
+
+  React.useEffect(() => {
+    armar.current();
+  }, [resting]);
 
   return (
     <div

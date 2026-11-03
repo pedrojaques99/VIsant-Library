@@ -17,20 +17,17 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "next-auth/react": ["./src/app/shims/next-auth-react.ts"],
+      "next/navigation": ["./src/app/shims/next-navigation.ts"]
     }
   },
   "include": ["src", "registry", "lab"],
-  // Duas exclusões, cada uma com motivo escrito. Exclusão sem motivo é erro
-  // escondido, não configuração.
+  // Uma exclusão, com motivo escrito. Exclusão sem motivo é erro escondido, não
+  // configuração. O `data-table` saiu daqui: ele importa Next, e na vitrine esses
+  // dois imports apontam pros substitutos de `src/app/shims` (ver `paths` acima).
   "exclude": [
-    // 1. Item acoplado ao Next (next-auth, next/navigation, @/hooks/use-media-query).
-    //    É a natureza do item — ele roda num app Next, não nesta vitrine, e a
-    //    descrição dele no catálogo já avisa. Typecheckar aqui exigiria instalar
-    //    o Next inteiro como devDependency para verificar um arquivo.
-    "registry/visant/ui/data-table.tsx",
-
-    // 2. Sobra do export do Figma Make (commit "Add files from Figma Make"):
+    // Sobra do export do Figma Make (commit "Add files from Figma Make"):
     //    `src/imports/*` e os wrappers soltos em `src/app/components/` que os
     //    importam. Está MORTO — nada no app referencia — e quebrado: `Knob.tsx`
     //    importa um `./svg-xf56mq2vgt` que não existe no disco. Fica excluído em

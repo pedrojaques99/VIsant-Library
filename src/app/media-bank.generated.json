@@ -171,6 +171,42 @@
     "h": 1496
   },
   {
+    "id": "efeito-padrao",
+    "papel": "efeito",
+    "tipo": "imagem",
+    "src": "/media/efeito-padrao.webp",
+    "alt": "Foto de uma TV de tubo numa prateleira, contra parede cinza",
+    "w": 1200,
+    "h": 1200
+  },
+  {
+    "id": "efeito-mao",
+    "papel": "efeito",
+    "tipo": "imagem",
+    "src": "/media/efeito-mao.webp",
+    "alt": "Mão metálica sobre fundo ciano",
+    "w": 1200,
+    "h": 1200
+  },
+  {
+    "id": "efeito-forma",
+    "papel": "efeito",
+    "tipo": "imagem",
+    "src": "/media/efeito-forma.webp",
+    "alt": "Forma abstrata em tons quentes",
+    "w": 1200,
+    "h": 1200
+  },
+  {
+    "id": "efeito-gradiente",
+    "papel": "efeito",
+    "tipo": "imagem",
+    "src": "/media/efeito-gradiente.webp",
+    "alt": "Gradiente suave",
+    "w": 1200,
+    "h": 1200
+  },
+  {
     "id": "video-loop3d",
     "papel": "video",
     "tipo": "video",

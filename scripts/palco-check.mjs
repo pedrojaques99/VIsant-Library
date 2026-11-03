@@ -8,7 +8,7 @@
  * encostam no topo, outras pintam além da borda, outras são mais altas que o
  * `h` declarado. Só a medida da tela mostra.
  *
- * Como mede: abre o acervo (`/`), rola até o fim pra montar cada peça (elas
+ * Como mede: abre o acervo (`/catalogo?nivel=alto`), rola até o fim pra montar cada peça (elas
  * montam perto da tela), e pra cada ladrilho vivo junta a caixa de tudo o que
  * PINTA dentro do palco (folha, fundo, borda — o mesmo critério da captura),
  * recortada por quem recorta. Daí sai:
@@ -52,7 +52,8 @@ const isentas = new Map(
 
 const navegador = await chromium.launch();
 const pagina = await navegador.newPage({ viewport: { width: 1440, height: 900 } });
-await pagina.goto(`${BASE}/`, { waitUntil: "networkidle" });
+/* `?nivel=alto`: sem GPU real o `aparelho.ts` cai no nível médio e o acervo vira foto, aí não sobra peça viva para medir e o portão passa com 0 medidas. */
+await pagina.goto(`${BASE}/catalogo?nivel=alto`, { waitUntil: "networkidle" });
 await pagina.waitForSelector("article[data-name]");
 
 const medidas = await pagina.evaluate(async () => {

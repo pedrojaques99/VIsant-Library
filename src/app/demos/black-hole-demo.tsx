@@ -11,10 +11,10 @@ import { BlackHole } from "../../../registry/visant/ui/black-hole";
 import type { DemoProps } from "../catalog";
 
 const CONVERSAS = [
-  { id: "1", nome: "Marina Lopes", assunto: "Copy da dobra, segunda passada", hora: "9:41" },
-  { id: "2", nome: "Rafael Souza", assunto: "Relatório da semana", hora: "9:12" },
-  { id: "3", nome: "Júlia Prado", assunto: "Revisão do layout mudou pra quinta", hora: "8:30" },
-  { id: "4", nome: "Caio Mendes", assunto: "A nota 2381 está pronta", hora: "Ontem" },
+  { id: "1", nome: "Marina", assunto: "Copy da dobra, segunda passada", hora: "9:41" },
+  { id: "2", nome: "Rafael", assunto: "Relatório da semana", hora: "9:12" },
+  { id: "3", nome: "Júlia", assunto: "Revisão do layout mudou pra quinta", hora: "8:30" },
+  { id: "4", nome: "Caio", assunto: "A nota está pronta", hora: "Ontem" },
   { id: "5", nome: "Bia Ramos", assunto: "Planejamento do trimestre", hora: "Ontem" },
 ];
 

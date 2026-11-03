@@ -47,6 +47,13 @@ import { cn } from "@/lib/utils";
  * Quem pediu menos movimento recebe a linha inteira preenchida e todos os nós
  * no estado final: o conteúdo é o mesmo, sem percurso.
  *
+ * ── Quem rola ─────────────────────────────────────────────────────────────
+ *
+ * Por padrão, a página. Com `scrollContainer`, um contêiner próprio: a linha
+ * mora num painel, num modal ou num card com rolagem, e o progresso passa a ser o
+ * percurso DELE. Sem isso a peça ficava muda em qualquer lugar onde a página não
+ * rola, presa no estado em que nasceu.
+ *
  * ── Por que o estado deixou de ser uma palavra ────────────────────────────
  *
  * Antes, o degrau atual se anunciava com a etiqueta "agora" ao lado da data:
@@ -88,6 +95,11 @@ export interface TimelineProps
   description?: React.ReactNode;
   /** O que a linha diz quando `data` chega vazio. */
   emptyLabel?: React.ReactNode;
+  /**
+   * Contêiner que rola, quando não é a página. O progresso vira o percurso dele,
+   * de ponta a ponta. O elemento precisa estar posicionado (`relative`).
+   */
+  scrollContainer?: React.RefObject<HTMLElement | null>;
 }
 
 const ESTADO = {
@@ -101,6 +113,7 @@ export function Timeline({
   title,
   description,
   emptyLabel = "Nenhuma etapa por aqui ainda.",
+  scrollContainer,
   className,
   ...props
 }: TimelineProps) {
@@ -124,11 +137,14 @@ export function Timeline({
     if (!lista) return;
 
     const medir = () => {
-      const alturaTotal = lista.offsetHeight || 1;
-      const topo = lista.getBoundingClientRect().top;
+      // As duas medidas na mesma régua: com `offsetHeight` dividindo um delta de
+      // `getBoundingClientRect`, a fração encolhia junto com o `scale` de quem
+      // hospeda a peça, e o ponto acendia antes de o traço chegar nele.
+      const caixa = lista.getBoundingClientRect();
+      const alturaTotal = caixa.height || 1;
       setFracoes(
         nosRef.current.map((no) =>
-          no ? (no.getBoundingClientRect().top - topo) / alturaTotal : 0,
+          no ? (no.getBoundingClientRect().top - caixa.top) / alturaTotal : 0,
         ),
       );
     };
@@ -145,10 +161,11 @@ export function Timeline({
    * última etapa sair pela borda de cima, senão a linha nunca é vista completa
    * — a pessoa rola, o traço ainda está a 80% e o conteúdo já acabou.
    */
-  const { scrollYProgress } = useScroll({
-    target: listaRef,
-    offset: ["start 85%", "end 60%"],
-  });
+  const { scrollYProgress } = useScroll(
+    scrollContainer
+      ? { container: scrollContainer as React.RefObject<HTMLElement> }
+      : { target: listaRef, offset: ["start 85%", "end 60%"] },
+  );
 
   // `scaleY` e não `height`: altura é layout a cada quadro, escala é compositor.
   const escala = useTransform(scrollYProgress, [0, 1], [0, 1]);
@@ -158,6 +175,15 @@ export function Timeline({
   useMotionValueEvent(scrollYProgress, "change", (p) => {
     setAlcancados(fracoes.filter((f) => f <= p).length);
   });
+  /*
+   * O evento só avisa quando o progresso MUDA. Se a primeira leitura chega antes
+   * de as frações existirem (o normal: as duas nascem no mesmo commit), o nó fica
+   * no piso até a pessoa rolar, enquanto o traço já está na posição certa. Era por
+   * isso que a mesma peça nascia no último passo numa tela e no primeiro em outra.
+   */
+  React.useEffect(() => {
+    setAlcancados(fracoes.filter((f) => f <= scrollYProgress.get()).length);
+  }, [fracoes, scrollYProgress]);
 
   /*
    * Piso de um: linha do tempo sem degrau atual não é linha do tempo.

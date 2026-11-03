@@ -25,7 +25,7 @@
 import * as React from "react";
 
 import { Media } from "../media";
-import { useStageActive } from "../stage";
+import { useElementWidth, useStageActive } from "../stage";
 import { ReelsRail, type ReelItem } from "../../../registry/visant/ui/reels-rail";
 import type { DemoProps } from "../catalog";
 
@@ -49,6 +49,11 @@ const CARDS: { papel: "video" | "retrato"; indice: number; title: string; meta: 
 
 export default function ReelsRailDemo({ props }: DemoProps) {
   const ativo = useStageActive();
+  // O celular é outro desenho: um card menor, inteiro no meio, com os vizinhos
+  // aparecendo nas pontas. A 280px ele encostava nas duas bordas e não sobrava
+  // lugar pra dizer que a fileira continua.
+  const [caixa, largura] = useElementWidth<HTMLDivElement>();
+  const estreito = largura > 0 && largura < 480;
 
   const itens = React.useMemo<ReelItem[]>(
     () =>
@@ -67,7 +72,7 @@ export default function ReelsRailDemo({ props }: DemoProps) {
 
   return (
     // Mural encosta na borda: sem respiro lateral, a fileira promete continuar.
-    <div className="flex h-full w-full items-center">
+    <div ref={caixa} className="flex h-full w-full items-center">
       <ReelsRail
         items={itens}
         // A barra fina do trilho aparecia dentro do ladrilho; a fileira rola
@@ -75,8 +80,8 @@ export default function ReelsRailDemo({ props }: DemoProps) {
         // elas eram cromo num canto disputando com o vídeo.
         className="w-full [&_[role=group]]:[scrollbar-width:none] [&_[role=group]::-webkit-scrollbar]:hidden"
         arrows={false}
-        itemWidth={280}
-        gap={20}
+        itemWidth={estreito ? 240 : 280}
+        gap={estreito ? 12 : 20}
         // A deriva também obedece ao palco: card fora da tela não anda.
         drift={ativo}
         driftSpeed={14}

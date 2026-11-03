@@ -5,11 +5,9 @@
  * espiada de descoberta) — mesmo trato do marquee e da cena presa: a biblioteca
  * chega quando o card chega.
  *
- * O acervo não tem um par real de antes/depois, e inventar um com filtro CSS
- * seria pior: a peça passaria a ser julgada pelo filtro, e o defeito que ela
- * evita (a foto de cima ENCOLHER em vez de ser recortada) só aparece quando as
- * duas imagens são de fato distintas. Duas cenas diferentes mostram a cortina
- * pelo que ela é.
+ * A MESMA foto nos dois lados, em dois tratamentos, com o antes à esquerda: é o
+ * que a peça compara na vida real. Duas cenas diferentes (já foi um globo contra
+ * um rádio) não comparam nada, e o olho não tem o que procurar na costura.
  *
  * A caixa cresceu de 440px para 620px pelo mesmo motivo: comparar duas fotos é
  * o produto da peça, e numa faixa de 293px de altura o "antes" e o "depois"
@@ -46,8 +44,9 @@ export default function PhotoCompareDemo({ props }: DemoProps) {
       <PhotoCompare
         className="mx-auto w-full max-w-[620px] rounded-[var(--r-surface,0.875rem)] border border-border"
         ratio="3/2"
-        before={<Media papel="cena" indice={2} className="size-full" />}
+        before={<Media papel="cena" indice={5} className="size-full [&_img]:[filter:grayscale(1)_contrast(0.9)]" />}
         after={<Media papel="cena" indice={5} className="size-full" />}
+        beforeSide="left"
         beforeLabel="antes"
         afterLabel="depois"
         {...props}

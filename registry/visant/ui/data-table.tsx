@@ -30,7 +30,7 @@ import {
 import { useSession } from 'next-auth/react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { InlineEdit } from './inline-edit';
-import { Input } from './input';
+import { Input } from '@/components/ui/input';
 import {
   TableBody,
   TableCell,
@@ -108,6 +108,10 @@ export interface DataTableProps<TData, TValue> {
    */
   disableSorting?: boolean;
   /**
+   * Ordenação com que a tabela nasce. A da URL (`?sort=`), quando existe, vence.
+   */
+  initialSorting?: SortingState;
+  /**
    * Title for the table toolbar (optional)
    */
   title?: string;
@@ -154,6 +158,7 @@ export function DataTable<TData, TValue>({
   initialColumnVisibility = {},
   initialColumnPinning,
   disableSorting = false,
+  initialSorting = [],
   title,
   pageSize = 20,
   hidePagination = false,
@@ -173,7 +178,7 @@ export function DataTable<TData, TValue>({
       const [id = '', desc] = sortParam.split('.');
       if (id) return [{ id, desc: desc === 'desc' }];
     }
-    return [];
+    return initialSorting;
   });
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(initialColumnVisibility);
   const [columnPinning, setColumnPinning] = React.useState<ColumnPinningState>(initialColumnPinning ?? {});

@@ -109,7 +109,7 @@
         }
       },
       "categories": [
-        "vintage",
+        "fundacao",
         "tema",
         "css"
       ],
@@ -154,7 +154,7 @@
         "@import \"https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Red+Hat+Mono:wght@400;500;600;700&display=swap\"": {}
       },
       "categories": [
-        "vintage",
+        "fundacao",
         "css",
         "base"
       ],
@@ -185,7 +185,7 @@
         "@visant/sfx-bus"
       ],
       "categories": [
-        "base",
+        "fundacao",
         "hook",
         "gesto"
       ],
@@ -213,7 +213,7 @@
         }
       ],
       "categories": [
-        "base",
+        "fundacao",
         "hook",
         "responsivo",
         "ssr"
@@ -242,7 +242,7 @@
         }
       ],
       "categories": [
-        "vintage",
+        "controles",
         "audio",
         "botao"
       ],
@@ -271,7 +271,7 @@
         }
       ],
       "categories": [
-        "vintage",
+        "controles",
         "audio",
         "fader"
       ],
@@ -299,7 +299,7 @@
         }
       ],
       "categories": [
-        "vintage",
+        "conteudo",
         "audio",
         "medidor"
       ],
@@ -328,7 +328,7 @@
         }
       ],
       "categories": [
-        "vintage",
+        "controles",
         "audio",
         "knob"
       ],
@@ -357,7 +357,7 @@
         }
       ],
       "categories": [
-        "vintage",
+        "controles",
         "audio",
         "knob"
       ],
@@ -386,7 +386,7 @@
         }
       ],
       "categories": [
-        "vintage",
+        "controles",
         "audio",
         "chave"
       ],
@@ -415,7 +415,7 @@
         }
       ],
       "categories": [
-        "vintage",
+        "controles",
         "audio",
         "eq",
         "faders",
@@ -445,7 +445,7 @@
         }
       ],
       "categories": [
-        "vintage",
+        "controles",
         "audio",
         "eq",
         "curva",
@@ -476,7 +476,7 @@
         }
       ],
       "categories": [
-        "vintage",
+        "feedback",
         "audio",
         "estado"
       ],
@@ -504,7 +504,7 @@
         }
       ],
       "categories": [
-        "vintage",
+        "controles",
         "comando",
         "teclado"
       ],
@@ -535,7 +535,7 @@
         }
       ],
       "categories": [
-        "vintage",
+        "conteudo",
         "moldura",
         "crt"
       ],
@@ -565,7 +565,7 @@
         }
       ],
       "categories": [
-        "vintage",
+        "controles",
         "audio",
         "pad"
       ],
@@ -594,7 +594,7 @@
         }
       ],
       "categories": [
-        "vintage",
+        "controles",
         "audio",
         "gesto"
       ],
@@ -622,7 +622,7 @@
         }
       ],
       "categories": [
-        "vintage",
+        "conteudo",
         "audio",
         "canvas"
       ],
@@ -664,7 +664,7 @@
         }
       },
       "categories": [
-        "secoes",
+        "conteudo",
         "faixa",
         "loop",
         "scroll",
@@ -699,7 +699,7 @@
         }
       ],
       "categories": [
-        "secoes",
+        "conteudo",
         "logos",
         "clientes",
         "prova-social",
@@ -730,7 +730,7 @@
         }
       ],
       "categories": [
-        "navegacao",
+        "controles",
         "carrossel",
         "snap"
       ],
@@ -762,7 +762,7 @@
         "lucide-react"
       ],
       "categories": [
-        "midia",
+        "conteudo",
         "video",
         "reels",
         "shorts",
@@ -793,7 +793,7 @@
         }
       ],
       "categories": [
-        "midia",
+        "conteudo",
         "produto",
         "foto"
       ],
@@ -847,7 +847,7 @@
         }
       ],
       "categories": [
-        "navegacao",
+        "controles",
         "filtro",
         "scroll"
       ],
@@ -874,7 +874,7 @@
         }
       ],
       "categories": [
-        "dados",
+        "conteudo",
         "loja",
         "fuso"
       ],
@@ -965,7 +965,7 @@
         }
       ],
       "categories": [
-        "efeitos",
+        "fundacao",
         "gsap",
         "scroll"
       ],
@@ -980,7 +980,7 @@
       "name": "kanban",
       "type": "registry:block",
       "title": "Kanban",
-      "description": "Board com drag-and-drop, seleção por marquee sobre o vazio e multi-seleção com shift/ctrl.",
+      "description": "Quadro de tarefas por etapa: arraste o cartão de uma coluna para outra. No celular as colunas empilham.",
       "author": "Visant Labs <visantsupply@gmail.com>",
       "registryDependencies": [
         "utils"
@@ -1025,7 +1025,7 @@
         }
       ],
       "categories": [
-        "dados",
+        "conteudo",
         "board",
         "dnd",
         "selecao"
@@ -1041,7 +1041,7 @@
       "name": "data-table",
       "type": "registry:ui",
       "title": "Data Table",
-      "description": "Tabela densa: ordenação, seleção, edição inline e menu de contexto. Hoje acoplada a Next (next-auth + next/navigation) — roda em app Next, não nesta vitrine.",
+      "description": "Tabela densa: ordenação, seleção, edição inline e menu de contexto. No seu projeto ela pede Next, porque lê sessão e URL (next-auth + next/navigation).",
       "author": "Visant Labs <visantsupply@gmail.com>",
       "registryDependencies": [
         "utils",
@@ -1068,7 +1068,7 @@
         "next-auth"
       ],
       "categories": [
-        "dados",
+        "conteudo",
         "tabela",
         "fila",
         "tanstack"
@@ -1223,7 +1223,7 @@
         "framer-motion"
       ],
       "categories": [
-        "secoes",
+        "conteudo",
         "scroll",
         "narrativa"
       ],
@@ -1251,7 +1251,7 @@
         }
       ],
       "categories": [
-        "dados",
+        "conteudo",
         "avatar",
         "equipe"
       ],
@@ -1309,7 +1309,7 @@
         }
       ],
       "categories": [
-        "efeitos",
+        "fundacao",
         "lenis",
         "gsap"
       ],
@@ -1482,7 +1482,7 @@
         }
       ],
       "categories": [
-        "midia",
+        "conteudo",
         "galeria",
         "grid"
       ],
@@ -1533,7 +1533,7 @@
         }
       ],
       "categories": [
-        "base",
+        "fundacao",
         "bpm",
         "ritmo",
         "musica",
@@ -1673,7 +1673,7 @@
         }
       ],
       "categories": [
-        "base",
+        "fundacao",
         "marca",
         "tokens",
         "runtime",
@@ -1737,7 +1737,7 @@
         }
       ],
       "categories": [
-        "secoes",
+        "conteudo",
         "dobra",
         "titulo",
         "landing"
@@ -1765,7 +1765,7 @@
         }
       ],
       "categories": [
-        "secoes",
+        "conteudo",
         "cta",
         "conversao",
         "dobra"
@@ -1793,7 +1793,7 @@
         }
       ],
       "categories": [
-        "cards",
+        "conteudo",
         "servico",
         "card",
         "vitrine"
@@ -1827,7 +1827,7 @@
         }
       ],
       "categories": [
-        "secoes",
+        "conteudo",
         "passos",
         "como-funciona",
         "onboarding"
@@ -1875,7 +1875,7 @@
         }
       },
       "categories": [
-        "secoes",
+        "conteudo",
         "depoimento",
         "prova-social",
         "masonry"
@@ -1903,7 +1903,7 @@
         }
       ],
       "categories": [
-        "secoes",
+        "conteudo",
         "depoimento",
         "prova-social",
         "citacao",
@@ -1994,7 +1994,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "base",
+        "fundacao",
         "som",
         "audio",
         "webaudio",
@@ -2073,7 +2073,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "dados",
+        "conteudo",
         "numero",
         "contagem",
         "prova",
@@ -2104,7 +2104,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "base",
+        "fundacao",
         "paralaxe",
         "ponteiro",
         "profundidade",
@@ -2239,7 +2239,7 @@
       },
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "efeitos",
+        "fundacao",
         "scroll",
         "entrada",
         "reveal",
@@ -2289,7 +2289,7 @@
       },
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "dados",
+        "conteudo",
         "numero",
         "regua",
         "evidencia",
@@ -2370,7 +2370,7 @@
       },
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "cards",
+        "conteudo",
         "card",
         "livro",
         "estante",
@@ -2404,7 +2404,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "midia",
+        "conteudo",
         "capa",
         "placeholder",
         "catalogo",
@@ -2477,6 +2477,35 @@
       }
     },
     {
+      "name": "skeleton-medido",
+      "type": "registry:ui",
+      "title": "Skeleton Medido",
+      "description": "Esqueleto medido do conteúdo real, sem escrever as medidas à mão. Experimental: usa o Skullet 0.0.x.",
+      "dependencies": [
+        "skullet@0.0.3"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/ui/skeleton-medido.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "categories": [
+        "feedback",
+        "skeleton",
+        "carregando",
+        "espera",
+        "experimental"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Conteúdo que muda de forma e cujo esqueleto não vale manter à mão",
+          "evite": "Projeto que não aceita dependência 0.0.x: skeleton-rail"
+        }
+      }
+    },
+    {
       "name": "use-local-search",
       "type": "registry:hook",
       "title": "useLocalSearch",
@@ -2493,7 +2522,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "base",
+        "fundacao",
         "busca",
         "filtro",
         "acento",
@@ -2950,10 +2979,11 @@
         }
       },
       "categories": [
-        "navegacao",
+        "controles",
         "menu",
         "mobile",
         "drawer",
+        "navegacao",
         "acessibilidade"
       ],
       "meta": {
@@ -2979,8 +3009,9 @@
         }
       ],
       "categories": [
-        "navegacao",
+        "controles",
         "sidebar",
+        "navegacao",
         "app",
         "colapsar",
         "atalho",
@@ -3012,7 +3043,7 @@
         }
       ],
       "categories": [
-        "secoes",
+        "conteudo",
         "scroll",
         "sticky",
         "passos",
@@ -3081,7 +3112,7 @@
         }
       },
       "categories": [
-        "midia",
+        "transicoes",
         "foto",
         "moldura",
         "imagem",
@@ -3122,7 +3153,7 @@
         }
       ],
       "categories": [
-        "secoes",
+        "conteudo",
         "dobra",
         "secao",
         "foto",
@@ -3254,7 +3285,7 @@
         }
       },
       "categories": [
-        "midia",
+        "transicoes",
         "foto",
         "galeria",
         "lightbox",
@@ -3390,7 +3421,7 @@
         }
       },
       "categories": [
-        "midia",
+        "conteudo",
         "foto",
         "antes",
         "depois",
@@ -3447,8 +3478,9 @@
         "@types/three@^0.170.0"
       ],
       "categories": [
-        "3d",
+        "conteudo",
         "livro",
+        "3d",
         "webgl",
         "catalogo",
         "capa",
@@ -3499,7 +3531,7 @@
         }
       },
       "categories": [
-        "3d",
+        "conteudo",
         "estante",
         "prateleira",
         "catalogo",
@@ -3542,8 +3574,9 @@
         "@types/three@^0.170.0"
       ],
       "categories": [
-        "3d",
+        "conteudo",
         "carrossel",
+        "3d",
         "webgl",
         "portfolio",
         "capa",
@@ -3569,7 +3602,7 @@
         }
       ],
       "categories": [
-        "base",
+        "fundacao",
         "marca",
         "tokens",
         "webgl",
@@ -3659,7 +3692,7 @@
         "@types/three@^0.170.0"
       ],
       "categories": [
-        "shaders",
+        "conteudo",
         "hero",
         "nevoa",
         "webgl",
@@ -3698,6 +3731,7 @@
         "@types/three@^0.170.0"
       ],
       "categories": [
+        "conteudo",
         "3d",
         "webgl",
         "produto",
@@ -3736,6 +3770,7 @@
         "@types/three@^0.170.0"
       ],
       "categories": [
+        "efeitos",
         "3d",
         "webgl",
         "shader",
@@ -3804,7 +3839,7 @@
         }
       ],
       "categories": [
-        "midia",
+        "conteudo",
         "foto",
         "slideshow",
         "crossfade",
@@ -3911,7 +3946,7 @@
         }
       },
       "categories": [
-        "feedback",
+        "transicoes",
         "modal",
         "dialog",
         "nevoa",
@@ -3960,6 +3995,7 @@
         "@types/three@^0.170.0"
       ],
       "categories": [
+        "efeitos",
         "3d",
         "webgl",
         "nevoa",
@@ -4012,6 +4048,7 @@
         "@types/three@^0.170.0"
       ],
       "categories": [
+        "conteudo",
         "3d",
         "webgl",
         "scroll",
@@ -4046,6 +4083,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
+        "conteudo",
         "dados",
         "calendario",
         "heatmap",
@@ -4112,11 +4150,12 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "cards",
+        "conteudo",
         "pilha",
         "arrastar",
         "gesto",
-        "depoimentos"
+        "depoimentos",
+        "cards"
       ],
       "meta": {
         "uso": {
@@ -4213,7 +4252,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "cards",
+        "conteudo",
         "card",
         "expandir",
         "detalhe",
@@ -4280,6 +4319,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
+        "conteudo",
         "dados",
         "medidor",
         "cota",
@@ -4446,7 +4486,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "cards",
+        "controles",
         "lista",
         "gesto",
         "arrastar",
@@ -4578,7 +4618,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "cards",
+        "conteudo",
         "recibo",
         "pedido",
         "3d",
@@ -4610,7 +4650,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "texto",
+        "efeitos",
         "canvas",
         "cursor",
         "hover",
@@ -4709,8 +4749,9 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "navegacao",
+        "controles",
         "dock",
+        "navegacao",
         "toolbar",
         "icones",
         "ampliacao",
@@ -4777,7 +4818,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "efeitos",
+        "conteudo",
         "card",
         "3d",
         "tilt",
@@ -4845,7 +4886,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "cards",
+        "feedback",
         "lista",
         "apagar",
         "desfazer",
@@ -4879,7 +4920,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "dados",
+        "conteudo",
         "contagem",
         "lancamento",
         "prazo",
@@ -4912,7 +4953,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "midia",
+        "conteudo",
         "galeria",
         "carrossel",
         "3d",
@@ -5020,7 +5061,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "navegacao",
+        "controles",
         "menu",
         "acoes",
         "gesto",
@@ -5054,7 +5095,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "midia",
+        "conteudo",
         "revista",
         "catalogo",
         "pagina",
@@ -5257,8 +5298,9 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "dados",
+        "conteudo",
         "grafico",
+        "dados",
         "serie-temporal",
         "camadas",
         "dashboard"
@@ -5323,7 +5365,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "midia",
+        "conteudo",
         "audio",
         "chat",
         "player",
@@ -5356,7 +5398,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "cards",
+        "conteudo",
         "carteira",
         "cartoes",
         "fintech",
@@ -5452,7 +5494,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "shaders",
+        "efeitos",
         "shader",
         "webgl",
         "fundo",
@@ -5516,7 +5558,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "shaders",
+        "efeitos",
         "shader",
         "webgl",
         "fundo",
@@ -5548,7 +5590,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "shaders",
+        "efeitos",
         "shader",
         "webgl",
         "fundo",
@@ -5894,7 +5936,7 @@
         }
       ],
       "categories": [
-        "base",
+        "fundacao",
         "ia",
         "agente",
         "mcp",
@@ -5927,7 +5969,7 @@
         }
       ],
       "categories": [
-        "base",
+        "fundacao",
         "hook",
         "busca",
         "debounce"
@@ -6002,6 +6044,7 @@
         }
       ],
       "dependencies": [
+        "motion",
         "react"
       ],
       "categories": [
@@ -6471,7 +6514,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "texturas",
+        "shaders",
         "textura",
         "webgl",
         "ponteiro",
@@ -6504,7 +6547,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "texturas",
+        "shaders",
         "textura",
         "webgl",
         "ponteiro",
@@ -6537,7 +6580,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "texturas",
+        "shaders",
         "textura",
         "webgl",
         "ponteiro",
@@ -6570,7 +6613,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "texturas",
+        "shaders",
         "textura",
         "webgl",
         "ponteiro",
@@ -6603,7 +6646,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "texturas",
+        "shaders",
         "textura",
         "webgl",
         "ponteiro",
@@ -6636,7 +6679,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "texturas",
+        "efeitos",
         "textura",
         "webgl",
         "fundo",
@@ -6669,7 +6712,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "texturas",
+        "efeitos",
         "textura",
         "webgl",
         "fundo",
@@ -6703,7 +6746,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "texturas",
+        "efeitos",
         "textura",
         "webgl",
         "fundo",
@@ -6737,7 +6780,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "texturas",
+        "efeitos",
         "textura",
         "webgl",
         "fundo",
@@ -6771,7 +6814,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "texturas",
+        "efeitos",
         "textura",
         "webgl",
         "fundo",
@@ -6805,7 +6848,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "texturas",
+        "efeitos",
         "textura",
         "webgl",
         "fundo",
@@ -6839,7 +6882,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "texturas",
+        "efeitos",
         "textura",
         "webgl",
         "fundo",
@@ -6873,7 +6916,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "texturas",
+        "efeitos",
         "textura",
         "webgl",
         "fundo",
@@ -6907,7 +6950,7 @@
       ],
       "author": "Visant Labs <visantsupply@gmail.com>",
       "categories": [
-        "texturas",
+        "efeitos",
         "textura",
         "webgl",
         "fundo",

@@ -93,6 +93,16 @@ const ACERVO = [
   { id: "textura-papel", papel: "textura", tipo: "imagem", de: `${FONTES.assets}/simon-lee-ldg40aCeOXo-unsplash.jpg`, alt: "Textura de papel" },
   { id: "textura-bruma", papel: "textura", tipo: "imagem", de: `${FONTES.assets}/icarius-Lim3NQQ_RZ4-unsplash.jpg`, alt: "Bruma colorida" },
 
+  // ── a foto padrão dos efeitos: UMA linha decide a imagem de todo shader ──────
+  // Papel próprio de propósito: como "cena", ela entraria no sorteio de `midia()`
+  // e mudaria a imagem de outras demos. Para trocar a foto de todos os efeitos,
+  // troque o `de:` e rode `npm run build:media`; o arquivo de saída não muda de nome.
+  { id: "efeito-padrao", papel: "efeito", tipo: "imagem", de: `${FONTES.assets}/creedi-zhong-krp1-vElSCI-unsplash.jpg`, alt: "Foto de uma TV de tubo numa prateleira, contra parede cinza", recorte: "iw:iw:0:(ih-iw)*0.42" },
+
+  { id: "efeito-mao", papel: "efeito", tipo: "imagem", de: `${FONTES.assets}/simon-lee-ldg40aCeOXo-unsplash.jpg`, alt: "Mão metálica sobre fundo ciano", recorte: "iw:iw" },
+  { id: "efeito-forma", papel: "efeito", tipo: "imagem", de: `${FONTES.assets}/steve-johnson-0vHT_QY9u7k-unsplash.jpg`, alt: "Forma abstrata em tons quentes", recorte: "ih:ih" },
+  { id: "efeito-gradiente", papel: "efeito", tipo: "imagem", de: `${FONTES.assets}/mymind-XUlsF9LYeVk-unsplash.jpg`, alt: "Gradiente suave", recorte: "iw:iw" },
+
   // ── vídeo: recorte curto, mudo, em loop ──────────────────────────────────
   { id: "video-loop3d", papel: "video", tipo: "video", de: `${FONTES.board}/3d-loop.mp4`, alt: "Loop 3D da marca", corte: 6 },
   { id: "video-vinheta", papel: "video", tipo: "video", de: `${FONTES.assets}/vinheta-visant-sketch01.mp4`, alt: "Vinheta Visant", corte: 6 },
@@ -166,7 +176,7 @@ for (const item of ACERVO) {
         // `-2` na altura mantém a proporção em número par, que é o que os
         // encoders aceitam sem reclamar. `min(w,iw)` nunca AMPLIA: subir uma
         // foto de 400px para 1200 não inventa detalhe, só peso.
-        ff(["-i", fonte, "-vf", `scale='min(${largura},iw)':-2`, "-c:v", "libwebp", "-quality", "78", destino]);
+        ff(["-i", fonte, "-vf", `${item.recorte ? `crop=${item.recorte},` : ""}scale='min(${largura},iw)':-2`, "-c:v", "libwebp", "-quality", "78", destino]);
         refeitos++;
       }
       manifesto.push({ id: item.id, papel: item.papel, tipo: "imagem", src: `/media/${item.id}.webp`, alt: item.alt, ...medir(destino) });

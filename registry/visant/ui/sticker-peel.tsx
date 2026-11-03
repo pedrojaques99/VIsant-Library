@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { animate, useMotionValue, useReducedMotion } from "motion/react";
+import { animate, useMotionValue, useReducedMotion, useSpring } from "motion/react";
 
 import { cn } from "@/lib/utils";
 
@@ -21,8 +21,11 @@ import { cn } from "@/lib/utils";
  *   `--e-raised` para uma sombra longa. Soltou, a dobra fecha em mola.
  * - Teclado: setas movem 8px (Shift, 32px). É o mesmo `onPositionChange`.
  * - Com `peelOff`: um clique (apertar e soltar sem arrastar), Enter ou Espaço
- *   descola o adesivo inteiro. A dobra atravessa a peça até o verso ficar todo
- *   à mostra, ele sai da página e `onPeelOff` avisa. Arrastar continua movendo.
+ *   descola o adesivo inteiro: a dobra atravessa a peça devagar, com a luz presa
+ *   ao vinco, e só com o verso quase todo à mostra ele se solta, sobe e some. Com
+ *   a saída de uma vez, a dobra nem chegava a ser vista. Arrastar continua movendo.
+ * - Pegou: o adesivo cresce um pouco e inclina com a velocidade da mão, e assenta
+ *   de volta ao soltar. Papel tem peso; um retângulo que só muda de coordenada não.
  *
  * ── Decisões que não são óbvias ────────────────────────────────────────────
  *
@@ -67,8 +70,25 @@ function cortar(poli: Ponto[], m: Ponto, n: Ponto, fora: boolean): Ponto[] {
 const poligono = (ps: Ponto[]) =>
   ps.length < 3 ? "polygon(0 0, 0 0, 0 0)" : `polygon(${ps.map((p) => `${p.x}px ${p.y}px`).join(",")})`;
 
+/**
+ * Um `linear-gradient` medido em px a partir da linha de dobra: a luz acompanha o
+ * vinco enquanto ele gira. Mesma conta do `page-curl`.
+ */
+function luzNoVinco(w: number, h: number, m: Ponto, dir: Ponto): string {
+  const ang = Math.atan2(dir.x, -dir.y);
+  const L = Math.abs(w * Math.sin(ang)) + Math.abs(h * Math.cos(ang)) || 1;
+  const s0 = { x: w / 2 - (dir.x * L) / 2, y: h / 2 - (dir.y * L) / 2 };
+  const t0 = (m.x - s0.x) * dir.x + (m.y - s0.y) * dir.y;
+  const para = (px: number) => `${(((t0 + px) / L) * 100).toFixed(2)}%`;
+  return `linear-gradient(${((ang * 180) / Math.PI).toFixed(2)}deg,color-mix(in oklab, black 24%, transparent) ${para(0)},color-mix(in oklab, black 4%, transparent) ${para(10)},color-mix(in oklab, white 10%, transparent) ${para(28)},transparent ${para(120)})`;
+}
+
 // Mola de gesto: chega em ~250ms, sem quicar a ponto de o papel parecer borracha.
-const MOLA = { type: "spring" as const, stiffness: 420, damping: 32, mass: 0.6 };
+const MOLA = { type: "spring" as const, stiffness: 340, damping: 30, mass: 0.6 };
+// Mola da mira: a dobra vira para o ponteiro com um atraso curto, sem acompanhar cada tremida.
+const MOLA_MIRA = { type: "spring" as const, stiffness: 260, damping: 28 };
+/** Inclinação máxima ao arrastar, em graus. */
+const INCLINA = 6;
 
 /** Ordem de empilhamento compartilhada: o último adesivo tocado fica por cima. */
 let topo = 1;
@@ -121,6 +141,9 @@ export function StickerPeel({
   // Dobra = distância (px) que o canto percorre; ângulo = para onde ele vai.
   const dobra = useMotionValue(0);
   const angulo = useMotionValue(Math.PI * 1.25); // diagonal, para cima e à esquerda
+  const inclina = useSpring(0, { stiffness: 220, damping: 22 });
+  const parouMao = React.useRef(0);
+  const ultimaMao = React.useRef({ x: 0, t: 0 });
 
   const desenhar = React.useCallback(() => {
     const el = raiz.current;
@@ -158,17 +181,24 @@ export function StickerPeel({
     v.style.transform = `matrix(${1 - 2 * n.x * n.x},${-2 * n.x * n.y},${-2 * n.x * n.y},${
       1 - 2 * n.y * n.y
     },${2 * k * n.x},${2 * k * n.y})`;
+    v.style.backgroundImage = luzNoVinco(w, h, m, n);
     v.style.visibility = "visible";
   }, [dobra, angulo]);
 
   React.useEffect(() => {
     const a = dobra.on("change", desenhar);
     const b = angulo.on("change", desenhar);
+    // Por `rotate` individual: `left`/`top` movem, `transform` é da pegada e da saída.
+    const c = inclina.on("change", (g) => {
+      if (raiz.current) raiz.current.style.rotate = `${rotate + g}deg`;
+    });
     return () => {
       a();
       b();
+      c();
+      window.clearTimeout(parouMao.current);
     };
-  }, [dobra, angulo, desenhar]);
+  }, [dobra, angulo, desenhar, inclina, rotate]);
 
   const levar = (alvo: number) => {
     if (saindo.current) return;
@@ -188,7 +218,6 @@ export function StickerPeel({
     setZ(++topo);
     const w = el.offsetWidth;
     const h = el.offsetHeight;
-    angulo.set(Math.atan2(-h, -w));
     const fim = () => {
       setSaiu(true);
       onPeelOff?.();
@@ -197,8 +226,23 @@ export function StickerPeel({
       fim();
       return;
     }
-    animate(dobra, Math.hypot(w, h) * 2.2, { duration: 0.3, ease: [0.22, 1, 0.36, 1] });
-    animate(el, { opacity: 0, y: -12 }, { duration: 0.18, delay: 0.22, ease: "easeIn" }).then(fim);
+    // A mira leva a dobra para a diagonal sem salto, e a dobra atravessa em vez de
+    // estourar: começo lento (vê-se o canto subindo), meio decidido, fim assentado.
+    animate(angulo, Math.atan2(-h, -w), { duration: 0.18, ease: [0.23, 1, 0.32, 1] });
+    animate(dobra, Math.hypot(w, h) * 2.05, { duration: 0.72, ease: [0.65, 0, 0.35, 1] });
+    // Só depois de o verso aparecer ele se solta: sobe, gira um nada e apaga. Um por vez.
+    animate(
+      el,
+      { opacity: 0, y: -22, scale: 1.05, rotate: 7 },
+      { duration: 0.26, delay: 0.5, ease: [0.23, 1, 0.32, 1] },
+    ).then(fim);
+  };
+
+  /** Pega e larga: o adesivo sobe um pouco da página e assenta ao soltar. */
+  const erguer = (sim: boolean) => {
+    const el = raiz.current;
+    if (!el || reduzir) return;
+    animate(el, { scale: sim ? 1.05 : 1 }, sim ? { duration: 0.14, ease: [0.23, 1, 0.32, 1] } : MOLA);
   };
 
   /** Ponteiro em px locais do adesivo: sem escala do palco e sem a rotação. */
@@ -226,7 +270,12 @@ export function StickerPeel({
     const vx = l.x - l.w;
     const vy = l.y - l.h;
     const dist = Math.hypot(vx, vy);
-    if (dist > 4) angulo.set(Math.atan2(vy, vx));
+    if (dist > 4) {
+      const alvo = Math.atan2(vy, vx);
+      // Dobra ainda fechada não tem o que girar: nasce já apontando para o ponteiro.
+      if (reduzir || dobra.get() < 1) angulo.set(alvo);
+      else animate(angulo, alvo, MOLA_MIRA);
+    }
     // Perto do canto a dobra cresce até o dobro do repouso.
     const perto = Math.max(0, 1 - dist / Math.max(l.w, l.h));
     return base * (1 + perto);
@@ -279,8 +328,17 @@ export function StickerPeel({
         if (g) {
           if (!g.moveu && Math.hypot(e.clientX - g.px, e.clientY - g.py) < 4) return;
           g.moveu = true;
+          const antes = pos.current.x;
           mover(g.x + (e.clientX - g.px) / g.escala, g.y + (e.clientY - g.py) / g.escala);
           mirar(l, 0);
+          if (!reduzir) {
+            // Inclina pelo passo da mão, e volta ao reto quando ela para.
+            const dt = Math.max(1, e.timeStamp - ultimaMao.current.t);
+            ultimaMao.current = { x: pos.current.x, t: e.timeStamp };
+            inclina.set(Math.max(-INCLINA, Math.min(INCLINA, ((pos.current.x - antes) / dt) * 5)));
+            window.clearTimeout(parouMao.current);
+            parouMao.current = window.setTimeout(() => inclina.set(0), 70);
+          }
           return;
         }
         if (e.pointerType === "mouse") levar(mirar(l, peel));
@@ -306,22 +364,27 @@ export function StickerPeel({
         setPego(true);
         mirar(l, 0);
         levar(Math.min(l.w, l.h) * 0.25);
+        erguer(true);
       }}
       onPointerUp={(e) => {
         const g = arrasto.current;
         if (!g) return;
         arrasto.current = null;
         setPego(false);
+        inclina.set(0);
         if (!g.moveu && peelOff) {
           descolar();
           return;
         }
+        erguer(false);
         levar(e.pointerType === "mouse" ? peel : 0);
         if (g.moveu) onPositionChange?.(pos.current);
       }}
       onPointerCancel={() => {
         arrasto.current = null;
         setPego(false);
+        inclina.set(0);
+        erguer(false);
         levar(0);
       }}
       onKeyDown={(e) => {
@@ -363,18 +426,25 @@ export function StickerPeel({
         {children}
       </div>
       {/* O verso: a mesma caixa, cor de papel, refletida pela linha de dobra. */}
+      {/* O invólucro sem transformação é quem projeta a sombra da aba sobre o adesivo. */}
       <div
-        ref={verso}
         aria-hidden
-        className="pointer-events-none absolute inset-0 origin-top-left bg-muted"
-        style={{
-          borderRadius: radius,
-          visibility: "hidden",
-          backgroundImage:
-            "linear-gradient(135deg, color-mix(in oklab, var(--foreground) 14%, transparent), transparent 60%)",
-          boxShadow: "0 0 0 1px var(--border)",
-        }}
-      />
+        className="pointer-events-none absolute inset-0"
+        style={{ filter: "drop-shadow(-2px 3px 5px color-mix(in oklab, black 38%, transparent))" }}
+      >
+        <div
+          ref={verso}
+          className="absolute inset-0 origin-top-left"
+          style={{
+            borderRadius: radius,
+            visibility: "hidden",
+            // Papel de verso: destacado do fundo em qualquer tema. Em `--muted` puro,
+            // ele sumia sobre uma prancheta da mesma cor.
+            backgroundColor: "color-mix(in oklab, var(--foreground) 16%, var(--card))",
+            boxShadow: "inset 0 0 0 1px var(--border)",
+          }}
+        />
+      </div>
     </div>
   );
 }

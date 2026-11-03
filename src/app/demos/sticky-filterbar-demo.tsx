@@ -1,130 +1,88 @@
 "use client";
 
 /**
- * A barra que gruda só se explica com uma lista embaixo dela.
+ * Uma linha de filtros e fotos rolando por baixo dela. Mais nada.
  *
- * A demo antiga eram três chips e catorze retângulos cinzas de 6px. Barra de
- * filtro que não filtra nada, grudando em cima de nada: o card mostrava a
- * mecânica (o `position: sticky`) e escondia a peça (governar uma lista longa
- * sem sumir com ela). Daí o "slop total" do report.
+ * Sem cabeçalho falso, sem segunda linha, sem contagem e sem legenda nos cards: o
+ * que a peça promete é grudar, e isso se vê com a lista passando por baixo. Por
+ * isso a demo nasce já um pouco rolada, com a foto cortada pela barra.
  *
- * Aqui a lista é de verdade: a contagem no canto muda, os chips cortam o
- * acervo, e o que rola por baixo da barra é conteúdo com foto. O que a peça
- * promete — grudar, condensar a linha secundária, e o fio contando quanto da
- * região já passou — só é julgável com percurso de rolagem real.
+ * O pé dissolve: a lista continua, e quem diz isso é o fim gradual. Com corte reto,
+ * o conteúdo terminava seco no meio do palco da ficha e a grade mostrava uma fresta
+ * de 2 a 3px da fileira seguinte na borda do cartão.
  *
- * O cabeçalho de mentira existe porque o componente MEDE um cabeçalho e publica
- * `--header-h`. Apontá-lo para o header da vitrine faria uma demo reescrever a
- * página que a hospeda.
+ * `--header-h` em -1px neste invólucro e um `headerSelector` que não acha nada: sem
+ * cabeçalho aqui, a peça não pode medir o da vitrine e reescrever a página. O -1px
+ * é do palco: sob `scale` o topo da barra cai em fração de pixel, e uma linha da
+ * foto escapava por cima dela.
  */
 
 import * as React from "react";
 
-import { Media } from "../media";
+import { Media, type Papel } from "../media";
 import { Chip } from "../../../registry/visant/ui/chip";
 import { StickyFilterbar, FilterRow } from "../../../registry/visant/ui/sticky-filterbar";
 import type { DemoProps } from "../catalog";
 
-type Estado = "producao" | "rascunho" | "arquivo";
-type Familia = "quente" | "fria" | "neutra";
-
-const ROTULO: Record<Estado, string> = {
-  producao: "Em produção",
-  rascunho: "Rascunho",
-  arquivo: "Arquivado",
-};
-
-const ACERVO: { nome: string; estado: Estado; familia: Familia }[] = [
-  { nome: "Âmbar", estado: "producao", familia: "quente" },
-  { nome: "Casa Vinte", estado: "producao", familia: "neutra" },
-  { nome: "Ribalta", estado: "rascunho", familia: "quente" },
-  { nome: "Bandeira", estado: "producao", familia: "fria" },
-  { nome: "Pomar", estado: "arquivo", familia: "quente" },
-  { nome: "Sereno", estado: "producao", familia: "fria" },
-  { nome: "Oficina 12", estado: "rascunho", familia: "neutra" },
-  { nome: "Maré", estado: "producao", familia: "fria" },
-  { nome: "Tarrafa", estado: "arquivo", familia: "neutra" },
-  { nome: "Vila Rica", estado: "rascunho", familia: "quente" },
-  { nome: "Aurora", estado: "producao", familia: "fria" },
-  { nome: "Serralheria", estado: "producao", familia: "neutra" },
+const ACERVO: { papel: Papel; indice: number }[] = [
+  { papel: "cena", indice: 2 },
+  { papel: "textura", indice: 0 },
+  { papel: "cena", indice: 3 },
+  { papel: "textura", indice: 2 },
+  { papel: "cena", indice: 5 },
+  { papel: "textura", indice: 3 },
+  { papel: "cena", indice: 6 },
+  { papel: "textura", indice: 1 },
+  { papel: "cena", indice: 0 },
+  { papel: "cena", indice: 4 },
 ];
 
+const SEM_CABECALHO = { "--header-h": "-1px" } as React.CSSProperties;
+const ROLAGEM_INICIAL = 44;
+const DISSOLVE = "linear-gradient(to bottom, black calc(100% - 72px), transparent)";
+
 export default function StickyFilterbarDemo({ props }: DemoProps) {
-  const [estado, setEstado] = React.useState<Estado | null>(null);
-  const [familia, setFamilia] = React.useState<Familia | null>(null);
+  const [filtro, setFiltro] = React.useState<Papel | null>(null);
+  const caixa = React.useRef<HTMLDivElement>(null);
+  const lista = ACERVO.filter((p) => !filtro || p.papel === filtro);
 
-  const lista = ACERVO.filter(
-    (p) => (!estado || p.estado === estado) && (!familia || p.familia === familia),
-  );
-
-  const conta = (e: Estado) => ACERVO.filter((p) => p.estado === e).length;
+  React.useLayoutEffect(() => {
+    caixa.current?.scrollTo({ top: ROLAGEM_INICIAL });
+  }, []);
 
   return (
     // O contêiner é quem rola. A barra descobre isso sozinha (ela procura o
-    // ancestral rolante), então o fio de progresso mede este percurso e não o
-    // da página inteira.
-    <div className="h-full w-full overflow-y-auto rounded-[var(--r-surface,0.875rem)] border border-border bg-background">
-      <div
-        data-demo-header
-        className="sticky top-0 z-40 flex h-14 items-center border-b border-border bg-background px-6"
-      >
-        <span className="text-destaque font-semibold tracking-tight">Acervo</span>
-      </div>
-
-      <StickyFilterbar headerSelector="[data-demo-header]" className="px-6" {...props}>
+    // ancestral rolante), então o fio de progresso mede este percurso.
+    <div
+      ref={caixa}
+      style={{ ...SEM_CABECALHO, maskImage: DISSOLVE, WebkitMaskImage: DISSOLVE }}
+      className="h-full w-full overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
+      <StickyFilterbar headerSelector="[data-demo-sem-cabecalho]" className="px-4" {...props}>
         <FilterRow>
-          <Chip pressed={estado === null} onClick={() => setEstado(null)}>
+          <Chip pressed={filtro === null} onClick={() => setFiltro(null)}>
             Todos
           </Chip>
-          {(Object.keys(ROTULO) as Estado[]).map((e) => (
-            <Chip
-              key={e}
-              pressed={estado === e}
-              count={conta(e)}
-              onClick={() => setEstado(estado === e ? null : e)}
-            >
-              {ROTULO[e]}
-            </Chip>
-          ))}
-          {/* A contagem do resultado mora na linha principal de propósito: é o
-              que a pessoa precisa continuar vendo depois que a barra condensa. */}
-          <span
-            key={lista.length}
-            className="ml-auto shrink-0 text-apoio tabular-nums text-muted-foreground animate-in fade-in-0 slide-in-from-bottom-1 [animation-duration:var(--dur-fast)]"
-          >
-            {lista.length} de {ACERVO.length}
-          </span>
-        </FilterRow>
-        <FilterRow label="Cor" collapsible>
-          {(["quente", "fria", "neutra"] as Familia[]).map((f) => (
-            <Chip
-              key={f}
-              pressed={familia === f}
-              onClick={() => setFamilia(familia === f ? null : f)}
-            >
-              {f[0].toUpperCase() + f.slice(1)}
-            </Chip>
-          ))}
+          <Chip pressed={filtro === "cena"} onClick={() => setFiltro("cena")}>
+            Cenas
+          </Chip>
+          <Chip pressed={filtro === "textura"} onClick={() => setFiltro("textura")}>
+            Texturas
+          </Chip>
         </FilterRow>
       </StickyFilterbar>
 
-      {/* Filtrar remonta a grade (a chave é o filtro), e cada card entra com
-          um fade de 4px em cascata curta: a pessoa vê que a lista respondeu. */}
-      <div key={`${estado}-${familia}`} className="grid grid-cols-2 gap-4 p-6">
-        {lista.map((p, i) => (
-          <article
-            key={p.nome}
-            className="overflow-hidden rounded-[var(--r-control,0.5rem)] border border-border bg-card animate-in fade-in-0 slide-in-from-bottom-1 fill-mode-backwards [animation-duration:var(--dur-base)] [animation-timing-function:var(--ease-out)]"
-            style={{ animationDelay: `${Math.min(i, 6) * 30}ms` }}
-          >
-            <Media papel="cena" indice={i} ratio="16/10" className="w-full" />
-            <div className="flex items-baseline justify-between gap-2 px-4 py-3">
-              <span className="truncate text-apoio font-medium">{p.nome}</span>
-              <span className="shrink-0 text-rotulo uppercase tracking-[0.1em] text-muted-foreground">
-                {p.familia}
-              </span>
-            </div>
-          </article>
+      {/* A chave é o filtro: a grade remonta e entra de novo, e a pessoa vê que a
+          lista respondeu. */}
+      <div key={String(filtro)} className="grid grid-cols-2 gap-3 p-4">
+        {lista.map((p) => (
+          <Media
+            key={`${p.papel}-${p.indice}`}
+            papel={p.papel}
+            indice={p.indice}
+            ratio="16/10"
+            className="w-full rounded-[var(--r-control,0.5rem)] animate-in fade-in-0 [animation-duration:var(--dur-base)] [animation-timing-function:var(--ease-out)]"
+          />
         ))}
       </div>
     </div>

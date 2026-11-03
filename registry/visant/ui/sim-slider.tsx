@@ -195,7 +195,7 @@ export function SimSlider({
               <dt className="text-[13px] text-[var(--muted-foreground)]">{o.label}</dt>
               <dd
                 className={cn(
-                  "tabular-nums leading-none",
+                  "tabular-nums",
                   /*
                    * O número principal ganha TAMANHO e a fonte de display, não
                    * a cor da marca. Marca clara pintando número grande é o
@@ -207,6 +207,10 @@ export function SimSlider({
                   o.primary
                     ? "[font-family:var(--font-display,inherit)] text-[clamp(1.75rem,1.4rem+1.4vw,2.5rem)] text-[var(--foreground)]"
                     : "text-[1.25rem] text-[var(--muted-foreground)]",
+                  /* Depois do tamanho: o `cn` trata `text-[...]` como quem define a
+                     entrelinha e apaga um `leading-*` que venha antes. Sem esta
+                     ordem o valor da direita descia 7px em relação ao da esquerda. */
+                  "leading-none",
                 )}
                 style={{ minWidth: `${widths[i]}ch` }}
               >

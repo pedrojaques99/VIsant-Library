@@ -34,7 +34,7 @@ export const SCOPE_SAMPLES = 256;
 
 /** Time fictício das demos de avatar e responsável. */
 export const PEOPLE = [
-  { id: "1", name: "Pedro Jaques" },
+  { id: "1", name: "Pedro Lopes" },
   { id: "2", name: "Ana Reis" },
   { id: "3", name: "Caio Duarte" },
   { id: "4", name: "Marina Alves" },

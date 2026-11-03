@@ -12,12 +12,12 @@ import { ExpandingSearch, type ExpandingSearchItem } from "../../../registry/vis
 import type { DemoProps } from "../catalog";
 
 const ITENS: ExpandingSearchItem[] = [
-  { id: "1", title: "Manual de marca Arco", meta: "Documento, editado ontem" },
+  { id: "1", title: "Manual de marca", meta: "Documento, editado ontem" },
   { id: "2", title: "Campanha de verão", meta: "Projeto, 14 peças" },
   { id: "3", title: "Ação de lançamento", meta: "Projeto, em andamento" },
   { id: "4", title: "Paleta e tipografia", meta: "Documento", keywords: ["cores", "fontes"] },
   { id: "5", title: "Fotos do estúdio", meta: "Pasta, 86 arquivos" },
-  { id: "6", title: "Proposta Marina Duarte", meta: "Orçamento, enviado" },
+  { id: "6", title: "Proposta enviada", meta: "Orçamento, enviado" },
   { id: "7", title: "Site institucional", meta: "Projeto, revisão" },
 ];
 

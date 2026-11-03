@@ -192,6 +192,7 @@ function Roda({ digito, base, atraso, reduzir }: { digito: number; base: number;
       className="relative inline-block overflow-hidden [--pena:0.16em] -my-[var(--pena)] py-[var(--pena)]"
       style={{ maskImage: MASCARA, WebkitMaskImage: MASCARA }}
       initial={{ width: 0, opacity: 0 }}
+      // motion-lint-disable-next-line layout-property-animation  dígito entra e os vizinhos precisam abrir espaço
       animate={{ width: "auto", opacity: 1 }}
       exit={{ width: 0, opacity: 0 }}
       transition={reduzir ? { duration: 0 } : MOLA_FORMA}

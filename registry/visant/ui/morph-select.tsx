@@ -250,6 +250,7 @@ export function MorphSelect({
 
         <motion.div
           initial={false}
+          // motion-lint-disable-next-line layout-property-animation  a superfície é o gatilho crescendo; escala deformaria texto e raio
           animate={{
             width: aberto ? larguraAberta : fechado.w || "auto",
             height: aberto ? ALTURA_GATILHO + alturaLista : ALTURA_GATILHO,

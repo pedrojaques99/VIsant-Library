@@ -19,9 +19,9 @@ export default function HoldToConfirmDemo({ props }: DemoProps) {
     <div className="flex h-full w-full items-center justify-center">
       <div className="flex w-[360px] max-w-full flex-col gap-4 rounded-[var(--r-surface)] border border-border bg-card p-5 text-foreground">
         <div className="flex flex-col gap-1">
-          <p className="text-sm font-medium">Projeto Ribalta</p>
+          <p className="text-sm font-medium">Projeto antigo</p>
           <p className="text-sm text-muted-foreground">
-            {feito ? "Apagado. Dá pra desfazer agora." : "Apaga os 48 arquivos e o histórico."}
+            {feito ? "Apagado. Dá pra desfazer agora." : "Apaga os arquivos e o histórico."}
           </p>
         </div>
         <div className="flex items-center gap-3">

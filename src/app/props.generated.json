@@ -2167,6 +2167,13 @@
           "descricao": null
         },
         {
+          "nome": "initialSorting",
+          "tipo": "SortingState",
+          "obrigatoria": false,
+          "padrao": "[]",
+          "descricao": "Ordenação com que a tabela nasce. A da URL (`?sort=`), quando existe, vence."
+        },
+        {
           "nome": "isLoading",
           "tipo": "boolean",
           "obrigatoria": false,
@@ -2578,6 +2585,13 @@
           "obrigatoria": false,
           "padrao": "Nenhuma etapa por aqui ainda.",
           "descricao": "O que a linha diz quando `data` chega vazio."
+        },
+        {
+          "nome": "scrollContainer",
+          "tipo": "RefObject<HTMLElement>",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Contêiner que rola, quando não é a página. O progresso vira o percurso dele,\nde ponta a ponta. O elemento precisa estar posicionado (`relative`)."
         },
         {
           "nome": "title",
@@ -5627,6 +5641,17 @@
           "descricao": null
         },
         {
+          "nome": "beforeSide",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "right",
+          "descricao": "De que lado fica o \"antes\". `left` é a ordem de leitura: antes, depois.\nO padrão continua `right` para não trocar as fotos de quem já instalou.",
+          "valores": [
+            "left",
+            "right"
+          ]
+        },
+        {
           "nome": "defaultValue",
           "tipo": "number",
           "obrigatoria": false,
@@ -6130,6 +6155,21 @@
           "obrigatoria": false,
           "padrao": "display",
           "descricao": "Família do `text`: token da casa ou qualquer valor de `font-family`."
+        },
+        {
+          "nome": "fx",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "tinta",
+          "descricao": "O que a tinta faz ao condensar. Ver a nota do cabeçalho.",
+          "valores": [
+            "tinta",
+            "escorrer",
+            "fatias",
+            "gota",
+            "grao",
+            "neon"
+          ]
         },
         {
           "nome": "mark",
@@ -14017,6 +14057,13 @@
           }
         },
         {
+          "nome": "resting",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": "Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai.\nSem isto, a peça parada é a foto pura: o efeito só existe com ponteiro."
+        },
+        {
           "nome": "strength",
           "tipo": "number",
           "obrigatoria": false,
@@ -14061,6 +14108,13 @@
             "max": 50,
             "step": 1
           }
+        },
+        {
+          "nome": "resting",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": "Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai.\nSem isto, a peça parada é a foto pura: o efeito só existe com ponteiro."
         },
         {
           "nome": "strength",
@@ -14119,6 +14173,13 @@
             "max": 70,
             "step": 1
           }
+        },
+        {
+          "nome": "resting",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": "Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai.\nSem isto, a peça parada é a foto pura: o efeito só existe com ponteiro."
         }
       ]
     }
@@ -14165,6 +14226,13 @@
             "max": 80,
             "step": 1
           }
+        },
+        {
+          "nome": "resting",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": "Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai.\nSem isto, a peça parada é a foto pura: o efeito só existe com ponteiro."
         },
         {
           "nome": "size",
@@ -14267,7 +14335,7 @@
           "nome": "rows",
           "tipo": "number",
           "obrigatoria": false,
-          "padrao": "5",
+          "padrao": "4",
           "descricao": "Quantos mostradores cabem na altura.",
           "faixa": {
             "min": 2,
@@ -14324,7 +14392,7 @@
           "tipo": "string[]",
           "obrigatoria": false,
           "padrao": null,
-          "descricao": "Paradas: fundo, branco do olho, íris e pupila. Qualquer cor CSS ou token."
+          "descricao": "Paradas: fundo, olho e disco. Uma quarta parada é aceita e ignorada. Qualquer cor CSS ou token."
         },
         {
           "nome": "follow",
@@ -14343,7 +14411,7 @@
           "tipo": "number",
           "obrigatoria": false,
           "padrao": "50",
-          "descricao": "Tamanho da íris.",
+          "descricao": "Tamanho do disco.",
           "faixa": {
             "min": 0,
             "max": 100,
@@ -14395,6 +14463,18 @@
           "obrigatoria": false,
           "padrao": "55",
           "descricao": "Comprimento de cada traço.",
+          "faixa": {
+            "min": 0,
+            "max": 100,
+            "step": 1
+          }
+        },
+        {
+          "nome": "scatter",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "0",
+          "descricao": "Bagunça: 0 é malha regular com todo traço girando pelo campo; 100 é limalha\ncaída ao acaso, com ângulo, posição e comprimento sorteados.",
           "faixa": {
             "min": 0,
             "max": 100,

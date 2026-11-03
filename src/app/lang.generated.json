@@ -69,6 +69,7 @@
   "cover-art": "react",
   "empty-state": "react",
   "skeleton-rail": "react",
+  "skeleton-medido": "react",
   "use-local-search": "react",
   "line-reveal": "react",
   "gleam": "react",

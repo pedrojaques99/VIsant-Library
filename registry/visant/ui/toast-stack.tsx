@@ -231,6 +231,7 @@ function ToastItem({ t, index, y, altura, aberto, visivel, pausado, reduce, stor
       className="absolute inset-x-0 bottom-0 origin-bottom"
       style={{ zIndex: t.seq }}
       initial={reduce ? { opacity: 0 } : { opacity: 0, y: altura || 48 }}
+      // motion-lint-disable-next-line layout-property-animation  cada aviso tem altura própria e a pilha recolhe na altura do da frente
       animate={{
         y,
         scale: aberto ? 1 : 1 - ENCOLHE * degrau,
@@ -380,6 +381,7 @@ export function ToastStack({
         aria-relevant="additions text"
         className="relative"
         initial={false}
+        // motion-lint-disable-next-line layout-property-animation  a caixa acompanha a pilha aberta para o clique não vazar
         animate={{ height: alturaLista }}
         transition={reduce ? parado : mola}
         onPointerEnter={(e) => e.pointerType === "mouse" && setHover(true)}

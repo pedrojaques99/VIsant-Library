@@ -65,7 +65,7 @@ export function CopyCommand({
         "alvo-toque group flex items-center text-left outline-none",
         "transition-[color,background-color,opacity] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
         variant === "cta" &&
-          "h-10 w-full gap-3 rounded-control bg-casa-cta px-3.5 text-casa-cta-fg hover:opacity-90",
+          "min-h-10 w-full gap-3 rounded-control bg-casa-cta px-3.5 py-2 text-casa-cta-fg hover:opacity-90",
         variant === "line" &&
           "h-10 w-full gap-3 rounded-control bg-casa-tile-2 px-3.5 text-casa-fg-2 hover:text-casa-fg",
         // O `flex` da base (camada utilities) vence o `inline-grid` + `place-items`
@@ -76,7 +76,15 @@ export function CopyCommand({
       )}
     >
       {variant === "chip" ? null : (
-        <code className="min-w-0 flex-1 truncate font-casa-mono text-casa-sm">{text}</code>
+        <code
+          className={cn(
+            "min-w-0 flex-1 font-casa-mono text-casa-sm",
+            /* No comando de instalar o nome da peça vem no fim: cortar ali apaga o que importa. */
+            variant === "cta" ? "[overflow-wrap:anywhere]" : "truncate",
+          )}
+        >
+          {text}
+        </code>
       )}
       <Icon className="h-4 w-4 shrink-0" />
     </button>

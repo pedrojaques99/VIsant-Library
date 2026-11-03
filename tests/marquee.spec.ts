@@ -55,12 +55,19 @@ const voltaDaFaixa = (page: Page, _i = 0) =>
  * cliques é folga sobre os quatro modos — se o rótulo nunca bate, é defeito de
  * verdade e o teste tem de falhar dizendo isso, não rodar para sempre.
  */
+const ROTULO_DO_MODO: Record<string, string> = {
+  solta: "Solta",
+  boost: "Empurra",
+  drive: "Esteira",
+  scrub: "Amarrada",
+};
+
 async function escolherModo(page: Page, modo: string) {
   const card = page.locator('article[data-name="marquee"]');
   for (let i = 0; i < 20; i++) {
-    const atual = await card.locator("span").filter({ hasText: /^(solta|boost|drive|scrub)$/ }).first().textContent();
-    if (atual?.trim() === modo) return;
-    await card.getByLabel("Próximo modo").click();
+    const atual = await card.getByRole("button", { name: /^Repetir / }).textContent();
+    if (atual?.trim() === ROTULO_DO_MODO[modo]) return;
+    await card.getByLabel("Próxima variação").click();
     await page.waitForTimeout(220);
   }
   throw new Error(`modo "${modo}" não apareceu na demo do marquee`);
@@ -109,7 +116,7 @@ async function centralizarFaixa(page: Page) {
    * teste desenha WebGL na CPU (SwiftShader), e o `aparelho.ts` põe máquina sem
    * GPU real no nível médio, onde a grade é foto até a intenção.
    */
-  await page.goto("/catalogo/secoes?nivel=alto");
+  await page.goto("/catalogo/conteudo?nivel=alto");
   /*
    * Rede parada antes de medir velocidade.
    *
@@ -225,6 +232,8 @@ test("fora da tela ela para", async ({ page }) => {
     window.scrollTo(0, topo + window.innerHeight * 2);
   });
   await page.waitForTimeout(800);
+  /* A grade desmonta a peça longe da tela: sem faixa montada, ela também parou. */
+  if (!(await page.locator('article[data-name="marquee"] .marquee-track').count())) return;
   expect(Math.abs(await pxPorSegundo(page, 700))).toBeLessThan(0.5);
 });
 

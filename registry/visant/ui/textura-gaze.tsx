@@ -19,9 +19,10 @@ import { onThemeChange, resolveCssColor } from "@/lib/css-color";
  *    olho até o cursor, então os olhos convergem nele, como uma plateia, em
  *    vez de todos desviarem iguais. Longe, a pupila vai até a borda; perto,
  *    ela recua pro meio e o olho parece focar.
- * 2. **A pupila anda dentro da amêndoa, não do quadrado.** O deslocamento é
- *    achatado na vertical (o olho é mais largo que alto), e a íris é recortada
- *    pela pálpebra; quando o olho pisca, ela some debaixo dela sem truque.
+ * 2. **Dois desenhos e só.** Amêndoa chapada e um disco. Íris com anel, pupila,
+ *    brilho e contorno somavam quatro detalhes por olho, e em grade viravam
+ *    ruído. O disco anda dentro da amêndoa, com o deslocamento achatado na
+ *    vertical, e a pálpebra o recorta: quando o olho pisca, ele some sem truque.
  * 3. **Cada olho pisca no seu ritmo.** Fase e período sorteados por célula,
  *    num hash do índice: nunca pisca a grade inteira junto, e nada fica
  *    guardado em memória por olho.
@@ -51,7 +52,6 @@ uniform float uPisca;
 uniform vec3 uFundo;
 uniform vec3 uOlho;
 uniform vec3 uIrisCor;
-uniform vec3 uPupila;
 
 float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 
@@ -85,26 +85,15 @@ void main(){
   float ri=uIris;
   float di=length(f-ic);
   float iris=1.-smoothstep(ri-aa,ri+aa,di);
-  float pupila=1.-smoothstep(ri*.45-aa,ri*.45+aa,di);
-  float luz=1.-smoothstep(ri*.16-aa,ri*.16+aa,length(f-ic-vec2(-ri*.35,-ri*.35)));
-
-  vec3 olho=uOlho;
-  olho=mix(olho,uIrisCor,iris);
-  olho=mix(olho,uPupila,pupila);
-  olho=mix(olho,uOlho,luz*iris);
-  vec3 col=mix(uFundo,olho,dentro);
-  float linha=(1.-smoothstep(aa*.5,aa*2.,abs(borda)))*step(abs(f.x),a+aa);
-  col=mix(col,uIrisCor,linha*.55);
-  gl_FragColor=vec4(col,1.);
+  gl_FragColor=vec4(mix(uFundo,mix(uOlho,uIrisCor,iris),dentro),1.);
 }
 `;
 
-/** Paradas padrão: fundo, branco do olho, íris, pupila. Tudo token. */
+/** Paradas padrão: fundo, olho e disco. Tudo token. */
 const CORES_PADRAO = [
   "var(--background)",
-  "color-mix(in oklab, var(--brand) 10%, var(--background))",
-  "var(--brand)",
-  "color-mix(in oklab, var(--brand) 25%, var(--foreground))",
+  "color-mix(in oklab, var(--foreground) 92%, var(--background))",
+  "var(--background)",
 ];
 
 export interface TexturaGazeProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
@@ -123,7 +112,7 @@ export interface TexturaGazeProps extends Omit<React.HTMLAttributes<HTMLDivEleme
    */
   follow?: number;
   /**
-   * Tamanho da íris.
+   * Tamanho do disco.
    * @min 0
    * @max 100
    * @step 1
@@ -136,7 +125,7 @@ export interface TexturaGazeProps extends Omit<React.HTMLAttributes<HTMLDivEleme
    * @step 1
    */
   blink?: number;
-  /** Paradas: fundo, branco do olho, íris e pupila. Qualquer cor CSS ou token. */
+  /** Paradas: fundo, olho e disco. Uma quarta parada é aceita e ignorada. Qualquer cor CSS ou token. */
   colors?: string[];
 }
 
@@ -209,7 +198,6 @@ export function TexturaGaze({
       fundo: u("uFundo"),
       olho: u("uOlho"),
       irisCor: u("uIrisCor"),
-      pupila: u("uPupila"),
     };
 
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -223,11 +211,10 @@ export function TexturaGaze({
     const mira = { x: 0, y: 0, foco: 0 };
 
     const cores = () => {
-      const [a, b, c, d] = coresChave.split("|").map((cor) => resolveCssColor(cor, wrap));
+      const [a, b, c] = coresChave.split("|").map((cor) => resolveCssColor(cor, wrap));
       gl.uniform3fv(U.fundo, a);
       gl.uniform3fv(U.olho, b ?? a);
-      gl.uniform3fv(U.irisCor, c ?? b ?? a);
-      gl.uniform3fv(U.pupila, d ?? a);
+      gl.uniform3fv(U.irisCor, c ?? a);
     };
 
     const medir = () => {

@@ -35,6 +35,7 @@ import {
   MIN_ABA,
   TYPE_LABEL,
   contaComoComponente,
+  ehPecaVisual,
   familyLabel,
   previewOf,
   stageSurfaceOf,
@@ -54,6 +55,7 @@ import { LogoAgente, abrirConectar } from "./conectar";
 import { Miniatura } from "./miniatura";
 import { nivelDoAparelho, pesoGpu, useVaga } from "./aparelho";
 import { BugButton } from "./bug-report";
+import { ShaderLab } from "./ShaderLab";
 import { CURADORIA_ATIVA, arquivada, useNotas } from "./curadoria";
 import LANG from "./lang.generated.json";
 import { siClaude, siCursor, siOpenai } from "simple-icons";
@@ -306,7 +308,7 @@ const Ladrilho = React.memo(function Ladrilho({
         precisa abrir a ficha. Os dois aparecem com o cursor no ladrilho e ficam
         fixos no toque (`no-hover`).
       */}
-      <div className="casa no-hover pointer-events-none absolute inset-x-3 bottom-3 flex items-end justify-between gap-2">
+      <div className="casa no-hover pointer-events-none absolute inset-x-3 bottom-3 flex items-end justify-between gap-2 pointer-coarse:static pointer-coarse:px-3 pointer-coarse:pb-3 pointer-coarse:pt-2">
         <button
           type="button"
           data-card-index={index}
@@ -314,6 +316,7 @@ const Ladrilho = React.memo(function Ladrilho({
           aria-label={`Ver ${item.title}`}
           className={cn(
             "group/abrir pointer-events-auto flex min-w-0 cursor-pointer items-center gap-1.5 rounded-[8px] bg-casa-bg py-1 pl-2 pr-2 text-casa-sm text-casa-fg outline-none",
+            // motion-lint-disable-next-line layout-property-animation  a etiqueta cresce só no hover para revelar a seta; transform deformaria o texto
             "transition-[background-color,padding] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
             "hover:bg-casa-tile-2 hover:pr-1.5 focus-visible:pr-1.5 focus-visible:[box-shadow:var(--focus)]",
           )}
@@ -328,6 +331,7 @@ const Ladrilho = React.memo(function Ladrilho({
             aria-hidden
             className={cn(
               "grid w-0 shrink-0 -translate-x-1 place-items-center overflow-hidden opacity-0",
+              // motion-lint-disable-next-line layout-property-animation  a etiqueta cresce só no hover para revelar a seta; transform deformaria o texto
               "transition-[width,opacity,transform] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
               "group-hover/abrir:w-3.5 group-hover/abrir:translate-x-0 group-hover/abrir:opacity-100",
               "group-focus-visible/abrir:w-3.5 group-focus-visible/abrir:translate-x-0 group-focus-visible/abrir:opacity-100",
@@ -350,29 +354,6 @@ const Ladrilho = React.memo(function Ladrilho({
  * Copiar fica atrás do hover (e visível no toque, via `no-hover`): uma palavra
  * "add" repetida em cada uma das noventa linhas era textura, não ação.
  */
-function Row({ item, onOpen, index }: { item: CatalogItem; onOpen: () => void; index: number }) {
-  return (
-    <div className="group flex items-center gap-4 rounded-control px-3 py-2.5 transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:bg-casa-tile">
-      <button
-        type="button"
-        data-card-index={index}
-        onClick={onOpen}
-        className="flex min-w-0 flex-1 items-baseline gap-3 text-left outline-none"
-      >
-        <Miniatura item={item} className="h-10 w-16 self-center" />
-        <span className="w-40 shrink-0 truncate text-casa-base text-casa-fg">{item.title}</span>
-        <span className="min-w-0 flex-1 truncate text-casa-base text-casa-fg-2">
-          {item.description}
-        </span>
-        <span className="hidden shrink-0 text-casa-sm text-casa-fg-3 sm:inline">
-          {TYPE_LABEL[item.type]}
-        </span>
-      </button>
-      <CopyCommand variant="chip" text={installCommand(item.name)} className="no-hover" />
-    </div>
-  );
-}
-
 /**
  * Os agentes que a pílula mostra, na ordem do empilhamento. O traço vem do
  * `simple-icons` local, não da Iconify: é a dobra, e logo que depende de rede
@@ -489,12 +470,8 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
 
   const pool = React.useMemo(
     () =>
-      // "Tudo" deixa de fora só a Anatomia (figura de aula, não peça de produto);
-      // Fundação continua no fim, no bloco das peças sem palco.
       porNovidade(
-        (familia ? CATALOG.filter((i) => i.family === familia) : CATALOG.filter((i) => i.family !== "anatomia")).filter(
-          naVitrine,
-        ),
+        CATALOG.filter((i) => ehPecaVisual(i) && (familia ? i.family === familia : i.family !== "shaders")).filter(naVitrine),
       ),
     [familia, naVitrine],
   );
@@ -506,8 +483,7 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
       ),
     [pool, dep, tipo, lang],
   );
-  const comPalco = React.useMemo(() => results.filter((i) => i.demo), [results]);
-  const semPalco = React.useMemo(() => results.filter((i) => !i.demo), [results]);
+  const comPalco = results;
 
   /*
    * O filtro de dependência se monta do que EXISTE ali, com a contagem junto —
@@ -613,6 +589,12 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
         return;
       }
       if (!listRef.current) return;
+      if (
+        el instanceof HTMLElement &&
+        !el.matches("[data-card-index]") &&
+        (el.closest("[data-grade]") || el.closest('[role="menu"],[role="listbox"],[role="dialog"]'))
+      )
+        return;
 
       const cards = Array.from(listRef.current.querySelectorAll<HTMLElement>("[data-card-index]"));
       if (!cards.length) return;
@@ -675,7 +657,7 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
             <Aba
               ativa={!familia}
               onClick={() => onFamilia?.(null)}
-              count={CATALOG.filter((i) => contaComoComponente(i) && naVitrine(i)).length}
+              count={CATALOG.filter((i) => contaComoComponente(i) && i.family !== "shaders" && naVitrine(i)).length}
             >
               Tudo
             </Aba>
@@ -824,7 +806,9 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
                 superfície: num ladrilho viravam um nome em código no meio de
                 fotos, e liam como peça quebrada.
               */}
-              {comPalco.length ? (
+              {familia === "shaders" ? (
+                <ShaderLab itens={comPalco} onFocus={onFocus} />
+              ) : comPalco.length ? (
                 <div
                   data-grade
                   style={{ gap: GRID_GAP }}
@@ -846,24 +830,6 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
               {/* O que não tem superfície: uma lista de texto depois da grade.
                   Continua na busca e na fatia da família — só não finge ser
                   uma imagem. */}
-              {semPalco.length ? (
-                <section className="casa mt-16">
-                  <h2 className="flex items-baseline gap-2 text-casa-lg font-medium">
-                    Hooks, temas e utilitários
-                    <span className="text-casa-sm tabular-nums text-casa-fg-3">{semPalco.length}</span>
-                  </h2>
-                  <div className="-mx-3 mt-3">
-                    {semPalco.map((item, i) => (
-                      <Row
-                        key={item.name}
-                        item={item}
-                        index={comPalco.length + i}
-                        onOpen={() => onFocus(item.name)}
-                      />
-                    ))}
-                  </div>
-                </section>
-              ) : null}
             </div>
 
         ) : (

@@ -27,9 +27,9 @@ const SALDO: Record<string, string> = {
 };
 
 const MOVIMENTOS = [
-  { icone: Users, nome: "Rafael Souza", quando: "Racha do jantar, hoje", valor: "+R$ 36,50" },
+  { icone: Users, nome: "Rafael", quando: "Racha do jantar, hoje", valor: "+R$ 36,50" },
   { icone: ShoppingBasket, nome: "Hortifruti da esquina", quando: "Mercado, ontem", valor: "-R$ 84,12" },
-  { icone: ArrowDownLeft, nome: "Estúdio Linha", quando: "Pagamento, 18 set", valor: "+R$ 2.860,00" },
+  { icone: ArrowDownLeft, nome: "Pagamento recebido", quando: "18 set", valor: "+R$ 2.860,00" },
 ];
 
 function Detalhe({ card }: { card: WalletCard }) {

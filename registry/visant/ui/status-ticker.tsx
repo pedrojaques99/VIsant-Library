@@ -166,7 +166,7 @@ export function StatusTicker({
   }, [stepsKey, rotateEverySec]);
 
   const relogio = showTimer ? (
-    <span aria-hidden="true" className="ml-auto shrink-0 pl-3 text-[10px] tabular-nums text-muted-foreground">
+    <span aria-hidden="true" className="ml-auto shrink-0 pl-3 text-[0.9em] tabular-nums text-muted-foreground">
       {timer}
     </span>
   ) : null;
@@ -177,7 +177,7 @@ export function StatusTicker({
 
   // `min-w` impede o bloco inteiro de pular a cada troca de palavra.
   const palavra = (
-    <span aria-hidden="true" className="min-w-[120px] text-foreground">
+    <span aria-hidden="true" className="min-w-[18ch] text-foreground">
       {word}
       {dots}
     </span>
@@ -213,7 +213,7 @@ export function StatusTicker({
               {agora ? (
                 palavra
               ) : (
-                <span className={cn("min-w-[120px]", feito ? "text-muted-foreground line-through decoration-1" : "text-muted-foreground")}>
+                <span className={cn("min-w-[18ch]", feito ? "text-muted-foreground line-through decoration-1" : "text-muted-foreground")}>
                   {passo}
                 </span>
               )}

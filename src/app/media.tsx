@@ -27,7 +27,7 @@ import { ImageOff, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import acervoBruto from "./media-bank.generated.json";
 
-export type Papel = "retrato" | "cena" | "textura" | "video";
+export type Papel = "retrato" | "cena" | "textura" | "video" | "efeito";
 
 export interface Midia {
   id: string;

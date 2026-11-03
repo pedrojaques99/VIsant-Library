@@ -8,35 +8,30 @@
  * Aqui o pedaço só é buscado quando o card entra na tela.
  *
  * Uma nota sobre o palco: o `FitStage` escala a demo com `transform` quando ela
- * não cabe, e o dnd-kit move o card em pixel de tela, sem saber da escala. Com
- * o board declarado em 1020 dentro da faixa cheia a escala é 1 e o arraste é
- * exato; abaixo disso (celular) o fantasma anda mais rápido que o board. É
- * limite do palco, não da peça — num app de verdade não há escala nenhuma.
+ * não cabe, e o dnd-kit move o card em pixel de tela, sem saber da escala. No
+ * ladrilho o fantasma anda um pouco mais rápido que o board; a ficha e a sala têm
+ * escala maior. É limite do palco, não da peça.
  */
 
 import * as React from "react";
 import { CalendarDays } from "lucide-react";
 
+import { useElementWidth } from "../stage";
+
 import { Kanban } from "../../../registry/visant/blocks/kanban";
 import type { KanbanItem } from "../../../registry/visant/blocks/kanban/types";
 
 /*
- * Dois tamanhos do mesmo board, e o motivo de existirem dois.
- *
- * No card do catálogo o board tem 1020px declarados: três colunas de 320
- * (`--kanban-col-min`) mais as goteiras. Duas colunas cabiam em 760, mas com
- * duas colunas o gesto tem um destino só — e o que este item vende é escolher
- * ONDE o card cai, entre quais vizinhos. Já na sala da mesa de trabalho o board
- * É a tela, e ali entram as quatro. Mesma peça, mesmo arquivo, densidade
- * diferente.
+ * Tamanhos do mesmo board. Na sala da mesa de trabalho o board É a tela, e ali
+ * entram as quatro colunas; o ladrilho do catálogo tem o seu, mais abaixo.
  */
 interface Tarefa {
   t: string;
   /** Pra quem é o trabalho. */
-  cliente: string;
+  cliente?: string;
   /** Iniciais de quem está com a tarefa. */
   quem: string;
-  prazo: string;
+  prazo?: string;
 }
 
 const ENXUTO = {
@@ -46,11 +41,11 @@ const ENXUTO = {
     { id: "pronto", data: { label: "Pronto" } },
   ],
   items: [
-    { id: "a", columnId: "fila", data: { t: "Naming da linha nova", cliente: "Casa Vinte", quem: "AR", prazo: "24 out" } },
-    { id: "b", columnId: "fila", data: { t: "Tema escuro do app", cliente: "Oficina Bandeira", quem: "CD", prazo: "28 out" } },
-    { id: "c", columnId: "fazendo", data: { t: "Landing de lançamento", cliente: "Casa Vinte", quem: "MA", prazo: "22 out" } },
-    { id: "d", columnId: "fazendo", data: { t: "Embalagem da linha café", cliente: "Padaria Miolo", quem: "PJ", prazo: "30 out" } },
-    { id: "e", columnId: "pronto", data: { t: "Rebrand completo", cliente: "Estúdio Ribalta", quem: "AR", prazo: "15 out" } },
+    { id: "a", columnId: "fila", data: { t: "Naming da linha nova", cliente: "Design", quem: "AR", prazo: "24 out" } },
+    { id: "b", columnId: "fila", data: { t: "Tema escuro do app", cliente: "Vendas", quem: "CD", prazo: "28 out" } },
+    { id: "c", columnId: "fazendo", data: { t: "Landing de lançamento", cliente: "Design", quem: "MA", prazo: "22 out" } },
+    { id: "d", columnId: "fazendo", data: { t: "Embalagem da linha café", cliente: "Suporte", quem: "PJ", prazo: "30 out" } },
+    { id: "e", columnId: "pronto", data: { t: "Rebrand completo", cliente: "Marketing", quem: "AR", prazo: "15 out" } },
   ],
 };
 
@@ -63,15 +58,41 @@ const DENSO = {
   ],
   items: [
     ...ENXUTO.items.filter((it) => it.columnId !== "pronto"),
-    { id: "f", columnId: "fila", data: { t: "Fotos do catálogo", cliente: "Ateliê Norte", quem: "MA", prazo: "02 nov" } },
-    { id: "g", columnId: "revisao", data: { t: "Manual de marca v2", cliente: "Oficina Bandeira", quem: "CD", prazo: "21 out" } },
-    { id: "h", columnId: "revisao", data: { t: "Cardápio impresso", cliente: "Padaria Miolo", quem: "PJ", prazo: "23 out" } },
-    { id: "e", columnId: "pronto", data: { t: "Rebrand completo", cliente: "Estúdio Ribalta", quem: "AR", prazo: "15 out" } },
+    { id: "f", columnId: "fila", data: { t: "Fotos do catálogo", cliente: "Produto", quem: "MA", prazo: "02 nov" } },
+    { id: "g", columnId: "revisao", data: { t: "Manual de marca v2", cliente: "Vendas", quem: "CD", prazo: "21 out" } },
+    { id: "h", columnId: "revisao", data: { t: "Cardápio impresso", cliente: "Suporte", quem: "PJ", prazo: "23 out" } },
+    { id: "e", columnId: "pronto", data: { t: "Rebrand completo", cliente: "Marketing", quem: "AR", prazo: "15 out" } },
   ],
 };
 
+/*
+ * O do ladrilho: três colunas estreitas e texto genérico, numa largura em que a
+ * escala ainda deixa ler o título. Os dois de cima seguem servindo à sala.
+ */
+const LADRILHO = {
+  columns: ENXUTO.columns,
+  items: [
+    { id: "a", columnId: "fila", data: { t: "Revisar o texto", quem: "AR" } },
+    { id: "b", columnId: "fila", data: { t: "Ajustar o layout", quem: "CD" } },
+    { id: "c", columnId: "fazendo", data: { t: "Testar no celular", quem: "MA" } },
+    { id: "e", columnId: "pronto", data: { t: "Publicar a página", quem: "PJ" } },
+  ],
+};
+
+/*
+ * O celular é outro desenho, não o desktop apertado.
+ *
+ * Três colunas de 180px numa caixa de 320 escondiam a terceira, cortavam a segunda
+ * no meio do título e obrigavam a rolar de lado pra ver o estado do quadro, que é
+ * a única coisa que um kanban existe pra dizer. Empilhadas, as três aparecem de uma
+ * vez, e o arraste continua valendo: de uma pilha pra outra é o mesmo gesto.
+ */
+const ESTREITO = 480;
+
 export default function KanbanDemo({ denso = false }: { denso?: boolean }) {
-  const base = denso ? DENSO : ENXUTO;
+  const base = denso ? DENSO : LADRILHO;
+  const [caixa, largura] = useElementWidth<HTMLDivElement>();
+  const empilhado = !denso && largura > 0 && largura < ESTREITO;
   const columns = React.useMemo(() => base.columns, [base]);
   const [items, setItems] = React.useState<KanbanItem<Tarefa>[]>(base.items as KanbanItem<Tarefa>[]);
   const contagem = React.useMemo(() => {
@@ -79,25 +100,29 @@ export default function KanbanDemo({ denso = false }: { denso?: boolean }) {
     for (const it of items) m.set(it.columnId, (m.get(it.columnId) ?? 0) + 1);
     return m;
   }, [items]);
-
-  // `overflow-hidden`, e não `auto`: a barra de rolagem que aparecia aqui dentro
-  // era o palco declarando largura menor que o board. Quem conserta isso é o
-  // `preview.w` do catálogo, não uma barra que esconde coluna.
+  // `overflow-hidden` no ladrilho: barra de rolagem dentro de card é defeito.
   return (
     <div
-      className={`h-full w-full p-3 ${
+      ref={caixa}
+      className={`w-full p-3 ${
         // No board denso a rolagem horizontal é o comportamento CERTO: board de
         // verdade tem mais coluna do que tela, e cortar a quarta a faca some com
         // ela. No card do catálogo continua `hidden` — lá a barra seria o palco
         // declarando largura menor que a peça, que é defeito.
-        denso ? "overflow-x-auto" : "overflow-hidden"
+        denso ? "h-full overflow-x-auto" : "overflow-hidden"
       }`}
     >
       <Kanban
         // Piso de coluna um pouco abaixo do padrão (320): com a faixa de fundo
         // e o respiro do palco, três colunas de 320 passavam da caixa e a
         // terceira saía cortada. `!` porque o kanban.css entra fora de camada.
-        className="[--kanban-col-min:296px]!"
+        className={
+          denso
+            ? "[--kanban-col-min:296px]!"
+            : empilhado
+              ? "flex-col [--kanban-card-gap:0.5rem]! [--kanban-col-max:none]! [--kanban-col-min:0px]! [--kanban-column-min-h:40px]! [--kanban-gap:0.5rem]!"
+              : "[--kanban-col-min:180px]!"
+        }
         columns={columns}
         items={items}
         /*
@@ -131,9 +156,11 @@ export default function KanbanDemo({ denso = false }: { denso?: boolean }) {
         }
         // A coluna é uma faixa de fundo levemente mais escura que o palco: é o
         // que separa "lugar onde o card mora" de "card", sem borda nenhuma.
-        columnClassName="rounded-[var(--r-surface,1rem)] bg-[color-mix(in_oklab,var(--muted)_55%,transparent)] p-3"
+        columnClassName={`rounded-[var(--r-surface,1rem)] bg-[color-mix(in_oklab,var(--muted)_55%,transparent)] ${
+          empilhado ? "flex-none! p-2.5" : "p-3"
+        }`}
         renderColumnHeader={(c) => (
-          <div className="mb-3 flex items-baseline justify-between px-1">
+          <div className={`flex items-baseline justify-between px-1 ${empilhado ? "mb-2" : "mb-3"}`}>
             <span className="text-[13px] font-medium text-foreground">
               {(c.data as { label: string }).label}
             </span>
@@ -148,11 +175,24 @@ export default function KanbanDemo({ denso = false }: { denso?: boolean }) {
         // consumidor só precisa ser um cartão.
         // O card é óbvio porque é OBJETO: fundo de cartão, sombra baixa e
         // conteúdo em três níveis (o que, pra quem, quem e quando).
-        renderCard={({ item }) => (
+        renderCard={({ item }) =>
+          empilhado ? (
+            <div className="flex items-center justify-between gap-3 rounded-[var(--r-control,0.625rem)] border border-border bg-card px-3 py-2 [box-shadow:var(--e-flat)]">
+              <span className="min-w-0 truncate text-[14px] font-medium leading-snug text-foreground">{item.data.t}</span>
+              <span
+                aria-label={`Com ${item.data.quem}`}
+                className="grid size-6 shrink-0 place-items-center rounded-full bg-muted text-[10px] font-semibold text-foreground"
+              >
+                {item.data.quem}
+              </span>
+            </div>
+          ) : (
           <div className="flex flex-col gap-3 rounded-[var(--r-control,0.625rem)] border border-border bg-card px-3.5 py-3 [box-shadow:var(--e-flat)]">
             <div className="flex flex-col gap-0.5">
               <span className="text-[14px] font-medium leading-snug text-foreground">{item.data.t}</span>
-              <span className="text-[12px] leading-snug text-muted-foreground">{item.data.cliente}</span>
+              {item.data.cliente ? (
+                <span className="text-[12px] leading-snug text-muted-foreground">{item.data.cliente}</span>
+              ) : null}
             </div>
             <div className="flex items-center justify-between">
               <span
@@ -161,13 +201,16 @@ export default function KanbanDemo({ denso = false }: { denso?: boolean }) {
               >
                 {item.data.quem}
               </span>
-              <span className="inline-flex items-center gap-1 text-[12px] tabular-nums text-muted-foreground">
-                <CalendarDays className="size-3.5" aria-hidden="true" />
-                {item.data.prazo}
-              </span>
+              {item.data.prazo ? (
+                <span className="inline-flex items-center gap-1 text-[12px] tabular-nums text-muted-foreground">
+                  <CalendarDays className="size-3.5" aria-hidden="true" />
+                  {item.data.prazo}
+                </span>
+              ) : null}
             </div>
           </div>
-        )}
+          )
+        }
       />
     </div>
   );

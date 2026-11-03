@@ -355,14 +355,82 @@ export function Rail({
    *
    * A distância divide pela escala da caixa: dentro de um palco com
    * `transform: scale`, 100px de mouse não são 100px de rolagem.
+   *
+   * ── Entrada e saída do gesto ───────────────────────────────────────────
+   * Escrever `scrollLeft` direto no `pointermove` deixava o trilho duro nas duas
+   * pontas: no começo ele saltava os 5px da zona morta, e ao soltar parava seco.
+   * Aqui um laço só faz os dois: a posição persegue o alvo (a mão, com um atraso
+   * mínimo) e, ao soltar, o alvo continua andando com a velocidade da mão, que
+   * decai sozinha. O snap volta só no fim da inércia, e volta ao valor que tinha
+   * antes do gesto: quem desliga o snap por fora (o `reels-rail`) não o reencontra
+   * ligado depois do primeiro arrasto. Sob movimento reduzido, é 1:1 e para ao soltar.
    */
-  const arrasto = React.useRef<{ x: number; inicio: number; escala: number; andou: boolean } | null>(null);
+  const arrasto = React.useRef<{ x: number; escala: number; andou: boolean; t: number; v: number } | null>(null);
+  const fisica = React.useRef<{
+    pos: number;
+    alvo: number;
+    v: number;
+    escrito: number;
+    t: number;
+    raf: number;
+    solto: boolean;
+    snap: string;
+  } | null>(null);
+
+  const assentar = React.useCallback(() => {
+    const f = fisica.current;
+    const el = ref.current;
+    if (!f || !el) return;
+    cancelAnimationFrame(f.raf);
+    fisica.current = null;
+    // Devolver o snap com rolagem suave: sem isto o trilho pula seco pro card.
+    const antes = el.scrollLeft;
+    el.style.scrollSnapType = f.snap;
+    const depois = el.scrollLeft;
+    if (antes !== depois) {
+      el.scrollLeft = antes;
+      el.scrollTo({ left: depois, behavior: "smooth" });
+    }
+  }, []);
+  React.useEffect(() => () => cancelAnimationFrame(fisica.current?.raf ?? 0), []);
+
+  const quadroFisica = (agora: number) => {
+    const f = fisica.current;
+    const el = ref.current;
+    if (!f || !el) return;
+    const dt = Math.min(48, agora - f.t);
+    f.t = agora;
+    // Outro dono mexeu na rolagem (a emenda do laço do `reels-rail`): anda junto.
+    const fora = el.scrollLeft - f.escrito;
+    if (Math.abs(fora) > 2) {
+      f.pos += fora;
+      f.alvo += fora;
+    }
+    if (f.solto) {
+      f.alvo += f.v * dt;
+      f.v *= Math.pow(0.9965, dt);
+    }
+    f.pos += (f.alvo - f.pos) * (1 - Math.pow(0.68, dt / 16.67));
+    el.scrollLeft = f.pos;
+    f.escrito = el.scrollLeft;
+    const fim = el.scrollWidth - el.clientWidth;
+    const naPonta = (el.scrollLeft <= 0 && f.v < 0) || (el.scrollLeft >= fim - 1 && f.v > 0);
+    if (f.solto && naPonta) f.v = 0;
+    if (f.solto && Math.abs(f.v) < 0.015 && (naPonta || Math.abs(f.alvo - f.pos) < 0.5)) {
+      assentar();
+      return;
+    }
+    f.raf = requestAnimationFrame(quadroFisica);
+  };
+
   const aoApertar = (e: React.PointerEvent<HTMLDivElement>) => {
     const el = ref.current;
     if (!el || e.pointerType !== "mouse" || e.button !== 0) return;
     if (el.scrollWidth <= el.clientWidth) return;
+    // Pegou a fileira ainda deslizando: ela para na mão.
+    assentar();
     const escala = el.offsetWidth ? el.getBoundingClientRect().width / el.offsetWidth : 1;
-    arrasto.current = { x: e.clientX, inicio: el.scrollLeft, escala: escala || 1, andou: false };
+    arrasto.current = { x: e.clientX, escala: escala || 1, andou: false, t: e.timeStamp, v: 0 };
   };
   const aoMover = (e: React.PointerEvent<HTMLDivElement>) => {
     const a = arrasto.current;
@@ -373,13 +441,33 @@ export function Rail({
       if (Math.abs(dx) < 5) return;
       a.andou = true;
       el.setPointerCapture(e.pointerId);
-      el.style.scrollSnapType = "none";
       // Marcador e não só `style.cursor`: o card por baixo é link e teria
       // `cursor: pointer` próprio, que ganharia do trilho no meio do arrasto.
       el.dataset.arrastando = "";
       el.style.userSelect = "none";
+      // Conta a partir daqui, senão a zona morta vira um salto de 5px.
+      a.x = e.clientX;
+      a.t = e.timeStamp;
+      const snap = el.style.scrollSnapType;
+      el.style.scrollSnapType = "none";
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        const p = el.scrollLeft;
+        fisica.current = { pos: p, alvo: p, v: 0, escrito: p, t: performance.now(), raf: 0, solto: false, snap };
+        fisica.current.raf = requestAnimationFrame(quadroFisica);
+      } else {
+        fisica.current = { pos: 0, alvo: 0, v: 0, escrito: 0, t: 0, raf: 0, solto: true, snap };
+      }
+      return;
     }
-    el.scrollLeft = a.inicio - dx;
+    // Passo a passo, nunca `inicio - dx`: a emenda do laço subtrai uma volta do
+    // `scrollLeft` no meio do gesto, e uma conta absoluta a desfaria no quadro seguinte.
+    a.x = e.clientX;
+    const dtm = Math.max(1, e.timeStamp - a.t);
+    a.t = e.timeStamp;
+    a.v = a.v * 0.6 + (-dx / dtm) * 0.4;
+    const f = fisica.current;
+    if (f && f.raf) f.alvo -= dx;
+    else el.scrollLeft -= dx;
   };
   const aoSoltar = (e: React.PointerEvent<HTMLDivElement>) => {
     const a = arrasto.current;
@@ -389,13 +477,13 @@ export function Rail({
     if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
     delete el.dataset.arrastando;
     el.style.userSelect = "";
-    // Devolver o snap com rolagem suave: sem isto o trilho pula seco pro card.
-    const antes = el.scrollLeft;
-    el.style.scrollSnapType = "";
-    const depois = el.scrollLeft;
-    if (antes !== depois) {
-      el.scrollLeft = antes;
-      el.scrollTo({ left: depois, behavior: "smooth" });
+    const f = fisica.current;
+    if (f && f.raf) {
+      // Parou a mão antes de soltar: nada de inércia herdada de um gesto que já acabou.
+      f.v = e.timeStamp - a.t > 90 ? 0 : Math.max(-3, Math.min(3, a.v));
+      f.solto = true;
+    } else {
+      assentar();
     }
     // O clique que vem junto do soltar não pode abrir o card que estava embaixo.
     const engolir = (ev: MouseEvent) => {

@@ -33,7 +33,7 @@ import { Miniatura } from "./miniatura";
 import { CURADORIA_ATIVA, arquivada, useNotas } from "./curadoria";
 
 /** O índice, montado uma vez: `haystack` normaliza texto de 81 itens. */
-const INDICE = CATALOG.map((item) => ({ item, texto: haystack(item) }));
+const INDICE = CATALOG.filter((i) => i.family !== "fundacao" && i.demo).map((item) => ({ item, texto: haystack(item) }));
 
 /**
  * A nota de um item para o termo digitado.

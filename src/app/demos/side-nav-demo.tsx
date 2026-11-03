@@ -127,7 +127,7 @@ export default function SideNavDemo({ props }: DemoProps) {
             <span className="flex items-center gap-2">
               {MARCA}
               <span className="font-mono text-rotulo uppercase tracking-[0.16em] text-foreground">
-                Visant
+                Sua marca
               </span>
             </span>
           }

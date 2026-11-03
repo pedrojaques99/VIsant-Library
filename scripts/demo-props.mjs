@@ -18,6 +18,10 @@
  * `items={itens}` fica de fora porque não é literal — é dado de fixture, e o
  * painel não tem o que fazer com ele.
  *
+ * Estado e constante contam: `value={pct}` com `useState(72)` está no palco em
+ * 72, e sem ler isso o painel do `gauge` abria em `value 0` com a peça em 84%.
+ * Vale só o que é um número, texto ou booleano escrito na própria demo.
+ *
  * Saída: `src/app/demos.props.generated.json`, lido pelo `controls.mjs`.
  */
 
@@ -130,8 +134,32 @@ function atributos(corpoBruto) {
   return partes;
 }
 
+/** `const [x, setX] = useState(72)` e `const x = 72`: o valor com que o nome nasce. */
+function valoresIniciais(fonte) {
+  const nomes = new Map();
+  const lit = (bruto) => {
+    const v = bruto.trim();
+    if (v === "true") return true;
+    if (v === "false") return false;
+    if (/^-?\d+(\.\d+)?$/.test(v)) return Number(v);
+    // Conta de hora escrita por extenso: `14 * 60`.
+    if (/^\d+( \* \d+)+$/.test(v)) return v.split(" * ").reduce((n, x) => n * Number(x), 1);
+    if (/^"[^"]*"$/.test(v) || /^'[^']*'$/.test(v)) return v.slice(1, -1);
+    return undefined;
+  };
+  for (const m of fonte.matchAll(/const \[(\w+), \w+\] = (?:React\.)?useState(?:<[^>]*>)?\(([^()]*)\)/g)) {
+    const v = lit(m[2]);
+    if (v !== undefined) nomes.set(m[1], v);
+  }
+  for (const m of fonte.matchAll(/const (\w+)(?:: [\w<>| ]+)? = ([^;\n]+);/g)) {
+    const v = lit(m[2]);
+    if (v !== undefined && !nomes.has(m[1])) nomes.set(m[1], v);
+  }
+  return nomes;
+}
+
 /** `speed={40}` → `["speed", 40]`. Devolve `null` pro que não é literal. */
-function literal(attr) {
+function literal(attr, iniciais) {
   if (attr.startsWith("{")) return null; // spread
 
   const igual = attr.indexOf("=");
@@ -152,6 +180,7 @@ function literal(attr) {
   if (dentro === "false") return [nome, false];
   if (/^-?\d+(\.\d+)?$/.test(dentro)) return [nome, Number(dentro)];
   if (/^"[^"]*"$/.test(dentro)) return [nome, dentro.slice(1, -1)];
+  if (iniciais?.has(dentro)) return [nome, iniciais.get(dentro)];
   // `{itens}`, `{() => …}`, `{PECAS.map(…)}`: dado ou comportamento, não knob.
   return null;
 }
@@ -166,9 +195,10 @@ for (const [item, comp] of Object.entries(alvosDeclarados())) {
   const corpo = corpoDaTag(fonte, comp);
   if (corpo === null) continue;
 
+  const iniciais = valoresIniciais(fonte);
   const props = {};
   for (const attr of atributos(corpo)) {
-    const par = literal(attr);
+    const par = literal(attr, iniciais);
     if (par) props[par[0]] = par[1];
   }
 

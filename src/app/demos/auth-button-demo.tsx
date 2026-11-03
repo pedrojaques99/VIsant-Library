@@ -17,7 +17,7 @@ import { midia } from "../media";
 import type { DemoProps } from "../catalog";
 
 const CONTA = {
-  name: "Marina Duarte",
+  name: "Marina",
   email: "marina@exemplo.com",
   avatarUrl: midia("retrato", 1)?.src,
 };

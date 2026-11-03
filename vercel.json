@@ -81,7 +81,7 @@
     },
     {
       "source": "/catalogo/aquisicao",
-      "destination": "/catalogo/secoes",
+      "destination": "/catalogo/conteudo",
       "permanent": true
     },
     {
@@ -120,11 +120,6 @@
       "permanent": true
     },
     {
-      "source": "/catalogo/shaders",
-      "destination": "/catalogo/efeitos",
-      "permanent": true
-    },
-    {
       "source": "/catalogo/texturas",
       "destination": "/catalogo/efeitos",
       "permanent": true
@@ -137,6 +132,26 @@
     {
       "source": "/catalogo/didatica",
       "destination": "/catalogo/anatomia",
+      "permanent": true
+    },
+    {
+      "source": "/catalogo/navegacao",
+      "destination": "/catalogo/controles",
+      "permanent": true
+    },
+    {
+      "source": "/catalogo/dados",
+      "destination": "/catalogo/conteudo",
+      "permanent": true
+    },
+    {
+      "source": "/catalogo/secoes",
+      "destination": "/catalogo/conteudo",
+      "permanent": true
+    },
+    {
+      "source": "/catalogo/fundacao",
+      "destination": "/docs",
       "permanent": true
     }
   ]

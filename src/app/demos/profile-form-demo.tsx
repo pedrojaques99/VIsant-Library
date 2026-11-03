@@ -20,8 +20,8 @@ import { midia } from "../media";
 import type { DemoProps } from "../catalog";
 
 const INICIAL: ProfileValue = {
-  name: "Marina Duarte",
-  email: "marina@estudioarco.com.br",
+  name: "Marina",
+  email: "marina@exemplo.com",
   avatarUrl: midia("retrato", 1)?.src ?? null,
 };
 
@@ -30,8 +30,9 @@ export default function ProfileFormDemo({ props }: DemoProps) {
   const [verificado, setVerificado] = React.useState(true);
 
   return (
-    <div className="flex h-full w-full items-center p-5">
+    <div className="mx-auto flex h-full w-full max-w-[420px] items-center">
       <ProfileForm
+        className="gap-3 border-0 bg-transparent p-0"
         value={valor}
         emailVerified={verificado}
         onResendVerification={() => setVerificado(true)}

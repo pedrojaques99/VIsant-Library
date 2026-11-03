@@ -152,7 +152,9 @@ export function Solo({
   }
 
   return (
-    <div ref={ref} className="p-4">
+    // `overflow-x-clip`: o viewport do preset nunca rola de lado, mesmo com peça que
+    // sangra de propósito (a fita do marquee).
+    <div ref={ref} className="overflow-x-clip p-4">
       {/* A demo é um `React.lazy`. Sem esta fronteira o documento do iframe
           suspende inteiro e o pai mede altura zero. */}
       <React.Suspense fallback={<div className="h-40 w-full animate-pulse bg-muted/40" />}>

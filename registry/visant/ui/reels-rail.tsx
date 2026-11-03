@@ -85,10 +85,21 @@ import { Rail } from "@/components/ui/rail";
  *
  * ── A deriva ───────────────────────────────────────────────────────────────
  *
- * A fileira anda sozinha, devagar, e para quando o ponteiro entra ou o foco cai
- * dentro dela: quem foi olhar um card não quer que ele fuja. Para também com o
- * trilho fora da tela e sob `prefers-reduced-motion` — movimento perpétuo é
- * exatamente o que essa preferência existe pra desligar.
+ * A fileira anda sozinha, devagar, e freia quando o ponteiro entra ou o foco cai
+ * dentro dela: quem foi olhar um card não quer que ele fuja. Freia e retoma em
+ * rampa (~0,5s), nunca de uma vez: ligar e desligar a velocidade cheia é o que
+ * fazia o trilho parecer preso a um motor. Para também com o trilho fora da tela
+ * e sob `prefers-reduced-motion` — movimento perpétuo é exatamente o que essa
+ * preferência existe pra desligar.
+ *
+ * ── Quando só cabe um card ─────────────────────────────────────────────────
+ *
+ * Com a vista menor que dois cards (`clientWidth < 1,8 × itemWidth`, o celular),
+ * a deriva não tem o que mostrar: o card que toca passa a maior parte do tempo
+ * cortado por uma das bordas, com o título pela metade. Aí o trilho para de andar
+ * sozinho e volta o encaixe, no centro: um card inteiro por vez, com os vizinhos
+ * aparecendo nas pontas. O laço continua: a emenda subtrai um conjunto inteiro, e
+ * o card cai na mesma posição de encaixe.
  */
 
 export interface ReelItem {
@@ -284,6 +295,19 @@ export function ReelsRail({
   const [copias, setCopias] = React.useState(loop ? 3 : 1);
   const passoRef = React.useRef(0);
 
+  /** A vista só comporta um card. Ver "Quando só cabe um card" no cabeçalho. */
+  const [umPorVez, setUmPorVez] = React.useState(false);
+  React.useEffect(() => {
+    const scroller = scrollerDe();
+    if (!scroller) return;
+    const ler = () => setUmPorVez(scroller.clientWidth < itemWidth * 1.8);
+    ler();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(ler);
+    ro.observe(scroller);
+    return () => ro.disconnect();
+  }, [scrollerDe, itemWidth]);
+
   React.useEffect(() => {
     if (!loop) {
       setCopias(1);
@@ -297,7 +321,7 @@ export function ReelsRail({
     // Encaixe e deriva brigam pela mesma rolagem — ver a nota. O valor antigo
     // volta na limpeza porque o scroller é do trilho, não desta peça.
     const encaixeAntes = scroller.style.scrollSnapType;
-    scroller.style.scrollSnapType = "none";
+    scroller.style.scrollSnapType = umPorVez ? "x mandatory" : "none";
 
     const medir = () => {
       const filhos = scroller.children;
@@ -310,6 +334,12 @@ export function ReelsRail({
       const b = (filhos[n] as HTMLElement).getBoundingClientRect().left;
       const passo = b - a;
       if (passo <= 0) return;
+      // O passo mudou (a largura do card mudou): a posição acompanha na mesma
+      // proporção, senão o card que estava no meio deixa de ser o mesmo.
+      const passoAntes = passoRef.current;
+      if (passoAntes && passoAntes !== passo) {
+        scroller.scrollLeft *= passo / passoAntes;
+      }
       passoRef.current = passo;
 
       // Um conjunto de folga de cada lado da vista: é o mínimo pra a subtração
@@ -343,13 +373,27 @@ export function ReelsRail({
       ro?.disconnect();
       scroller.style.scrollSnapType = encaixeAntes;
     };
-  }, [loop, items.length, copias, scrollerDe]);
+  }, [loop, items.length, copias, scrollerDe, umPorVez]);
 
-  /** Ponteiro dentro ou foco dentro: a fileira espera. */
-  const [pausado, setPausado] = React.useState(false);
+  /**
+   * Ponteiro dentro ou foco dentro: a fileira espera.
+   *
+   * Dois estados, não um. Os controles só existem no card ativo: quando o ativo
+   * troca, o botão focado desmonta, o `blur` dispara, e com um estado só ele soltava
+   * a fileira debaixo do ponteiro, que era o motor voltando logo depois do arrasto.
+   */
+  const [comPonteiro, setComPonteiro] = React.useState(false);
+  const [comFoco, setComFoco] = React.useState(false);
+  const pausado = comPonteiro || comFoco;
+  /** Velocidade de agora. Sobrevive ao efeito: a rampa não recomeça do zero ao mudar de estado. */
+  const velRef = React.useRef(0);
 
   React.useEffect(() => {
-    if (!loop || !drift || reduzido || !naTela || pausado) return;
+    if (!loop || !drift || reduzido || !naTela || umPorVez) {
+      velRef.current = 0;
+      return;
+    }
+    if (pausado && velRef.current === 0) return;
     const scroller = scrollerDe();
     if (!scroller) return;
 
@@ -369,7 +413,13 @@ export function ReelsRail({
       if (ultimo) {
         const dt = Math.min(64, t - ultimo);
         if (Math.abs(scroller.scrollLeft - pos) > 2) pos = scroller.scrollLeft;
-        pos += (driftSpeed * dt) / 1000;
+        const alvo = pausado ? 0 : driftSpeed;
+        velRef.current += (alvo - velRef.current) * (1 - Math.exp(-dt / 220));
+        if (pausado && velRef.current < 0.2) {
+          velRef.current = 0;
+          return;
+        }
+        pos += (velRef.current * dt) / 1000;
         scroller.scrollLeft = pos;
       }
       ultimo = t;
@@ -378,7 +428,7 @@ export function ReelsRail({
 
     raf = requestAnimationFrame(quadro);
     return () => cancelAnimationFrame(raf);
-  }, [loop, drift, reduzido, naTela, pausado, driftSpeed, scrollerDe]);
+  }, [loop, drift, reduzido, naTela, pausado, driftSpeed, scrollerDe, umPorVez]);
 
   /** O trilho inteiro fora da tela para tudo. */
   React.useEffect(() => {
@@ -485,15 +535,19 @@ export function ReelsRail({
   return (
     <div
       ref={raizRef}
-      className={cn("relative min-w-0", className)}
+      className={cn(
+        "relative min-w-0",
+        umPorVez && "[&_[role=group]>*]:[scroll-snap-align:center]",
+        className,
+      )}
       // Os quatro juntos porque a deriva tem que parar pelos DOIS caminhos de
       // atenção: o ponteiro que chega e o foco que entra por teclado. Parar só
       // no hover deixaria a fileira fugindo debaixo de quem navega com Tab.
-      onPointerEnter={() => setPausado(true)}
-      onPointerLeave={() => setPausado(false)}
-      onFocusCapture={() => setPausado(true)}
+      onPointerEnter={() => setComPonteiro(true)}
+      onPointerLeave={() => setComPonteiro(false)}
+      onFocusCapture={() => setComFoco(true)}
       onBlurCapture={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setPausado(false);
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setComFoco(false);
       }}
       {...props}
     >

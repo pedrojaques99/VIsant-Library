@@ -20,7 +20,7 @@ export default function TiltCardDemo({ props }: DemoProps) {
       <TiltCard className="w-64" {...props}>
         <Media papel="cena" indice={3} ratio="4/5" className="w-full" />
         <div className="flex items-baseline justify-between gap-3 px-4 py-3">
-          <span className="text-sm font-medium text-foreground">Troféu Ribalta</span>
+          <span className="text-sm font-medium text-foreground">Troféu de metal</span>
           <span className="text-sm tabular-nums text-muted-foreground">R$ 489</span>
         </div>
       </TiltCard>

@@ -22,9 +22,13 @@ import { cn } from "@/lib/utils";
  *   verso do papel e, por baixo, já aparece a próxima página. A dobra projeta
  *   sombra na página de baixo.
  * - Soltou além do meio, ou com um peteleco para a esquerda: a página termina
- *   de virar. Antes do meio: volta para o lugar. As duas em mola de ~250ms.
+ *   de virar. Antes do meio: volta para o lugar. As duas continuam a mesma curva
+ *   de onde a mão largou.
  * - Setas do teclado, os botões e o peteleco fazem a mesma virada animada;
  *   voltar é a mesma curva tocada ao contrário.
+ * - **A virada é um arco, não um trilho.** O canto levanta enquanto atravessa
+ *   (`curvaDaVirada`). Com o canto preso à base, a linha de dobra ficava sempre
+ *   vertical: a página não virava, uma faixa cinza varria a folha.
  *
  * ── Decisões que não são óbvias ────────────────────────────────────────────
  *
@@ -92,13 +96,12 @@ function gradienteNaDobra(
   return `linear-gradient(${((ang * 180) / Math.PI).toFixed(2)}deg,${lista})`;
 }
 
-/** Luz do verso: sombra colada no vinco, brilho no meio da aba, e a ponta apagando. */
+/** Luz do verso: sombra colada no vinco e papel quase chapado. Brilho forte lia como metal. */
 const LUZ_VERSO: [number, string][] = [
-  [0, "color-mix(in oklab, black 26%, transparent)"],
-  [10, "color-mix(in oklab, black 6%, transparent)"],
-  [34, "color-mix(in oklab, white 22%, transparent)"],
-  [90, "color-mix(in oklab, white 6%, transparent)"],
-  [220, "color-mix(in oklab, black 14%, transparent)"],
+  [0, "color-mix(in oklab, black 22%, transparent)"],
+  [12, "color-mix(in oklab, black 5%, transparent)"],
+  [40, "color-mix(in oklab, white 6%, transparent)"],
+  [220, "color-mix(in oklab, black 8%, transparent)"],
 ];
 
 /** A sombra que a aba levantada joga na página de baixo, logo além do vinco. */
@@ -108,7 +111,12 @@ const SOMBRA_BAIXO: [number, string][] = [
   [56, "transparent"],
 ];
 
-const MOLA = { type: "spring" as const, stiffness: 260, damping: 30, mass: 0.7 };
+const MOLA = { type: "spring" as const, stiffness: 240, damping: 30, mass: 0.7 };
+
+/** A virada inteira: longa porque é o gesto da peça, não um controle respondendo. */
+const VIRADA = { duration: 0.62, ease: [0.32, 0.72, 0, 1] as const };
+/** Quanto o canto sobe no meio da virada, em fração da altura da folha. */
+const ARCO = 0.26;
 
 export interface PageCurlProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
   /** As páginas, na ordem. Cada uma preenche a folha inteira. */
@@ -243,7 +251,41 @@ export function PageCurl({
   };
 
   const fechado = () => ({ x: dims.current.w, y: dims.current.h });
-  const virado = () => ({ x: -dims.current.w, y: dims.current.h });
+
+  /** O canto em `prog` (0 fechada, 1 virada), somado ao desvio `dy` da mão. */
+  const curvaDaVirada = (prog: number, dy = 0): Ponto => {
+    const { w, h } = dims.current;
+    return prender({ x: w - 2 * w * prog, y: h - h * ARCO * Math.sin(Math.PI * prog) + dy });
+  };
+  const progDe = (x: number) => Math.max(0, Math.min(1, (dims.current.w - x) / (2 * dims.current.w)));
+
+  /** Toca a curva de onde o canto está até `ate`. A mão pode ter largado fora dela. */
+  const virar = (ate: 0 | 1) => {
+    const de = progDe(px.get());
+    const { w, h } = dims.current;
+    if (reduzir) {
+      px.set(ate === 1 ? -w : w);
+      py.set(h);
+      return Promise.resolve();
+    }
+    const dy0 = py.get() - (h - h * ARCO * Math.sin(Math.PI * de));
+    px.stop();
+    py.stop();
+    const parte = Math.abs(ate - de);
+    return animate(0, 1, {
+      ...VIRADA,
+      // Volta curta anda em tempo curto; a ida inteira é `VIRADA.duration`.
+      duration: Math.max(0.24, VIRADA.duration * parte),
+      onUpdate: (t) => {
+        const q = curvaDaVirada(de + (ate - de) * t, dy0 * (1 - t));
+        px.set(q.x);
+        py.set(q.y);
+      },
+    }).then(() => {
+      px.set(ate === 1 ? -w : w);
+      py.set(h);
+    });
+  };
 
   const assentar = (novo: number) => {
     indiceRef.current = novo;
@@ -262,7 +304,7 @@ export function PageCurl({
     const i = indiceRef.current;
     if (ocupado.current || i >= pages.length - 1) return;
     ocupado.current = true;
-    await ir(virado());
+    await virar(1);
     assentar(i + 1);
     ocupado.current = false;
   };
@@ -275,7 +317,7 @@ export function PageCurl({
     flushSync(() => setPar({ cima: i - 1, baixo: i }));
     px.set(-dims.current.w);
     py.set(dims.current.h);
-    await ir(fechado());
+    await virar(0);
     assentar(i - 1);
     ocupado.current = false;
   };
@@ -289,6 +331,8 @@ export function PageCurl({
     vx: number;
     ux: number;
   } | null>(null);
+  /** Alvo do convite de hover: o `pointermove` só reprograma a mola quando ele muda. */
+  const convite = React.useRef(false);
 
   const temProxima = indice < pages.length - 1;
 
@@ -330,7 +374,8 @@ export function PageCurl({
             g.vx = (dx - g.ux) / dt;
             g.ux = dx;
             g.t = agora;
-            const q = prender({ x: g.p0.x + dx, y: g.p0.y + dy });
+            // O arco vale também na mão: arrastar reto para o lado já vira como papel.
+            const q = curvaDaVirada(progDe(g.p0.x + dx), g.p0.y + dy - dims.current.h);
             px.set(q.x);
             py.set(q.y);
             return;
@@ -344,9 +389,12 @@ export function PageCurl({
           const ly = (e.clientY - r.top) / escala;
           const { w, h } = dims.current;
           const perto = lx > w * 0.6 && ly > h * 0.65;
+          if (perto === convite.current) return;
+          convite.current = perto;
           void ir(perto ? { x: w - peek, y: h - peek } : fechado());
         }}
         onPointerLeave={() => {
+          convite.current = false;
           if (!gesto.current && !ocupado.current) void ir(fechado());
         }}
         // Imagem dentro da peça dispara o arrasto nativo do navegador, que cancela
@@ -377,20 +425,33 @@ export function PageCurl({
           if (!g) return;
           gesto.current = null;
           const passou = px.get() < dims.current.w / 2 || g.vx < -0.6;
+          ocupado.current = true;
+          convite.current = false;
           if (passou) {
-            ocupado.current = true;
-            await ir(virado());
+            await virar(1);
             assentar(indiceRef.current + 1);
-            ocupado.current = false;
           } else {
-            void ir(fechado());
+            await virar(0);
           }
+          ocupado.current = false;
         }}
         onPointerCancel={() => {
           gesto.current = null;
           void ir(fechado());
         }}
       >
+        {/* A pega do canto. O gesto da peça é puxar pela quina, e a quina é onde a
+            folha não existe: `border-radius` também recorta o alvo do ponteiro,
+            então apertar exatamente ali caía fora da folha e nada acontecia. Esta
+            área reta, sem raio e passando 16px para fora, entrega o evento à folha
+            por bolha, e o mesmo gesto segue valendo. */}
+        {temProxima && (
+          <div
+            aria-hidden
+            data-page-curl-pega
+            className="absolute -bottom-4 -right-4 z-10 size-20 cursor-grab touch-none active:cursor-grabbing"
+          />
+        )}
         {/* O miolo: as folhas de baixo aparecendo na borda, como num caderno
             de verdade. Atrás da folha (`-z`) e deslocadas pra direita e pra
             baixo, cada uma um tom mais escura. É o que tira a peça do plano. */}

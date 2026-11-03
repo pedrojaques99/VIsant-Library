@@ -358,9 +358,9 @@ export function BlackHole<T extends { id: string }>({
                   top: buraco.y - 3,
                   boxShadow: "0 0 0 5px color-mix(in oklab, var(--foreground) 6%, transparent)",
                 }}
-                initial={{ scale: 0, opacity: 0 }}
+                initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 0.8 }}
-                exit={{ scale: 0, opacity: 0, transition: { duration: 0.12 } }}
+                exit={{ scale: 0.95, opacity: 0, transition: { duration: 0.12 } }}
                 transition={{ duration: SUGAR / 2000, ease: [0.22, 1, 0.36, 1] }}
               />
             )}

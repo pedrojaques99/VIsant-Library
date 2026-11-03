@@ -46,5 +46,65 @@
     "comentario": "mal apresentado, meio inutil; fica s� como a paleta do Rig vintage, fora da vitrine",
     "excluir": false,
     "data": "2026-10-20"
+  },
+  "logo-wall": {
+    "nota": 2,
+    "comentario": "mt comum, esconder",
+    "excluir": false,
+    "data": "2026-11-03"
+  },
+  "cta-surface": {
+    "nota": 2,
+    "comentario": "mt comum, esconder",
+    "excluir": false,
+    "data": "2026-11-03"
+  },
+  "step-cards": {
+    "nota": 2,
+    "comentario": "mt comum, esconder",
+    "excluir": false,
+    "data": "2026-11-03"
+  },
+  "quote-block": {
+    "nota": 2,
+    "comentario": "mt comum",
+    "excluir": false,
+    "data": "2026-11-03"
+  },
+  "pinned-scene": {
+    "nota": 2,
+    "comentario": "mt comum, esconder",
+    "excluir": false,
+    "data": "2026-11-03"
+  },
+  "turbulence-field": {
+    "nota": 2,
+    "comentario": "slop, esconder",
+    "excluir": false,
+    "data": "2026-11-03"
+  },
+  "store-status": {
+    "nota": 2,
+    "comentario": "slop, remover",
+    "excluir": false,
+    "data": "2026-11-03"
+  },
+  "measure-bar": {
+    "nota": 2,
+    "comentario": "slop, remover",
+    "excluir": false,
+    "data": "2026-11-03"
+  },
+  "tempo-bar": {
+    "nota": 2,
+    "comentario": "slop",
+    "excluir": false,
+    "data": "2026-11-03"
+  },
+  "spine-card": {
+    "nota": 2,
+    "comentario": "slop",
+    "excluir": false,
+    "data": "2026-11-03"
   }
 }

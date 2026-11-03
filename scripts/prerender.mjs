@@ -38,9 +38,10 @@ const escapar = (s = "") =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** Injeta as meta tags no lugar do `<title>` que o Vite deixou. */
-function comMeta({ titulo, descricao, url, imagem }) {
+function comMeta({ titulo, descricao, url, imagem, noindex }) {
   const tags = [
     `<title>${escapar(titulo)}</title>`,
+    ...(noindex ? [`<meta name="robots" content="noindex" />`] : []),
     `<meta name="description" content="${escapar(descricao)}" />`,
     `<link rel="canonical" href="${url}" />`,
     `<meta property="og:type" content="website" />`,
@@ -109,6 +110,7 @@ writeFileSync(
 const SECOES = [
   {
     slug: "kits",
+    noindex: true,
     titulo: "Kits — @visant/ui",
     descricao: "Cinco composições montadas com as peças do registry: mesa de trabalho, landing, motion, bancada vintage e marca viva.",
   },
@@ -120,15 +122,21 @@ const SECOES = [
     descricao: `As ${registry.items.length} peças do registry, divididas por categoria — cada fatia com demo viva e comando de instalação.`,
   },
   {
+    slug: "docs",
+    titulo: "Docs — @visant/ui",
+    descricao: "Libs, hooks, temas e regras do registry, sem interface própria.",
+  },
+  {
     slug: "marca",
     titulo: "Marca — @visant/ui",
-    descricao: "Trocar a marca repinta a interface inteira: tokens compilados do vault, em runtime.",
+    descricao: "O brand book da marca escolhida: cor, tipografia, forma e movimento, pesquisáveis e prontos pra copiar.",
   },
   /* `/rig` virou apelido de `/kit/rig-vintage`. A página continua existindo
      porque o endereço circulou — e sem HTML próprio o link colado no chat
      perderia a prévia que já tinha. */
   {
     slug: "rig",
+    noindex: true,
     titulo: "Rig vintage — @visant/ui",
     descricao: "A bancada de áudio: knobs, faders, VU, osciloscópio e paleta de comandos.",
   },
@@ -163,6 +171,7 @@ const KITS = [
     .matchAll(/slug:\s*"([^"]+)",[\s\S]*?title:\s*"([^"]+)",[\s\S]*?tese:\s*\n?\s*"((?:[^"\\]|\\.)*)"/g),
 ].map(([, slug, title, tese]) => ({
   slug: `kit/${slug}`,
+  noindex: true,
   titulo: `${title} — @visant/ui`,
   descricao: tese.replace(/\\"/g, '"'),
 }));
@@ -212,7 +221,7 @@ if (!familias.length || vazias.length) {
 }
 
 for (const s of [...SECOES, ...FAMILIAS, ...KITS]) {
-  escrever(s.slug, comMeta({ titulo: s.titulo, descricao: s.descricao, url: `${SITE}/${s.slug}`, imagem: `${SITE}/og/home.png` }));
+  escrever(s.slug, comMeta({ titulo: s.titulo, descricao: s.descricao, url: `${SITE}/${s.slug}`, imagem: `${SITE}/og/home.png`, noindex: s.noindex }));
 }
 
 for (const item of registry.items) {

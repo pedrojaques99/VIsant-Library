@@ -15,11 +15,11 @@ import { PullToRefresh } from "../../../registry/visant/ui/pull-to-refresh";
 import type { DemoProps } from "../catalog";
 
 const VENDAS = [
-  { quem: "Ana Lúcia", valor: 89.9 },
-  { quem: "Bruno Takeda", valor: 240 },
-  { quem: "Café Barão", valor: 1320.5 },
-  { quem: "Joana Prado", valor: 56 },
-  { quem: "Marcos Vidal", valor: 410 },
+  { quem: "Ana", valor: 89.9 },
+  { quem: "Bruno", valor: 240 },
+  { quem: "Café da esquina", valor: 1320.5 },
+  { quem: "Joana", valor: 56 },
+  { quem: "Marcos", valor: 410 },
 ];
 
 const real = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

@@ -2,9 +2,92 @@
 
 <!-- Gerado por scripts/vite-bug-report.mjs. Não edite à mão: use `npm run bugs -- --resolve <id>`. -->
 
-**0 aberto(s)** · 200 resolvido(s)
+**17 aberto(s)** · 245 resolvido(s)
 
-_Nada aberto._
+## mesa-de-trabalho (1)
+
+- **mesa-de-trabalho-3** — a tab de "marca" deve ser reorganizada e redesenhada pra ser um modelo de "brand system guidelines" ou branding book, que mostra o sistema de marca e identidade visual completo interativo e pesquisável, assim como já existe na visantlabs.com/brand-guidelines
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 15:32</sub>
+
+## slide-to-confirm (1)
+
+- **slide-to-confirm-3** — a cor do bg do botão deve ser levemente mais clara. com profundidade não intrusiva
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 21:46</sub>
+
+## timeline (1)
+
+- **timeline-6** — ainda mt slop, pode remover
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:00</sub>
+
+## testimonial-wall (1)
+
+- **testimonial-wall-6** — precisa ter mais variações de bento grid
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:00</sub>
+
+## section-intro (1)
+
+- **section-intro-3** — mt simples e obvio, pode esconder
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:01</sub>
+
+## count-up (1)
+
+- **count-up-3** — trocar o reload por um icon button
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:01</sub>
+
+## reels-rail (1)
+
+- **reels-rail-4** — icon help não intrusivo q deixa intuitivo
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:01</sub>
+
+## fog-hero (1)
+
+- **fog-hero-1** — remover labels
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:01</sub>
+
+## lathe-object (1)
+
+- **lathe-object-2** — deixar na cor do brand
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:01</sub>
+
+## fog-garden (1)
+
+- **fog-garden-2** — mt bugado ainda qnd mexe nos parametros trava trudo
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:02</sub>
+
+## brand-selector (1)
+
+- **brand-selector-3** — mt mal apresentado e não intuitivo
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:03</sub>
+
+## kanban (1)
+
+- **kanban-6** — precisa melhorar a interatividade pra ficar nível vale do silicio bem burilado
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:03</sub>
+
+## inline-edit (1)
+
+- **inline-edit-3** — mt obvio e simples
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:03</sub>
+
+## scrub-input (1)
+
+- **scrub-input-3** — mostre todos os tipos de input, não só sliders
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:03</sub>
+
+## fader (1)
+
+- **fader-1** — igual feedback dos sliders
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:04</sub>
+
+## sticky-filterbar (1)
+
+- **sticky-filterbar-8** — mal posicionado no catlog qaundo tm pequeno, mt espremido
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:04</sub>
+
+## assignee-stack (1)
+
+- **assignee-stack-5** — mal posicionado no catlog qaundo tm pequeno, mt espremido
+  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:04</sub>
 
 ---
 
@@ -211,5 +294,50 @@ mais respiro visual, cards mais óbvcios~~
 - ~~testimonial-wall-5 · testimonial-wall — mais layoutado, falta um componente em baixo parece~~
 - ~~sfx-bus-2 · sfx-bus — sfx do drop ainda ta ruim~~
 - ~~use-pointer-parallax-5 · use-pointer-parallax — se mexe demais~~
+- ~~timeline-5 · timeline — mt slop ainda, mt coisa aparecendo, e não funciona no catálogo pq o card não é tão height~~
+- ~~section-intro-2 · section-intro — faltou arrows para escollher a variante no catálogo~~
+- ~~logo-wall-2 · logo-wall — mt comum, esconder~~
+- ~~cta-surface-1 · cta-surface — mt comum, esconder~~
+- ~~step-cards-3 · step-cards — mt comum, esconder~~
+- ~~quote-block-2 · quote-block — mt comum.~~
+- ~~fog-garden-1 · fog-garden — remover hud e labels, deixar no theme escolhido pelo brand selcctor~~
+- ~~pinned-scene-3 · pinned-scene — mt comum, esconder~~
+- ~~line-reveal-3 · line-reveal — faltou arrow para escolher entre tipos de animacao/fx tb~~
+- ~~ink-wordmark-2 · ink-wordmark — mt slop ou simples, remover traçado de baixo, precisa de mais vairações de fx~~
+- ~~heat-word-1 · heat-word — mover pra efeitos~~
+- ~~shader-crt-1 · shader-crt — trocar imagem padrão de todos os efeitos pra ser algo mais genérico~~
+- ~~textura-gaze-1 · textura-gaze — simplificar o desenho~~
+- ~~textura-magnet-1 · textura-magnet — deixar mais regular a rotação de cada tracinho~~
+- ~~textura-watch-1 · textura-watch — simplificar o desenho~~
+- ~~repulsive-hover-2 · repulsive-hover — 1 só por vez, remover bordas e caixas desnecessárias~~
+- ~~grid-dots-2 · grid-dots — remover caixa desnecessária e remover cards de dentro~~
+- ~~turbulence-field-2 · turbulence-field — slop. esconder~~
+- ~~erase-field-3 · erase-field — remover textos~~
+- ~~fog-tree-2 · fog-tree — remover hud e labels e caixas desnecessárias, deixar no brand theme selected~~
+- ~~sticker-peel-2 · sticker-peel — mt ruim a anaimação~~
+- ~~photo-frame-3 · photo-frame — tá mais pra efeito de transição do q pra componente, reorganizar pra ficar no lugar certo junto com outros transicoes~~
+- ~~photo-flip-2 · photo-flip — ta mais pra efeito de transição, e tem mt foto aprarecendo~~
+- ~~reels-rail-3 · reels-rail — tá mt rigido ainda, precisa ser mais suave o in out do drag~~
+- ~~lathe-riso-1 · lathe-riso — precisa ir pra efeitos acho~~
+- ~~spine-card-4 · spine-card — slop~~
+- ~~card-stack-2 · card-stack — precisa melhorar a animação de in out pra ficar mais suave e intuitiva~~
+- ~~page-curl-2 · page-curl — animacao ainda tm ruim~~
+- ~~mist-dialog-2 · mist-dialog — ta mais pra efeito de transicao de dialog, reorganizar pra ficar na tab certa~~
+- ~~empty-state-4 · empty-state — precisa de mais variantes de empty states~~
+- ~~skeleton-rail-6 · skeleton-rail — usar o skulet~~
+- ~~toast-stack-2 · toast-stack — ta aparecendo mt longe o card de notificacao, deixe o car de notificação centralizado melhor no catalaogo card~~
+- ~~kanban-5 · kanban — mt mal aparesentado no catalog~~
+- ~~store-status-2 · store-status — slop, remover~~
+- ~~measure-bar-3 · measure-bar — slop, remover~~
+- ~~sticky-filterbar-7 · sticky-filterbar — mal aparesentado, ta mt slop ainda, mt coisa aparecenedo por vez~~
+- ~~segmented-control-3 · segmented-control — o seletor de estilo de animacao ficou não intuitivo pq se camuflou, parece q é o componente junto, nao o seletor, deveria ser arrows igual aos outros q tem vairaç~eos~~
+- ~~tempo-bar-1 · tempo-bar — slop~~
+- ~~filter-bar-1 · filter-bar — mal animado, traçado mt groço no focus do input, arrumar na raíz esse slop~~
+- ~~search-field-1 · search-field — mesmo feedback do filterbar~~
+- ~~searchable-select-1 · searchable-select — mal animado~~
+- ~~side-nav-4 · side-nav — categoria inteira de navegação poderia estar junto com "controles"~~
+- ~~marquee-2 · marquee — categoria inteira de seções poderia estar junto com conteúdo~~
+- ~~assignee-stack-4 · assignee-stack — categoria inteira de dados poderia estar junto com conteúdo~~
+- ~~mesa-de-trabalho-2 · mesa-de-trabalho — pode esconder completamente toda a tab e rota dos "kits"~~
 
 </details>

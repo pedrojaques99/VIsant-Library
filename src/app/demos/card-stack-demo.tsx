@@ -13,11 +13,11 @@ import { CardStack } from "../../../registry/visant/ui/card-stack";
 import type { DemoProps } from "../catalog";
 
 const DEPOIMENTOS = [
-  { id: "a", nome: "Marina Rocha", casa: "Casa Vinte", fala: "O site novo pagou o projeto no primeiro mês de reservas." },
-  { id: "b", nome: "Caio Duarte", casa: "Ribalta", fala: "A marca finalmente parece do tamanho que a gente é." },
-  { id: "c", nome: "Lia Prado", casa: "Forno Lento", fala: "Entregaram o manual e o time usou sem pedir ajuda." },
-  { id: "d", nome: "Davi Campos", casa: "Trilha Norte", fala: "Rápido, direto e sem reunião sobrando." },
-  { id: "e", nome: "Rosa Leme", casa: "Ateliê Leme", fala: "A loja nova vende sozinha de madrugada." },
+  { id: "a", nome: "Marina", casa: "Marketing", fala: "Rápido e fácil de trabalhar junto." },
+  { id: "b", nome: "Caio", casa: "Produto", fala: "Entendeu o pedido e entregou no combinado." },
+  { id: "c", nome: "Lia", casa: "Design", fala: "Explica cada decisão sem enrolar." },
+  { id: "d", nome: "Davi", casa: "Operação", fala: "Direto e sem reunião sobrando." },
+  { id: "e", nome: "Rosa", casa: "Fundação", fala: "Saiu melhor do que a gente imaginava." },
 ];
 
 export default function CardStackDemo({ props }: DemoProps) {

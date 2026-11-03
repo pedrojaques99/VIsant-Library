@@ -1,40 +1,30 @@
 "use client";
 
 /**
- * A marca condensando da fumaça, em ciclo.
+ * A marca condensando da fumaça, um efeito por vez.
  *
  * No site a condensação vem do scroll (o rodapé chega e a tinta assenta). Num
  * card de vitrine não há o que rolar, então a demo usa a prop `progress` e
- * dirige o mesmo caminho por tempo.
- *
- * A marca é escrita pela prop `text`: VISANT® em Manrope Bold maiúscula, que é
- * a assinatura da casa. A cada volta à fumaça ela assenta numa voz diferente
- * (display com traço de pincel, mono espaçado), e é assim que a demo mostra as
- * opções sem um rótulo explicando: a troca acontece dentro da fumaça.
- * Passe o mouse rápido sobre a marca assentada para agitar a tinta.
+ * dirige o mesmo caminho por tempo. A marca é sempre VISANT® em Manrope Bold
+ * maiúscula, a assinatura da casa, para a comparação ser só do efeito: as setas
+ * trocam `fx` e a tinta se desfaz e condensa de novo na voz nova.
  */
 
 import * as React from "react";
 import { animate, useMotionValue, useReducedMotion } from "framer-motion";
 
-import { InkWordmark } from "../../../registry/visant/ui/ink-wordmark";
+import { InkWordmark, type InkWordmarkFx } from "../../../registry/visant/ui/ink-wordmark";
 import type { DemoProps } from "../catalog";
+import { Trocador, useUmPorVez } from "./um-por-vez";
 
-type Voz = Pick<
-  React.ComponentProps<typeof InkWordmark>,
-  "text" | "mark" | "font" | "weight" | "textCase" | "tracking" | "underline"
->;
-
-const VOZES: Voz[] = [
-  { text: "Visant", mark: "®", font: "manrope", weight: 700, textCase: "upper", tracking: -0.02 },
-  { text: "Visant", font: "display", weight: 600, textCase: "as-is", tracking: -0.04, underline: true },
-  { text: "Visant", mark: "™", font: "mono", weight: 500, textCase: "lower", tracking: 0.04 },
-];
+const EFEITOS: readonly InkWordmarkFx[] = ["tinta", "escorrer", "fatias", "gota", "grao", "neon"];
 
 export default function InkWordmarkDemo({ props }: DemoProps) {
-  const progresso = useMotionValue(0);
+  const { fx: externo, ...resto } = (props ?? {}) as { fx?: InkWordmarkFx };
+  const { atual, rodada, passo, repetir } = useUmPorVez(EFEITOS, externo);
+  // Nasce já formando (0,3), não em branco: a grade e o primeiro quadro mostram a marca.
+  const progresso = useMotionValue(0.3);
   const reduce = useReducedMotion();
-  const [voz, setVoz] = React.useState(0);
 
   React.useEffect(() => {
     if (reduce) {
@@ -42,37 +32,47 @@ export default function InkWordmarkDemo({ props }: DemoProps) {
       return;
     }
     let vivo = true;
-    let atual: ReturnType<typeof animate> | undefined;
+    let atualAnim: ReturnType<typeof animate> | undefined;
+    let espera = 0;
     const ciclo = async () => {
+      progresso.jump(0.3);
       while (vivo) {
-        atual = animate(progresso, 1, { duration: 2.8, ease: [0.23, 1, 0.32, 1] });
-        await atual;
-        await new Promise((r) => setTimeout(r, 2600));
+        // Longo e em `in-out`: o efeito precisa ser visto; com `ease-out` ele já tinha acabado.
+        atualAnim = animate(progresso, 1, { duration: 2.6, ease: [0.77, 0, 0.175, 1] });
+        await atualAnim;
         if (!vivo) break;
-        atual = animate(progresso, 0, { duration: 1.6, ease: [0.77, 0, 0.175, 1] });
-        await atual;
+        await new Promise<void>((r) => {
+          espera = window.setTimeout(r, 3200);
+        });
         if (!vivo) break;
-        // A troca de voz mora aqui, com a marca ainda em fumaça.
-        setVoz((v) => (v + 1) % VOZES.length);
-        await new Promise((r) => setTimeout(r, 500));
+        atualAnim = animate(progresso, 0.3, { duration: 1.4, ease: [0.77, 0, 0.175, 1] });
+        await atualAnim;
       }
     };
-    ciclo();
+    void ciclo();
     return () => {
       vivo = false;
-      atual?.stop();
+      window.clearTimeout(espera);
+      atualAnim?.stop();
     };
-  }, [progresso, reduce]);
+  }, [progresso, reduce, rodada]);
 
   return (
-    <div className="grid h-full w-full place-items-center overflow-hidden px-8">
+    <div className="flex h-full w-full flex-col items-center justify-center gap-5 overflow-hidden px-8">
       <InkWordmark
         progress={progresso}
         aria-label="Visant"
         className="w-full max-w-[34rem] text-foreground"
-        {...VOZES[voz]}
-        {...props}
+        text="Visant"
+        mark="®"
+        font="manrope"
+        weight={700}
+        textCase="upper"
+        tracking={-0.02}
+        fx={atual}
+        {...resto}
       />
+      <Trocador nome={atual} onPasso={passo} onRepetir={repetir} rotulo="efeito" />
     </div>
   );
 }

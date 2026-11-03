@@ -187,6 +187,7 @@ export function ExpandableCard({
           // `inert` como atributo cru: o React 18 não conhece a prop e só repassa string.
           {...({ inert: aberto ? undefined : "" } as object)}
           initial={false}
+          // motion-lint-disable-next-line layout-property-animation  altura do conteúdo é desconhecida e empurra o que vem abaixo
           animate={{ height: aberto ? "auto" : 0 }}
           transition={t}
           className="overflow-hidden bg-muted text-sm text-muted-foreground [box-shadow:inset_0_1px_0_var(--border)]"

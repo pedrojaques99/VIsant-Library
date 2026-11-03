@@ -49,7 +49,7 @@ const ficha = (page: Page) => page.locator("[data-ficha]");
  * nada aparece cortado, a altura não oscila) mudaram de endereço, não de força:
  * eles valem onde há palco, e agora o palco é a fatia.
  *
- * `secoes` é a fatia usada como cobaia de propósito: é a que carrega
+ * `conteudo` é a fatia usada como cobaia de propósito: é a que carrega
  * scroll-driven, pin e loop — se algum layout quebra, quebra ali.
  */
 /*
@@ -59,11 +59,11 @@ const ficha = (page: Page) => page.locator("[data-ficha]");
  * suíte, `aparelho.spec.ts`.
  */
 const INDICE = "/catalogo?nivel=alto";
-const FATIA = "/catalogo/secoes";
-/** Peça de OUTRA família (`dados`), para provar que a fatia não vaza. */
-const FORA_DA_FATIA = "kanban";
+const FATIA = "/catalogo/conteudo";
+/** Peça de OUTRA família (`controles`), para provar que a fatia não vaza. */
+const FORA_DA_FATIA = "chip";
 /** Peça desta fatia, para provar que ela está lá. */
-const DENTRO_DA_FATIA = "pinned-scene";
+const DENTRO_DA_FATIA = "marquee";
 
 async function esperarGrade(page: Page) {
   await page.waitForSelector(CARD);
@@ -133,10 +133,10 @@ test.describe("catálogo — índice de categorias", () => {
     await page.goto(INDICE);
     await page.waitForTimeout(400);
 
-    await page.getByRole("button", { name: /^Seções\s*\d+$/ }).click();
+    await page.getByRole("button", { name: /^Conteúdo\s*\d+$/ }).click();
     await page.waitForTimeout(500);
 
-    expect(new URL(page.url()).pathname).toBe("/catalogo/secoes");
+    expect(new URL(page.url()).pathname).toBe("/catalogo/conteudo");
     await expect(page.locator(peca(DENTRO_DA_FATIA))).toHaveCount(1);
   });
 
@@ -145,6 +145,47 @@ test.describe("catálogo — índice de categorias", () => {
    * campo próprio ao lado, escrevendo em outro lugar — duas portas pro mesmo
    * dado.
    */
+  test("o que não é visual sai do catálogo e mora em /docs", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(INDICE);
+    await esperarGrade(page);
+    await expect(page.locator(peca("use-debounce"))).toHaveCount(0);
+    await expect(page.getByText("Hooks, temas e utilitários")).toHaveCount(0);
+
+    await page.goto("/catalogo/fundacao");
+    await expect(page.locator('[data-doc="use-debounce"]')).toBeVisible();
+    await page.goto("/docs");
+    await expect(page.locator('[data-doc="agent-rules"]')).toBeVisible();
+  });
+
+  test("shaders: um canvas só, e só o painel rola no desktop", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/catalogo/shaders");
+    const lab = page.locator("[data-shader-lab]");
+    await expect(lab.locator("canvas")).toHaveCount(1);
+
+    /* O seletor de imagem nasce recolhido. */
+    await expect(page.getByRole("button", { name: "Usar mão" })).toHaveCount(0);
+    await page.getByLabel("Trocar imagem").click();
+    await expect(page.getByRole("button", { name: "Usar mão" })).toBeVisible();
+
+    const medir = () =>
+      page.evaluate(() => ({
+        pagina: window.scrollY,
+        lista: document.querySelector('[aria-label="Filtros"]')!.scrollTop,
+      }));
+    await page.mouse.move(1300, 450);
+    await page.mouse.wheel(0, 400);
+    await page.waitForTimeout(300);
+    const depois = await medir();
+    expect(depois.lista).toBeGreaterThan(0);
+    expect(depois.pagina).toBe(0);
+
+    /* Trocar de filtro não acumula contexto WebGL. */
+    await page.locator('[data-filtro="textura-twist"]').click();
+    await expect(lab.locator("canvas")).toHaveCount(1);
+  });
+
   test("a busca acha por uso, não só por nome", async ({ page }) => {
     await page.goto(INDICE);
     await page.waitForTimeout(400);
@@ -185,7 +226,7 @@ test.describe("catálogo — fatia por família", () => {
     await expect(page.locator(peca(FORA_DA_FATIA))).toHaveCount(0);
 
     /* A contagem na linha de categorias é a promessa; as peças são a entrega. */
-    const cabecalho = page.getByRole("button", { name: /^Seções\s*\d+$/ });
+    const cabecalho = page.getByRole("button", { name: /^Conteúdo\s*\d+$/ });
     const prometido = Number((await cabecalho.textContent())?.match(/\d+/)?.[0]);
     expect(prometido, "a fatia veio vazia").toBeGreaterThan(0);
     expect(await page.locator(PECA).count()).toBe(prometido);
@@ -287,7 +328,7 @@ test.describe("catálogo — fatia por família", () => {
     await page.goto(FATIA);
     await esperarGrade(page);
 
-    await page.getByRole("button", { name: "Filtrar por tipo e dependência" }).click();
+    await page.getByRole("button", { name: "Filtrar por linguagem, tipo e dependência" }).click();
     for (const tipo of ["Hook", "Utilitário", "Componente"]) {
       const aba = page.getByRole("button", { name: new RegExp(`^${tipo}\\s*\\d+$`) });
       if (!(await aba.count())) continue;
@@ -418,10 +459,10 @@ test.describe("vista de foco", () => {
     /*
      * Sair tem de voltar para a grade: senão o botão voltar do navegador
      * mente. Com o catálogo fatiado, a grade de `/c/kanban` é a fatia da peça —
-     * `kanban` é da família `dados`. É o que faz as setas terem lista para
+     * `kanban` é da família `conteudo`. É o que faz as setas terem lista para
      * percorrer e o Esc entregar vizinhança em vez de uma página de capas.
      */
-    expect(new URL(page.url()).pathname).toBe("/catalogo/dados");
+    expect(new URL(page.url()).pathname).toBe("/catalogo/conteudo");
   });
 
   /*
@@ -502,7 +543,7 @@ test.describe("dependências npm", () => {
 
     // Tipo e npm vivem recolhidos atrás de um ícone, que acende quando há
     // filtro ligado — nada some, mas o teste precisa abrir, como a pessoa abre.
-    await page.getByRole("button", { name: "Filtrar por tipo e dependência" }).click();
+    await page.getByRole("button", { name: "Filtrar por linguagem, tipo e dependência" }).click();
     const gsap = page.locator("[aria-pressed]", { hasText: /^gsap\s*\d+$/ });
     const prometido = Number((await gsap.textContent())?.match(/\d+/)?.[0]);
     await gsap.click();
@@ -516,16 +557,16 @@ test.describe("dependências npm", () => {
   });
 
   test("recolhido nunca esconde filtro ativo, e o eixo de tipo filtra", async ({ page }) => {
-    // `fundacao` é a fatia que tem hook: o eixo de tipo precisa de mais de um tipo pra filtrar.
-    await page.goto("/catalogo/fundacao");
+    // `conteudo` mistura componente e seção inteira: o eixo de tipo precisa de mais de um tipo pra filtrar.
+    await page.goto("/catalogo/conteudo");
     await esperarGrade(page);
 
-    const botao = page.getByRole("button", { name: "Filtrar por tipo e dependência" });
+    const botao = page.getByRole("button", { name: "Filtrar por linguagem, tipo e dependência" });
     await botao.click();
 
-    const hook = page.locator("[aria-pressed]", { hasText: /^Hook\s*\d+$/ });
+    const hook = page.locator("[aria-pressed]", { hasText: /^Componente\s*\d+$/ });
     const esperado = Number((await hook.textContent())?.match(/\d+/)?.[0]);
-    expect(esperado, "a fatia não tem hook nenhum").toBeGreaterThan(0);
+    expect(esperado, "a fatia não tem esse tipo").toBeGreaterThan(0);
 
     await hook.click();
     await page.waitForTimeout(400);

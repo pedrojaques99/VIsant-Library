@@ -1,9 +1,11 @@
 "use client";
 
 /**
- * Um seletor de visão, que é onde a peça mora, e embaixo dele a escolha da
- * `animation`: o de baixo troca como o de cima anda. Os dois usam a animação
- * escolhida, então mexer em qualquer um já mostra a diferença.
+ * O controle sozinho, e as setas embaixo trocam a `animation`.
+ *
+ * O seletor de animação era um segundo segmented control logo abaixo do
+ * primeiro, e lia como parte da peça. Agora é o mesmo seletor das outras demos.
+ * Trocar já anda para a opção seguinte, porque animação só se vê em movimento.
  */
 
 import * as React from "react";
@@ -11,43 +13,40 @@ import { Columns3, LayoutGrid, List } from "lucide-react";
 
 import { SegmentedControl } from "../../../registry/visant/ui/segmented-control";
 import type { DemoProps } from "../catalog";
+import { Trocador, useUmPorVez } from "./um-por-vez";
 
-type Animacao = "slide" | "spring" | "stretch" | "fade";
+const ANIMACOES = ["stretch", "spring", "slide", "fade"] as const;
+const VISOES = ["grade", "lista", "quadro"] as const;
+type Animacao = (typeof ANIMACOES)[number];
+type Visao = (typeof VISOES)[number];
 
 export default function SegmentedControlDemo({ props }: DemoProps) {
-  const [visao, setVisao] = React.useState<"grade" | "lista" | "quadro">("grade");
-  const [animacao, setAnimacao] = React.useState<Animacao>("stretch");
+  const { animation: _a, ...resto } = (props ?? {}) as { animation?: Animacao } & Record<string, unknown>;
+  const { atual, rodada, passo, repetir } = useUmPorVez(ANIMACOES, _a);
+  const [visao, setVisao] = React.useState<Visao>("grade");
+
+  // A `rodada` muda a cada troca e a cada repetição; a montagem não conta.
+  React.useEffect(() => {
+    if (rodada === 0) return;
+    setVisao((v) => VISOES[(VISOES.indexOf(v) + 1) % VISOES.length]!);
+  }, [rodada]);
 
   return (
-    <div className="flex h-full w-full items-center justify-center p-6">
-      <div className="flex w-[300px] max-w-full flex-col items-stretch gap-4">
-        <SegmentedControl
-          value={visao}
-          onChange={setVisao}
-          aria-label="Visão"
-          animation={animacao}
-          {...props}
-          options={[
-            { value: "grade", label: "Grade", icon: LayoutGrid },
-            { value: "lista", label: "Lista", icon: List },
-            { value: "quadro", label: "Quadro", icon: Columns3 },
-          ]}
-        />
-        <SegmentedControl
-          value={animacao}
-          onChange={setAnimacao}
-          aria-label="Animação"
-          size="sm"
-          animation={animacao}
-          className="mx-auto w-[260px] max-w-full"
-          options={[
-            { value: "slide", label: "Desliza" },
-            { value: "spring", label: "Mola" },
-            { value: "stretch", label: "Estica" },
-            { value: "fade", label: "Funde" },
-          ]}
-        />
-      </div>
+    <div className="flex h-full w-full flex-col items-center justify-center gap-5 p-6">
+      <SegmentedControl
+        value={visao}
+        onChange={setVisao}
+        aria-label="Visão"
+        className="w-[320px] max-w-full"
+        {...resto}
+        animation={atual}
+        options={[
+          { value: "grade", label: "Grade", icon: LayoutGrid },
+          { value: "lista", label: "Lista", icon: List },
+          { value: "quadro", label: "Quadro", icon: Columns3 },
+        ]}
+      />
+      <Trocador nome={atual} onPasso={passo} onRepetir={repetir} rotulo="animação" />
     </div>
   );
 }

@@ -285,6 +285,7 @@ export function CoverFlow({
             tabIndex={-1}
             onClick={() => ir(i)}
             className={cn(
+              // motion-lint-disable-next-line layout-property-animation  o ponto vira traço sem deformar a ponta redonda e abre espaço nos vizinhos
               "h-1.5 rounded-[var(--r-pill)] transition-[width,background-color] duration-[var(--dur-base)] ease-[var(--ease-out)]",
               i === indice ? "w-5 bg-foreground" : "w-1.5 bg-border hover:bg-muted-foreground",
             )}

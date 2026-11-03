@@ -196,7 +196,8 @@ export function TimeDial({
       })}
       {MARCAS.map(({ m, t }) => {
         const a = (grau(m) * Math.PI) / 180;
-        const d = R - 30;
+        // Por dentro da faixa do aro: rótulo em cima do arco não se lê.
+        const d = R - 40;
         return (
           <span
             key={t}
@@ -217,7 +218,7 @@ export function TimeDial({
 
       {/* Ponteiro: a haste e a pega giram juntas. */}
       <motion.div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ rotate: giro }}>
-        <span className="absolute left-1/2 w-0.5 -translate-x-1/2 rounded-full bg-foreground" style={{ top: 22, height: R - 66 }} />
+        <span className="absolute left-1/2 w-0.5 -translate-x-1/2 rounded-full bg-foreground" style={{ top: 22, height: Math.max(0, R - 80) }} />
       </motion.div>
       <motion.div className="pointer-events-none absolute inset-0" style={{ rotate: giro }}>
         <div

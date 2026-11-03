@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 import { onThemeChange, resolveCssColor } from "@/lib/css-color";
 
 /**
- * Textura Magnet — limalha de ferro sobre papel: traços curtos espalhados ao
- * acaso que se alinham às linhas de campo de um ímã preso ao cursor. Perto
- * dele a limalha escurece e desenha o campo; longe, fica bagunçada como caiu.
+ * Textura Magnet — limalha de ferro sobre papel: traços curtos numa malha que
+ * giram com as linhas de campo de um ímã preso ao cursor. Perto dele a limalha
+ * ganha tinta e comprimento; longe, ela apaga, mas continua alinhada ao campo.
  *
  * Original da Visant Labs, família texturas: superfície que reage ao ponteiro,
  * um gesto só.
@@ -19,10 +19,11 @@ import { onThemeChange, resolveCssColor } from "@/lib/css-color";
  *    estrela sem graça. Com dois polos (norte e sul) a um palmo um do outro,
  *    o campo de dipolo faz os arcos de livro de física, e é isso que se lê
  *    como "limalha".
- * 2. **Direção misturada, não ângulo.** Cada traço tem uma direção própria
- *    sorteada e soma a do campo pesada pela força local. Misturar vetores,
- *    não ângulos, evita o salto de 359° para 0° e deixa a transição entre
- *    bagunça e ordem contínua.
+ * 2. **Rotação regular por padrão.** Com `scatter` em 0, o ângulo de cada traço
+ *    vem só do campo, e os traços ficam numa malha: é o desenho das linhas de
+ *    força que se lê, não o sorteio. Subir `scatter` devolve a bagunça de limalha
+ *    caída ao acaso. A direção sorteada soma por vetor, nunca por ângulo, para
+ *    evitar o salto de 359° para 0° e deixar a transição contínua.
  * 3. **Linha de campo não tem sentido.** O traço é um segmento centrado, então
  *    norte e sul desenham igual; não há seta para trair a física.
  * 4. **Vizinhos entram na conta.** Traço girado passa da própria célula, então
@@ -45,6 +46,7 @@ uniform vec2 uRes;
 uniform float uCell;
 uniform float uLen;
 uniform float uForca;
+uniform float uSolto;
 uniform vec2 uIma;
 uniform vec3 uFundo;
 uniform vec3 uLimalha;
@@ -70,7 +72,7 @@ void main(){
   for(int x=-1;x<=1;x++){
     vec2 id=ip+vec2(float(x),float(y));
     vec2 hz=hash(id);
-    vec2 c=(id+.5+(hz-.5)*.7)*uCell;
+    vec2 c=(id+.5+(hz-.5)*.7*uSolto)*uCell;
     vec2 r1=(c-uIma-vec2(sep,0.))/uRes.y;
     vec2 r2=(c-uIma+vec2(sep,0.))/uRes.y;
     float l1=max(length(r1),.01);
@@ -81,10 +83,10 @@ void main(){
     float ang=hash(id+4.1).x*6.2832;
     vec2 solto=vec2(cos(ang),sin(ang));
     vec2 campo=m>0.?B/m:solto;
-    vec2 dir=solto*(1.-peso)+campo*peso;
+    vec2 dir=solto*(1.-peso)*uSolto+campo*(peso+(1.-peso)*(1.-uSolto));
     float dl=length(dir);
     dir=dl>.001?dir/dl:campo;
-    float meia=uCell*uLen*(.75+.35*peso)*(.7+.6*hz.y)*.5;
+    float meia=uCell*uLen*(.75+.35*peso)*(1.+(.6*hz.y-.3)*uSolto)*.5;
     float d=seg(px,c-dir*meia,c+dir*meia);
     float t=(1.-smoothstep(w-aa,w+aa,d))*(.3+.7*peso);
     tinta=max(tinta,t);
@@ -118,6 +120,14 @@ export interface TexturaMagnetProps extends Omit<React.HTMLAttributes<HTMLDivEle
    * @step 1
    */
   strength?: number;
+  /**
+   * Bagunça: 0 é malha regular com todo traço girando pelo campo; 100 é limalha
+   * caída ao acaso, com ângulo, posição e comprimento sorteados.
+   * @min 0
+   * @max 100
+   * @step 1
+   */
+  scatter?: number;
   /** Paradas: papel e limalha. Qualquer cor CSS ou token. */
   colors?: string[];
 }
@@ -146,13 +156,14 @@ export function TexturaMagnet({
   density = 30,
   length = 55,
   strength = 60,
+  scatter = 0,
   colors,
   className,
   ...props
 }: TexturaMagnetProps) {
   const wrapRef = React.useRef<HTMLDivElement>(null);
-  const params = React.useRef({ density, length, strength });
-  params.current = { density, length, strength };
+  const params = React.useRef({ density, length, strength, scatter });
+  params.current = { density, length, strength, scatter };
   const redesenhar = React.useRef<() => void>(() => {});
   const coresChave = (colors ?? CORES_PADRAO).join("|");
 
@@ -183,6 +194,7 @@ export function TexturaMagnet({
       cell: u("uCell"),
       len: u("uLen"),
       forca: u("uForca"),
+      solto: u("uSolto"),
       ima: u("uIma"),
       fundo: u("uFundo"),
       limalha: u("uLimalha"),
@@ -225,6 +237,7 @@ export function TexturaMagnet({
       gl.uniform1f(U.cell, canvas.height / Math.max(10, Math.min(60, p.density)));
       gl.uniform1f(U.len, 0.45 + (p.length / 100) * 0.75);
       gl.uniform1f(U.forca, 0.25 + (p.strength / 100) * 0.75);
+      gl.uniform1f(U.solto, Math.max(0, Math.min(1, p.scatter / 100)));
       gl.uniform2f(U.ima, ima.x, ima.y);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
@@ -301,7 +314,7 @@ export function TexturaMagnet({
 
   React.useEffect(() => {
     redesenhar.current();
-  }, [density, length, strength]);
+  }, [density, length, strength, scatter]);
 
   return (
     <div

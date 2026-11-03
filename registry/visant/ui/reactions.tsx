@@ -528,7 +528,7 @@ export function Reactions({
                   initial={reduzir ? soOpacidade : pilulaEntra}
                   animate={repouso}
                   exit={reduzir ? someSeco : pilulaSai}
-                  whileTap={{ scale: reduzir ? 1 : 0.97 }}
+                  whileTap={{ scale: reduzir ? 1 : 0.97, transition: { duration: RAPIDO, ease: SAIDA } }}
                   transition={reduzir ? { duration: RAPIDO, layout: { duration: 0 } } : pilulaTransicao}
                 >
                   <IconeChute icon={opcao.icon} pulso={pulsos[r.id] ?? 0} reduzir={reduzir} />
