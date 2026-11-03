@@ -1,14 +1,25 @@
 #!/usr/bin/env node
 /**
- * The interaction lab's four verbs. This is what the daily agent run calls.
+ * The interaction lab's verbs. This is what the daily agent run calls.
  *
+ *   pnpm lab:next [--seed N]             # today's tag combo (Thompson sampling over lab/taste.json)
  *   pnpm lab:new <slug> <drag|tilt|scroll|pointer|press>
- *                [--label WORD] [--hint "..."] [--title "..."] [--date yyyy-mm-dd]
+ *                --family F --intensity I --response R --rationale "..."
+ *                [--label WORD] [--hint "..."] [--hint-touch "..."] [--title "..."] [--date yyyy-mm-dd]
  *   (npm works too: `npm run lab:new -- <slug> <input>`; the input is positional
  *    because npm under PowerShell eats unknown `--flags` before they get here.)
  *   pnpm lab:check                       # gate: shape + rules, exit 1 on any error
  *   pnpm lab:keep <id> "why"              # status → kept, reason logged in PREFERENCES.md
  *   pnpm lab:discard <id> "why"          # file deleted, reason logged (git keeps the code)
+ *   pnpm lab:sync                        # pull the verdicts given on /lab?admin into git
+ *
+ * `lab:sync` reads https://ui.visantlabs.com/api/lab (the verdict store) and, for
+ * each verdict not yet in git, does what keep/discard would: kept → status flip,
+ * discarded → file deleted, reason logged either way. Idempotent: a verdict
+ * already reflected in the files is skipped. `--url <base>` points elsewhere.
+ * Every verdict (with the experiment's tags, read before a discard deletes the
+ * file) is kept in `lab/taste.json`, and sync rewrites the scoreboard there and
+ * between the `lab:taste` markers in PREFERENCES.md (scripts/lab-taste.mjs).
  *
  * The checks are regex on purpose: an experiment is a small file with a fixed
  * shape, and parsing TSX would mean a new dependency for no extra certainty.
@@ -18,18 +29,25 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { DIMENSIONS, jaccard, markdown, next, rng, sameCombo, scoreboard } from "./lab-taste.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const LAB = path.join(ROOT, "lab");
 const DIR = path.join(LAB, "experiments");
+const CDIR = path.join(LAB, "components");
 const TEMPLATE = path.join(DIR, "_template.tsx");
 const RULES = path.join(LAB, "RULES.md");
 const PREFS = path.join(LAB, "PREFERENCES.md");
+const TASTE = path.join(LAB, "taste.json");
 
-const INPUTS = ["drag", "tilt", "scroll", "pointer", "press"];
-const IMPORTS_OK = ["react", "motion/react", "../types", "@/lib/utils"];
+const INPUTS = DIMENSIONS.input;
+const TOO_CLOSE = 0.6;
+const IMPORTS_OK = ["react", "motion/react", "../types", "../hooks", "@/lib/utils"];
 const SOFT_MAX = 150;
 const HARD_MAX = 175;
+// Components are refined pieces (several controls, a11y, states): more room.
+const C_SOFT_MAX = 250;
+const C_HARD_MAX = 275;
 
 const today = () => new Date().toISOString().slice(0, 10);
 const die = (msg) => {
@@ -47,13 +65,82 @@ function args(argv) {
   return { pos, opt };
 }
 
-const files = () =>
-  fs.existsSync(DIR) ? fs.readdirSync(DIR).filter((f) => /^\d{4}-\d{2}-\d{2}-.+\.tsx$/.test(f)) : [];
+const datedIn = (dir) =>
+  fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => /^\d{4}-\d{2}-\d{2}-.+\.tsx$/.test(f)) : [];
+const files = () => datedIn(DIR);
+/** Experiments and components, each with its kind and absolute path. */
+const entries = () => [
+  ...datedIn(DIR).map((f) => ({ f, file: path.join(DIR, f), kind: "experiment" })),
+  ...datedIn(CDIR).map((f) => ({ f, file: path.join(CDIR, f), kind: "component" })),
+];
+const fileFor = (id) => [path.join(DIR, `${id}.tsx`), path.join(CDIR, `${id}.tsx`)].find((f) => fs.existsSync(f));
 
 const ruleIds = () =>
   new Set([...fs.readFileSync(RULES, "utf8").matchAll(/\*\*`([a-z0-9-]+)`\*\*/g)].map((m) => m[1]));
 
 const field = (src, key) => src.match(new RegExp(`\\b${key}:\\s*"([^"]*)"`))?.[1];
+
+const readTags = (src) => {
+  const body = src.match(/\btags:\s*\{([^}]*)\}/)?.[1];
+  if (!body) return null;
+  return Object.fromEntries(Object.keys(DIMENSIONS).map((k) => [k, field(body, k)]));
+};
+/** The header comment's first paragraph: "LABEL: the metaphor...". */
+const metaphor = (src) =>
+  (src.match(/^\/\*\n([\s\S]*?)(?:\n \*\n|\n \*\/)/)?.[1] ?? "").replace(/^\s*\*\s?/gm, " ").trim();
+const describe = (src) => `${field(src, "title") ?? ""} ${metaphor(src)}`;
+
+// ── Taste ledger (lab/taste.json) ──────────────────────────────────────────
+const loadTaste = () => (fs.existsSync(TASTE) ? JSON.parse(fs.readFileSync(TASTE, "utf8")) : { decisions: [] });
+
+function saveTaste(taste) {
+  const board = scoreboard(taste.decisions);
+  const out = {
+    updated: today(),
+    n: board.n,
+    kept: board.kept,
+    decisions: taste.decisions,
+    board: board.dims,
+    motivos: board.motivos,
+    sources: board.sources,
+  };
+  fs.writeFileSync(TASTE, JSON.stringify(out, null, 2) + "\n");
+  const prefs = fs.readFileSync(PREFS, "utf8");
+  const block = `<!-- lab:taste (written by pnpm lab:sync; edits here are overwritten) -->\n${markdown(board)}\n<!-- /lab:taste -->`;
+  // Kept components are ready to harvest; promotion to registry/ is the owner's call.
+  const ready = taste.decisions.filter((d) => d.kind === "component" && d.status === "kept");
+  const colher = `<!-- lab:colher (written by pnpm lab:sync) -->\n${
+    ready.length
+      ? ready.map((d) => `- \`${d.id}\` · ${d.title ?? ""} · lab/components/${d.id}.tsx${d.source ? ` · ${d.source}` : ""}`).join("\n")
+      : "_Nenhum componente aprovado ainda._"
+  }\n<!-- /lab:colher -->`;
+  fs.writeFileSync(
+    PREFS,
+    prefs
+      .replace(/<!-- lab:taste[\s\S]*?<!-- \/lab:taste -->/, () => block)
+      .replace(/<!-- lab:colher[\s\S]*?<!-- \/lab:colher -->/, () => colher),
+  );
+  return board;
+}
+
+/** Upsert by id: the latest verdict on an experiment is the one that counts. */
+function record(taste, d) {
+  const i = taste.decisions.findIndex((x) => x.id === d.id);
+  const prev = i >= 0 ? taste.decisions[i] : {};
+  const merged = { ...prev, ...Object.fromEntries(Object.entries(d).filter(([, v]) => v != null)) };
+  if (i >= 0) taste.decisions[i] = merged;
+  else taste.decisions.push(merged);
+}
+
+const fromFile = (id, src) => ({
+  id,
+  kind: /kind:\s*"component"/.test(src) ? "component" : "experiment",
+  title: field(src, "title"),
+  metaphor: metaphor(src),
+  tags: readTags(src),
+  gallery: field(src, "gallery"),
+  source: field(src, "url"),
+});
 
 function log(verb, id, why) {
   const line = `- ${today()} · ${verb} · \`${id}\` · ${why}\n`;
@@ -73,6 +160,11 @@ function cmdNew({ pos, opt }) {
   const taken = files().find((f) => f.endsWith(`-${slug}.tsx`));
   if (taken) console.warn(`lab: warning, the slug "${slug}" was already used in ${taken}`);
 
+  const tags = { input, family: opt.family, intensity: opt.intensity, response: opt.response };
+  for (const [k, v] of Object.entries(tags))
+    if (!DIMENSIONS[k].includes(v)) die(`--${k} must be one of ${DIMENSIONS[k].join(", ")} (see pnpm lab:next)`);
+  if (!opt.rationale?.trim()) die('--rationale "..." is required (the lab:next line, or why you deviate from it)');
+
   const label = (opt.label ?? slug.split("-")[0]).toUpperCase();
   const title = opt.title ?? slug.replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase());
   const src = fs
@@ -83,7 +175,10 @@ function cmdNew({ pos, opt }) {
     .replaceAll("__TITLE__", title)
     .replaceAll("__LABEL__", label)
     .replaceAll("__HINT__", opt.hint ?? `${input} to <verb>`)
-    .replaceAll("__INPUT__", input);
+    .replaceAll("__HINT_TOUCH__", opt["hint-touch"] ?? "<arraste|toque|segure> pra <verbo>")
+    .replaceAll("__INPUT__", input)
+    .replace(/^  tags: .*$/m, `  tags: { input: "${input}", family: "${tags.family}", intensity: "${tags.intensity}", response: "${tags.response}" },`)
+    .replaceAll("__RATIONALE__", opt.rationale.replace(/"/g, "'"));
   fs.writeFileSync(out, src);
   console.log(`lab: created ${path.relative(ROOT, out)}`);
   console.log("next: fill in the component + meta, then `pnpm lab:check && pnpm typecheck`");
@@ -91,11 +186,12 @@ function cmdNew({ pos, opt }) {
 
 function cmdCheck() {
   const ids = ruleIds();
+  const discarded = loadTaste().decisions.filter((d) => d.status === "discarded");
+  const all = entries().map((e) => ({ ...e, src: fs.readFileSync(e.file, "utf8") }));
   const labels = new Map();
   let errors = 0;
   let warnings = 0;
-  for (const f of files()) {
-    const src = fs.readFileSync(path.join(DIR, f), "utf8");
+  for (const { f, src, kind } of all) {
     const err = (m) => (errors++, console.error(`  ✗ ${f}: ${m}`));
     const warn = (m) => (warnings++, console.warn(`  ! ${f}: ${m}`));
     const id = f.replace(/\.tsx$/, "");
@@ -111,6 +207,32 @@ function cmdCheck() {
     if (/<[^>]+>/.test(field(src, "hint") ?? "") || field(src, "formula") === "x = Δx · k")
       err("hint/formula still hold the template placeholder");
 
+    const tags = readTags(src);
+    if (!tags) err("meta.tags is missing ({ input, family, intensity, response })");
+    else
+      for (const [k, values] of Object.entries(DIMENSIONS))
+        if (!values.includes(tags[k])) err(`meta.tags.${k} must be one of ${values.join(", ")}`);
+    const rationale = field(src, "rationale");
+    if (!rationale?.trim() || rationale.includes("__RATIONALE__")) err("meta.rationale is empty (pnpm lab:next)");
+
+    // Anti-repeat, for candidates only, and only against what came BEFORE them
+    // (older experiments, discards decided before the candidate was made), so a
+    // later verdict never retro-fails a candidate that was fine on its day.
+    if (field(src, "status") === "candidate" && tags) {
+      const before = discarded.filter((d) => d.id !== id && (d.at ?? d.id.slice(0, 10)) <= id.slice(0, 10));
+      const twin = before.find((d) => sameCombo(d.tags, tags));
+      if (twin) err(`same tag combo as discarded ${twin.id}; pick another (pnpm lab:next)`);
+      const me = describe(src);
+      const others = [
+        ...all.filter((o) => o.f !== f && o.f.slice(0, 10) <= f.slice(0, 10)).map((o) => ({ id: o.f.replace(/\.tsx$/, ""), text: describe(o.src) })),
+        ...before.map((d) => ({ id: `${d.id} (discarded)`, text: `${d.title ?? ""} ${d.metaphor ?? ""}` })),
+      ];
+      for (const o of others) {
+        const j = jaccard(me, o.text);
+        if (j > TOO_CLOSE) err(`title/metaphor too close to ${o.id} (Jaccard ${j.toFixed(2)} > ${TOO_CLOSE})`);
+      }
+    }
+
     const rules = src.match(/rules:\s*\[([\s\S]*?)\]/)?.[1].match(/"([^"]+)"/g)?.map((s) => s.slice(1, -1)) ?? [];
     if (!rules.length) err("meta.rules is empty");
     for (const r of rules) if (!ids.has(r)) err(`unknown rule "${r}" (not in lab/RULES.md)`);
@@ -124,12 +246,48 @@ function cmdCheck() {
       err("pointer handlers without touch-none (touch)");
     if (/transition-all|cubic-bezier\(/.test(src)) err("transition-all or inline cubic-bezier; use motion tokens");
 
+    // Mobile (RULES.md "touch", "mobile-*"): a finger has no hover, no wheel, and
+    // a long press opens the OS menu. These are the static half; `pnpm lab:mobile`
+    // drives each card with real touch events for the other half.
+    const hintTouch = field(src, "hintTouch");
+    if (!hintTouch?.trim() || /<[^>]+>/.test(hintTouch)) err('meta.hintTouch missing: the hint for a finger ("arraste", "toque", "segure")');
+    if (/hover:|group-hover|onPointer(Enter|Over|Leave|Out)/.test(src))
+      err("hover-only behavior: a phone has no hover (mobile-no-hover)");
+    if (tags?.input === "scroll" && !/overflow-y-(scroll|auto)/.test(src))
+      err("scroll input needs a native scroller (overflow-y-scroll), or a finger can't drive it (mobile-scroll)");
+    if (tags?.input === "scroll" && /touch-none/.test(src)) err("touch-none on a scroll experiment blocks the swipe");
+    if (tags?.input === "press" && !(/touch-callout:none/.test(src) && /onContextMenu/.test(src)))
+      err("press needs [-webkit-touch-callout:none] + onContextMenu preventDefault, or a long press opens the OS menu (mobile-press)");
+    if (tags?.input === "pointer" && !/useIdle\(/.test(src))
+      err("pointer input needs an idle state (useIdle from ../hooks): on a phone nothing hovers (mobile-idle)");
+    if (/requestAnimationFrame/.test(src) && !/cancelAnimationFrame/.test(src))
+      err("requestAnimationFrame without cancelAnimationFrame: the loop never stops (mobile-perf)");
+    if (/setInterval|requestAnimationFrame\(\s*function|requestAnimationFrame\(\s*loop/.test(src) && !/useInView|useIdle/.test(src))
+      err("a running loop must pause off screen (useInView / useIdle from ../hooks) (mobile-perf)");
+    if (/getContext\(/.test(src) && !/Math\.min\([^)]*devicePixelRatio[^)]*2\)|Math\.min\(2,\s*[^)]*devicePixelRatio/.test(src))
+      err("canvas without DPR capped at 2: Math.min(devicePixelRatio, 2) (mobile-perf)");
+
+    // Components: credit the source, say the principle, keep the rejected sketches.
+    if (kind === "component") {
+      if (!/kind:\s*"component"/.test(src)) err('meta.kind must be "component"');
+      const block = src.match(/source:\s*\{([\s\S]*?)\n\s*\}/)?.[1] ?? "";
+      for (const k of ["title", "studio", "gallery"]) if (!field(block, k)?.trim()) err(`meta.source.${k} is empty (credit the source)`);
+      if (!/^https:\/\/www\.behance\.net\/gallery\/\d+/.test(field(block, "url") ?? "")) err("meta.source.url must be the Behance project URL");
+      if (!/refs:\s*\[\s*"/.test(block)) err("meta.source.refs is empty (the images you looked at)");
+      const insp = field(src, "inspiration") ?? "";
+      if (!insp.trim()) err("meta.inspiration is empty (one sentence: the principle)");
+      else if ((insp.match(/[.!?](\s|$)/g) ?? []).length > 1) warn("meta.inspiration should be ONE sentence");
+      const sketches = src.match(/sketches:\s*\[([\s\S]*?)\]/)?.[1].match(/"[^"]+"/g) ?? [];
+      if (sketches.length < 2) err("meta.sketches needs the 2 rejected concepts, one line each");
+    }
+
     const lines = src.split("\n").length;
-    if (lines > HARD_MAX) err(`${lines} lines (max ~${SOFT_MAX})`);
-    else if (lines > SOFT_MAX) warn(`${lines} lines (aim for < ${SOFT_MAX})`);
+    const [soft, hard] = kind === "component" ? [C_SOFT_MAX, C_HARD_MAX] : [SOFT_MAX, HARD_MAX];
+    if (lines > hard) err(`${lines} lines (max ~${soft})`);
+    else if (lines > soft) warn(`${lines} lines (aim for < ${soft})`);
   }
   const n = files().length;
-  console.log(`lab: ${n} experiment(s), ${errors} error(s), ${warnings} warning(s)`);
+  console.log(`lab: ${n} experiment(s), ${all.length - n} component(s), ${errors} error(s), ${warnings} warning(s)`);
   process.exit(errors ? 1 : 0);
 }
 
@@ -137,10 +295,13 @@ function verdict(verb, { pos }) {
   const [id, ...why] = pos;
   const reason = why.join(" ").trim();
   if (!id || !reason) die(`usage: lab:${verb} -- <id> "why"   (the why is what teaches the next run)`);
-  const file = path.join(DIR, `${id}.tsx`);
-  if (!fs.existsSync(file)) die(`no experiment ${id}`);
+  const file = fileFor(id);
+  if (!file) die(`no experiment or component ${id}`);
+  const src = fs.readFileSync(file, "utf8");
+  const taste = loadTaste();
+  record(taste, { ...fromFile(id, src), status: verb === "keep" ? "kept" : "discarded", reason, at: today() });
+  saveTaste(taste);
   if (verb === "keep") {
-    const src = fs.readFileSync(file, "utf8");
     fs.writeFileSync(file, src.replace(/status:\s*"candidate"/, 'status: "kept"'));
     log("kept", id, reason);
   } else {
@@ -150,9 +311,59 @@ function verdict(verb, { pos }) {
   console.log(`lab: ${verb === "keep" ? "kept" : "discarded"} ${id}; reason logged in lab/PREFERENCES.md`);
 }
 
+async function cmdSync({ opt }) {
+  const base = (opt.url ?? "https://ui.visantlabs.com").replace(/\/$/, "");
+  const res = await fetch(`${base}/api/lab`);
+  if (!res.ok) die(`GET ${base}/api/lab → ${res.status}`);
+  const { store, veredictos = [] } = await res.json();
+  if (!store) die("the verdict store is not reachable in production (SUPABASE_* on Vercel)");
+  const taste = loadTaste();
+  let n = 0;
+  for (const v of veredictos) {
+    if (!/^\d{4}-\d{2}-\d{2}-[a-z0-9-]+$/.test(v.id) || !["kept", "discarded"].includes(v.status)) continue;
+    const motivos = Array.isArray(v.motivos) ? v.motivos : [];
+    const decision = { id: v.id, status: v.status, motivos, reason: v.reason ?? "", at: String(v.at).slice(0, 10) };
+    const file = fileFor(v.id);
+    if (!file) {
+      record(taste, decision); // already deleted: keep the tags we had, if any
+      continue;
+    }
+    const src = fs.readFileSync(file, "utf8");
+    record(taste, { ...fromFile(v.id, src), ...decision });
+    const why = [motivos.join(", "), (v.reason || "").replace(/\s+/g, " ")].filter(Boolean).join(" · ") || "(sem motivo)";
+    const line = (verb) => `- ${decision.at} · ${verb} · \`${v.id}\` · ${why} · via /lab\n`;
+    if (v.status === "kept" && /status:\s*"candidate"/.test(src)) {
+      fs.writeFileSync(file, src.replace(/status:\s*"candidate"/, 'status: "kept"'));
+      fs.appendFileSync(PREFS, line("kept"));
+    } else if (v.status === "discarded") {
+      fs.unlinkSync(file);
+      fs.appendFileSync(PREFS, line("discarded"));
+    } else continue;
+    n++;
+    console.log(`lab: ${v.status} ${v.id}`);
+  }
+  const board = saveTaste(taste);
+  console.log(`lab: synced ${n} verdict(s) from ${base}; taste: ${board.kept}/${board.n} kept → lab/taste.json`);
+}
+
+function cmdNext({ opt }) {
+  const taste = loadTaste();
+  const board = scoreboard(taste.decisions);
+  const r = rng(opt.seed ? Number(opt.seed) : Date.now());
+  const discarded = taste.decisions.filter((d) => d.status === "discarded");
+  let pick = next(board, r);
+  for (let i = 0; i < 50 && discarded.some((d) => sameCombo(d.tags, pick.tags)); i++) pick = next(board, r);
+  const { input, family, intensity, response } = pick.tags;
+  console.log(JSON.stringify(pick, null, 2));
+  console.log(`\nnext: pnpm lab:new <slug> ${input} --family ${family} --intensity ${intensity} --response ${response} --rationale "${pick.rationale}"`);
+  console.log("(deviate only with a written reason in --rationale)");
+}
+
 const [cmd, ...rest] = process.argv.slice(2);
 const a = args(rest);
 if (cmd === "new") cmdNew(a);
 else if (cmd === "check") cmdCheck();
 else if (cmd === "keep" || cmd === "discard") verdict(cmd, a);
-else die("commands: new | check | keep | discard");
+else if (cmd === "sync") await cmdSync(a);
+else if (cmd === "next") cmdNext(a);
+else die("commands: next | new | check | keep | discard | sync");

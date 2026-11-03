@@ -21,14 +21,57 @@ export interface LabMeta {
   label: string;
   /** Tiny instruction, top-right: the single gesture, in plain words. */
   hint: string;
+  /** The same instruction for a finger, shown under `(pointer: coarse)`: "arraste", "toque", "segure". */
+  hintTouch?: string;
   /** The math behind it, one mono line at the bottom of the card. */
   formula: string;
   /** Rule ids from lab/RULES.md that this experiment follows. */
   rules: string[];
   status: LabStatus;
+  /** What the taste model learns from (scripts/lab-taste.mjs). One value each. */
+  tags: LabTags;
+  /** Why this combo today: the `pnpm lab:next` line, or the written reason to deviate. */
+  rationale: string;
+}
+
+export interface LabTags {
+  input: "drag" | "tilt" | "scroll" | "pointer" | "press";
+  family: "mechanical" | "ink-print" | "fluid" | "optics" | "typography" | "light" | "material" | "other";
+  intensity: "subtle" | "medium" | "bold";
+  response: "snap" | "spring" | "inertia" | "direct";
 }
 
 export interface LabModule {
   meta: LabMeta;
+  default: () => ReactElement;
+}
+
+/** Where a lab component came from: credited, linked, never copied. */
+export interface LabSource {
+  title: string;
+  url: string;
+  studio: string;
+  /** The Behance gallery it was featured in (ui-ux, graphic-design, motion): the taste learns which sources win. */
+  gallery: string;
+  /** Local reference images (lab/.refs/, gitignored) the run looked at. */
+  refs: string[];
+}
+
+/**
+ * A lab COMPONENT (lab/components/): a refined, interactive piece inspired by a
+ * featured Behance project. Same verdict flow as an experiment; a kept one is
+ * "pronto pra colher" and only reaches registry/ when the owner asks.
+ */
+export interface LabComponentMeta extends LabMeta {
+  kind: "component";
+  source: LabSource;
+  /** ONE sentence: what makes the source special. Designed from this, not from its pixels. */
+  inspiration: string;
+  /** The two concepts thought through and not shipped, one line each (why they lost). */
+  sketches: string[];
+}
+
+export interface LabComponentModule {
+  meta: LabComponentMeta;
   default: () => ReactElement;
 }

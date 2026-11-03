@@ -29,7 +29,8 @@ Each rule has an id. An experiment lists the ids it follows in `meta.rules`, and
 ## The code
 
 - **`no-new-deps`**: only what the repo already has. Allowed imports: `react`,
-  `motion/react`, `../types`, `@/lib/utils`. Anything else fails `lab:check`.
+  `motion/react`, `../types`, `../hooks`, `@/lib/utils`. Anything else fails
+  `lab:check`.
 - **`tokens`**: color, type, radius and motion come from the house tokens
   (`--casa-*`, `--ease-out`, `--dur-*`, `font-casa-mono`, `text-casa-*`). Zero
   hex, zero `rgb(` literals. Springs are allowed for gesture (see visant-motion).
@@ -39,6 +40,34 @@ Each rule has an id. An experiment lists the ids it follows in `meta.rules`, and
 - **`touch`**: works with a finger on a phone. Pointer Events only (no mouse
   events), `touch-action: none` on the surface you drag, and nothing hidden behind
   hover.
+
+## Mobile (most people meet the lab on a phone)
+
+Static half in `lab:check`, live half in `pnpm lab:mobile` (iPhone 13 + Pixel 7
+with real touch events, plus desktop 1440). Shared hooks live in `lab/hooks.ts`.
+
+- **`mobile-hint`**: `meta.hintTouch` says the gesture for a finger, in Portuguese
+  ("arraste", "toque", "segure", "deslize"); the page shows it under
+  `(pointer: coarse)`. One line at 375px, or it wraps cleanly.
+- **`mobile-no-hover`**: no `hover:` and no `onPointerEnter/Leave/Over`. A
+  `pointer` experiment maps the finger as a drag (capture the pointer) and has
+  an idle state that moves on its own (`useIdle`), because a phone never hovers.
+- **`mobile-idle`**: `useIdle(ref, fn)` runs only while the card is on screen,
+  untouched, and motion is allowed; any input calls `poke()`.
+- **`mobile-scroll`**: a `scroll` experiment is a native scroller
+  (`overflow-y-scroll` + `touch-pan-y`), so a swipe drives it, never
+  `touch-none`. Keep it short: a full-width card must not trap the page.
+- **`mobile-press`**: a hold needs `[-webkit-touch-callout:none]` and
+  `onContextMenu` preventDefault, or the OS menu opens mid-press.
+- **`mobile-tilt`**: anything that tilts may also read the gyroscope
+  (`useTilt`, enabled inside the first tap so iOS can ask permission), with
+  drag as the fallback.
+- **`mobile-perf`**: 60 fps. No layout properties (`only-transform`), every
+  `requestAnimationFrame` cancelled, loops paused off screen (`useInView` /
+  `useIdle`), canvas DPR capped with `Math.min(devicePixelRatio, 2)`.
+- Hit areas are the whole surface (≥ 44px); the page grid is one column on a
+  phone and never overflows sideways (`lab:mobile` asserts it).
+
 - **`small`**: under ~150 lines per file, including comments. If it doesn't fit,
   the idea is two experiments.
 - **`only-transform`**: animate `transform` / `opacity`, or a paint-only value on
@@ -47,10 +76,79 @@ Each rule has an id. An experiment lists the ids it follows in `meta.rules`, and
 
 ## The run
 
-1. Read `PREFERENCES.md` first. Repeat what was kept, avoid what was discarded.
-2. Pick an input and a metaphor not already on the board (`lab/experiments/`).
-3. `pnpm lab:new <slug> <drag|tilt|scroll|pointer|press> --label WORD --hint "..."`
-4. Fill in the component and the meta. Status stays `candidate`.
-5. `pnpm lab:check && pnpm typecheck`. Both green, or no commit.
-6. Never touch `registry/`, never deploy to production. A kept experiment only
-   becomes a registry item when the owner says so.
+Candidates go straight to production, hidden: the public `/lab` renders only
+`kept`. A Visant Labs admin judges them on `ui.visantlabs.com/lab?admin`
+("Entrar com Visant Labs", then "Aprovar" / "Descartar", one-tap reason chips
+and optional free text). The verdict goes to a store (`api/lab.ts`, Supabase
+`lab.veredictos`) and the page merges it at runtime: an approval is public at
+once, no deploy. Git catches up on the next run. No PR, no command for the owner.
+
+The lab learns: every experiment carries `meta.tags` (input, family,
+intensity, response). `lab:sync` turns verdicts into a Beta(1,1) approval rate
+per tag value (`lab/taste.json` + the table in `PREFERENCES.md`), and
+`lab:next` Thompson-samples today's combo from it: proven values usually win,
+untested ones still get tried. `lab:check` refuses a candidate whose combo
+matches a discarded one or whose title/metaphor overlaps another (Jaccard > 0.6).
+
+Work in the worktree `Z:/Cursor/.worktrees/interaction-lab`, never in the main
+checkout (it holds the owner's uncommitted work and has `main` checked out).
+
+1. `git fetch origin && git checkout -B lab/<yyyy-mm-dd>-<slug> origin/main`.
+2. `pnpm lab:sync`: pulls the verdicts given on `/lab` into git (kept → status
+   `kept`, discarded → file deleted, chips + reason logged in `PREFERENCES.md`)
+   and rewrites the taste scoreboard. Idempotent; it ships in today's commit.
+3. `pnpm lab:next`: prints today's tag combo and a one-line rationale.
+4. Read `PREFERENCES.md` (the generated taste block and the log). Pick a
+   metaphor that fits the combo and is not already on the board.
+5. `pnpm lab:new <slug> <input> --family F --intensity I --response R --rationale "<the lab:next line>" --label WORD --hint "..." --hint-touch "..."`
+   Build on the suggested combo. Deviate only with the reason written in
+   `--rationale` (e.g. `desvio: ... porque ...`).
+6. Fill in the component and the meta. Status stays `candidate`.
+7. The component of the day (next section, steps C1–C5).
+8. `pnpm test:lab && pnpm lab:check && pnpm typecheck && pnpm lab:mobile`. All
+   green, or nothing ships (`lab:mobile` starts Vite itself and drives every
+   card, experiments and components, by touch).
+9. `cp -r Z:/Cursor/Vintageuiuxlibrary/.vercel .vercel` (if missing; the
+   worktree has no Vercel link, see VISANT-REGISTRY-PLANO.md §8).
+10. `node scripts/ship.mjs --main --no-perf -m "lab: <LABEL> (<input>) + <COMPONENT>, candidates"`
+   (all ship gates, commit, push `HEAD:main`, `vercel deploy --prod`). If the
+   push is refused (main moved), `git rebase origin/main` and run it again.
+11. Never touch `registry/`, never set `status: "kept"` by hand (only
+    `lab:sync` does, from the owner's verdict). A kept experiment or component
+    only becomes a registry item when the owner says so.
+
+## The component (one per run, from a featured Behance project)
+
+Besides the interaction, every run ships ONE refined, interactive component to
+`lab/components/<date>-<slug>.tsx`, inspired by a project featured in a curated
+Behance gallery. It goes through the same verdict (Aprovar / Descartar + chips);
+a kept one is listed under "Prontos pra colher" in `PREFERENCES.md` by
+`lab:sync`, and promotion to `registry/` is a separate step the owner asks for.
+
+- C1. `pnpm lab:behance`: picks a random featured project not used before
+  (`lab/behance-used.json`), downloads 3 refs into `lab/.refs/<date>-<slug>/`
+  (gitignored) and prints title, url, studio, gallery. It drives headless
+  Chromium (a plain fetch gets 403). If it fails, use the fallback in the
+  script's header (pick by hand, `--url <project>`); never block the run on it.
+- C2. Look at the refs yourself. Then the method, in this order:
+  - **A. Principle, not pixels.** Write `meta.inspiration`: ONE sentence on what
+    makes the project special. Design from that sentence, not from its layouts.
+  - **B. Collision.** Combine that principle with one physical metaphor from
+    the lab (a detent, a kaleidoscope, an abacus...), so the idea is ours.
+  - **C. Three sketches, one shipped.** Think through 3 concepts; score each
+    against `lab/taste.json` (what the owner keeps) plus craft, originality and
+    mobile; ship the best; write the 2 losers in `meta.sketches`, one line each
+    with why they lost.
+  - **D. Source taste.** `meta.source` = `{ title, url, studio, gallery, refs }`;
+    `gallery` lets the scoreboard learn which sources produce approvals.
+- C3. Build it: `kind: "component"`, the same `tags` / `rationale` / `hint` /
+  `hintTouch` / `formula` as an experiment, up to ~250 lines, `../hooks` for
+  touch/idle/tilt, `data-lab-target` on the primary control (lab:mobile drives
+  it). No source branding or text, no lifted layouts, no client names.
+- C4. Production craft: our tokens only (map the source's colors to `--casa-*`,
+  `--chart-*`, `--destructive` with `color-mix(in srgb, ...)`, never hex),
+  visant-motion springs/durations, reduced motion honored, a11y (real roles,
+  keyboard, `aria-valuetext` / live regions), mobile first (all Mobile rules).
+- C5. Distinct from the other components on the board in input and metaphor.
+  `lab:check` enforces the credit (`source.*`), the principle, the 2 sketches,
+  no literal colors and the size; `lab:mobile` drives it by touch.

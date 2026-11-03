@@ -48,7 +48,12 @@
     "lab:new": "node scripts/lab.mjs new",
     "lab:check": "node scripts/lab.mjs check",
     "lab:keep": "node scripts/lab.mjs keep",
-    "lab:discard": "node scripts/lab.mjs discard"
+    "lab:discard": "node scripts/lab.mjs discard",
+    "lab:sync": "node scripts/lab.mjs sync",
+    "lab:next": "node scripts/lab.mjs next",
+    "lab:mobile": "node scripts/lab-mobile.mjs",
+    "lab:behance": "node scripts/lab-behance.mjs",
+    "test:lab": "node --test scripts/lab-taste.test.mjs"
   },
   "dependencies": {
     "@dgreenheck/ez-tree": "1.1.0",
@@ -96,10 +101,12 @@
     "date-fns": "3.6.0",
     "embla-carousel-react": "8.6.0",
     "input-otp": "1.4.2",
+    "iron-session": "^9.0.1",
     "lucide-react": "0.487.0",
     "mcp-handler": "^2.3.0",
     "motion": "12.23.24",
     "next-themes": "0.4.6",
+    "oauth4webapi": "^3.8.8",
     "react-day-picker": "8.10.1",
     "react-dnd": "16.0.1",
     "react-dnd-html5-backend": "16.0.1",
