@@ -363,7 +363,7 @@ export const SAIDA_FECHADA: LinhaSaida[] = [
   { passo: 3, linha: "  src/Pricing.tsx:4  opacity-ladder", alvo: 4 },
   { passo: 4, linha: "gates: 4/4 ran; none skipped" },
   { passo: 4, linha: "GATE CLOSED: 3 detector(s) with findings.", fecho: true },
-  { passo: 4, linha: "A gate finding becomes a fix, not a proposal." },
+  { passo: 4, linha: "A confirmed finding is a defect, not a taste call: list it and ask before editing." },
 ];
 
 export const SAIDA_ABERTA: LinhaSaida[] = [

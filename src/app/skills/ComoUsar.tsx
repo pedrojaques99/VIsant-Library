@@ -1,59 +1,43 @@
 "use client";
 
 /**
- * /skills/como-usar: o primeiro uso, para quem nunca abriu um terminal.
+ * /skills/como-usar: o primeiro uso, sem terminal.
  *
- * Um passo por tela, com uma coisa só para fazer. Quando o passo pede um comando, ele aparece
- * sendo digitado e tem um botão de copiar. Sem rolagem, e as setas do teclado também andam.
+ * Quem instala é o agente: a pessoa copia uma mensagem e cola na conversa. Depois vêm os dois
+ * jeitos de pedir, uma skill ou um componente, um por tela. As setas do teclado também andam.
  */
 
 import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Copy } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Copy } from "lucide-react";
 import { useCopy } from "../copy-command";
 import { Acao, cx, DUR, EASE_OUT, useMenosMovimento } from "./hub/base";
 import { COMANDO_COMPLETO } from "./hub/dock";
 
-type Passo = {
-  titulo: string;
-  texto: string;
-  /** O que a pessoa baixa antes de seguir. */
-  link?: { href: string; rotulo: string };
-  comando?: string;
-  /** O que se escreve pro Claude: conversa, sem botão de copiar. */
-  conversa?: string;
-};
+/* O llms.txt ensina o agente a ligar o registry: nada disso precisa ficar na mensagem. */
+const MENSAGEM = `Instale as skills da Visant neste projeto:
+${COMANDO_COMPLETO}
+
+Depois leia https://ui.visantlabs.com/llms.txt e use a library @visant/ui quando eu pedir um componente.`;
+
+type Passo = { titulo: string; texto: string; escrita: string; copiar?: boolean };
 
 const PASSOS: Passo[] = [
   {
-    titulo: "Instale o Node.js.",
-    texto: "É ele que baixa as skills. Escolha a versão LTS e clique em avançar até o fim.",
-    link: { href: "https://nodejs.org", rotulo: "Baixar o Node.js" },
+    titulo: "Envie isso para o seu agente de IA.",
+    texto: "Copie e cole na conversa. Ele instala tudo sozinho.",
+    escrita: MENSAGEM,
+    copiar: true,
   },
   {
-    titulo: "Instale o Claude Code.",
-    texto: "É o Claude trabalhando direto nos arquivos do seu projeto.",
-    link: { href: "https://claude.com/claude-code", rotulo: "Baixar o Claude Code" },
+    titulo: "Chame uma skill.",
+    texto: "Escreva como falaria com alguém. Ele escolhe a skill certa.",
+    escrita: "tá com cara de IA, audita essa tela",
   },
   {
-    titulo: "Abra o terminal na pasta do projeto.",
-    texto: "No Mac, abra o Terminal. No Windows, o PowerShell. Troque meu-projeto pelo nome da sua pasta.",
-    comando: "cd meu-projeto",
-  },
-  {
-    titulo: "Cole este comando.",
-    texto: "Copie, cole no terminal e aperte Enter. Ele instala as seis skills.",
-    comando: COMANDO_COMPLETO,
-  },
-  {
-    titulo: "Abra o Claude.",
-    texto: "Digite isto no mesmo terminal e aperte Enter.",
-    comando: "claude",
-  },
-  {
-    titulo: "Peça do seu jeito.",
-    texto: "Escreva como falaria com alguém. O Claude escolhe a skill certa.",
-    conversa: "tá com cara de IA, audita essa tela",
+    titulo: "Peça um componente.",
+    texto: "Ele acha a peça na library e coloca no seu projeto.",
+    escrita: "coloca um kanban da Visant nessa tela",
   },
 ];
 
@@ -81,43 +65,18 @@ function Digitando({ texto }: { texto: string }) {
   );
 }
 
-function Tela({ passo }: { passo: Passo }) {
-  const texto = passo.comando ?? passo.conversa;
-  const { done, copy } = useCopy(passo.comando ?? "");
-  const Icone = done ? Check : Copy;
-  if (!texto) return null;
-  return (
-    <div className="mt-6 flex min-h-20 items-start gap-3 rounded-tile bg-casa-tile p-4 font-casa-mono text-casa-base">
-      <span aria-hidden="true" className="text-casa-fg-3">
-        {passo.comando ? "$" : ">"}
-      </span>
-      <code className="min-w-0 flex-1 text-casa-fg [overflow-wrap:anywhere]" aria-label={texto}>
-        <Digitando key={texto} texto={texto} />
-      </code>
-      {passo.comando ? (
-        <button
-          type="button"
-          onClick={copy}
-          data-copiar-passo
-          aria-label={done ? "Copiado" : "Copiar"}
-          className="-mr-2 -mt-2 grid size-11 shrink-0 place-items-center rounded-control bg-casa-tile-2 text-casa-fg outline-none focus-visible:[box-shadow:var(--focus)]"
-        >
-          <Icone className="size-4" aria-hidden="true" />
-        </button>
-      ) : null}
-    </div>
-  );
-}
-
 export function ComoUsar() {
   const [i, setI] = React.useState(0);
   const [sentido, setSentido] = React.useState(1);
+  const [copiou, setCopiou] = React.useState(false);
   const menos = useMenosMovimento();
   const total = PASSOS.length;
   const fim = i === total;
   const passo = PASSOS[i];
   const titulo = React.useRef<HTMLHeadingElement>(null);
   const primeira = React.useRef(true);
+  const { done, copy } = useCopy(MENSAGEM);
+  const Icone = done ? Check : Copy;
 
   const andar = React.useCallback(
     (d: number) => {
@@ -146,9 +105,10 @@ export function ComoUsar() {
   }, [i]);
 
   const deslize = menos ? 0 : 24 * sentido;
+  const classeDoTitulo = "text-[clamp(2.25rem,7vw,4rem)] font-medium leading-[1.08] tracking-[-0.02em] outline-none [text-wrap:balance]";
 
   return (
-    <main data-como-usar className="casa shell flex min-h-[calc(100svh-var(--shell-header-h))] flex-col py-4 lg:mx-auto lg:max-w-2xl lg:py-8">
+    <main data-como-usar className="casa shell flex min-h-[calc(100svh-var(--shell-header-h)-3.5rem)] flex-col py-4 lg:mx-auto lg:min-h-[calc(100svh-var(--shell-header-h))] lg:max-w-2xl lg:py-8">
       <div role="progressbar" aria-label="Progresso" aria-valuemin={0} aria-valuemax={total} aria-valuenow={i} className="flex gap-1.5">
         {PASSOS.map((p, k) => (
           <span key={p.titulo} className="h-1 flex-1 overflow-hidden rounded-[2px] bg-casa-tile-2">
@@ -160,8 +120,8 @@ export function ComoUsar() {
         ))}
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col justify-start pb-8 pt-[12svh]">
-        <AnimatePresence mode="wait" initial={false} custom={sentido}>
+      <div className="flex min-h-0 flex-1 flex-col justify-start pb-8 pt-[10svh]">
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={i}
             initial={{ opacity: 0, x: deslize }}
@@ -179,31 +139,36 @@ export function ComoUsar() {
                 >
                   <Check className="size-6" aria-hidden="true" />
                 </motion.span>
-                <h1 ref={titulo} tabIndex={-1} className="text-[clamp(2.25rem,7vw,4rem)] font-medium leading-[1.08] tracking-[-0.02em] outline-none">
+                <h1 ref={titulo} tabIndex={-1} className={classeDoTitulo}>
                   Pronto.
                 </h1>
-                <p className="mt-3 text-casa-lg text-casa-fg-2 [text-wrap:pretty]">As skills já estão no seu projeto. É só continuar pedindo.</p>
+                <p className="mt-3 text-casa-lg text-casa-fg-2 [text-wrap:pretty]">Agora é só continuar pedindo.</p>
               </>
             ) : (
               <>
-                <p className="mb-3 font-casa-mono text-casa-sm text-casa-fg-3">
-                  {i + 1} de {total}
-                </p>
-                <h1 ref={titulo} tabIndex={-1} className="text-[clamp(2.25rem,7vw,4rem)] font-medium leading-[1.08] tracking-[-0.02em] outline-none [text-wrap:balance]">
+                <h1 ref={titulo} tabIndex={-1} className={classeDoTitulo}>
                   {passo.titulo}
                 </h1>
                 <p className="mt-3 text-casa-lg text-casa-fg-2 [text-wrap:pretty]">{passo.texto}</p>
-                <Tela passo={passo} />
-                {passo.link ? (
-                  <a
-                    href={passo.link.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-6 inline-flex h-11 items-center gap-2 rounded-control bg-casa-tile-2 px-5 text-casa-base font-medium text-casa-fg outline-none focus-visible:[box-shadow:var(--focus)]"
+                <p
+                  aria-label={passo.escrita}
+                  data-escrita
+                  className="mt-6 min-h-20 whitespace-pre-wrap rounded-tile bg-casa-tile p-4 font-casa-mono text-casa-sm text-casa-fg [overflow-wrap:anywhere]"
+                >
+                  <Digitando key={passo.escrita} texto={passo.escrita} />
+                </p>
+                {passo.copiar ? (
+                  <Acao
+                    data-copiar-mensagem
+                    className="mt-3 w-full"
+                    onClick={() => {
+                      copy();
+                      setCopiou(true);
+                    }}
                   >
-                    {passo.link.rotulo}
-                    <ArrowUpRight className="size-4" aria-hidden="true" />
-                  </a>
+                    <Icone className="size-4" aria-hidden="true" />
+                    {done ? "Copiado" : "Copiar"}
+                  </Acao>
                 ) : null}
               </>
             )}
@@ -231,7 +196,8 @@ export function ComoUsar() {
             Ver as skills
           </a>
         ) : (
-          <Acao onClick={() => andar(1)} data-continuar>
+          /* No primeiro passo a ação é copiar: Continuar só vira a principal depois disso. */
+          <Acao secundaria={i === 0 && !copiou} onClick={() => andar(1)} data-continuar>
             Continuar
             <ArrowRight className="size-4" aria-hidden="true" />
           </Acao>

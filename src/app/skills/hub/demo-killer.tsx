@@ -7,6 +7,7 @@
  */
 
 import * as React from "react";
+import { motion } from "motion/react";
 import { Check, X } from "lucide-react";
 import { SAIDA_ABERTA, SAIDA_FECHADA, SLOP_CARTAO } from "./amostras";
 import { Acao, ALTURA_LARGA, ANIMA_COR, ANIMA_OPACIDADE, cx, Dobra, LINK, Terminal, useAoEntrar, useMenosMovimento, useSequencia } from "./base";
@@ -21,6 +22,8 @@ const ACHADOS = {
   preco: { passo: 0, regras: ["tailwind-palette"] },
 };
 type Alvo = keyof typeof ACHADOS;
+
+const TOTAL = Object.values(ACHADOS).reduce((s, a) => s + a.regras.length, 0);
 
 function Marca({ alvo, passo, ativo, onToque }: { alvo: Alvo; passo: number; ativo: Alvo | null; onToque: (a: Alvo) => void }) {
   const a = ACHADOS[alvo];
@@ -83,7 +86,7 @@ export function DemoKiller() {
       faixa
       como={
         <>
-          <p>Roda quatro detectores no seu código e, se achar slop, não deixa passar. Depois abre a tela, discute com o próprio veredito e dá uma nota.</p>
+          <p>Roda quatro detectores no seu código e, se achar slop, não deixa passar. Depois abre a tela, discute com o próprio veredito, dá uma nota e pergunta o que corrigir.</p>
           <Terminal>{saida.map((l) => l.linha).join("\n")}</Terminal>
           <a href="/skills/killer" data-para-killer className={cx(LINK, "mt-3 inline-block text-casa-fg-2")}>
             Ver como o killer audita
@@ -92,6 +95,9 @@ export function DemoKiller() {
       }
     >
       <div ref={palco} className="flex min-w-0 flex-col gap-3 lg:mx-auto lg:w-full lg:max-w-4xl" data-demo="killer">
+        <p data-chamada className="max-w-2xl text-casa-base text-casa-fg-2 [text-wrap:pretty] lg:text-casa-lg">
+          Analisa o design, aponta cada erro e pergunta antes de corrigir. Feito com o que o time da Visant aprendeu em + de 4 anos de projeto. Pronto para usar em minutos.
+        </p>
         <div className="relative min-w-0 overflow-hidden rounded-tile bg-casa-bg p-5 pr-12 lg:p-10 lg:pr-14">
           <div className="grid">
             <div data-cartao="limpo" aria-hidden={!limpo} className={cx("col-start-1 row-start-1 flex flex-col justify-between", ANIMA_OPACIDADE, !limpo && "invisible opacity-0")}>
@@ -134,7 +140,7 @@ export function DemoKiller() {
             />
           ) : null}
         </div>
-        <div className="flex min-h-11 items-center justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:min-h-14 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex min-w-0 items-center gap-2" aria-live="polite" data-gate>
             {limpo ? <Check className="size-6 shrink-0" /> : <X className="size-6 shrink-0 text-[color:var(--destructive)]" />}
             <span className="text-[2rem] font-medium leading-none tabular-nums" data-total>
@@ -146,8 +152,19 @@ export function DemoKiller() {
               </span>
             ) : null}
           </p>
-          <Acao onClick={limpo ? varrer : corrigir} secundaria={limpo} data-acao="killer">
-            {limpo ? "De novo" : "Corrigir"}
+          <Acao onClick={limpo ? varrer : corrigir} secundaria={limpo || !fim} grande className="relative w-full sm:w-auto" data-acao="killer">
+            {limpo ? "De novo" : fim ? `Corrigir os ${TOTAL} erros` : "Corrigir"}
+            {/* O convite: quando a varredura termina, o botão chama algumas vezes e para. */}
+            {fim && !limpo && !menos ? (
+              <motion.span
+                aria-hidden="true"
+                data-pulso
+                className="pointer-events-none absolute inset-0 rounded-control border-2 border-casa-cta"
+                initial={{ opacity: 0.8, scale: 1 }}
+                animate={{ opacity: 0, scale: 1.14 }}
+                transition={{ duration: 1, ease: "easeOut", repeat: 4, repeatDelay: 0.5 }}
+              />
+            ) : null}
           </Acao>
         </div>
       </div>

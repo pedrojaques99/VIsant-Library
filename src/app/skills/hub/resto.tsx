@@ -36,8 +36,11 @@ export function Resto({ instalando, setInstalando }: { instalando: boolean; setI
         <section data-fecho className={`shell grid min-w-0 content-center items-center gap-6 py-6 lg:grid-cols-2 lg:gap-16 ${ALTURA_LARGA}`}>
           <div className="min-w-0">
             <h2 className="text-[clamp(2.25rem,5vw,4rem)] font-medium leading-[1.12] tracking-[-0.02em]">
-              <CountUp>6</CountUp> skills, licença MIT.
+              Para nossa comunidade.
             </h2>
+            <p className="mt-3 text-casa-base text-casa-fg-2 lg:text-casa-lg">
+              <CountUp>6</CountUp> skills, licença MIT.
+            </p>
             <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
               <Acao onClick={() => setInstalando(true)} data-acao="fecho">
                 Instalar

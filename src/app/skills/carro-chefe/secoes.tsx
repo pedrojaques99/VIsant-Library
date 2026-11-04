@@ -191,7 +191,7 @@ const TRILHAS: {
       "Julga, faz o papel de advogado do diabo e abre a tela.",
       "Entrega o AUDIT.md com achados, nota e o que não checou.",
     ],
-    resultado: "Não muda nada: o card fica como está, defeitos inclusive, e sai um relatório apontando cada um.",
+    resultado: "O card fica como está, defeitos inclusive. Sai um relatório apontando cada um, e ela pergunta o que corrigir.",
     consertos: new Set(),
     juizos: new Set(),
   },

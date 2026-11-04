@@ -75,14 +75,16 @@ export function Acao({
   className,
   children,
   secundaria,
+  grande,
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { secundaria?: boolean }) {
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { secundaria?: boolean; grande?: boolean }) {
   return (
     <button
       type="button"
       {...props}
       className={cx(
-        "inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-control px-5 text-casa-base font-medium outline-none",
+        "inline-flex shrink-0 items-center justify-center gap-2 rounded-control font-medium outline-none",
+        grande ? "h-14 px-8 text-casa-lg" : "h-11 px-5 text-casa-base",
         secundaria ? "bg-casa-tile-2 text-casa-fg" : "bg-casa-cta text-casa-cta-fg",
         "transition-[transform,opacity] [transition-duration:var(--dur-press)] [transition-timing-function:var(--ease-out)]",
         "active:scale-[0.97] focus-visible:[box-shadow:var(--focus)] disabled:pointer-events-none",

@@ -98,6 +98,12 @@ export const listNotas = () => rpc<NotaDaCuradoria[]>("curadoria_notas");
 export const putNota = (item: string, nota: number, comentario: string, excluir: boolean, por: string) =>
   rpc<unknown>("curadoria_nota_put", { p_item: item, p_nota: nota, p_comentario: comentario, p_excluir: excluir, p_por: por });
 
+/** A burilação de copy: os votos dos admins. Tabela em `burilacao/supabase.sql`. */
+export type VotoDaBurilacao = { duelo: string; por: string; escolha: string; motivos: string[]; escrita: string; data: string };
+export const listVotos = () => rpc<VotoDaBurilacao[]>("burilacao_votos");
+export const putVoto = (duelo: string, por: string, escolha: string, motivos: string[], escrita: string) =>
+  rpc<unknown>("burilacao_voto_put", { p_duelo: duelo, p_por: por, p_escolha: escolha, p_motivos: motivos, p_escrita: escrita });
+
 export const redirect = (to: string, headers: Headers) => {
   headers.set("location", to);
   headers.set("cache-control", "no-store");

@@ -32,8 +32,10 @@ test("como usar: um passo por tela, do botão de /skills até o fim", async ({ p
   await page.goto("/skills");
   await page.locator("[data-como-usar-link]").click();
   await expect(page).toHaveURL(/\/skills\/como-usar$/);
-  await expect(page.locator("h1")).toHaveText("Instale o Node.js.");
-  for (let i = 0; i < 6; i++) {
+  await expect(page.locator("h1")).toHaveText("Envie isso para o seu agente de IA.");
+  await expect(page.locator("[data-escrita]")).toHaveAttribute("aria-label", /llms\.txt/);
+  await page.locator("[data-copiar-mensagem]").click();
+  for (let i = 0; i < 3; i++) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
     await expect(page.locator("h1")).toHaveCount(1);
     await page.locator("[data-continuar]").click();
@@ -41,7 +43,7 @@ test("como usar: um passo por tela, do botão de /skills até o fim", async ({ p
   }
   await expect(page.locator("h1")).toHaveText("Pronto.");
   await page.getByRole("button", { name: "Voltar" }).click();
-  await expect(page.locator("h1")).toHaveText("Peça do seu jeito.");
+  await expect(page.locator("h1")).toHaveText("Peça um componente.");
 });
 
 test("endereço que não existe mostra 404, e a volta do OAuth não", async ({ page }) => {

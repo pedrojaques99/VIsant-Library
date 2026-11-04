@@ -246,7 +246,7 @@ const SECOES = [
   {
     slug: "skills/como-usar",
     titulo: "Como usar as skills / Visant",
-    descricao: "Do zero ao primeiro pedido, um passo por tela, para quem nunca abriu um terminal.",
+    descricao: "Mande uma mensagem pro seu agente de IA e comece a pedir: skills e componentes, um passo por tela.",
   },
   {
     slug: "skills/killer",
@@ -279,6 +279,13 @@ const SECOES = [
     noindex: true,
     titulo: "Lab / @visant/ui",
     descricao: "Bancada de interações: uma nova por dia, e só fica a que presta.",
+  },
+  /* Mesmo motivo do `/lab`: sem HTML próprio, 404 na Vercel. */
+  {
+    slug: "burilar",
+    noindex: true,
+    titulo: "Burilação / @visant/ui",
+    descricao: "Duelos de copy para os admins da Visant.",
   },
   /* `/callback` é a volta do OAuth do Visant Labs (`visant-auth.tsx`). Mesmo
      buraco do `/lab`: sem HTML próprio a Vercel responde 404 antes do app

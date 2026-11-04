@@ -85,6 +85,8 @@ function EsperaDaRota() {
 }
 /* O laboratório de interações (`/lab`): só quem abre a rota paga pelo chunk. */
 const Lab = React.lazy(() => import("./Lab").then((m) => ({ default: m.Lab })));
+/* A burilação de copy (`/burilar`): duelos A ou B, só para admin. */
+const Burilar = React.lazy(() => import("./Burilar").then((m) => ({ default: m.Burilar })));
 const Docs = React.lazy(() => import("./Docs").then((m) => ({ default: m.Docs })));
 const SkillsHub = React.lazy(() => import("./skills/Hub").then((m) => ({ default: m.Hub })));
 const SkillsFilme = React.lazy(() => import("./skills/Filme").then((m) => ({ default: m.Filme })));
@@ -95,7 +97,7 @@ import { DEFAULT_BRAND, REGISTRY_URL } from "./registry-meta";
 import { VisantAuthProvider } from "./visant-auth";
 import { MinhasMarcas } from "./MinhasMarcas";
 
-type View = "kits" | "catalogo" | "marca" | "lab" | "docs" | "skills" | "404";
+type View = "kits" | "catalogo" | "marca" | "lab" | "burilar" | "docs" | "skills" | "404";
 
 interface Route {
   view: View;
@@ -142,13 +144,14 @@ const VIEWS: { value: View; label: string }[] = [
 const ROTAS_SEM_PORTA: View[] = ["kits", "docs"];
 const SUBPAGINAS_DE_SKILLS = ["filme", "killer", "como-usar"];
 /* `callback` é a volta do OAuth (`visant-auth.tsx`), que cai no catálogo. */
-const ROTAS_CONHECIDAS = ["catalogo", "marca", "skills", "kits", "kit", "c", "rig", "lab", "docs", "callback"];
+const ROTAS_CONHECIDAS = ["catalogo", "marca", "skills", "kits", "kit", "c", "rig", "lab", "burilar", "docs", "callback"];
 
 const TITULO_DA_VIEW: Partial<Record<View, string>> = {
   marca: "Marca / @visant/ui",
   docs: "Docs / @visant/ui",
   kits: "Kits / @visant/ui",
   lab: "Lab / @visant/ui",
+  burilar: "Burilação / @visant/ui",
   "404": "Página não encontrada / @visant/ui",
 };
 const TITULO_DA_SKILL: Record<string, string> = {
@@ -190,6 +193,7 @@ function parsePath(loc: Location): Route {
   /* `/lab` fica fora das três portas do cabeçalho: é bancada de rascunho, não
      seção da library. Entra por endereço. */
   if (partes[0] === "lab") return { view: "lab", focus: null, kit: null, familia: null };
+  if (partes[0] === "burilar") return { view: "burilar", focus: null, kit: null, familia: null };
   /* `/rig` era a aba da bancada. Hoje a bancada é uma sala, e o link antigo
      entra nela em vez de dar 404 em quem tinha o endereço salvo. */
   if (partes[0] === "rig")
@@ -483,6 +487,7 @@ function Shell() {
       <React.Suspense fallback={<EsperaDaRota />}>
         {route.view === "marca" && <BrandStudioBody />}
         {route.view === "lab" && <Lab />}
+        {route.view === "burilar" && <Burilar />}
         {route.view === "docs" && <Docs />}
         {route.view === "404" && (
           <main className="shell casa min-h-[60vh] pt-24">

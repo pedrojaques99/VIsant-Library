@@ -89,7 +89,7 @@ export const FUNCAO: Record<string, string> = {
   "visant-frontend": "Decide o que fica na tela",
   "visant-copy": "Escreve e tira o tique",
   "visant-refine": "Gráfico, medidor e painel",
-  "visant-killer": "Audita antes do PR",
+  "visant-killer": "Olho de designer para o seu Claude Code",
   "visant-motion": "Movimento e espera",
   "visant-preflight": "Confere antes do projeto grande",
   "visant-methodology": "Método de marca em 9 etapas",

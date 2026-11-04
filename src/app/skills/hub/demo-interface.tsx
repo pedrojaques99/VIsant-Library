@@ -9,15 +9,33 @@ import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowDown } from "lucide-react";
 import { PROVA_MONTADA, SELO_MONTADO } from "./amostras";
-import { Acao, cx, Dobra, DUR, EASE_OUT, useAoEntrar, useMenosMovimento, useNaTela, useSequencia } from "./base";
+import { Acao, ANIMA_OPACIDADE, cx, Dobra, DUR, EASE_OUT, useAoEntrar, useMenosMovimento, useNaTela, useSequencia } from "./base";
 
 const ROTAS = [
   { fala: "tá com cara de IA, limpa o slop", trilha: "Limpar", etapas: ["Roda o check.mjs na tela", "Conserta cada achado na causa", "Lê as imagens e tira o que detector não vê", "Roda de novo até sair limpo"] },
   { fala: "melhora o design dessa tela", trilha: "Ponta a ponta", etapas: ["Vê a tela antes do código", "Nomeia o trabalho da tela", "Diagnostica pela imagem", "Corta antes de somar", "Constrói com o que o produto já tem", "Olha o resultado, até três rodadas", "Relata o que não checou"] },
-  { fala: "audita essa tela", trilha: "visant-killer", etapas: ["Audita e não muda nada"] },
+  { fala: "audita essa tela", trilha: "visant-killer", etapas: ["Audita e pergunta antes de mudar"] },
   { fala: "deixa essa animação mais suave", trilha: "visant-motion", etapas: ["Carrega o manual de motion"] },
   { fala: "faz um gráfico pra esse painel", trilha: "visant-refine", etapas: ["Carrega o manual de dado e controle"] },
 ];
+
+/**
+ * A fala apaga até onde as duas frases coincidem e digita o resto. O que falta digitar
+ * fica no fluxo, transparente: sem isso a frase centrada anda a cada letra.
+ */
+function useDigitado(alvo: string, menos: boolean) {
+  const [texto, setTexto] = React.useState(alvo);
+  const anterior = React.useRef(alvo);
+  const digitando = alvo.startsWith(texto);
+  if (digitando) anterior.current = alvo;
+  React.useEffect(() => {
+    if (menos || texto === alvo) return;
+    const id = setTimeout(() => setTexto(digitando ? alvo.slice(0, texto.length + 1) : texto.slice(0, -1)), digitando ? 34 : 14);
+    return () => clearTimeout(id);
+  }, [alvo, texto, digitando, menos]);
+  if (menos) return { texto: alvo, resto: "", pronto: true };
+  return { texto, resto: anterior.current.slice(texto.length), pronto: texto === alvo };
+}
 
 export function DemoDesign() {
   const [i, setI] = React.useState(0);
@@ -25,12 +43,14 @@ export function DemoDesign() {
   const [palco, naTela] = useNaTela<HTMLButtonElement>();
   const menos = useMenosMovimento();
   const rota = ROTAS[i];
+  const { texto, resto, pronto } = useDigitado(rota.fala, menos);
 
+  /* Espera a frase terminar antes de contar: a próxima só vem depois de lida. */
   React.useEffect(() => {
-    if (!naTela || mao || menos) return;
-    const id = setInterval(() => setI((n) => (n + 1) % ROTAS.length), 2400);
-    return () => clearInterval(id);
-  }, [naTela, mao, menos]);
+    if (!naTela || mao || menos || !pronto) return;
+    const id = setTimeout(() => setI((n) => (n + 1) % ROTAS.length), 1800);
+    return () => clearTimeout(id);
+  }, [naTela, mao, menos, pronto]);
 
   return (
     <Dobra
@@ -67,22 +87,20 @@ export function DemoDesign() {
           <span className="size-5" />
           <span className="w-fit px-3 py-2 font-casa-mono text-casa-sm">{rota.trilha}</span>
         </span>
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.span
-            key={i}
-            initial={menos ? false : { opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={menos ? undefined : { opacity: 0 }}
-            transition={{ duration: DUR.base, ease: EASE_OUT }}
-            className="col-start-1 row-start-1 flex flex-col gap-5 lg:items-center"
-          >
-            <span className="text-[clamp(2rem,5vw,4rem)] font-medium leading-[1.12] tracking-[-0.02em]">{rota.fala}</span>
+        <span className="col-start-1 row-start-1 flex flex-col gap-5 lg:items-center">
+          <span className="text-[clamp(2rem,5vw,4rem)] font-medium leading-[1.12] tracking-[-0.02em]" data-fala>
+            {texto}
+            {!pronto ? <span aria-hidden="true" data-cursor className="ml-[0.04em] inline-block h-[0.85em] w-[0.06em] translate-y-[0.1em] bg-casa-fg" /> : null}
+            <span aria-hidden="true" className="invisible">{resto}</span>
+          </span>
+          {/* O destino só aparece com a frase inteira: primeiro o pedido, depois o caminho. */}
+          <span className={cx("flex flex-col gap-5 lg:items-center", pronto ? cx(ANIMA_OPACIDADE, "opacity-100") : "opacity-0")}>
             <ArrowDown className="size-5 text-casa-fg-3" aria-hidden="true" />
             <span className="w-fit rounded-control bg-casa-tile-2 px-3 py-2 font-casa-mono text-casa-sm" data-trilha>
               {rota.trilha}
             </span>
-          </motion.span>
-        </AnimatePresence>
+          </span>
+        </span>
       </button>
     </Dobra>
   );

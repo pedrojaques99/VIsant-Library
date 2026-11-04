@@ -57,6 +57,8 @@
     "lab:next": "node scripts/lab.mjs next",
     "lab:mobile": "node scripts/lab-mobile.mjs",
     "lab:behance": "node scripts/lab-behance.mjs",
+    "burilar": "node scripts/burilar.mjs",
+    "test:burilar": "node --test scripts/burilar.test.mjs",
     "test:lab": "node --test scripts/lab-taste.test.mjs"
   },
   "dependencies": {

@@ -1,0 +1,44 @@
+{
+  "data": "2026-11-04",
+  "duelos": [
+    {
+      "id": "2026-11-04-linha-do-killer",
+      "dimensao": "beneficio-mecanismo",
+      "onde": "/skills, a linha sob o nome visant-killer",
+      "fonte": "src/app/skills/filme/roteiro.ts",
+      "a": { "texto": "Olho de designer para o seu Claude Code", "valor": "beneficio" },
+      "b": { "texto": "Audita a tela e pergunta antes de corrigir", "valor": "mecanismo" }
+    },
+    {
+      "id": "2026-11-04-teste-do-dock",
+      "dimensao": "eu-a-gente",
+      "onde": "/skills, o aviso no instalador",
+      "fonte": "src/app/skills/hub/dock.tsx",
+      "a": { "texto": "A gente só testou no Claude Code.", "valor": "a-gente" },
+      "b": { "texto": "Eu só testei no Claude Code.", "valor": "eu" }
+    },
+    {
+      "id": "2026-11-04-titulo-do-hub",
+      "dimensao": "tarefa-consequencia",
+      "onde": "/skills, o título da primeira dobra",
+      "fonte": "src/app/skills/Hub.tsx",
+      "a": { "texto": "Tire a cara de IA da sua interface.", "valor": "tarefa" },
+      "b": { "texto": "Se a tela parece feita por IA, o cliente percebe primeiro.", "valor": "consequencia" }
+    },
+    {
+      "id": "2026-11-04-lead-do-killer",
+      "dimensao": "numero-cena",
+      "onde": "/skills/killer, o texto ao lado do título",
+      "fonte": "src/app/skills/CarroChefe.tsx",
+      "a": { "texto": "Quatro detectores no código, uma tela aberta e uma nota no fim.", "valor": "numero" },
+      "b": { "texto": "Ela abre a tela, discute com o próprio veredito e só então dá a nota.", "valor": "cena" }
+    },
+    {
+      "id": "2026-11-04-imitacao-comeco",
+      "tipo": "imitacao",
+      "onde": "Fecho de um post curto sobre começar a publicar",
+      "a": { "texto": "O começo é lento, mas é o mais importante.", "real": true },
+      "b": { "texto": "Começar devagar é o que faz o resto valer." }
+    }
+  ]
+}
