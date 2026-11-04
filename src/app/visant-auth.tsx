@@ -200,7 +200,7 @@ export function VisantAuthProvider({ children }: { children: React.ReactNode }) 
       });
       if (!res.ok) throw new Error(`brand-guidelines: HTTP ${res.status}`);
       const json = await res.json();
-      const lista = Array.isArray(json) ? json : (json.items ?? json.data ?? []);
+      const lista = json.guidelines ?? [];
       setMarcas(
         lista.map((g: Record<string, any>) => ({
           id: g.id,
