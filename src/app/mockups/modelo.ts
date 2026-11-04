@@ -6,7 +6,8 @@
  * o que se viu, e não uma regravação aproximada.
  */
 
-export type Proporcao = "9:16" | "4:5" | "1:1" | "16:9";
+/** `cheio` não tem medida própria: o quadro é o palco, então acompanha a tela de quem está usando. */
+export type Proporcao = "cheio" | "9:16" | "4:5" | "1:1" | "16:9";
 export type TipoMovimento = "parado" | "flutuar" | "balancar" | "pendulo" | "aproximar" | "entrada" | "varredura";
 export type ModoFundo = "cor" | "degrade" | "foto" | "nenhum";
 export type FormatoImagem = "png" | "webp";
@@ -57,7 +58,7 @@ export const PADRAO: Cena = {
   reflexo: 7,
   sombra: 55,
   fundo: { modo: "degrade", cor: "#16181D", a: "#20242C", b: "#6A4A3A", angulo: 160, foto: "/media/textura-neon.webp", desfoque: 0 },
-  proporcao: "9:16",
+  proporcao: "cheio",
   movimento: { tipo: "parado", duracao: 6, intensidade: 50 },
   saida: { largura: 1080, fps: 30, imagem: "png", video: "mp4" },
 };
@@ -101,19 +102,17 @@ export const PRESETS: { id: string; nome: string; aplica: Partial<Cena> }[] = [
   { id: "foto", nome: "Foto", aplica: { rot: { x: 6, y: 28, z: -3 }, tamanho: 58, acabamento: "titanio", sombra: 70, fundo: { ...PADRAO.fundo, modo: "foto", foto: "/media/textura-neon.webp", desfoque: 12 } } },
 ];
 
-export const ASPECTO: Record<Proporcao, number> = { "9:16": 9 / 16, "4:5": 4 / 5, "1:1": 1, "16:9": 16 / 9 };
+export const ASPECTO: Record<Exclude<Proporcao, "cheio">, number> = { "9:16": 9 / 16, "4:5": 4 / 5, "1:1": 1, "16:9": 16 / 9 };
 
 /** A dimensão de saída: `largura` é o lado MENOR, como se fala de vídeo. Sempre par, que o encoder exige. */
-export function dimensoes(p: Proporcao, largura: number) {
-  const a = ASPECTO[p];
+export function dimensoes(a: number, largura: number) {
   const par = (n: number) => Math.round(n / 2) * 2;
   return a < 1 ? { w: largura, h: par(largura / a) } : { w: par(largura * a), h: largura };
 }
 
 /** GIF pesa rápido e só tem 256 cores: tamanho e cadência fixos, como no exportador do visantlabs-os. */
 export const GIF = { fps: 15, maiorLado: 640 };
-export function dimensoesGif(p: Proporcao) {
-  const a = ASPECTO[p];
+export function dimensoesGif(a: number) {
   const par = (n: number) => Math.round(n / 2) * 2;
   return a < 1 ? { w: par(GIF.maiorLado * a), h: GIF.maiorLado } : { w: GIF.maiorLado, h: par(GIF.maiorLado / a) };
 }

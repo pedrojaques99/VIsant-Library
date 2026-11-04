@@ -36,20 +36,23 @@ import {
   paletaDe,
   type Acabamento,
   type Cena,
-  type Proporcao,
   type Tela,
   type TipoMovimento,
 } from "./modelo";
 import "./estudio.css";
 
-const CHAVE = "visant:mockup";
+const CHAVE = "visant:mockup:2";
+// Quem abriu a primeira versão ficou com 9:16 salvo sem ter escolhido: herda o resto da cena, não o quadro.
+const CHAVE_ANTIGA = "visant:mockup";
 // A largura lógica do quadro. A saída é escala dela, então o desenho não muda com a resolução.
 const BASE = 1080;
 const igual = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 const lerSalvo = (): Cena => {
   try {
     const s = localStorage.getItem(CHAVE);
-    return s ? { ...PADRAO, ...JSON.parse(s) } : PADRAO;
+    if (s) return { ...PADRAO, ...JSON.parse(s) };
+    const antiga = localStorage.getItem(CHAVE_ANTIGA);
+    return antiga ? { ...PADRAO, ...JSON.parse(antiga), proporcao: PADRAO.proporcao } : PADRAO;
   } catch {
     return PADRAO;
   }
@@ -133,7 +136,9 @@ export function Estudio() {
   const telas = React.useMemo(() => [...enviadas, ...TELAS], [enviadas]);
   const tela = telas.find((t) => t.id === cena.telaId) ?? TELAS[0];
   const anima = animado(cena);
-  const { w: baseW, h: baseH } = dimensoes(cena.proporcao, BASE);
+  const [medida, setMedida] = React.useState({ w: 1600, h: 900 });
+  const aspecto = cena.proporcao === "cheio" ? medida.w / medida.h : ASPECTO[cena.proporcao];
+  const { w: baseW, h: baseH } = dimensoes(aspecto, BASE);
   const transparente = cena.fundo.modo === "nenhum";
 
   const edita = React.useCallback(<K extends keyof Cena>(chave: K, valor: Cena[K] | ((v: Cena[K]) => Cena[K])) => {
@@ -216,19 +221,23 @@ export function Estudio() {
   /* ── O palco: encaixe e gesto ───────────────────────────────────────── */
   const palco = React.useRef<HTMLDivElement>(null);
   const quadro = React.useRef<HTMLDivElement>(null);
-  const [encaixe, setEncaixe] = React.useState(0.4);
+  // Cheio cobre o palco até a borda; o arredondamento para par não pode abrir fresta. Medida fixa ganha respiro.
+  const encaixe = cena.proporcao === "cheio"
+    ? Math.max(medida.w / baseW, medida.h / baseH)
+    : Math.max(0.01, Math.min((medida.w - 32) / baseW, (medida.h - 32) / baseH));
   React.useLayoutEffect(() => {
     const el = palco.current;
     if (!el) return;
     const medir = () => {
       const r = el.getBoundingClientRect();
-      setEncaixe(Math.min((r.width - 32) / baseW, (r.height - 32) / baseH));
+      // Janela mexida no meio de um vídeo não pode mudar o quadro que já está sendo gravado.
+      if (!exportando && r.width > 0 && r.height > 0) setMedida({ w: r.width, h: r.height });
     };
     medir();
     const ro = new ResizeObserver(medir);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [baseW, baseH]);
+  }, [exportando]);
 
   const gesto = React.useRef<{ x: number; y: number; rot: Cena["rot"]; pos: Cena["pos"]; mover: boolean } | null>(null);
   const noPalco = {
@@ -311,8 +320,8 @@ export function Estudio() {
   /* ── Exportar ───────────────────────────────────────────────────────── */
   const cancelar = React.useRef<AbortController | null>(null);
   const emVideo = anima && !transparente;
-  const { w: saidaW, h: saidaH } = anima && !transparente && cena.saida.video === "gif" ? dimensoesGif(cena.proporcao) : dimensoes(cena.proporcao, cena.saida.largura);
-  const nome = `mockup-${cena.proporcao.replace(":", "x")}-${saidaW}x${saidaH}`;
+  const { w: saidaW, h: saidaH } = anima && !transparente && cena.saida.video === "gif" ? dimensoesGif(aspecto) : dimensoes(aspecto, cena.saida.largura);
+  const nome = `mockup-${saidaW}x${saidaH}`;
   const formatoVideo = semMp4 && cena.saida.video === "mp4" ? "webm" : cena.saida.video;
   const emGif = emVideo && formatoVideo === "gif";
   const fps = emGif ? GIF.fps : cena.saida.fps;
@@ -555,8 +564,11 @@ export function Estudio() {
           </Pasta>
 
           <Pasta titulo="Quadro" sujo={cena.proporcao !== PADRAO.proporcao} onReset={() => edita("proporcao", PADRAO.proporcao)}>
-            <Miniaturas rotulo="Proporção" colunas={4}>
-              {(Object.keys(ASPECTO) as Proporcao[]).map((p) => (
+            <Miniaturas rotulo="Proporção" colunas={5}>
+              <Miniatura nome="Cheio" ativa={cena.proporcao === "cheio"} onClick={() => edita("proporcao", "cheio")}>
+                <span className="mk-arte-proporcao" style={{ aspectRatio: String(medida.w / medida.h) }} />
+              </Miniatura>
+              {(Object.keys(ASPECTO) as (keyof typeof ASPECTO)[]).map((p) => (
                 <Miniatura key={p} nome={p} ativa={cena.proporcao === p} onClick={() => edita("proporcao", p)}>
                   <span className="mk-arte-proporcao" style={{ aspectRatio: String(ASPECTO[p]) }} />
                 </Miniatura>
