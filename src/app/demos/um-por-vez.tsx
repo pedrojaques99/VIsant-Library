@@ -63,7 +63,7 @@ export function Trocador({
   rotulo?: string;
 }) {
   return (
-    <div className="flex items-center gap-0.5 text-muted-foreground">
+    <div className="flex items-center gap-0.5 pointer-coarse:gap-2 text-muted-foreground">
       <Seta dir={-1} onClick={() => onPasso(-1)} rotulo={rotulo} />
       <button
         type="button"

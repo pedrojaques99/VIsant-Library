@@ -92,7 +92,7 @@ export function EclipseSwitch({
         onThemeChange?.(proximo, e.currentTarget);
       }}
       className={cn(
-        "inline-flex select-none items-center justify-center gap-2 border border-border bg-card text-sm font-medium text-foreground",
+        "relative inline-flex select-none items-center justify-center gap-2 border border-border bg-card text-sm font-medium text-foreground pointer-coarse:after:absolute pointer-coarse:after:-inset-1",
         "rounded-[var(--r-control)] outline-none [box-shadow:var(--e-raised)]",
         "transition-[border-color] duration-[var(--dur-fast)] ease-[var(--ease-out)]",
         "hover:border-foreground/30 focus-visible:[box-shadow:var(--focus)]",

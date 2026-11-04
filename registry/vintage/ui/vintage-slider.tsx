@@ -251,7 +251,7 @@ arraste · shift = fino · roda · duplo clique = centro`}
         ref={trackRef}
         className={cn(
           // `touch-pan-y`: o arraste de lado é do slider, e em pé a página continua rolando.
-          "relative cursor-ew-resize touch-pan-y rounded-[4px] outline-none",
+          "relative cursor-ew-resize touch-pan-y rounded-[4px] outline-none pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-2.5",
           "focus-visible:[box-shadow:var(--focus,0_0_0_2px_var(--vintage-value))]",
           dense ? "h-6" : "h-8"
         )}

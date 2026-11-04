@@ -52,7 +52,7 @@ export default function VintageTvFrameDemo() {
               role="radio"
               aria-checked={sel}
               onClick={() => setCanal(i)}
-              className="group relative flex items-center gap-1.5 rounded-[4px] px-2 py-1.5 font-vintage-mono text-[10px] font-semibold tabular-nums tracking-[0.14em] outline-none"
+              className="alvo-toque group flex items-center gap-1.5 rounded-[4px] px-2 py-1.5 font-vintage-mono text-[10px] font-semibold tabular-nums tracking-[0.14em] outline-none"
               style={{
                 color: sel ? "var(--vintage-label)" : "var(--vintage-text-muted)",
                 // Tecla de rack: a do canal no ar fica travada, mais funda.

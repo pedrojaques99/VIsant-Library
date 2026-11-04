@@ -501,9 +501,9 @@ export function VintageTvFrame({
             data-sfx-silent=""
             aria-pressed={isOn}
             aria-label={isOn ? "Desligar a TV" : "Ligar a TV"}
-            // `alvo-toque` estende só a região clicável: o botão desenhado tem
+            // O `::after` estende só a região clicável: o botão desenhado tem
             // 24px de altura (é o desenho do móvel), o dedo recebe 44.
-            className="alvo-toque"
+            className="relative pointer-coarse:after:absolute pointer-coarse:after:-inset-x-2 pointer-coarse:after:-inset-y-3.5"
             style={{
               width: CROMO.powerW,
               height: CROMO.powerH,

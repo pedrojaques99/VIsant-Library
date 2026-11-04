@@ -65,7 +65,7 @@ export default function TestimonialWallDemo({ props }: DemoProps) {
           <a
             href="#"
             onClick={(e) => e.preventDefault()}
-            className="inline-flex items-center gap-1.5 rounded-[var(--r-control,0.5rem)] text-[14px] font-medium text-foreground focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]"
+            className="alvo-toque inline-flex items-center gap-1.5 rounded-[var(--r-control,0.5rem)] text-[14px] font-medium text-foreground focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]"
           >
             Ler todos os depoimentos
             <ArrowRight className="size-4" aria-hidden="true" />

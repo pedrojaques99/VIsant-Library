@@ -136,7 +136,7 @@ export default function GleamDemo({ props }: DemoProps) {
         aria-expanded={ajustes}
         aria-controls={painel}
         onClick={() => setAjustes((v) => !v)}
-        className="alvo-toque inline-flex items-center gap-1.5 absolute bottom-2 right-3 rounded-[var(--r-control,0.5rem)] px-1.5 py-1 font-mono text-micro text-muted-foreground outline-none transition-[color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:text-foreground focus-visible:[box-shadow:var(--focus)] aria-expanded:text-foreground"
+        className="alvo-toque inline-flex items-center gap-1.5 absolute bottom-2 pointer-coarse:bottom-3 right-3 rounded-[var(--r-control,0.5rem)] px-1.5 py-1 font-mono text-micro text-muted-foreground outline-none transition-[color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:text-foreground focus-visible:[box-shadow:var(--focus)] aria-expanded:text-foreground"
       >
         <SlidersHorizontal className="size-3.5" aria-hidden />
         ajustes

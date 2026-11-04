@@ -1,5 +1,5 @@
 {
-  "lead": "Instale uma peça, vista a sua marca e conecte o agente. Os três passos foram rodados num projeto Vite limpo.",
+  "lead": "Instale uma peça, vista a sua marca e conecte o agente.",
   "passos": [
     {
       "titulo": "Configure o registry",

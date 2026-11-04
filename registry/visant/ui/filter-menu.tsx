@@ -121,7 +121,7 @@ export function FilterMenu({
     <DropdownMenu.Root>
       <DropdownMenu.Trigger
         className={cn(
-          "inline-flex h-[var(--control-h,2.25rem)] shrink-0 items-center gap-2",
+          "inline-flex h-[var(--control-h,2.25rem)] pointer-coarse:h-11 shrink-0 items-center gap-2",
           "rounded-[var(--r-control,0.5rem)] border border-[var(--border)] px-3",
           "text-sm font-medium text-[var(--foreground)]",
           "transition-[background-color,border-color,box-shadow]",

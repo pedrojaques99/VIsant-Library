@@ -259,6 +259,7 @@ export function MorphSelect({
           transition={transicao}
           className={cn(
             "absolute top-0 z-20 overflow-hidden border border-border bg-card text-foreground",
+            !aberto && "pointer-coarse:overflow-visible",
             "transition-[border-radius,box-shadow] duration-[var(--dur-base)] ease-[var(--ease-out)]",
             align === "end" ? "right-0" : "left-0",
             // O anel de foco vai na superfície: dentro dela o `overflow-hidden` cortaria o anel do botão.
@@ -284,7 +285,7 @@ export function MorphSelect({
               // `[font:inherit]`: muito projeto (e o tema base do shadcn/Figma) estiliza `button`
               // com fonte própria; o molde é um `span` e mede na fonte do pai. Fontes diferentes
               // e o rótulo do gatilho virava reticências.
-              "relative flex h-[38px] w-full items-center gap-2 pl-3 pr-9 outline-none [font:inherit]",
+              "relative flex h-[38px] w-full items-center gap-2 pl-3 pr-9 outline-none [font:inherit] pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-1",
               disabled ? "cursor-not-allowed" : "cursor-pointer",
               !item && "text-muted-foreground",
             )}
@@ -326,7 +327,7 @@ export function MorphSelect({
             style={{ maxHeight: maxListHeight }}
             className={cn(
               "overflow-y-auto overscroll-contain px-1 pb-1 transition-opacity duration-[var(--dur-fast)] ease-[var(--ease-out)]",
-              aberto ? "opacity-100" : "pointer-events-none opacity-0",
+              aberto ? "opacity-100" : "pointer-events-none opacity-0 pointer-coarse:invisible",
             )}
           >
             {items.map((op, n) => {

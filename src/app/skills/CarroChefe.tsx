@@ -65,7 +65,7 @@ export function CarroChefe() {
         </h1>
         <div>
           <p className="text-casa-lg text-casa-fg-2">
-            A visant-killer roda quatro detectores no seu código, abre a tela e discute com o próprio veredito. A visant-design lê o pedido e escolhe o caminho.
+            Quatro detectores no código, a tela aberta e um veredito discutido.
           </p>
           <ComandoInstalar className="mt-5" />
         </div>

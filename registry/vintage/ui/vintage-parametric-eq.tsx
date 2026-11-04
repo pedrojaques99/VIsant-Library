@@ -248,7 +248,7 @@ export function VintageParametricEQ({
           type="button"
           onClick={() => setBypass((v) => !v)}
           aria-pressed={bypass}
-          className="group relative flex shrink-0 items-center gap-1.5 rounded-[4px] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] outline-none"
+          className="group relative flex shrink-0 items-center gap-1.5 rounded-[4px] px-2 py-1 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-4 text-[10px] font-semibold uppercase tracking-[0.14em] outline-none"
           style={{
             fontFamily: "var(--font-vintage-mono, monospace)",
             color: bypass ? "var(--vintage-label)" : "var(--vintage-text-muted)",

@@ -261,7 +261,7 @@ function ToastItem({ t, index, y, altura, aberto, visivel, pausado, reduce, stor
       >
         <motion.div
           ref={conteudo}
-          className="flex items-start gap-3 py-3 pl-3.5 pr-2"
+          className="flex items-start gap-3 pointer-coarse:gap-4 py-3 pl-3.5 pr-2"
           initial={false}
           animate={{ opacity: aberto || frente ? 1 : 0 }}
           transition={reduce ? parado : curto}
@@ -286,7 +286,7 @@ function ToastItem({ t, index, y, altura, aberto, visivel, pausado, reduce, stor
             <button
               type="button"
               onClick={() => store.rodarAcao(t.id)}
-              className="h-7 shrink-0 rounded-[var(--r-control)] border border-border bg-background px-2.5 text-xs font-medium outline-none transition-[background-color] duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-muted focus-visible:[box-shadow:var(--focus)]"
+              className="relative h-7 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-2.5 shrink-0 rounded-[var(--r-control)] border border-border bg-background px-2.5 text-xs font-medium outline-none transition-[background-color] duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-muted focus-visible:[box-shadow:var(--focus)]"
             >
               {t.action.label}
             </button>
@@ -295,7 +295,7 @@ function ToastItem({ t, index, y, altura, aberto, visivel, pausado, reduce, stor
             type="button"
             aria-label="Dispensar aviso"
             onClick={() => store.dismiss(t.id)}
-            className="grid size-7 shrink-0 place-items-center rounded-[var(--r-control)] text-muted-foreground outline-none transition-[background-color,color] duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-muted hover:text-foreground focus-visible:[box-shadow:var(--focus)]"
+            className="relative grid size-7 pointer-coarse:after:absolute pointer-coarse:after:-inset-2 shrink-0 place-items-center rounded-[var(--r-control)] text-muted-foreground outline-none transition-[background-color,color] duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-muted hover:text-foreground focus-visible:[box-shadow:var(--focus)]"
           >
             <X className="size-4" aria-hidden="true" />
           </button>

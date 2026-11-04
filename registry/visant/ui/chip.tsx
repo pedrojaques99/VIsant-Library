@@ -128,8 +128,8 @@ export function Chip({
       }}
       data-state={pressed ? "on" : "off"}
       className={cn(
-        "inline-flex items-center whitespace-nowrap border font-semibold",
-        size === "sm" ? "px-2.5 py-1 text-[11px]" : "px-3.5 py-2 text-[13px]",
+        "relative inline-flex items-center whitespace-nowrap border font-semibold pointer-coarse:after:absolute pointer-coarse:after:inset-x-0",
+        size === "sm" ? "px-2.5 py-1 text-[11px] pointer-coarse:after:-inset-y-2.5" : "px-3.5 py-2 text-[13px] pointer-coarse:after:-inset-y-1",
         "border-[var(--border)] text-[var(--foreground)]",
         "transition-[background-color,color,border-color,transform]",
         "[transition-duration:var(--dur-press,120ms)]",

@@ -172,7 +172,7 @@ export default function VintageOscilloscopeDemo({ props }: DemoProps) {
                   role="radio"
                   aria-checked={sel}
                   onClick={() => setModo(m)}
-                  className="group relative flex items-center gap-1.5 rounded-[4px] px-2 py-1.5 font-vintage-mono text-[10px] font-semibold uppercase tracking-[0.14em] outline-none"
+                  className="alvo-toque group flex items-center gap-1.5 rounded-[4px] px-2 py-1.5 font-vintage-mono text-[10px] font-semibold uppercase tracking-[0.14em] outline-none"
                   style={{
                     color: sel ? "var(--vintage-label)" : "var(--vintage-text-muted)",
                     // Tecla de rack: a escolhida fica travada, mais funda.

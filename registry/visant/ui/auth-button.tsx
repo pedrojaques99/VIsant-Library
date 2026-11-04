@@ -285,7 +285,7 @@ function Painel({
 }
 
 const ITEM =
-  "flex w-full min-w-0 items-center gap-2.5 px-3 py-2 text-left text-[length:var(--text-corpo,0.8125rem)] text-foreground " +
+  "flex w-full min-w-0 items-center gap-2.5 px-3 py-2 pointer-coarse:py-3 text-left text-[length:var(--text-corpo,0.8125rem)] text-foreground " +
   "transition-colors [transition-duration:var(--dur-press,120ms)] hover:bg-muted focus-visible:bg-muted focus-visible:outline-none";
 
 export function AuthButton({
@@ -355,7 +355,7 @@ export function AuthButton({
           aria-haspopup={providers?.length ? "menu" : undefined}
           aria-expanded={providers?.length ? aberto : undefined}
           className={cn(
-            "flex h-[var(--ab-h)] min-w-[var(--ab-w)] items-center justify-center gap-1.5 px-4",
+            "relative flex h-[var(--ab-h)] min-w-[var(--ab-w)] items-center justify-center gap-1.5 px-4 pointer-coarse:after:absolute pointer-coarse:after:-inset-1.5",
             "rounded-[var(--r-pill,9999px)] border border-border bg-card",
             "text-[length:var(--text-corpo,0.8125rem)] font-medium text-foreground",
             // A marca entra em BORDA e sombra, nunca no texto: o ciano da casa
@@ -386,7 +386,7 @@ export function AuthButton({
           aria-expanded={aberto}
           aria-label={`Conta de ${account.name}`}
           className={cn(
-            "flex h-[var(--ab-h)] min-w-[var(--ab-h)] max-w-[13rem] items-center gap-2 rounded-[var(--r-pill,9999px)]",
+            "relative flex h-[var(--ab-h)] min-w-[var(--ab-h)] max-w-[13rem] items-center gap-2 rounded-[var(--r-pill,9999px)] pointer-coarse:after:absolute pointer-coarse:after:-inset-1.5",
             "border border-transparent bg-transparent pl-0 pr-0 sm:border-border sm:bg-card sm:pl-1 sm:pr-2.5",
             "transition-[border-color,box-shadow] [transition-duration:var(--dur-fast,160ms)] ease-[var(--ease-out)]",
             "hover:border-[var(--brand,var(--border))] hover:[box-shadow:var(--e-raised)]",

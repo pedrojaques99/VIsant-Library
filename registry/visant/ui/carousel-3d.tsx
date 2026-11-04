@@ -276,7 +276,7 @@ const Card3D = React.memo(function Card3D({
               }}
               className={cn(
                 // motion-lint-disable-next-line slow-ui-duration  peça arquivada: legenda de card 3D que entra junto com o giro lento da cena
-                "pointer-events-auto flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white/25 px-5 py-2 transition-opacity duration-500 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70",
+                "pointer-events-auto relative flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white/25 px-5 py-2 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-1 transition-opacity duration-500 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70",
                 hovered ? "opacity-100 delay-150" : "opacity-0",
               )}
             >
@@ -491,7 +491,7 @@ export function Carousel3D({
           <button
             type="button"
             onClick={() => setActive((p) => (p - 1 + items.length) % items.length)}
-            className="absolute left-3 top-1/2 z-20 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-[color-mix(in_oklab,var(--background)_70%,transparent)] text-muted-foreground backdrop-blur-md transition-colors [transition-duration:var(--dur-fast)] hover:text-foreground focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]"
+            className="absolute left-3 top-1/2 z-20 grid size-10 pointer-coarse:after:absolute pointer-coarse:after:-inset-0.5 -translate-y-1/2 place-items-center rounded-full bg-[color-mix(in_oklab,var(--background)_70%,transparent)] text-muted-foreground backdrop-blur-md transition-colors [transition-duration:var(--dur-fast)] hover:text-foreground focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]"
             aria-label="Anterior"
           >
             <ChevronLeft className="size-5" />
@@ -499,7 +499,7 @@ export function Carousel3D({
           <button
             type="button"
             onClick={() => setActive((p) => (p + 1) % items.length)}
-            className="absolute right-3 top-1/2 z-20 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-[color-mix(in_oklab,var(--background)_70%,transparent)] text-muted-foreground backdrop-blur-md transition-colors [transition-duration:var(--dur-fast)] hover:text-foreground focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]"
+            className="absolute right-3 top-1/2 z-20 grid size-10 pointer-coarse:after:absolute pointer-coarse:after:-inset-0.5 -translate-y-1/2 place-items-center rounded-full bg-[color-mix(in_oklab,var(--background)_70%,transparent)] text-muted-foreground backdrop-blur-md transition-colors [transition-duration:var(--dur-fast)] hover:text-foreground focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]"
             aria-label="Próximo"
           >
             <ChevronRight className="size-5" />

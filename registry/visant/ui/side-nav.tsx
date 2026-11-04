@@ -290,7 +290,7 @@ export const SideNavToggle = React.forwardRef<
       aria-controls={navId}
       aria-label={collapsed ? "Expandir a navegação" : "Recolher a navegação"}
       className={cn(
-        "grid size-9 shrink-0 place-items-center rounded-[var(--r-control,0.5rem)]",
+        "relative grid size-9 shrink-0 place-items-center rounded-[var(--r-control,0.5rem)] pointer-coarse:after:absolute pointer-coarse:after:-inset-1",
         "text-[var(--muted-foreground)] transition-colors [transition-duration:var(--dur-fast,140ms)]",
         "hover:bg-[var(--muted)] hover:text-[var(--foreground)]",
         "outline-none focus-visible:[box-shadow:var(--focus)]",
@@ -458,7 +458,7 @@ export const SideNavItem = React.forwardRef<HTMLAnchorElement, SideNavItemProps>
       // tooltip nativo repetiria o rótulo que já está na tela.
       title: collapsed && typeof rotulo === "string" ? rotulo : undefined,
       className: cn(
-        "relative flex w-full items-center gap-3 rounded-[var(--r-control,0.5rem)] px-3 py-2",
+        "relative flex w-full items-center gap-3 rounded-[var(--r-control,0.5rem)] px-3 py-2 pointer-coarse:min-h-11",
         "text-[length:var(--text-corpo,0.875rem)] no-underline",
         "text-[var(--muted-foreground)]",
         "transition-colors [transition-duration:var(--dur-fast,140ms)]",

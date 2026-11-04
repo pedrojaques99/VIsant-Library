@@ -52,14 +52,14 @@ export default function DateReelDemo({ props }: DemoProps) {
           label="Data do envio"
           {...props}
         />
-        <div className="flex flex-wrap items-center gap-2 border-t border-border pt-4">
+        <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-3 border-t border-border pt-4">
           {atalhos.map((a) => (
             <button
               key={a.rotulo}
               type="button"
               aria-pressed={a.data.getTime() === data.getTime()}
               onClick={() => setData(a.data)}
-              className="h-8 rounded-[var(--r-pill)] border border-border bg-background px-2.5 text-sm text-foreground [font:inherit] transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-muted aria-pressed:bg-muted focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]"
+              className="alvo-toque h-8 rounded-[var(--r-pill)] border border-border bg-background px-2.5 text-sm text-foreground [font:inherit] transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-muted aria-pressed:bg-muted focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]"
             >
               {a.rotulo}
             </button>
@@ -67,7 +67,7 @@ export default function DateReelDemo({ props }: DemoProps) {
           <button
             type="button"
             onClick={() => setAgendado(true)}
-            className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-[var(--r-control)] bg-[var(--brand)] px-4 text-sm font-medium text-[var(--brand-foreground)] [font:inherit] focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]"
+            className="alvo-toque ml-auto inline-flex h-8 items-center gap-1.5 rounded-[var(--r-control)] bg-[var(--brand)] px-4 text-sm font-medium text-[var(--brand-foreground)] [font:inherit] focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]"
           >
             {agendado && <Check aria-hidden="true" className="size-4" />}
             {agendado ? "Agendado" : "Agendar"}

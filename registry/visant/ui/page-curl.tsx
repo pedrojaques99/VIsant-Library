@@ -522,7 +522,7 @@ export function PageCurl({
           onClick={() => void anterior()}
           disabled={indice === 0}
           aria-label="Página anterior"
-          className="inline-flex size-8 items-center justify-center rounded-[var(--r-control)] text-foreground outline-none transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-muted focus-visible:[box-shadow:var(--focus)] disabled:text-muted-foreground disabled:hover:bg-transparent"
+          className="relative inline-flex size-8 pointer-coarse:after:absolute pointer-coarse:after:-inset-1.5 items-center justify-center rounded-[var(--r-control)] text-foreground outline-none transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-muted focus-visible:[box-shadow:var(--focus)] disabled:text-muted-foreground disabled:hover:bg-transparent"
         >
           <ChevronLeft className="size-4" aria-hidden />
         </button>
@@ -534,7 +534,7 @@ export function PageCurl({
           onClick={() => void proxima()}
           disabled={!temProxima}
           aria-label="Próxima página"
-          className="inline-flex size-8 items-center justify-center rounded-[var(--r-control)] text-foreground outline-none transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-muted focus-visible:[box-shadow:var(--focus)] disabled:text-muted-foreground disabled:hover:bg-transparent"
+          className="relative inline-flex size-8 pointer-coarse:after:absolute pointer-coarse:after:-inset-1.5 items-center justify-center rounded-[var(--r-control)] text-foreground outline-none transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-muted focus-visible:[box-shadow:var(--focus)] disabled:text-muted-foreground disabled:hover:bg-transparent"
         >
           <ChevronRight className="size-4" aria-hidden />
         </button>

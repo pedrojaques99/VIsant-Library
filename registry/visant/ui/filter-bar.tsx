@@ -106,7 +106,7 @@ export function FilterBar({
           "[transition-duration:var(--dur-base,200ms)]",
           "[transition-timing-function:var(--ease-out)]",
           "motion-reduce:transition-none",
-          hasChips || showCount ? "grid-rows-[1fr]" : "grid-rows-[0fr] opacity-0",
+          hasChips || showCount ? "grid-rows-[1fr]" : "pointer-events-none grid-rows-[0fr] opacity-0",
         )}
       >
         {/* `-m-1 p-1`: o recorte que dobra a linha não pode comer o anel de foco do chip. */}
@@ -135,7 +135,7 @@ export function FilterBar({
                 type="button"
                 onClick={onClearAll}
                 className={cn(
-                  "px-1.5 py-1 text-xs font-semibold text-[var(--muted-foreground)] underline-offset-4",
+                  "px-1.5 py-1 pointer-coarse:min-h-11 text-xs font-semibold text-[var(--muted-foreground)] underline-offset-4",
                   "hover:text-[var(--foreground)] hover:underline",
                   "outline-none focus-visible:[box-shadow:0_0_0_1px_color-mix(in_oklab,var(--ring)_60%,var(--foreground))]",
                   "rounded-[var(--r-control,0.375rem)]",

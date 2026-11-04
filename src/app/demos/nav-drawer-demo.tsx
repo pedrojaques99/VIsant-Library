@@ -53,7 +53,7 @@ export default function NavDrawerDemo({ props }: DemoProps) {
             type="button"
             aria-pressed={variante === v}
             onClick={() => setVariante(v)}
-            className="rounded-[calc(var(--r-control,0.5rem)-2px)] px-3 py-1.5 text-[length:var(--text-apoio,0.8125rem)] text-muted-foreground outline-none transition-colors [transition-duration:var(--dur-fast)] hover:text-foreground focus-visible:[box-shadow:var(--focus)] aria-pressed:bg-muted aria-pressed:text-foreground"
+            className="alvo-toque rounded-[calc(var(--r-control,0.5rem)-2px)] px-3 py-1.5 text-[length:var(--text-apoio,0.8125rem)] text-muted-foreground outline-none transition-colors [transition-duration:var(--dur-fast)] hover:text-foreground focus-visible:[box-shadow:var(--focus)] aria-pressed:bg-muted aria-pressed:text-foreground"
           >
             {nome}
           </button>

@@ -45,7 +45,7 @@ export function SfxToggle({ labels, className, ...props }: SfxToggleProps) {
       style={on === null ? { visibility: "hidden" } : undefined}
       onClick={() => sfx.setEnabled(!sfx.isEnabled())}
       className={cn(
-        "sfx-toggle inline-flex size-[34px] flex-none items-center justify-center rounded-[var(--r-control)]",
+        "sfx-toggle relative inline-flex size-[34px] flex-none items-center justify-center rounded-[var(--r-control)] pointer-coarse:after:absolute pointer-coarse:after:-inset-1.5",
         "border border-transparent bg-transparent p-0 text-muted-foreground",
         // `[transition-duration:…]` e não `duration-[…]`: a utility de duração
         // do Tailwind não aceita `var()` como valor arbitrário e não gera regra

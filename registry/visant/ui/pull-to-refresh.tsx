@@ -94,7 +94,7 @@ function Ponto({ i, total, progresso }: { i: number; total: number; progresso: M
 
 export function PullToRefresh({
   onRefresh,
-  threshold = 64,
+  threshold = 56,
   max = 120,
   dots = 8,
   label = "Painel",

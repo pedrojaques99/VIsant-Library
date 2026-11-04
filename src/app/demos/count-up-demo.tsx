@@ -58,7 +58,7 @@ export default function CountUpDemo({ props }: DemoProps) {
         ))}
       </div>
 
-      <Chip className="alvo-toque" onClick={() => setN((x) => x + 1)}>
+      <Chip onClick={() => setN((x) => x + 1)}>
         contar de novo
       </Chip>
     </div>

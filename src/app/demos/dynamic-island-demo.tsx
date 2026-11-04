@@ -51,7 +51,7 @@ function Controle({
       type="button"
       {...props}
       className={
-        "grid size-10 place-items-center rounded-[var(--r-pill)] outline-none transition-[background-color] duration-[var(--dur-fast)] ease-[var(--ease-out)] focus-visible:[box-shadow:var(--focus)] [&_svg]:size-[18px] " +
+        "alvo-toque grid size-10 place-items-center rounded-[var(--r-pill)] outline-none transition-[background-color] duration-[var(--dur-fast)] ease-[var(--ease-out)] focus-visible:[box-shadow:var(--focus)] [&_svg]:size-[18px] " +
         (marca
           ? "bg-[var(--brand)] text-[var(--brand-foreground)]"
           : "bg-background/15 text-background hover:bg-background/25") +
@@ -170,7 +170,7 @@ export default function DynamicIslandDemo({ props }: DemoProps) {
             aria-pressed={atividade === a}
             onClick={() => setAtividade(a)}
             className={
-              "rounded-[var(--r-control)] px-1.5 py-1 text-xs outline-none transition-[color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] focus-visible:[box-shadow:var(--focus)] " +
+              "alvo-toque rounded-[var(--r-control)] px-1.5 py-1 text-xs outline-none transition-[color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] focus-visible:[box-shadow:var(--focus)] " +
               (atividade === a ? "text-foreground" : "text-muted-foreground hover:text-foreground")
             }
           >

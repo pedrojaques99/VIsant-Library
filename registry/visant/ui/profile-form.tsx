@@ -76,7 +76,7 @@ function iniciais(nome: string): string {
 }
 
 const CAMPO =
-  "h-9 w-full min-w-0 rounded-[var(--r-control,0.5rem)] border border-border bg-background px-3 " +
+  "h-9 pointer-coarse:h-11 w-full min-w-0 rounded-[var(--r-control,0.5rem)] border border-border bg-background px-3 " +
   "text-[length:var(--text-corpo,0.8125rem)] text-foreground placeholder:text-muted-foreground " +
   "transition-[border-color,box-shadow] [transition-duration:var(--dur-fast,160ms)] " +
   "focus-visible:outline-none focus-visible:[box-shadow:var(--focus,0_0_0_2px_var(--ring))] " +
@@ -304,7 +304,7 @@ export function ProfileForm({
             // O rótulo acompanha o estado: sem foto, não há o que trocar.
             aria-label={fotoAtual ? "Trocar foto do perfil" : "Enviar foto do perfil"}
             className={cn(
-              "absolute -bottom-1 -right-1 grid h-7 w-7 place-items-center rounded-full border border-border bg-card",
+              "absolute -bottom-1 -right-1 grid h-7 w-7 pointer-coarse:after:absolute pointer-coarse:after:-inset-2.5 place-items-center rounded-full border border-border bg-card",
               "transition-[border-color,box-shadow] [transition-duration:var(--dur-fast,160ms)]",
               "hover:border-[var(--brand,var(--foreground))] hover:[box-shadow:var(--e-raised)]",
               "focus-visible:outline-none focus-visible:[box-shadow:var(--focus,0_0_0_2px_var(--ring))]",
@@ -349,7 +349,7 @@ export function ProfileForm({
                   setArquivo(null);
                   setRemoverFoto(true);
                 }}
-                className="flex items-center gap-1 text-[length:var(--text-apoio,0.75rem)] text-muted-foreground transition-colors [transition-duration:var(--dur-press,120ms)] hover:text-destructive"
+                className="relative flex items-center gap-1 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-3.5 text-[length:var(--text-apoio,0.75rem)] text-muted-foreground transition-colors [transition-duration:var(--dur-press,120ms)] hover:text-destructive"
               >
                 <Trash2 className="h-3 w-3" />
                 Remover
@@ -475,7 +475,7 @@ export function ProfileForm({
             onClick={desfazerRascunho}
             disabled={!sujo || estado === "salvando"}
             className={cn(
-              "h-9 rounded-[var(--r-pill,9999px)] border border-border bg-card px-3.5",
+              "relative h-9 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-1.5 rounded-[var(--r-pill,9999px)] border border-border bg-card px-3.5",
               "text-[length:var(--text-corpo,0.8125rem)] text-foreground",
               "transition-[opacity,border-color] [transition-duration:var(--dur-fast,160ms)]",
               "hover:border-[var(--brand,var(--foreground))] disabled:opacity-40",
@@ -493,7 +493,7 @@ export function ProfileForm({
             type="submit"
             disabled={!sujo || estado === "salvando"}
             className={cn(
-              "flex h-9 items-center gap-1.5 rounded-[var(--r-pill,9999px)] px-4",
+              "relative flex h-9 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-1 items-center gap-1.5 rounded-[var(--r-pill,9999px)] px-4",
               "bg-[var(--brand,var(--foreground))] text-[var(--brand-foreground,var(--background))]",
               "text-[length:var(--text-corpo,0.8125rem)] font-medium",
               "transition-[opacity,box-shadow,transform] [transition-duration:var(--dur-fast,160ms)] ease-[var(--ease-out)]",

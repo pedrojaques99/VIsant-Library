@@ -104,7 +104,7 @@ export function PalcoDoShader({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
-      <div className="flex items-center gap-0.5 text-muted-foreground">
+      <div className="flex items-center gap-0.5 pointer-coarse:gap-4 text-muted-foreground">
         <Trocador nome={atual.nome} onPasso={passar} rotulo="imagem" />
         <button
           type="button"

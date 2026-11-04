@@ -54,7 +54,7 @@ function Painel() {
     <button
       type="button"
       onClick={publicar}
-      className="absolute left-1/2 top-[calc(50%+38px)] inline-flex h-9 -translate-x-1/2 items-center gap-2 rounded-[var(--r-control)] border border-border bg-card px-3.5 text-sm font-medium text-foreground outline-none transition-[background-color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:bg-muted focus-visible:[box-shadow:var(--focus)]"
+      className="absolute left-1/2 top-[calc(50%+38px)] inline-flex h-9 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-1.5 -translate-x-1/2 items-center gap-2 rounded-[var(--r-control)] border border-border bg-card px-3.5 text-sm font-medium text-foreground outline-none transition-[background-color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:bg-muted focus-visible:[box-shadow:var(--focus)]"
     >
       <Send className="size-4 text-muted-foreground" aria-hidden="true" />
       Publicar

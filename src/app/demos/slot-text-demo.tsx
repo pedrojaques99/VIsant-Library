@@ -54,7 +54,7 @@ export default function SlotTextDemo({ props }: DemoProps) {
           <button
             type="button"
             onClick={vender}
-            className="inline-flex h-8 items-center gap-1.5 rounded-[var(--r-control)] border border-border bg-card px-3 text-apoio font-medium text-foreground [transition:background-color_var(--dur-fast)_var(--ease-out)] hover:bg-muted focus-visible:outline-none focus-visible:[box-shadow:var(--focus)] [&_svg]:size-3.5"
+            className="alvo-toque inline-flex h-8 items-center gap-1.5 rounded-[var(--r-control)] border border-border bg-card px-3 text-apoio font-medium text-foreground [transition:background-color_var(--dur-fast)_var(--ease-out)] hover:bg-muted focus-visible:outline-none focus-visible:[box-shadow:var(--focus)] [&_svg]:size-3.5"
           >
             <Plus aria-hidden="true" />
             Nova venda

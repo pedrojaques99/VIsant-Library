@@ -17,7 +17,7 @@ import type { DemoProps } from "../catalog";
 const DOIS_DIAS = (2 * 86_400 + 5 * 3_600 + 41 * 60 + 12) * 1000;
 
 const botao =
-  "inline-flex h-8 items-center gap-1.5 rounded-[var(--r-control)] border border-border bg-card px-3 text-apoio font-medium text-foreground [transition:background-color_var(--dur-fast)_var(--ease-out)] hover:bg-muted focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]";
+  "alvo-toque inline-flex h-8 items-center gap-1.5 rounded-[var(--r-control)] border border-border bg-card px-3 text-apoio font-medium text-foreground [transition:background-color_var(--dur-fast)_var(--ease-out)] hover:bg-muted focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]";
 
 export default function CountdownDemo({ props }: DemoProps) {
   const [alvo, setAlvo] = React.useState(() => Date.now() + DOIS_DIAS);

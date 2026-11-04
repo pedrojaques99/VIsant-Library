@@ -420,7 +420,7 @@ export function DataTable<TData, TValue>({
                 placeholder="Pesquisar..."
                 value={globalFilter ?? ''}
                 onChange={(event) => setGlobalFilter(event.target.value)}
-                className="h-8 w-[150px] lg:w-[200px] pl-8 text-xs bg-background/50"
+                className="h-8 pointer-coarse:h-11 w-[150px] lg:w-[200px] pl-8 text-xs bg-background/50"
               />
             </div>
           </div>
@@ -475,8 +475,8 @@ export function DataTable<TData, TValue>({
                   */
                   const canSort = header.column.getCanSort();
                   const triggerClass = cn(
-                    'group flex w-full items-center gap-1 text-xs font-medium text-muted-foreground transition-colors',
-                    canSort && 'cursor-pointer hover:text-foreground'
+                    'group relative flex w-full items-center gap-1 text-xs font-medium text-muted-foreground transition-colors',
+                    canSort && 'cursor-pointer hover:text-foreground pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-3.5'
                   );
                   const headerBody = (
                     <>

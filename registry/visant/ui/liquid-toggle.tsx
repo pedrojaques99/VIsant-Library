@@ -113,7 +113,7 @@ export function LiquidToggle({
         onCheckedChange?.(novo);
       }}
       className={cn(
-        "group relative inline-flex flex-none items-center rounded-[var(--r-pill)] outline-none",
+        "group relative inline-flex flex-none items-center rounded-[var(--r-pill)] outline-none pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-2",
         "bg-muted transition-[background-color,border-color] [transition-duration:var(--dur-base)] ease-[var(--ease-out)]",
         "data-[state=on]:bg-[var(--brand)]",
         "focus-visible:[box-shadow:var(--focus)] disabled:cursor-not-allowed disabled:opacity-50",

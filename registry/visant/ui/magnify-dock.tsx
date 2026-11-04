@@ -258,7 +258,7 @@ const DockIcone = React.forwardRef<HTMLButtonElement, DockIconeProps>(function D
           // Sem caixa própria: o ícone mora direto na barra. Borda em cada botão
           // dentro da borda da barra era moldura dentro de moldura, e a onda de
           // ampliação lia como caixas se empurrando em vez de ícones crescendo.
-          "grid place-items-center rounded-[var(--r-control)] outline-none focus-visible:[box-shadow:var(--focus)]",
+          "relative grid place-items-center rounded-[var(--r-control)] outline-none focus-visible:[box-shadow:var(--focus)] pointer-coarse:after:absolute pointer-coarse:after:-inset-0.5",
           "transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-muted",
           "[&_svg]:size-[50%] [&_svg]:shrink-0",
           ativo || mostrarRotulo ? "text-foreground" : "text-muted-foreground",

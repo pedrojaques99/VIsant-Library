@@ -234,7 +234,7 @@ export const ScrubInput = React.memo<ScrubInputProps>(function ScrubInput({
       className={cn(
         // Respiro: 12 px de lado e 8 de cima e baixo. Com menos, o rótulo
         // encostava na borda e a coluna de parâmetros lia como planilha.
-        "group relative isolate overflow-hidden rounded-[var(--r-control)] border border-border bg-card px-3 py-2",
+        "group relative isolate overflow-hidden rounded-[var(--r-control)] border border-border bg-card px-3 py-2 pointer-coarse:min-h-11 pointer-coarse:justify-center",
         "transition-colors [transition-duration:var(--dur-fast)] ease-[var(--ease-out)]",
         "hover:border-ring/40 focus-within:border-ring focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]",
         // Repouso · hover · foco · arrastando · desabilitado, os cinco

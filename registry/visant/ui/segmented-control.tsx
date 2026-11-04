@@ -228,15 +228,15 @@ export function SegmentedControl<T extends string>({
             // com `active ? 0 : -1` ele ficaria inalcançável por teclado.
             tabIndex={i === activeIndex ? 0 : -1}
             className={cn(
-              "relative flex items-center justify-center gap-1.5 rounded-lg font-medium",
+              "relative flex items-center justify-center gap-1.5 rounded-lg font-medium pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-2.5",
               "transition-[color,opacity,transform] [transition-duration:var(--dur-fast,160ms)] [transition-timing-function:var(--ease-out)]",
               "active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50",
               size === "sm" ? "text-[11px]" : "text-xs",
               variant === "fill"
                 ? cn("flex-1", size === "sm" ? "px-2 py-1" : "px-3 py-1.5")
                 : size === "sm"
-                  ? "h-6 w-7"
-                  : "h-7 w-8",
+                  ? "h-6 w-7 pointer-coarse:w-11"
+                  : "h-7 w-8 pointer-coarse:w-11",
               active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
               // Fio de cabelo entre vizinhos inativos.
               showDivider &&

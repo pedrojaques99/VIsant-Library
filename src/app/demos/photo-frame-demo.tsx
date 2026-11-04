@@ -109,7 +109,7 @@ export default function PhotoFrameDemo({ props }: DemoProps) {
         <Media papel={foto.papel} indice={foto.indice} className="size-full" />
       </PhotoFrame>
 
-      <div className="flex items-center gap-1 text-muted-foreground">
+      <div className="flex items-center gap-1 pointer-coarse:gap-2 text-muted-foreground">
         <Trocador nome={atual} onPasso={passo} onRepetir={repetir} />
         {anima ? <Temporizador key={rodada} ms={CICLO} /> : null}
       </div>

@@ -169,7 +169,7 @@ function Parte({ reduzido, className, children }: { reduzido: boolean; className
 }
 
 const BOTAO =
-  "inline-flex h-7 items-center rounded-[var(--r-pill)] px-3 font-medium outline-none transition-colors [transition-duration:var(--dur-fast)] focus-visible:[box-shadow:var(--focus)]";
+  "relative inline-flex h-7 items-center rounded-[var(--r-pill)] px-3 font-medium outline-none pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-2 transition-colors [transition-duration:var(--dur-fast)] focus-visible:[box-shadow:var(--focus)]";
 
 export function ConfirmMorph({
   label,
@@ -489,7 +489,7 @@ export function ConfirmMorph({
       {/* A borda é um contorno por cima (after), pra nunca entrar na medida da largura. */}
       <motion.div
         style={{ width: largura }}
-        className="relative flex h-9 max-w-full justify-start overflow-clip rounded-[var(--r-pill)] bg-card [box-shadow:var(--e-raised)] after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:border after:border-border after:content-['']"
+        className="relative flex h-9 pointer-coarse:h-11 max-w-full justify-start overflow-clip rounded-[var(--r-pill)] bg-card [box-shadow:var(--e-raised)] after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:border after:border-border after:content-['']"
       >
         <AnimatePresence initial={false}>
           <Rosto

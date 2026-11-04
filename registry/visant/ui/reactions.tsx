@@ -363,7 +363,7 @@ function Bandeja({
               aria-pressed={minha}
               tabIndex={i === focoIdx ? 0 : -1}
               className={cn(
-                "relative grid size-10 flex-none cursor-pointer place-items-center rounded-[var(--r-pill)] border-0 p-0 [-webkit-tap-highlight-color:transparent]",
+                "relative grid size-10 pointer-coarse:after:absolute pointer-coarse:after:-inset-0.5 flex-none cursor-pointer place-items-center rounded-[var(--r-pill)] border-0 p-0 [-webkit-tap-highlight-color:transparent]",
                 transicaoCor,
                 foco,
                 minha
@@ -503,7 +503,7 @@ export function Reactions({
 
   return (
     <motion.div className={cn("relative min-w-0", className)} style={{ height: altura }}>
-      <div ref={barra} className="relative flex flex-wrap items-center gap-x-1.5 gap-y-2" role="group" aria-label={label}>
+      <div ref={barra} className="relative flex flex-wrap items-center gap-x-1.5 gap-y-2 pointer-coarse:gap-y-3" role="group" aria-label={label}>
         <LayoutGroup id={grupo}>
           <AnimatePresence mode="popLayout" initial={false}>
             {visiveis.map((r) => {
@@ -518,7 +518,7 @@ export function Reactions({
                   aria-label={`${opcao.label}, ${r.count} ${plural(r.count)}${r.reacted ? ", incluindo a sua" : ""}`}
                   onClick={() => alternar(r.id)}
                   className={cn(
-                    "group/pilula relative inline-flex h-8 flex-none cursor-pointer items-center gap-1.5 rounded-[var(--r-pill)] border py-0 pl-2.5 pr-3 text-corpo font-medium leading-none tabular-nums [-webkit-tap-highlight-color:transparent] [touch-action:manipulation] hover:z-10 focus-visible:z-10",
+                    "group/pilula relative inline-flex h-8 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-2 flex-none cursor-pointer items-center gap-1.5 rounded-[var(--r-pill)] border py-0 pl-2.5 pr-3 text-corpo font-medium leading-none tabular-nums [-webkit-tap-highlight-color:transparent] [touch-action:manipulation] hover:z-10 focus-visible:z-10",
                     transicaoCor,
                     foco,
                     r.reacted
@@ -551,7 +551,7 @@ export function Reactions({
                 type="button"
                 aria-label="Adicionar reação"
                 className={cn(
-                  "group/pilula relative inline-flex h-8 w-[38px] flex-none cursor-pointer items-center justify-center rounded-[var(--r-pill)] border border-border bg-card p-0 text-muted-foreground [-webkit-tap-highlight-color:transparent] hover:z-10 hover:bg-muted hover:text-foreground focus-visible:z-10 data-[state=open]:bg-muted data-[state=open]:text-foreground",
+                  "group/pilula relative inline-flex h-8 w-[38px] pointer-coarse:after:absolute pointer-coarse:after:-inset-x-1 pointer-coarse:after:-inset-y-2 flex-none cursor-pointer items-center justify-center rounded-[var(--r-pill)] border border-border bg-card p-0 text-muted-foreground [-webkit-tap-highlight-color:transparent] hover:z-10 hover:bg-muted hover:text-foreground focus-visible:z-10 data-[state=open]:bg-muted data-[state=open]:text-foreground",
                   transicaoCor,
                   foco,
                 )}

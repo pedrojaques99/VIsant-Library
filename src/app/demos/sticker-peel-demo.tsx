@@ -120,7 +120,7 @@ export default function StickerPeelDemo({ props }: DemoProps) {
             setRodada((r) => r + 1);
             setMexeu(false);
           }}
-          className="absolute right-3 bottom-3 z-[999] inline-flex items-center gap-1.5 rounded-[var(--r-control)] bg-card px-3 py-1.5 text-xs text-foreground [box-shadow:var(--e-raised)] transition-opacity duration-[var(--dur-fast)] ease-[var(--ease-out)] outline-none focus-visible:[box-shadow:var(--focus)] disabled:opacity-50"
+          className="absolute right-3 bottom-3 z-[999] inline-flex pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-2 items-center gap-1.5 rounded-[var(--r-control)] bg-card px-3 py-1.5 text-xs text-foreground [box-shadow:var(--e-raised)] transition-opacity duration-[var(--dur-fast)] ease-[var(--ease-out)] outline-none focus-visible:[box-shadow:var(--focus)] disabled:opacity-50"
         >
           <RotateCcw className="size-3.5" aria-hidden />
           Recomeçar

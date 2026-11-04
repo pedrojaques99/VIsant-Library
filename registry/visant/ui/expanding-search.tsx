@@ -195,6 +195,7 @@ export function ExpandingSearch({
         <div
           className={cn(
             "relative h-full overflow-hidden rounded-[var(--r-control)] border border-border bg-card text-foreground",
+            !aberto && "pointer-coarse:overflow-visible",
             "transition-[box-shadow] duration-[var(--dur-fast)] ease-[var(--ease-out)]",
             "has-[:focus-visible]:[box-shadow:var(--focus)]",
           )}
@@ -215,7 +216,7 @@ export function ExpandingSearch({
               aria-label={label}
               aria-expanded={false}
               onClick={() => mudarAberto(true)}
-              className="absolute inset-0 cursor-pointer outline-none"
+              className="absolute inset-0 cursor-pointer outline-none pointer-coarse:after:absolute pointer-coarse:after:-inset-1"
             />
           )}
 
@@ -255,7 +256,7 @@ export function ExpandingSearch({
                 campoRef.current?.focus();
               }}
               className={cn(
-                "absolute top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-[var(--r-control)] text-muted-foreground",
+                "absolute top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-[var(--r-control)] text-muted-foreground pointer-coarse:after:absolute pointer-coarse:after:-inset-1.5",
                 "outline-none hover:bg-muted hover:text-foreground focus-visible:[box-shadow:var(--focus)]",
                 fim ? "left-1.5" : "right-1.5",
               )}

@@ -215,7 +215,7 @@ export function CommandSearch({
         // como "button" no leitor de tela e no Tab.
         aria-label={shortcut ? `${triggerLabel} (Ctrl+${shortcut.toUpperCase()})` : triggerLabel}
         className={cn(
-          "group flex h-[var(--control-h,2.25rem)] items-center",
+          "group relative flex h-[var(--control-h,2.25rem)] items-center pointer-coarse:after:absolute pointer-coarse:after:-inset-1.5",
           "rounded-[var(--r-control,0.5rem)] border border-[var(--border)]",
           "text-[var(--muted-foreground)]",
           "transition-[background-color,border-color,color,box-shadow]",

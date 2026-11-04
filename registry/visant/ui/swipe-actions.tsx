@@ -505,7 +505,7 @@ export function SwipeActionsRow({
               onClick={(e) => {
                 if (e.detail > 0) setMenuAberto((o) => !o);
               }}
-              className="grid size-8 flex-none place-items-center rounded-[var(--r-control)] text-muted-foreground outline-none transition-colors [transition-duration:var(--dur-fast)] hover:bg-muted hover:text-foreground focus-visible:[box-shadow:var(--focus)] data-[state=open]:bg-muted data-[state=open]:text-foreground group-data-[dragging]/linha:bg-transparent"
+              className="relative grid size-8 pointer-coarse:after:absolute pointer-coarse:after:-inset-1.5 flex-none place-items-center rounded-[var(--r-control)] text-muted-foreground outline-none transition-colors [transition-duration:var(--dur-fast)] hover:bg-muted hover:text-foreground focus-visible:[box-shadow:var(--focus)] data-[state=open]:bg-muted data-[state=open]:text-foreground group-data-[dragging]/linha:bg-transparent"
             >
               <MoreHorizontal className="size-[18px]" strokeWidth={1.75} aria-hidden="true" />
             </Menu.Trigger>

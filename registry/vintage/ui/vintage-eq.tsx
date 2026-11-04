@@ -150,7 +150,7 @@ export function VintageEQ({
 
               <div
                 id={`vintage-eq-slider-${index}`}
-                className="relative h-[168px] w-8 select-none rounded-[4px] outline-none focus-visible:[box-shadow:var(--focus,0_0_0_2px_var(--vintage-value))]"
+                className="relative h-[168px] w-8 pointer-coarse:after:absolute pointer-coarse:after:-inset-x-1.5 pointer-coarse:after:inset-y-0 select-none rounded-[4px] outline-none focus-visible:[box-shadow:var(--focus,0_0_0_2px_var(--vintage-value))]"
                 style={{ cursor: draggingIndex === index ? "grabbing" : "grab", touchAction: "pan-x" }}
                 tabIndex={0}
                 role="slider"

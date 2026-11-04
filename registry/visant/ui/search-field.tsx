@@ -113,7 +113,7 @@ export function SearchField({
           placeholder={placeholder}
           onChange={(event) => setText(event.target.value)}
           className={cn(
-            "h-[var(--control-h,2.25rem)] w-full",
+            "h-[var(--control-h,2.25rem)] pointer-coarse:h-11 w-full",
             "rounded-[var(--r-control,0.5rem)] border border-[var(--input,var(--border))]",
             "bg-[var(--background)] pl-9 pr-9 text-sm text-[var(--foreground)]",
             "placeholder:text-[var(--muted-foreground)]",
@@ -133,7 +133,7 @@ export function SearchField({
             aria-label={clearLabel}
             onClick={() => setText("")}
             className={cn(
-              "absolute right-1.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center",
+              "absolute right-1.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center pointer-coarse:after:absolute pointer-coarse:after:-inset-2.5",
               "rounded-[var(--r-control,0.375rem)] text-[var(--muted-foreground)]",
               "hover:text-[var(--foreground)] focus-visible:bg-[var(--muted)]",
               "outline-none focus-visible:[box-shadow:0_0_0_1px_color-mix(in_oklab,var(--ring)_60%,var(--foreground))]",

@@ -6691,9 +6691,9 @@
           "prop": "threshold",
           "tipo": "numero",
           "min": 0,
-          "max": 160,
+          "max": 140,
           "step": 1,
-          "padrao": 64,
+          "padrao": 56,
           "resumo": "Quanto puxar (px de painel esticado) até valer."
         },
         {

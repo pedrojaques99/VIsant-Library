@@ -246,7 +246,7 @@ export function BlackHole<T extends { id: string }>({
             onClick={apagar}
             disabled={nMarcadas === 0 || sumindo}
             aria-label={nMarcadas > 0 ? `Apagar ${nMarcadas}` : "Apagar"}
-            className="inline-flex h-8 cursor-pointer items-center rounded-[var(--r-control)] bg-muted px-2 text-sm text-foreground outline-none transition-opacity duration-[var(--dur-fast)] ease-[var(--ease-out)] focus-visible:[box-shadow:var(--focus)] disabled:cursor-default disabled:opacity-50"
+            className="relative inline-flex h-8 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-1.5 cursor-pointer items-center rounded-[var(--r-control)] bg-muted px-2 text-sm text-foreground outline-none transition-opacity duration-[var(--dur-fast)] ease-[var(--ease-out)] focus-visible:[box-shadow:var(--focus)] disabled:cursor-default disabled:opacity-50"
           >
             <Trash2 className="size-4" aria-hidden />
             <span
@@ -391,7 +391,7 @@ export function BlackHole<T extends { id: string }>({
               <button
                 type="button"
                 onClick={desfazer}
-                className="rounded-[var(--r-pill)] px-3 py-1 text-sm font-medium text-foreground outline-none transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-muted focus-visible:[box-shadow:var(--focus)]"
+                className="relative rounded-[var(--r-pill)] px-3 py-1 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-2 text-sm font-medium text-foreground outline-none transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-muted focus-visible:[box-shadow:var(--focus)]"
               >
                 Desfazer
               </button>

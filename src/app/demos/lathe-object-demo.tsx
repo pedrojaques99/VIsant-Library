@@ -49,7 +49,7 @@ export default function LatheObjectDemo({ props }: DemoProps) {
       <div className="min-h-0 flex-1">
         <LatheObject profile={caso.profile} sticks={caso.sticks} aria-label={caso.label} {...props} />
       </div>
-      <div className="flex justify-center gap-4 pb-1" role="group" aria-label="Objeto">
+      <div className="flex justify-center gap-4 pb-1 pointer-coarse:pb-3" role="group" aria-label="Objeto">
         {CASOS.map((c, n) => (
           <button
             key={c.id}

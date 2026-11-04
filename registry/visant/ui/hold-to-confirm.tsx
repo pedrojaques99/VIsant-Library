@@ -329,7 +329,7 @@ export function HoldToConfirm({
         onBlur={soltar}
         onContextMenu={(e) => e.preventDefault()}
         className={cn(
-          "relative inline-flex h-10 select-none items-center justify-center rounded-[var(--r-control)] border bg-card px-5 text-sm font-medium outline-none [-webkit-touch-callout:none] [touch-action:manipulation]",
+          "relative inline-flex h-10 select-none items-center justify-center rounded-[var(--r-control)] border bg-card px-5 text-sm font-medium outline-none pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-1 [-webkit-touch-callout:none] [touch-action:manipulation]",
           "transition-[background-color,opacity] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
           "focus-visible:[box-shadow:var(--focus)] disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:cursor-default",
           "hover:bg-muted disabled:hover:bg-card aria-disabled:hover:bg-card",

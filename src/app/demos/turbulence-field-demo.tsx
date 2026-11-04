@@ -43,11 +43,10 @@ export default function TurbulenceFieldDemo({ props }: DemoProps) {
         </div>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-1.5">
+      <div className="flex flex-wrap justify-center gap-1.5 pointer-coarse:pb-1">
         {PRESETS.map((preset, n) => (
           <Chip
             key={preset.id}
-            className="alvo-toque"
             pressed={n === i}
             onClick={() => setI(n)}
           >

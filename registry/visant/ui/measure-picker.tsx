@@ -181,7 +181,7 @@ export function MeasurePicker<T>({
             // duas ficavam 3px fora de registro, que é a bolinha desalinhada do
             // report. Tirando o espaço de linha, os dois centros voltam a ser o
             // mesmo ponto.
-            "measure-range relative z-10 block h-10 w-full cursor-grab appearance-none bg-transparent",
+            "measure-range relative z-10 block h-10 pointer-coarse:h-11 w-full cursor-grab appearance-none bg-transparent",
             "active:cursor-grabbing focus-visible:outline-none",
             // Trilha nativa some: quem pinta é a camada de faixas acima.
             "[&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-transparent",

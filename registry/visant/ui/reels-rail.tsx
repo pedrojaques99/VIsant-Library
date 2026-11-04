@@ -737,7 +737,7 @@ function ControleReel({
       aria-label={label}
       {...(pressionado === undefined ? null : { "aria-pressed": pressionado })}
       className={cn(
-        "grid size-9 place-items-center rounded-[var(--r-pill,9999px)]",
+        "relative grid size-9 pointer-coarse:after:absolute pointer-coarse:after:-inset-1 place-items-center rounded-[var(--r-pill,9999px)]",
         // Fundo próprio e não `--background`: o controle mora sobre a mídia, e
         // ali o contraste não pode depender do tema da página.
         "bg-black/55 text-white backdrop-blur-[2px]",

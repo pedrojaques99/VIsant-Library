@@ -174,7 +174,7 @@ export function VoiceNote({
         onClick={alternar}
         aria-label={tocando ? "Pausar" : "Tocar"}
         className={cn(
-          "grid size-9 flex-none place-items-center rounded-[var(--r-pill)] outline-none [font:inherit] focus-visible:[box-shadow:var(--focus)]",
+          "relative grid size-9 pointer-coarse:after:absolute pointer-coarse:after:-inset-1 flex-none place-items-center rounded-[var(--r-pill)] outline-none [font:inherit] focus-visible:[box-shadow:var(--focus)]",
           "transition-[opacity] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:opacity-90 active:opacity-80",
           tom.botao,
         )}
@@ -244,7 +244,7 @@ export function VoiceNote({
           e.preventDefault();
           buscar(alvo);
         }}
-        className="relative h-7 min-w-0 flex-1 cursor-pointer touch-pan-y rounded-[var(--r-control)] outline-none focus-visible:[box-shadow:var(--focus)]"
+        className="relative h-7 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-2 min-w-0 flex-1 cursor-pointer touch-pan-y rounded-[var(--r-control)] outline-none focus-visible:[box-shadow:var(--focus)]"
       >
         <span aria-hidden="true" className="absolute inset-0 opacity-30">
           <Barras peaks={peaks} cor="bg-muted-foreground" />
@@ -263,7 +263,7 @@ export function VoiceNote({
           type="button"
           onClick={onDelete}
           aria-label="Apagar nota de voz"
-          className="-mr-1 grid size-7 flex-none place-items-center rounded-[var(--r-pill)] text-muted-foreground outline-none [font:inherit] transition-[background-color,color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:bg-muted hover:text-foreground focus-visible:[box-shadow:var(--focus)]"
+          className="relative -mr-1 grid size-7 pointer-coarse:after:absolute pointer-coarse:after:-inset-2 flex-none place-items-center rounded-[var(--r-pill)] text-muted-foreground outline-none [font:inherit] transition-[background-color,color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:bg-muted hover:text-foreground focus-visible:[box-shadow:var(--focus)]"
         >
           <X className="size-4" strokeWidth={1.75} />
         </button>

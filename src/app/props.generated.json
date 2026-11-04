@@ -11706,7 +11706,7 @@
           "nome": "threshold",
           "tipo": "number",
           "obrigatoria": false,
-          "padrao": "64",
+          "padrao": "56",
           "descricao": "Quanto puxar (px de painel esticado) até valer."
         }
       ]

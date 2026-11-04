@@ -51,7 +51,7 @@ const PERIODOS = { trimestre: semanas(12), semestre: semanas(26) };
 type Periodo = keyof typeof PERIODOS;
 
 const opcao =
-  "h-7 rounded-[var(--r-pill)] px-3 text-apoio font-medium [transition:background-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out)] focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]";
+  "alvo-toque h-7 rounded-[var(--r-pill)] px-3 text-apoio font-medium [transition:background-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out)] focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]";
 
 export default function StreamgraphDemo({ props }: DemoProps) {
   const [periodo, setPeriodo] = React.useState<Periodo>("trimestre");

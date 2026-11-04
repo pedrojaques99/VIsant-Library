@@ -12,6 +12,7 @@ import {
   defaultDropAnimationSideEffects,
   useSensor,
   useSensors,
+  type Announcements,
   type DragEndEvent,
   type DragOverEvent,
   type DragStartEvent,
@@ -92,6 +93,17 @@ function readDropAnimation() {
     }),
   };
 }
+
+/* Sem isto o leitor de tela anuncia em inglês o id interno ("Draggable item a was dropped"). */
+const AVISOS: Announcements = {
+  onDragStart: () => "Cartão pego.",
+  onDragOver: ({ over }) => (over ? "Cartão sobre uma nova posição." : "Cartão fora das colunas."),
+  onDragEnd: ({ over }) => (over ? "Cartão solto." : "Cartão devolvido."),
+  onDragCancel: () => "Movimento cancelado. Cartão devolvido.",
+};
+const INSTRUCOES = {
+  draggable: "Espaço pega o cartão. As setas movem. Espaço solta e Esc cancela. No toque, segure e arraste.",
+};
 
 export function Kanban<T = unknown, C = unknown>({
   columns,
@@ -481,6 +493,7 @@ export function Kanban<T = unknown, C = unknown>({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
+      accessibility={{ announcements: AVISOS, screenReaderInstructions: INSTRUCOES }}
     >
       {/* data-kanban-dragging: consumidores (via `:has()`) desligam scroll-snap
           durante o drag pra não brigar com o auto-scroll do dnd-kit. */}

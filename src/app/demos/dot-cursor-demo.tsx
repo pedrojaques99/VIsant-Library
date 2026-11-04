@@ -58,7 +58,7 @@ export default function DotCursorDemo(_: DemoProps) {
           <a
             href="#dot-cursor"
             onClick={(e) => e.preventDefault()}
-            className="text-foreground underline underline-offset-4"
+            className="alvo-toque text-foreground underline underline-offset-4"
           >
             link
           </a>{" "}
@@ -66,7 +66,7 @@ export default function DotCursorDemo(_: DemoProps) {
         </p>
         <button
           type="button"
-          className="rounded-[var(--r-control,10px)] border border-current px-4 py-2 text-rotulo text-foreground focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]"
+          className="alvo-toque rounded-[var(--r-control,10px)] border border-current px-4 py-2 text-rotulo text-foreground focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]"
         >
           Um botão
         </button>

@@ -22,6 +22,7 @@
  *   node scripts/toque-check.mjs --familia controles --ctx ficha,padrao
  *   node scripts/toque-check.mjs --continuar     # pula o que já está no progresso
  *   node scripts/toque-check.mjs --workers 6
+ *   node scripts/toque-check.mjs --alvos         # só a área de toque, sem gestos: perf/toque/alvos.json
  *
  * Progresso, uma linha por medição: perf/toque/progresso.jsonl
  * Tabela no fim:                    perf/toque/relatorio.md
@@ -51,11 +52,15 @@ const valor = (flag) => {
 };
 const only = valor("--only")?.split(",");
 const familiaPedida = valor("--familia");
-const contextos = valor("--ctx")?.split(",") ?? ["ficha", "alto", "padrao"];
+const contextos = args.includes("--alvos") ? ["ficha"] : valor("--ctx")?.split(",") ?? ["ficha", "alto", "padrao"];
 const workers = Number(valor("--workers") ?? 4);
 const continuar = args.includes("--continuar");
 const cru = args.includes("--cru");
-const parcial = Boolean(only || familiaPedida || valor("--ctx"));
+const soAlvos = args.includes("--alvos");
+const ALVOS = join(SAIDA, "alvos.json");
+/** A régua: 44px menos um de folga, porque o centro cai em fração quando o vizinho tem largura de texto. */
+const ALVO_MIN = 43;
+const parcial = Boolean(only || familiaPedida || valor("--ctx") || soAlvos);
 
 /**
  * Quem pode segurar o arrasto vertical, e por quê. Fora desta lista, arrasto
@@ -179,6 +184,44 @@ const inventariar = ([raizSel, SEL]) => {
     } else if (so_hover) {
       hover.push(nomeDe(el));
     }
+  }
+  /*
+   * A área de toque é o que o DEDO acerta, não a caixa: `getBoundingClientRect` não
+   * vê o `::after` invisível, e o vizinho por cima conta contra. Mesma medida em cruz
+   * de tests/mobile.spec.ts. `esc` é a redução do palco: a peça dá 44px no espaço
+   * dela e a régua desconta o que a vitrine encolheu (quem instala não tem palco).
+   */
+  for (const c of controles) {
+    const el = raiz.querySelector(`[data-tq-i="${c.i}"]`);
+    if (!el) continue;
+    const slider = el.getAttribute("role") === "slider";
+    const meu = (x, y) => {
+      const t = document.elementFromPoint(x, y);
+      if (!t) return false;
+      if (t === el || el.contains(t) || t.closest("[data-bug-botao]") || el.closest("label")?.contains(t)) return true;
+      // Num slider o dedo pega a trilha inteira, não só a alça.
+      if (slider) {
+        let a = t;
+        while (a && a !== raiz) {
+          if (a.contains(el) && (reactDe(a) ?? {}).onPointerDown) return true;
+          a = a.parentElement;
+        }
+      }
+      return false;
+    };
+    c.esc = +(el.offsetWidth ? c.w / el.offsetWidth : (el.getScreenCTM?.()?.a ?? 1)).toFixed(2);
+    c.desligado = el.disabled === true || getComputedStyle(el).pointerEvents === "none";
+    if (!meu(c.x, c.y)) {
+      c.tw = c.th = 0;
+      continue;
+    }
+    const andar = (dx, dy) => {
+      let n = 0;
+      while (n < 40 && meu(c.x + dx * (n + 1), c.y + dy * (n + 1))) n++;
+      return n;
+    };
+    c.tw = andar(-1, 0) + andar(1, 0) + 1;
+    c.th = andar(0, -1) + andar(0, 1) + 1;
   }
   // O próprio palco/raiz podem escutar.
   const cobertos = [];
@@ -391,7 +434,17 @@ async function medir(job, nav, comparar) {
   r.touchActions = i0.touchActions;
   r.hover = i0.hover.slice(0, 3);
   r.cobertos = i0.cobertos;
-  if (tipo === "ficha") r.pequenos = i0.controles.filter((c) => c.w < 40 || c.h < 40).map((c) => `${c.nome} ${Math.round(c.w)}x${Math.round(c.h)}`).slice(0, 6);
+  if (tipo === "ficha") {
+    // `pequenos` é a caixa desenhada (cortada em 6 por peça); `curtos` é o que o dedo acerta, todos.
+    r.pequenos = i0.controles.filter((c) => c.w < 40 || c.h < 40).map((c) => `${c.nome} ${Math.round(c.w)}x${Math.round(c.h)}`).slice(0, 6);
+    r.curtos = i0.controles.filter((c) => !c.desligado && (c.tw < ALVO_MIN * (c.esc ?? 1) || c.th < ALVO_MIN * (c.esc ?? 1))).map((c) => `${c.nome} ${c.tw}x${c.th}${c.esc < 0.98 ? ` @${c.esc}` : ""}`);
+  }
+  if (soAlvos) {
+    r.caixa = i0.controles.filter((c) => c.w < 40 || c.h < 40).length;
+    await ctx.close();
+    r.cat = "alvos";
+    return r;
+  }
 
   const a0 = await foto(i0.palco);
   await p.waitForTimeout(500);
@@ -756,6 +809,7 @@ async function trabalhador() {
       classificar(r);
     }
     medidas.push(r);
+    if (soAlvos) continue;
     appendFileSync(PROGRESSO, JSON.stringify(r) + "\n");
     feitasAgora++;
     console.log(`${r.cat === "conflito" ? "x" : r.cat === "responde" ? "." : "-"} ${r.ctx.padEnd(6)} ${r.nome.padEnd(24)} ${r.cat}${r.motivos.length ? ": " + r.motivos.join("; ").slice(0, 160) : ""}`);
@@ -764,6 +818,16 @@ async function trabalhador() {
 
 await Promise.all(Array.from({ length: workers }, trabalhador));
 await nav.close();
+
+if (soAlvos) {
+  const com = medidas.filter((r) => r.curtos?.length).sort((a, b) => a.familia.localeCompare(b.familia) || a.nome.localeCompare(b.nome));
+  const total = com.reduce((n, r) => n + r.curtos.length, 0);
+  writeFileSync(ALVOS, JSON.stringify(com.map(({ nome, familia, curtos }) => ({ nome, familia, curtos })), null, 1) + "\n");
+  for (const r of com) console.log(`${r.familia}/${r.nome}: ${r.curtos.join(" | ")}`);
+  const quebradas = medidas.filter((r) => r.quebrou).map((r) => r.nome);
+  console.log(`\n${medidas.length} peças; ${com.length} com alvo abaixo de 44px; ${total} alvos. Caixa desenhada abaixo de 40px: ${medidas.reduce((n, r) => n + (r.caixa ?? 0), 0)}.${quebradas.length ? ` Quebraram: ${quebradas.join(", ")}` : ""}`);
+  process.exit(0);
+}
 
 // O relatório junta o que já estava no progresso: a medição mais nova de cada par vale.
 const finais = new Map();

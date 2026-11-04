@@ -282,7 +282,7 @@ function useReduzir() {
 
 const foco = "focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]";
 const botaoIcone = cn(
-  "grid size-9 cursor-pointer place-items-center rounded-[var(--r-pill)] border-0 bg-transparent p-0 text-muted-foreground [-webkit-tap-highlight-color:transparent] [transition:background-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out)] hover:enabled:bg-muted hover:enabled:text-foreground disabled:cursor-default disabled:opacity-45",
+  "relative grid size-9 pointer-coarse:after:absolute pointer-coarse:after:-inset-1 cursor-pointer place-items-center rounded-[var(--r-pill)] border-0 bg-transparent p-0 text-muted-foreground [-webkit-tap-highlight-color:transparent] [transition:background-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out)] hover:enabled:bg-muted hover:enabled:text-foreground disabled:cursor-default disabled:opacity-45",
   foco,
 );
 
@@ -520,7 +520,7 @@ export function SignaturePad({
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Espessura value={largura} onChange={(v) => { setLargura(v); setStatus(`Ponta ${LARGURAS[v].label.toLowerCase()}`); }} grupo={`${uid}-larg`} reduzir={reduzir} />
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-0.5 pointer-coarse:gap-2">
           <button type="button" className={botaoIcone} aria-label="Desfazer" title="Desfazer" onClick={desfazer} disabled={!hist.past.length || rodando}>
             <Undo2 size={18} strokeWidth={1.75} aria-hidden="true" />
           </button>
@@ -567,7 +567,7 @@ function Espessura({
     refs.current[i]?.focus();
   }
   return (
-    <div className="flex items-center gap-0.5" role="radiogroup" aria-label="Espessura da ponta" onKeyDown={onKeyDown}>
+    <div className="flex items-center gap-0.5 pointer-coarse:gap-2" role="radiogroup" aria-label="Espessura da ponta" onKeyDown={onKeyDown}>
       {OPCOES_LARGURA.map((o, i) => (
         <button
           key={o}
@@ -582,7 +582,7 @@ function Espessura({
           tabIndex={o === value ? 0 : -1}
           onClick={() => onChange(o)}
           className={cn(
-            "relative grid size-9 cursor-pointer place-items-center rounded-[var(--r-pill)] border-0 bg-transparent p-0 [-webkit-tap-highlight-color:transparent]",
+            "relative grid size-9 pointer-coarse:after:absolute pointer-coarse:after:-inset-1 cursor-pointer place-items-center rounded-[var(--r-pill)] border-0 bg-transparent p-0 [-webkit-tap-highlight-color:transparent]",
             foco,
           )}
         >

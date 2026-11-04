@@ -194,7 +194,7 @@ export function SearchableSelect({
         disabled={disabled}
         aria-haspopup="listbox"
         className={cn(
-          "group flex h-[var(--control-h,2.5rem)] w-full items-center justify-between gap-2",
+          "group relative flex h-[var(--control-h,2.5rem)] w-full items-center justify-between gap-2 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-1.5",
           "rounded-[var(--r-control,0.5rem)] border border-[var(--input,var(--border))]",
           "bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)]",
           "hover:bg-[var(--muted)] disabled:hover:bg-transparent",

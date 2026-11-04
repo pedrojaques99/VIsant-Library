@@ -212,7 +212,7 @@ export function BillingToggle({
             onClick={() => onValueChange(o.value)}
             onKeyDown={(e) => aoTeclar(e, i)}
             className={cn(
-              "relative z-[1] inline-flex h-9 items-center gap-2 rounded-[var(--r-pill)] px-4 font-medium outline-none",
+              "relative z-[1] inline-flex h-9 items-center gap-2 rounded-[var(--r-pill)] px-4 font-medium outline-none pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-1",
               "transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] focus-visible:[box-shadow:var(--focus)]",
               ativo ? "text-foreground" : "text-muted-foreground hover:text-foreground",
             )}

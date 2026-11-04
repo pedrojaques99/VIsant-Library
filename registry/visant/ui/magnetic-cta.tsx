@@ -279,7 +279,7 @@ export function MagneticCta({
         disabled={disabled}
         data-variant={variant}
         className={cn(
-          "magnet-body group/magnet pointer-events-auto relative isolate inline-flex select-none items-center justify-center gap-2 overflow-hidden",
+          "magnet-body group/magnet pointer-events-auto relative isolate inline-flex select-none items-center justify-center gap-2 overflow-hidden pointer-coarse:min-h-11",
           "h-[var(--control-h,2.75rem)] rounded-[var(--r-pill,9999px)] px-6",
           "text-[length:var(--text-corpo,0.9375rem)] font-medium tracking-[-0.01em]",
           "outline-none focus-visible:[box-shadow:var(--focus)]",

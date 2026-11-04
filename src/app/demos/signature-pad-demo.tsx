@@ -24,7 +24,7 @@ export default function SignaturePadDemo({ props }: DemoProps) {
         <button
           type="button"
           disabled={tracos === 0}
-          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[var(--r-control)] border border-[var(--brand)] bg-[var(--brand)] px-4 text-corpo font-medium text-[var(--brand-foreground)] [transition:opacity_var(--dur-fast)_var(--ease-out)] focus-visible:outline-none focus-visible:[box-shadow:var(--focus)] disabled:opacity-40"
+          className="alvo-toque inline-flex h-9 items-center justify-center gap-1.5 rounded-[var(--r-control)] border border-[var(--brand)] bg-[var(--brand)] px-4 text-corpo font-medium text-[var(--brand-foreground)] [transition:opacity_var(--dur-fast)_var(--ease-out)] focus-visible:outline-none focus-visible:[box-shadow:var(--focus)] disabled:opacity-40"
         >
           <Check className="size-4" aria-hidden="true" />
           Aceitar proposta
