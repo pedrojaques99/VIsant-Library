@@ -38,16 +38,19 @@ export default function VintageTvFrameDemo() {
   const analyser = useLoop(tocando && ligada && ativo);
 
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-4">
-      <div className="w-[300px]">
+    <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-2">
+      <div className="w-[260px]">
         <VintageTvFrame
           title="VISANT TV"
-          width={300}
+          width={260}
           showTimecode="00:12:34"
           program={CANAIS[canal].modo}
           programActive={ativo}
           programAnalyser={analyser}
-          onPowerToggle={setLigada}
+          onPowerToggle={(v) => {
+            setLigada(v);
+            if (!v) setTocando(false);
+          }}
         />
       </div>
 

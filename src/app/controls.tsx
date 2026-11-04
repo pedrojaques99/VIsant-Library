@@ -420,7 +420,7 @@ export function Customize({
           onClick={() => setAbertoExtra((v) => !v)}
           className="self-start rounded-control py-1 text-casa-sm text-casa-fg-2 transition-colors [transition-duration:var(--dur-fast)] hover:text-casa-fg pointer-coarse:min-h-11"
         >
-          {abertoExtra ? "Menos controles" : `Mais ${extras.length} controles`}
+          {abertoExtra ? "Menos controles" : `Mais ${extras.length} ${extras.length === 1 ? "controle" : "controles"}`}
         </button>
       ) : null}
     </section>

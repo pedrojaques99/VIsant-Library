@@ -572,7 +572,7 @@ export function ComponentFocus({
              * O palco cresce com a peça, com piso — não com a tela. Esticar até
              * o fim da viewport dava 200px de vazio em cima de peça pequena.
              */
-            className="flex min-h-[min(48vh,420px)] items-center justify-center overflow-auto px-5 pb-8 pt-16 sm:px-8 lg:min-h-[min(72vh,640px)]"
+            className="flex min-h-[min(48vh,420px)] items-center justify-center overflow-hidden px-5 pb-8 pt-16 sm:px-8 lg:min-h-[min(72vh,640px)]"
           >
             {preset.px ? (
               /*

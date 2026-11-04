@@ -44,6 +44,7 @@ export default function FilterBarKitDemo() {
               </motion.li>
             ))}
           </AnimatePresence>
+          {filtrada.length === 0 ? <li className="px-4 py-2 text-sm text-muted-foreground">Nada com esse filtro.</li> : null}
         </ul>
       </div>
     </div>

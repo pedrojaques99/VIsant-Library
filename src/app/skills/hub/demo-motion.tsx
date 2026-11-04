@@ -297,7 +297,7 @@ export function DemoMotion() {
               <div
                 aria-hidden="true"
                 data-lado={l.errado ? "errado" : "certo"}
-                className="relative h-56 overflow-hidden rounded-tile bg-casa-bg sm:h-72 lg:h-[clamp(18rem,52svh,30rem)]"
+                className="relative isolate h-56 overflow-hidden rounded-tile bg-casa-bg sm:h-72 lg:h-[clamp(18rem,52svh,30rem)]"
               >
                 <Palco key={cena} cena={cena} errado={l.errado} fase={fase} seco={seco} />
                 <div className="pointer-events-none absolute inset-0 z-20 rounded-tile" style={{ boxShadow: `inset 0 0 0 1.5px var(${l.errado ? "--marca-antes" : "--marca-depois"})` }} />

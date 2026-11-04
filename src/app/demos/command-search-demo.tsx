@@ -17,12 +17,19 @@ const ATALHOS = [
 export default function CommandSearchDemo() {
   const buscar = React.useCallback(async (q: string) => {
     const needle = q.toLowerCase();
-    return FILA.filter((l) => l.nome.toLowerCase().includes(needle)).map((l) => ({
+    const atalhos = ATALHOS.filter((a) => `${a.title} ${a.subtitle}`.toLowerCase().includes(needle)).map(({ id, title, subtitle }) => ({
+      id,
+      title,
+      subtitle,
+      type: "atalho",
+    }));
+    const fila = FILA.filter((l) => l.nome.toLowerCase().includes(needle)).map((l) => ({
       id: l.id,
       title: l.nome,
       subtitle: ROTULO_FILTRO[l.status],
       type: "job",
     }));
+    return [...atalhos, ...fila];
   }, []);
 
   return (

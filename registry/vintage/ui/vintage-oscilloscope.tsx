@@ -218,15 +218,35 @@ function lerBandas(amostras: ArrayLike<number>, st: Estado): Bandas {
   return { bass, mid, high, volume, kick, snare, hat };
 }
 
+const MATIZES = new Map<string, number>();
+
+/**
+ * Os canais da cor, pintando um pixel. A cor computada pode vir em `oklch()` ou `color-mix`, e
+ * ler os números dela como RGB dava sempre a mesma matiz, em qualquer marca.
+ */
+function canaisDe(cor: string): [number, number, number] | null {
+  const ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+  if (!ctx) return null;
+  ctx.fillStyle = cor;
+  ctx.fillRect(0, 0, 1, 1);
+  const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+  return [r, g, b];
+}
+
 /** A matiz do fósforo, resolvida do token. Cai no verde de tubo se falhar. */
 function matizDe(el: HTMLElement | null): number {
   if (!el || typeof window === "undefined") return 120;
   const cor = getComputedStyle(el).color;
-  const m = cor.match(/-?\d+(\.\d+)?/g);
-  if (!m || m.length < 3) return 120;
-  const r = Number(m[0]) / 255;
-  const g = Number(m[1]) / 255;
-  const b = Number(m[2]) / 255;
+  const guardada = MATIZES.get(cor);
+  if (guardada !== undefined) return guardada;
+  const canais = canaisDe(cor);
+  if (!canais) return 120;
+  const matiz = matizDosCanais(canais[0] / 255, canais[1] / 255, canais[2] / 255);
+  MATIZES.set(cor, matiz);
+  return matiz;
+}
+
+function matizDosCanais(r: number, g: number, b: number): number {
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   const d = max - min;

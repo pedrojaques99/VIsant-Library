@@ -877,6 +877,7 @@ export const CATALOG: CatalogItem[] = [
   },
   {
     name: "filter-bar",
+    // palco-check: a barra fica no alto de propósito e a lista reserva altura embaixo, para a barra não andar ao filtrar
     title: "Filter Bar",
     type: "ui",
     family: "controles",
@@ -1713,6 +1714,7 @@ export const CATALOG: CatalogItem[] = [
   },
   {
     name: "fog-tree",
+    // palco-check: é fundo e sangra: no ladrilho e na ficha preenche o palco, a caixa do preview não vale
     title: "Fog Tree",
     type: "ui",
     family: "efeitos",
@@ -2926,6 +2928,7 @@ export const CATALOG: CatalogItem[] = [
   },
   {
     name: "device-frame",
+    // palco-check: as setas de pose somam altura embaixo; o aparelho é que fica no centro
     title: "Device Frame",
     type: "ui",
     family: "conteudo",
