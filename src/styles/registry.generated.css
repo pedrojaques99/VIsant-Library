@@ -591,7 +591,7 @@
   inset: 0;
   border-radius: inherit;
   background: var(--device-edge);
-  transform: translateZ(calc(var(--c) * -0.45cqw));
+  transform: translateZ(calc(var(--c) * var(--device-step, -0.45cqw)));
 }
 .device-frame-botao {
   position: absolute;
@@ -640,6 +640,100 @@
   inset: 0 -30%;
   pointer-events: none;
   background: linear-gradient(112deg, transparent 38%, color-mix(in srgb, white var(--device-glare, 7%), transparent) 48%, transparent 58%);
+}
+.device-frame[data-device="tablet"] {
+  --device-step: -0.13cqw;
+  aspect-ratio: 4 / 3;
+}
+.device-frame[data-device="tablet"] .device-frame-corpo {
+  border-radius: 3.6cqw;
+}
+.device-frame[data-device="tablet"] .device-frame-frente {
+  padding: 2.4cqw;
+  background: color-mix(in srgb, white 4%, black);
+  box-shadow: inset 0 0 0 0.3cqw var(--device-edge);
+}
+.device-frame[data-device="tablet"] .device-frame-tela {
+  border-radius: 1.4cqw;
+}
+.device-frame-camera {
+  position: absolute;
+  top: 0.85cqw;
+  left: 50%;
+  translate: -50% 0;
+  width: 0.7cqw;
+  height: 0.7cqw;
+  border-radius: 50%;
+  background: color-mix(in srgb, white 14%, black);
+}
+.device-frame-botao[data-lado="t"] {
+  top: -0.35cqw;
+  left: var(--t);
+  width: var(--a);
+  height: 0.5cqw;
+  border-radius: 0.5cqw;
+  transform: translateZ(-0.7cqw);
+}
+.device-frame[data-device="laptop"] {
+  --device-step: -0.05cqw;
+  aspect-ratio: 16 / 10;
+}
+.device-frame[data-device="laptop"] .device-frame-corpo {
+  border-radius: 1.9cqw;
+}
+.device-frame[data-device="laptop"] .device-frame-frente {
+  padding: 1.1cqw;
+  background: color-mix(in srgb, white 3%, black);
+  box-shadow: inset 0 0 0 0.22cqw var(--device-edge);
+}
+.device-frame[data-device="laptop"] .device-frame-tela {
+  border-radius: 0.8cqw;
+}
+.device-frame[data-device="laptop"] .device-frame-ilha {
+  top: 0;
+  width: 11cqw;
+  height: 1.5cqw;
+  border-radius: 0 0 0.7cqw 0.7cqw;
+}
+.device-frame-base {
+  --device-step: -0.16cqw;
+  position: absolute;
+  top: 100%;
+  left: -1cqw;
+  right: -1cqw;
+  height: 68cqw;
+  border-radius: 0.6cqw 0.6cqw 2cqw 2cqw;
+  transform-origin: 50% 0;
+  transform: rotateX(70deg);
+  transform-style: preserve-3d;
+}
+.device-frame-deck {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--device-body);
+  box-shadow: inset 0 0 0 0.2cqw var(--device-edge);
+}
+.device-frame-teclado {
+  position: absolute;
+  top: 4%;
+  left: 5%;
+  right: 5%;
+  height: 52%;
+  border-radius: 0.6cqw;
+  background-color: color-mix(in srgb, black 62%, var(--device-body));
+  background-image: repeating-linear-gradient(90deg, var(--device-body) 0 0.24cqw, transparent 0.24cqw 6.55cqw), repeating-linear-gradient(0deg, var(--device-body) 0 0.24cqw, transparent 0.24cqw 5.9cqw);
+}
+.device-frame-trackpad {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  translate: -50% 0;
+  width: 38cqw;
+  height: 34%;
+  border-radius: 1cqw;
+  background: color-mix(in srgb, white 5%, var(--device-body));
+  box-shadow: inset 0 0 0 0.12cqw var(--device-edge);
 }
 .glass-board {
   --glass-panel-radius: 14px;

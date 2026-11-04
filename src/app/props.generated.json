@@ -15475,6 +15475,18 @@
           "descricao": null
         },
         {
+          "nome": "device",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "phone",
+          "descricao": "O notebook tem base articulada: fica melhor visto de cima, com `rotation` e X negativo.",
+          "valores": [
+            "phone",
+            "tablet",
+            "laptop"
+          ]
+        },
+        {
           "nome": "finish",
           "tipo": "enum",
           "obrigatoria": false,

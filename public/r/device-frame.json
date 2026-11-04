@@ -3,7 +3,7 @@
   "name": "device-frame",
   "title": "Device Frame",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Aparelho em CSS 3D com a tela viva dentro: cinco poses, entrada animada e balanço por ponteiro, flutuação ou rolagem.",
+  "description": "Aparelho em CSS 3D com a tela viva dentro: celular, tablet ou notebook, cinco poses, entrada animada e balanço por ponteiro, flutuação ou rolagem.",
   "dependencies": [
     "motion"
   ],
@@ -13,7 +13,7 @@
   "files": [
     {
       "path": "registry/visant/ui/device-frame.tsx",
-      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { animate, motion, useInView, useMotionValue, type MotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from \"motion/react\";\n\nimport { cn } from \"@/lib/utils\";\n\nexport type DevicePose = \"front\" | \"hero\" | \"left\" | \"right\" | \"flat\";\nexport type DeviceTilt = \"none\" | \"pointer\" | \"float\" | \"scroll\";\n\nexport interface DeviceFrameProps {\n  /** A tela: qualquer coisa viva, com largura e altura de 100%. */\n  children?: React.ReactNode;\n  pose?: DevicePose;\n  /** `pointer` cai em `float` no toque, porque celular não tem hover. */\n  tilt?: DeviceTilt;\n  /** Entra girando até a pose. Com movimento reduzido, já nasce nela. */\n  intro?: boolean;\n  finish?: \"graphite\" | \"silver\";\n  /** Quem rola, se não for a página. Só vale com `tilt=\"scroll\"`. */\n  scrollContainer?: React.RefObject<HTMLElement>;\n  /** O que tem a rolagem medida. Aparelho em `sticky` não sai do lugar: passe o trilho dele aqui. */\n  scrollTarget?: React.RefObject<HTMLElement>;\n  /**\n   * Ângulos dirigidos por fora: ignora `pose`, `tilt` e `intro`. Para quem controla o tempo,\n   * como uma exportação quadro a quadro, onde mola nenhuma pode interferir.\n   */\n  rotation?: { x: MotionValue<number>; y: MotionValue<number>; z: MotionValue<number> };\n  className?: string;\n  style?: React.CSSProperties;\n}\n\nconst POSES: Record<DevicePose, { x: number; y: number; z: number }> = {\n  front: { x: 0, y: 0, z: 0 },\n  hero: { x: 14, y: -12, z: 6 },\n  left: { x: 6, y: 24, z: -3 },\n  right: { x: 6, y: -24, z: 3 },\n  flat: { x: 54, y: 0, z: -24 },\n};\n// Teto do balanço. Mais que isto e a tela interativa fica difícil de acertar.\nconst BALANCO = 10;\nconst CAMADAS = Array.from({ length: 10 }, (_, i) => i + 1);\nconst MOLA = { stiffness: 120, damping: 20, mass: 0.9 };\nconst ENTRADA = [0.16, 1, 0.3, 1] as const;\n\n/**\n * Aparelho em CSS 3D com a tela viva dentro. Só `transform`, então a animação não\n * refaz layout. A espessura são camadas empilhadas em Z: convence até uns 60° de\n * giro, mas não dá a volta inteira. Para isso seria preciso um modelo em WebGL, e a\n * tela deixaria de ser HTML de verdade.\n *\n * O ponteiro não mexe no aparelho enquanto há botão apertado: tela que foge do\n * arraste é impossível de usar.\n */\nexport function DeviceFrame({ children, pose = \"hero\", tilt = \"none\", intro = true, finish = \"graphite\", scrollContainer, scrollTarget, rotation, className, style }: DeviceFrameProps) {\n  const reduz = useReducedMotion() ?? false;\n  const raiz = React.useRef<HTMLDivElement>(null);\n  const naTela = useInView(raiz);\n  const alvo = POSES[pose];\n\n  const px = useSpring(alvo.x, MOLA);\n  const py = useSpring(alvo.y, MOLA);\n  const pz = useSpring(alvo.z, MOLA);\n  const ax = useSpring(0, MOLA);\n  const ay = useSpring(0, MOLA);\n  const entrada = useMotionValue(intro && !reduz && !rotation ? 0 : 1);\n\n  React.useEffect(() => {\n    for (const [mv, n] of [[px, alvo.x], [py, alvo.y], [pz, alvo.z]] as const) {\n      if (reduz) mv.jump(n);\n      else mv.set(n);\n    }\n  }, [alvo, px, py, pz, reduz]);\n\n  React.useEffect(() => {\n    if (!intro || reduz || rotation) return;\n    const a = animate(entrada, 1, { duration: 1, ease: ENTRADA });\n    return () => a.stop();\n  }, [intro, reduz, entrada]);\n\n  const modo = reduz || rotation ? \"none\" : tilt;\n\n  React.useEffect(() => {\n    ax.set(0);\n    ay.set(0);\n    if (!naTela || modo === \"none\" || modo === \"scroll\") return;\n    const flutua = modo === \"float\" || window.matchMedia(\"(pointer: coarse)\").matches;\n    if (flutua) {\n      let raf = 0;\n      const t0 = performance.now();\n      const passo = (t: number) => {\n        ax.set(Math.sin((t - t0) / 1900) * BALANCO * 0.5);\n        ay.set(Math.cos((t - t0) / 2600) * BALANCO * 0.7);\n        raf = requestAnimationFrame(passo);\n      };\n      raf = requestAnimationFrame(passo);\n      return () => cancelAnimationFrame(raf);\n    }\n    const mover = (e: PointerEvent) => {\n      if (e.buttons) return;\n      ay.set(((e.clientX / window.innerWidth) * 2 - 1) * BALANCO);\n      ax.set((1 - (e.clientY / window.innerHeight) * 2) * BALANCO);\n    };\n    window.addEventListener(\"pointermove\", mover, { passive: true });\n    return () => window.removeEventListener(\"pointermove\", mover);\n  }, [modo, naTela, ax, ay]);\n\n  const { scrollYProgress } = useScroll({ target: scrollTarget ?? raiz, container: scrollContainer, offset: [\"start end\", \"end start\"] });\n  useMotionValueEvent(scrollYProgress, \"change\", (p) => {\n    if (modo !== \"scroll\") return;\n    ay.set((p - 0.5) * 2 * BALANCO * 2.4);\n    ax.set((0.5 - p) * BALANCO);\n  });\n\n  const rotateX = useTransform([px, ax, entrada], ([p, a, e]: number[]) => p + a + (1 - e) * 38);\n  const rotateY = useTransform([py, ay, entrada], ([p, a, e]: number[]) => p + a - (1 - e) * 26);\n  const rotateZ = useTransform([pz, entrada], ([p, e]: number[]) => p + (1 - e) * 6);\n  const y = useTransform(entrada, (e) => `${(1 - e) * 12}%`);\n  // O brilho anda ao contrário do giro: é ele que faz o vidro da tela parecer vidro.\n  const brilho = useTransform([rotation?.y ?? py, ay], ([p, a]: number[]) => `${(p + a) * -1.6}%`);\n\n  return (\n    <div ref={raiz} className={cn(\"device-frame\", className)} data-finish={finish} style={style}>\n      <motion.div className=\"device-frame-corpo\" style={{ rotateX: rotation?.x ?? rotateX, rotateY: rotation?.y ?? rotateY, rotateZ: rotation?.z ?? rotateZ, y, opacity: entrada }}>\n        {CAMADAS.map((n) => (\n          <span key={n} className=\"device-frame-camada\" style={{ \"--c\": n } as React.CSSProperties} aria-hidden />\n        ))}\n        <span className=\"device-frame-botao\" data-lado=\"e\" style={{ \"--t\": \"20%\", \"--a\": \"6%\" } as React.CSSProperties} aria-hidden />\n        <span className=\"device-frame-botao\" data-lado=\"e\" style={{ \"--t\": \"28%\", \"--a\": \"10%\" } as React.CSSProperties} aria-hidden />\n        <span className=\"device-frame-botao\" data-lado=\"d\" style={{ \"--t\": \"25%\", \"--a\": \"14%\" } as React.CSSProperties} aria-hidden />\n        <div className=\"device-frame-frente\">\n          <div className=\"device-frame-tela\">\n            {children}\n            <span className=\"device-frame-ilha\" aria-hidden />\n            <motion.span className=\"device-frame-brilho\" style={{ x: brilho }} aria-hidden />\n          </div>\n        </div>\n      </motion.div>\n    </div>\n  );\n}\n",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { animate, motion, useInView, useMotionValue, type MotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from \"motion/react\";\n\nimport { cn } from \"@/lib/utils\";\n\nexport type DevicePose = \"front\" | \"hero\" | \"left\" | \"right\" | \"flat\";\nexport type DeviceTilt = \"none\" | \"pointer\" | \"float\" | \"scroll\";\nexport type DeviceModel = \"phone\" | \"tablet\" | \"laptop\";\n\nexport interface DeviceFrameProps {\n  /** A tela: qualquer coisa viva, com largura e altura de 100%. */\n  children?: React.ReactNode;\n  /** O notebook tem base articulada: fica melhor visto de cima, com `rotation` e X negativo. */\n  device?: DeviceModel;\n  pose?: DevicePose;\n  /** `pointer` cai em `float` no toque, porque celular não tem hover. */\n  tilt?: DeviceTilt;\n  /** Entra girando até a pose. Com movimento reduzido, já nasce nela. */\n  intro?: boolean;\n  finish?: \"graphite\" | \"silver\";\n  /** Quem rola, se não for a página. Só vale com `tilt=\"scroll\"`. */\n  scrollContainer?: React.RefObject<HTMLElement>;\n  /** O que tem a rolagem medida. Aparelho em `sticky` não sai do lugar: passe o trilho dele aqui. */\n  scrollTarget?: React.RefObject<HTMLElement>;\n  /**\n   * Ângulos dirigidos por fora: ignora `pose`, `tilt` e `intro`. Para quem controla o tempo,\n   * como uma exportação quadro a quadro, onde mola nenhuma pode interferir.\n   */\n  rotation?: { x: MotionValue<number>; y: MotionValue<number>; z: MotionValue<number> };\n  className?: string;\n  style?: React.CSSProperties;\n}\n\nconst POSES: Record<DevicePose, { x: number; y: number; z: number }> = {\n  front: { x: 0, y: 0, z: 0 },\n  hero: { x: 14, y: -12, z: 6 },\n  left: { x: 6, y: 24, z: -3 },\n  right: { x: 6, y: -24, z: 3 },\n  flat: { x: 54, y: 0, z: -24 },\n};\n// Teto do balanço. Mais que isto e a tela interativa fica difícil de acertar.\nconst BALANCO = 10;\nconst CAMADAS = Array.from({ length: 10 }, (_, i) => i + 1);\nconst MOLA = { stiffness: 120, damping: 20, mass: 0.9 };\nconst ENTRADA = [0.16, 1, 0.3, 1] as const;\n\n/**\n * Aparelho em CSS 3D com a tela viva dentro. Só `transform`, então a animação não\n * refaz layout. A espessura são camadas empilhadas em Z: convence até uns 60° de\n * giro, mas não dá a volta inteira. Para isso seria preciso um modelo em WebGL, e a\n * tela deixaria de ser HTML de verdade.\n *\n * O ponteiro não mexe no aparelho enquanto há botão apertado: tela que foge do\n * arraste é impossível de usar.\n */\nexport function DeviceFrame({ children, device = \"phone\", pose = \"hero\", tilt = \"none\", intro = true, finish = \"graphite\", scrollContainer, scrollTarget, rotation, className, style }: DeviceFrameProps) {\n  const reduz = useReducedMotion() ?? false;\n  const raiz = React.useRef<HTMLDivElement>(null);\n  const naTela = useInView(raiz);\n  const alvo = POSES[pose];\n\n  const px = useSpring(alvo.x, MOLA);\n  const py = useSpring(alvo.y, MOLA);\n  const pz = useSpring(alvo.z, MOLA);\n  const ax = useSpring(0, MOLA);\n  const ay = useSpring(0, MOLA);\n  const entrada = useMotionValue(intro && !reduz && !rotation ? 0 : 1);\n\n  React.useEffect(() => {\n    for (const [mv, n] of [[px, alvo.x], [py, alvo.y], [pz, alvo.z]] as const) {\n      if (reduz) mv.jump(n);\n      else mv.set(n);\n    }\n  }, [alvo, px, py, pz, reduz]);\n\n  React.useEffect(() => {\n    if (!intro || reduz || rotation) return;\n    const a = animate(entrada, 1, { duration: 1, ease: ENTRADA });\n    return () => a.stop();\n  }, [intro, reduz, entrada]);\n\n  const modo = reduz || rotation ? \"none\" : tilt;\n\n  React.useEffect(() => {\n    ax.set(0);\n    ay.set(0);\n    if (!naTela || modo === \"none\" || modo === \"scroll\") return;\n    const flutua = modo === \"float\" || window.matchMedia(\"(pointer: coarse)\").matches;\n    if (flutua) {\n      let raf = 0;\n      const t0 = performance.now();\n      const passo = (t: number) => {\n        ax.set(Math.sin((t - t0) / 1900) * BALANCO * 0.5);\n        ay.set(Math.cos((t - t0) / 2600) * BALANCO * 0.7);\n        raf = requestAnimationFrame(passo);\n      };\n      raf = requestAnimationFrame(passo);\n      return () => cancelAnimationFrame(raf);\n    }\n    const mover = (e: PointerEvent) => {\n      if (e.buttons) return;\n      ay.set(((e.clientX / window.innerWidth) * 2 - 1) * BALANCO);\n      ax.set((1 - (e.clientY / window.innerHeight) * 2) * BALANCO);\n    };\n    window.addEventListener(\"pointermove\", mover, { passive: true });\n    return () => window.removeEventListener(\"pointermove\", mover);\n  }, [modo, naTela, ax, ay]);\n\n  const { scrollYProgress } = useScroll({ target: scrollTarget ?? raiz, container: scrollContainer, offset: [\"start end\", \"end start\"] });\n  useMotionValueEvent(scrollYProgress, \"change\", (p) => {\n    if (modo !== \"scroll\") return;\n    ay.set((p - 0.5) * 2 * BALANCO * 2.4);\n    ax.set((0.5 - p) * BALANCO);\n  });\n\n  const rotateX = useTransform([px, ax, entrada], ([p, a, e]: number[]) => p + a + (1 - e) * 38);\n  const rotateY = useTransform([py, ay, entrada], ([p, a, e]: number[]) => p + a - (1 - e) * 26);\n  const rotateZ = useTransform([pz, entrada], ([p, e]: number[]) => p + (1 - e) * 6);\n  const y = useTransform(entrada, (e) => `${(1 - e) * 12}%`);\n  // O brilho anda ao contrário do giro: é ele que faz o vidro da tela parecer vidro.\n  const brilho = useTransform([rotation?.y ?? py, ay], ([p, a]: number[]) => `${(p + a) * -1.6}%`);\n\n  return (\n    <div ref={raiz} className={cn(\"device-frame\", className)} data-device={device} data-finish={finish} style={style}>\n      <motion.div className=\"device-frame-corpo\" style={{ rotateX: rotation?.x ?? rotateX, rotateY: rotation?.y ?? rotateY, rotateZ: rotation?.z ?? rotateZ, y, opacity: entrada }}>\n        {CAMADAS.map((n) => (\n          <span key={n} className=\"device-frame-camada\" style={{ \"--c\": n } as React.CSSProperties} aria-hidden />\n        ))}\n        {device === \"phone\" ? (\n          <>\n            <span className=\"device-frame-botao\" data-lado=\"e\" style={{ \"--t\": \"20%\", \"--a\": \"6%\" } as React.CSSProperties} aria-hidden />\n            <span className=\"device-frame-botao\" data-lado=\"e\" style={{ \"--t\": \"28%\", \"--a\": \"10%\" } as React.CSSProperties} aria-hidden />\n            <span className=\"device-frame-botao\" data-lado=\"d\" style={{ \"--t\": \"25%\", \"--a\": \"14%\" } as React.CSSProperties} aria-hidden />\n          </>\n        ) : null}\n        {device === \"tablet\" ? <span className=\"device-frame-botao\" data-lado=\"t\" style={{ \"--t\": \"8%\", \"--a\": \"6%\" } as React.CSSProperties} aria-hidden /> : null}\n        {device === \"laptop\" ? (\n          <span className=\"device-frame-base\" aria-hidden>\n            {CAMADAS.map((n) => (\n              <span key={n} className=\"device-frame-camada\" style={{ \"--c\": n } as React.CSSProperties} />\n            ))}\n            <span className=\"device-frame-deck\">\n              <span className=\"device-frame-teclado\" />\n              <span className=\"device-frame-trackpad\" />\n            </span>\n          </span>\n        ) : null}\n        <div className=\"device-frame-frente\">\n          {device === \"tablet\" ? <span className=\"device-frame-camera\" aria-hidden /> : null}\n          <div className=\"device-frame-tela\">\n            {children}\n            {device === \"tablet\" ? null : <span className=\"device-frame-ilha\" aria-hidden />}\n            <motion.span className=\"device-frame-brilho\" style={{ x: brilho }} aria-hidden />\n          </div>\n        </div>\n      </motion.div>\n    </div>\n  );\n}\n",
       "type": "registry:ui"
     }
   ],
@@ -43,7 +43,7 @@
       "inset": "0",
       "border-radius": "inherit",
       "background": "var(--device-edge)",
-      "transform": "translateZ(calc(var(--c) * -0.45cqw))"
+      "transform": "translateZ(calc(var(--c) * var(--device-step, -0.45cqw)))"
     },
     ".device-frame-botao": {
       "position": "absolute",
@@ -92,6 +92,100 @@
       "inset": "0 -30%",
       "pointer-events": "none",
       "background": "linear-gradient(112deg, transparent 38%, color-mix(in srgb, white var(--device-glare, 7%), transparent) 48%, transparent 58%)"
+    },
+    ".device-frame[data-device=\"tablet\"]": {
+      "--device-step": "-0.13cqw",
+      "aspect-ratio": "4 / 3"
+    },
+    ".device-frame[data-device=\"tablet\"] .device-frame-corpo": {
+      "border-radius": "3.6cqw"
+    },
+    ".device-frame[data-device=\"tablet\"] .device-frame-frente": {
+      "padding": "2.4cqw",
+      "background": "color-mix(in srgb, white 4%, black)",
+      "box-shadow": "inset 0 0 0 0.3cqw var(--device-edge)"
+    },
+    ".device-frame[data-device=\"tablet\"] .device-frame-tela": {
+      "border-radius": "1.4cqw"
+    },
+    ".device-frame-camera": {
+      "position": "absolute",
+      "top": "0.85cqw",
+      "left": "50%",
+      "translate": "-50% 0",
+      "width": "0.7cqw",
+      "height": "0.7cqw",
+      "border-radius": "50%",
+      "background": "color-mix(in srgb, white 14%, black)"
+    },
+    ".device-frame-botao[data-lado=\"t\"]": {
+      "top": "-0.35cqw",
+      "left": "var(--t)",
+      "width": "var(--a)",
+      "height": "0.5cqw",
+      "border-radius": "0.5cqw",
+      "transform": "translateZ(-0.7cqw)"
+    },
+    ".device-frame[data-device=\"laptop\"]": {
+      "--device-step": "-0.05cqw",
+      "aspect-ratio": "16 / 10"
+    },
+    ".device-frame[data-device=\"laptop\"] .device-frame-corpo": {
+      "border-radius": "1.9cqw"
+    },
+    ".device-frame[data-device=\"laptop\"] .device-frame-frente": {
+      "padding": "1.1cqw",
+      "background": "color-mix(in srgb, white 3%, black)",
+      "box-shadow": "inset 0 0 0 0.22cqw var(--device-edge)"
+    },
+    ".device-frame[data-device=\"laptop\"] .device-frame-tela": {
+      "border-radius": "0.8cqw"
+    },
+    ".device-frame[data-device=\"laptop\"] .device-frame-ilha": {
+      "top": "0",
+      "width": "11cqw",
+      "height": "1.5cqw",
+      "border-radius": "0 0 0.7cqw 0.7cqw"
+    },
+    ".device-frame-base": {
+      "--device-step": "-0.16cqw",
+      "position": "absolute",
+      "top": "100%",
+      "left": "-1cqw",
+      "right": "-1cqw",
+      "height": "68cqw",
+      "border-radius": "0.6cqw 0.6cqw 2cqw 2cqw",
+      "transform-origin": "50% 0",
+      "transform": "rotateX(70deg)",
+      "transform-style": "preserve-3d"
+    },
+    ".device-frame-deck": {
+      "position": "absolute",
+      "inset": "0",
+      "border-radius": "inherit",
+      "background": "var(--device-body)",
+      "box-shadow": "inset 0 0 0 0.2cqw var(--device-edge)"
+    },
+    ".device-frame-teclado": {
+      "position": "absolute",
+      "top": "4%",
+      "left": "5%",
+      "right": "5%",
+      "height": "52%",
+      "border-radius": "0.6cqw",
+      "background-color": "color-mix(in srgb, black 62%, var(--device-body))",
+      "background-image": "repeating-linear-gradient(90deg, var(--device-body) 0 0.24cqw, transparent 0.24cqw 6.55cqw), repeating-linear-gradient(0deg, var(--device-body) 0 0.24cqw, transparent 0.24cqw 5.9cqw)"
+    },
+    ".device-frame-trackpad": {
+      "position": "absolute",
+      "top": "60%",
+      "left": "50%",
+      "translate": "-50% 0",
+      "width": "38cqw",
+      "height": "34%",
+      "border-radius": "1cqw",
+      "background": "color-mix(in srgb, white 5%, var(--device-body))",
+      "box-shadow": "inset 0 0 0 0.12cqw var(--device-edge)"
     }
   },
   "meta": {
@@ -106,7 +200,9 @@
     "celular",
     "aparelho",
     "3d",
-    "tela"
+    "tela",
+    "tablet",
+    "notebook"
   ],
   "type": "registry:ui"
 }

@@ -223,14 +223,71 @@ export function Miniatura({ nome, ativa, onClick, children }: { nome: string; at
 }
 
 /** O aparelho em miniatura: a pose se lê sem ler o nome. */
-export function FoneMini({ rot, classe }: { rot?: { x: number; y: number; z: number }; classe?: string }) {
+export function FoneMini({ rot, classe, modelo = "phone" }: { rot?: { x: number; y: number; z: number }; classe?: string; modelo?: "phone" | "tablet" | "laptop" }) {
   return (
     <span className="mk-fone-palco" aria-hidden>
       <span
         className={cn("mk-fone", classe)}
+        data-modelo={modelo}
         style={rot ? { transform: `rotateX(${rot.x}deg) rotateY(${rot.y}deg) rotateZ(${rot.z}deg)` } : undefined}
       />
     </span>
+  );
+}
+
+/** Onde o foco cai: a tela do aparelho em miniatura, e o ponto se arrasta sobre ela. `raio` é sobre a largura da tela. */
+export function Alvo({
+  rotulo,
+  x,
+  y,
+  aspecto,
+  raio,
+  arte,
+  onChange,
+}: {
+  rotulo: string;
+  x: number;
+  y: number;
+  aspecto: number;
+  raio: number;
+  arte?: string;
+  onChange: (x: number, y: number) => void;
+}) {
+  const prende = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
+  const seguir = (e: React.PointerEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    onChange(prende(((e.clientX - r.left) / r.width) * 100), prende(((e.clientY - r.top) / r.height) * 100));
+  };
+  return (
+    <div
+      className="mk-alvo"
+      role="slider"
+      tabIndex={0}
+      aria-label={rotulo}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={x}
+      aria-valuetext={`${x}% na horizontal, ${y}% na vertical`}
+      // Sem conteúdo em fluxo a largura precisa vir de fora: a miniatura cabe no painel e nunca passa de 11rem de altura.
+      style={{ aspectRatio: String(aspecto), width: `min(100%, calc(11rem * ${aspecto}))` }}
+      onPointerDown={(e) => {
+        e.currentTarget.setPointerCapture(e.pointerId);
+        seguir(e);
+      }}
+      onPointerMove={(e) => {
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) seguir(e);
+      }}
+      onKeyDown={(e) => {
+        const d = e.shiftKey ? 10 : 2;
+        const seta = ({ ArrowRight: [d, 0], ArrowLeft: [-d, 0], ArrowDown: [0, d], ArrowUp: [0, -d] } as Record<string, number[]>)[e.key];
+        if (!seta) return;
+        e.preventDefault();
+        onChange(prende(x + seta[0]), prende(y + seta[1]));
+      }}
+    >
+      {arte ? <img src={arte} alt="" className="mk-arte-img" draggable={false} /> : <span className="mk-arte-sensor" />}
+      <span className="mk-alvo-ponto" style={{ left: `${x}%`, top: `${y}%`, width: `${raio * 200}%` }} aria-hidden />
+    </div>
   );
 }
 

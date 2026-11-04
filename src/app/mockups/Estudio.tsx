@@ -14,7 +14,7 @@ import { Download, Pause, Play, Plus, Redo2, Undo2, X } from "lucide-react";
 
 import { DeviceFrame } from "../../../registry/visant/ui/device-frame";
 import { SensorDial } from "../../../registry/visant/ui/sensor-dial";
-import { Amostras, CampoCor, FoneMini, Miniatura, Miniaturas, Pasta, Segmentos, Slider, Vetor } from "./controles";
+import { Alvo, Amostras, CampoCor, FoneMini, Miniatura, Miniaturas, Pasta, Segmentos, Slider, Vetor } from "./controles";
 import { codecDisponivel, exportarImagem, exportarVideo } from "./exportar";
 import {
   ACABAMENTOS,
@@ -22,20 +22,25 @@ import {
   CORES,
   GIF,
   FOTOS_DE_FUNDO,
+  MODELOS,
   MOVIMENTOS,
   PADRAO,
-  POSES,
   PRESETS,
   TELAS,
   animado,
+  cameraEm,
   dimensoes,
   dimensoesGif,
   emLoop,
   fundoCss,
+  heroiDe,
+  medidasDoAparelho,
   movimentoEm,
   paletaDe,
+  posesDe,
   type Acabamento,
   type Cena,
+  type Modelo,
   type Tela,
   type TipoMovimento,
 } from "./modelo";
@@ -133,8 +138,9 @@ export function Estudio() {
   const [aviso, setAviso] = React.useState<string | null>(null);
   const [semMp4, setSemMp4] = React.useState(false);
 
-  const telas = React.useMemo(() => [...enviadas, ...TELAS], [enviadas]);
-  const tela = telas.find((t) => t.id === cena.telaId) ?? TELAS[0];
+  // A peça viva é uma tela de celular: em tablet e notebook ela sai da lista e a escolha volta quando o celular voltar.
+  const telas = React.useMemo(() => [...enviadas, ...TELAS.filter((t) => t.tipo !== "vivo" || cena.modelo === "phone")], [enviadas, cena.modelo]);
+  const tela = telas.find((t) => t.id === cena.telaId) ?? telas[0];
   const anima = animado(cena);
   const [medida, setMedida] = React.useState({ w: 1600, h: 900 });
   const aspecto = cena.proporcao === "cheio" ? medida.w / medida.h : ASPECTO[cena.proporcao];
@@ -180,6 +186,11 @@ export function Estudio() {
   const dy = useMotionValue("0%");
   const escala = useMotionValue(1);
   const opacidade = useMotionValue(1);
+  const camX = useMotionValue(0);
+  const camY = useMotionValue(0);
+  const camZoom = useMotionValue(1);
+  const filtro = useMotionValue("blur(0px)");
+  const mascara = useMotionValue("none");
 
   const aplicar = React.useCallback(
     (c: Cena, t: number) => {
@@ -190,8 +201,14 @@ export function Estudio() {
       dy.set(`${m.dy}%`);
       escala.set(m.escala);
       opacidade.set(m.opacidade);
+      const cam = cameraEm(c, t, baseW, baseH);
+      camX.set(cam.x);
+      camY.set(cam.y);
+      camZoom.set(cam.zoom);
+      filtro.set(`blur(${cam.desfoque.toFixed(2)}px)`);
+      mascara.set(cam.mascara);
     },
-    [rotX, rotY, rotZ, dy, escala, opacidade],
+    [rotX, rotY, rotZ, dy, escala, opacidade, camX, camY, camZoom, filtro, mascara, baseW, baseH],
   );
   const cenaAtual = React.useRef(cena);
   cenaAtual.current = cena;
@@ -327,7 +344,8 @@ export function Estudio() {
   const fps = emGif ? GIF.fps : cena.saida.fps;
   const totalQuadros = Math.round(cena.movimento.duracao * fps);
   // Medido em 1080p no Chrome: uns 350 ms por quadro. A conta real assume assim que começar.
-  const estimativa = totalQuadros * 0.4 * (emGif ? 1 : (cena.saida.largura / 1080) ** 2);
+  // Com foco a cena existe duas vezes, a nítida e a desfocada, e cada quadro desenha as duas.
+  const estimativa = totalQuadros * 0.4 * (emGif ? 1 : (cena.saida.largura / 1080) ** 2) * (cena.foco.ativo ? 2 : 1);
 
   const exportar = async () => {
     const el = quadro.current;
@@ -366,6 +384,22 @@ export function Estudio() {
   };
 
   const fundo = cena.fundo;
+  const modelo = cena.modelo;
+  const poses = posesDe(modelo);
+  const trocarModelo = (m: Modelo) =>
+    // Celular e tablet dividem as poses; o notebook tem as dele, então a pose só acompanha quando cruza essa fronteira.
+    setCena((c) => (c.modelo === m ? c : { ...c, modelo: m, rot: (c.modelo === "laptop") === (m === "laptop") ? c.rot : heroiDe(m) }));
+  const ligarFoco = (ativo: boolean) =>
+    // Close sem foco não tem o que mostrar: um liga o outro, e desligar o foco não deixa o movimento vazio.
+    setCena((c) => ({ ...c, foco: { ...c.foco, ativo }, movimento: !ativo && c.movimento.tipo === "close" ? { ...c.movimento, tipo: "parado" } : c.movimento }));
+  const focoArte = tela.tipo === "vivo" ? undefined : tela.poster ?? (tela.tipo === "imagem" ? tela.url : undefined);
+  const { w: larguraAparelho } = medidasDoAparelho(cena, baseW, baseH);
+  const fotoDeFundo = fundo.modo === "foto" ? (
+    <img src={fundo.foto} alt="" className="mk-foto" style={{ filter: fundo.desfoque ? `blur(${fundo.desfoque}px)` : undefined }} />
+  ) : null;
+  const composicao = (
+    <Composicao cena={cena} tela={tela} baseW={baseW} baseH={baseH} rotX={rotX} rotY={rotY} rotZ={rotZ} dy={dy} escala={escala} opacidade={opacidade} />
+  );
   const mostra = (ativo: boolean) => (ativo ? undefined : ("hidden" as const));
 
   return (
@@ -384,21 +418,19 @@ export function Estudio() {
               className="mk-quadro"
               style={{ width: baseW, height: baseH, background: fundoCss(fundo) }}
             >
-              {fundo.modo === "foto" ? (
-                <img src={fundo.foto} alt="" className="mk-foto" style={{ filter: fundo.desfoque ? `blur(${fundo.desfoque}px)` : undefined }} />
-              ) : null}
-              <Composicao
-                cena={cena}
-                tela={tela}
-                baseW={baseW}
-                baseH={baseH}
-                rotX={rotX}
-                rotY={rotY}
-                rotZ={rotZ}
-                dy={dy}
-                escala={escala}
-                opacidade={opacidade}
-              />
+              <motion.div className="mk-camera" style={{ x: camX, y: camY, scale: camZoom, originX: 0, originY: 0 }}>
+                {/* O desfoque é uma cópia inteira da cena embaixo, e a nítida por cima tem um furo em volta do foco. */}
+                {cena.foco.ativo ? (
+                  <motion.div ref={inerte} className="mk-camada mk-camada-copia" aria-hidden style={{ filter: filtro, background: fundoCss(fundo) }}>
+                    {fotoDeFundo}
+                    {composicao}
+                  </motion.div>
+                ) : null}
+                <motion.div className="mk-camada" style={{ maskImage: mascara, background: cena.foco.ativo ? fundoCss(fundo) : undefined }}>
+                  {fotoDeFundo}
+                  {composicao}
+                </motion.div>
+              </motion.div>
             </div>
           </div>
           <div className="mk-historico">
@@ -428,13 +460,38 @@ export function Estudio() {
               {PRESETS.map((p) => {
                 const f = p.aplica.fundo!;
                 return (
-                  <Miniatura key={p.id} nome={p.nome} ativa={false} onClick={() => setCena((c) => ({ ...c, ...p.aplica }))}>
+                  <Miniatura key={p.id} nome={p.nome} ativa={false} onClick={() => setCena((c) => ({ ...c, ...p.aplica, rot: c.modelo === "laptop" ? p.rotNotebook : p.aplica.rot! }))}>
                     <span className="mk-arte-fundo" style={f.modo === "foto" ? { backgroundImage: `url(${f.foto})` } : { background: fundoCss(f) }} />
-                    <FoneMini rot={p.aplica.rot} classe={p.aplica.acabamento === "prata" ? "mk-fone-claro" : undefined} />
+                    <FoneMini modelo={modelo} rot={modelo === "laptop" ? p.rotNotebook : p.aplica.rot} classe={p.aplica.acabamento === "prata" ? "mk-fone-claro" : undefined} />
                   </Miniatura>
                 );
               })}
             </Miniaturas>
+          </Pasta>
+
+          <Pasta
+            titulo="Aparelho"
+            sujo={!igual([cena.acabamento, cena.reflexo, cena.sombra], [PADRAO.acabamento, PADRAO.reflexo, PADRAO.sombra])}
+            onReset={() => setCena((c) => ({ ...c, acabamento: PADRAO.acabamento, reflexo: PADRAO.reflexo, sombra: PADRAO.sombra }))}
+          >
+            <Miniaturas rotulo="Modelo do aparelho">
+              {(Object.keys(MODELOS) as Modelo[]).map((m) => (
+                <Miniatura key={m} nome={MODELOS[m].nome} ativa={modelo === m} onClick={() => trocarModelo(m)}>
+                  <FoneMini modelo={m} />
+                </Miniatura>
+              ))}
+            </Miniaturas>
+            <div className="mk-linha">
+              <span className="mk-rotulo">Acabamento</span>
+              <span className="mk-valor">{ACABAMENTOS[cena.acabamento].nome}</span>
+            </div>
+            <div className="mk-amostras" role="radiogroup" aria-label="Acabamento">
+              {(Object.keys(ACABAMENTOS) as Acabamento[]).map((k) => (
+                <button key={k} type="button" role="radio" aria-checked={cena.acabamento === k} aria-label={ACABAMENTOS[k].nome} style={{ background: `linear-gradient(135deg, ${ACABAMENTOS[k].borda}, ${ACABAMENTOS[k].corpo})` }} onClick={() => edita("acabamento", k)} />
+              ))}
+            </div>
+            <Slider rotulo="Reflexo" valor={cena.reflexo} min={0} max={30} padrao={PADRAO.reflexo} unidade="%" onChange={(v) => edita("reflexo", v)} />
+            <Slider rotulo="Sombra" valor={cena.sombra} min={0} max={100} padrao={PADRAO.sombra} unidade="%" onChange={(v) => edita("sombra", v)} />
           </Pasta>
 
           <Pasta titulo="Tela" sujo={cena.telaId !== PADRAO.telaId} onReset={() => edita("telaId", PADRAO.telaId)}>
@@ -472,9 +529,9 @@ export function Estudio() {
             onReset={() => setCena((c) => ({ ...c, rot: PADRAO.rot, tamanho: PADRAO.tamanho, pos: PADRAO.pos, lente: PADRAO.lente }))}
           >
             <Miniaturas rotulo="Pose do aparelho">
-              {POSES.map((p) => (
+              {poses.map((p) => (
                 <Miniatura key={p.id} nome={p.nome} ativa={igual(p.rot, cena.rot)} onClick={() => edita("rot", p.rot)}>
-                  <FoneMini rot={p.rot} />
+                  <FoneMini modelo={modelo} rot={p.rot} />
                 </Miniatura>
               ))}
             </Miniaturas>
@@ -505,21 +562,30 @@ export function Estudio() {
           </Pasta>
 
           <Pasta
-            titulo="Aparelho"
-            sujo={!igual([cena.acabamento, cena.reflexo, cena.sombra], [PADRAO.acabamento, PADRAO.reflexo, PADRAO.sombra])}
-            onReset={() => setCena((c) => ({ ...c, acabamento: PADRAO.acabamento, reflexo: PADRAO.reflexo, sombra: PADRAO.sombra }))}
+            titulo="Foco"
+            sujo={!igual(cena.foco, PADRAO.foco)}
+            onReset={() => setCena((c) => ({ ...c, foco: PADRAO.foco, movimento: c.movimento.tipo === "close" ? { ...c.movimento, tipo: "parado" } : c.movimento }))}
           >
-            <div className="mk-linha">
-              <span className="mk-rotulo">Acabamento</span>
-              <span className="mk-valor">{ACABAMENTOS[cena.acabamento].nome}</span>
+            <Segmentos
+              rotulo="Foco"
+              valor={cena.foco.ativo ? "com" : "sem"}
+              opcoes={[{ valor: "sem", nome: "Sem foco" }, { valor: "com", nome: "Com foco" }]}
+              onChange={(v) => ligarFoco(v === "com")}
+            />
+            <div className="mk-dependente" hidden={mostra(cena.foco.ativo) !== undefined}>
+              <Alvo
+                rotulo="Área em foco"
+                x={cena.foco.x}
+                y={cena.foco.y}
+                aspecto={MODELOS[modelo].aspecto}
+                raio={((cena.foco.area / 100) * Math.min(baseW, baseH)) / cena.foco.zoom / larguraAparelho}
+                arte={focoArte}
+                onChange={(x, y) => edita("foco", (f) => ({ ...f, x, y }))}
+              />
+              <Slider rotulo="Close" valor={cena.foco.zoom} min={1} max={4} passo={0.1} padrao={PADRAO.foco.zoom} unidade="×" casas={1} onChange={(v) => edita("foco", (f) => ({ ...f, zoom: v }))} />
+              <Slider rotulo="Área" valor={cena.foco.area} min={10} max={80} padrao={PADRAO.foco.area} unidade="%" onChange={(v) => edita("foco", (f) => ({ ...f, area: v }))} />
+              <Slider rotulo="Desfoque" valor={cena.foco.desfoque} min={0} max={48} padrao={PADRAO.foco.desfoque} unidade=" px" onChange={(v) => edita("foco", (f) => ({ ...f, desfoque: v }))} />
             </div>
-            <div className="mk-amostras" role="radiogroup" aria-label="Acabamento">
-              {(Object.keys(ACABAMENTOS) as Acabamento[]).map((k) => (
-                <button key={k} type="button" role="radio" aria-checked={cena.acabamento === k} aria-label={ACABAMENTOS[k].nome} style={{ background: `linear-gradient(135deg, ${ACABAMENTOS[k].borda}, ${ACABAMENTOS[k].corpo})` }} onClick={() => edita("acabamento", k)} />
-              ))}
-            </div>
-            <Slider rotulo="Reflexo" valor={cena.reflexo} min={0} max={30} padrao={PADRAO.reflexo} unidade="%" onChange={(v) => edita("reflexo", v)} />
-            <Slider rotulo="Sombra" valor={cena.sombra} min={0} max={100} padrao={PADRAO.sombra} unidade="%" onChange={(v) => edita("sombra", v)} />
           </Pasta>
 
           <Pasta titulo="Fundo" sujo={!igual(cena.fundo, PADRAO.fundo)} onReset={() => edita("fundo", PADRAO.fundo)}>
@@ -579,8 +645,8 @@ export function Estudio() {
           <Pasta titulo="Movimento" sujo={!igual(cena.movimento, PADRAO.movimento)} onReset={() => edita("movimento", PADRAO.movimento)}>
             <Miniaturas rotulo="Movimento">
               {MOVIMENTOS.map((m) => (
-                <Miniatura key={m.id} nome={m.nome} ativa={cena.movimento.tipo === m.id} onClick={() => edita("movimento", (v) => ({ ...v, tipo: m.id as TipoMovimento }))}>
-                  <FoneMini classe={`mk-anima-${m.id}`} />
+                <Miniatura key={m.id} nome={m.nome} ativa={cena.movimento.tipo === m.id} onClick={() => setCena((c) => ({ ...c, movimento: { ...c.movimento, tipo: m.id as TipoMovimento }, foco: m.id === "close" ? { ...c.foco, ativo: true } : c.foco }))}>
+                  <FoneMini modelo={modelo} classe={`mk-anima-${m.id}`} />
                 </Miniatura>
               ))}
             </Miniaturas>
@@ -656,6 +722,11 @@ export function Estudio() {
   );
 }
 
+/** A cópia desfocada é só imagem: nem ponteiro, nem Tab, nem leitor de tela chegam nela. */
+const inerte = (el: HTMLDivElement | null) => {
+  if (el) el.inert = true;
+};
+
 function duracaoFalada(s: number) {
   if (s < 60) return `${Math.max(1, Math.round(s))} s`;
   return `${Math.round(s / 60)} min`;
@@ -688,11 +759,8 @@ const Composicao = React.memo(function Composicao({
   escala: MV;
   opacidade: MV;
 }) {
-  // `tamanho` é a altura do aparelho sobre o lado menor disponível, então 62% quer dizer o mesmo em todo quadro.
-  const alturaFone = (Math.min(baseH, baseW * 1.78) * cena.tamanho) / 100;
-  const larguraFone = alturaFone / 2.05;
+  const { w: larguraFone, h: alturaFone, subida, perspectiva } = medidasDoAparelho(cena, baseW, baseH);
   const a = ACABAMENTOS[cena.acabamento];
-  const perspectiva = larguraFone * (cena.lente / 50) * 3.4;
   const rotation = React.useMemo(() => ({ x: rotX, y: rotY, z: rotZ }), [rotX, rotY, rotZ]);
   return (
     <motion.div
@@ -703,7 +771,7 @@ const Composicao = React.memo(function Composicao({
         width: larguraFone,
         height: alturaFone,
         marginLeft: -larguraFone / 2,
-        marginTop: -alturaFone / 2,
+        marginTop: -alturaFone / 2 - subida,
         y: dy,
         scale: escala,
         opacity: opacidade,
@@ -713,6 +781,7 @@ const Composicao = React.memo(function Composicao({
       {cena.sombra > 0 ? (
         <motion.div
           className="mk-sombra"
+          data-modelo={cena.modelo}
           style={{
             rotateX: rotX,
             rotateY: rotY,
@@ -725,6 +794,7 @@ const Composicao = React.memo(function Composicao({
         />
       ) : null}
       <DeviceFrame
+        device={cena.modelo}
         rotation={rotation}
         intro={false}
         style={

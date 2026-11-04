@@ -35,10 +35,17 @@
 /* Absoluto: o quadro tem 1080px de layout, e no fluxo do grid estouraria o palco antes da escala. */
 .mk-escala { position: absolute; left: 50%; top: 50%; transform-origin: center; }
 .mk-quadro { position: relative; overflow: hidden; box-shadow: 0 0 0 1px var(--casa-line); }
+/* A câmera do close, e as duas cópias da cena: a desfocada embaixo e a nítida furada por cima. */
+.mk-camera, .mk-camada { position: absolute; inset: 0; }
+.mk-camada-copia { pointer-events: none; }
+/* Com will-change o aparelho é rasterizado uma vez, em 1x, e o close só amplia esse bitmap: a área em foco sairia mole. */
+.mk-camada .device-frame-corpo { will-change: auto; }
 .mk-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); pointer-events: none; }
 /* Sem preserve-3d aqui: sombra e aparelho no mesmo contexto 3D se interceptam, e a sombra corta a tela na diagonal. */
 .mk-pose { position: absolute; }
 .mk-sombra { position: absolute; inset: 2%; border-radius: 12%/6%; background: black; pointer-events: none; }
+.mk-sombra[data-modelo="tablet"] { border-radius: 4%/5%; }
+.mk-sombra[data-modelo="laptop"] { inset: 6% 0 -30%; border-radius: 3%/4%; }
 
 .mk-tela-midia { position: absolute; inset: 0; width: 100%; height: 100%; background: black; pointer-events: none; }
 .mk-tela-sensor { position: absolute; inset: 0; }
@@ -123,6 +130,10 @@
 
 .mk-fone-palco { position: relative; display: grid; place-items: center; width: 100%; height: 100%; perspective: 140px; }
 .mk-fone { display: block; width: 26%; aspect-ratio: 1 / 2.05; border-radius: 16%/8%; background: var(--casa-fg); box-shadow: inset 0 0 0 1.5px var(--casa-fg), inset 0 0 0 3px var(--casa-tile-2); }
+.mk-fone { position: relative; }
+.mk-fone[data-modelo="tablet"] { width: 62%; aspect-ratio: 4 / 3; border-radius: 9%/12%; }
+.mk-fone[data-modelo="laptop"] { width: 66%; aspect-ratio: 16 / 10; border-radius: 6%/9%; }
+.mk-fone[data-modelo="laptop"]::after { content: ""; position: absolute; top: 104%; left: -8%; right: -8%; height: 12%; border-radius: 0 0 40% 40%/0 0 100% 100%; background: inherit; }
 .mk-fone-claro { background: oklch(0.86 0.004 250); box-shadow: 0 0 0 0.5px oklch(0 0 0 / 0.2); }
 
 /* Em repouso, cada movimento já tem o seu desenho: tampe os nomes e ainda dá para distinguir. */
@@ -132,6 +143,7 @@
 .mk-anima-aproximar { transform: scale(1.32); }
 .mk-anima-entrada { transform: rotateX(46deg); }
 .mk-anima-varredura { transform: rotateY(-40deg); }
+.mk-anima-close { transform: scale(1.7); filter: blur(0.5px); }
 
 /* O movimento se mostra no próprio desenho, e só no escolhido ou sob o ponteiro. */
 @keyframes mk-flutuar { 50% { transform: translateY(-6%) rotateY(14deg); } }
@@ -140,12 +152,14 @@
 @keyframes mk-aproximar { 50% { transform: scale(1.32); } }
 @keyframes mk-entrada { 0% { transform: rotateX(50deg) translateY(30%); opacity: 0; } 70%, 100% { transform: none; opacity: 1; } }
 @keyframes mk-varredura { 0% { transform: rotateY(-40deg); } 100% { transform: rotateY(40deg); } }
+@keyframes mk-close { 0%, 100% { transform: none; filter: none; } 35%, 65% { transform: scale(1.7); filter: blur(0.5px); } }
 @media (prefers-reduced-motion: no-preference) {
   .mk-mini:is([aria-checked="true"], :hover) .mk-anima-flutuar { animation: mk-flutuar 2.4s var(--ease-in-out) infinite; }
   .mk-mini:is([aria-checked="true"], :hover) .mk-anima-balancar { animation: mk-balancar 2.4s var(--ease-in-out) infinite; }
   .mk-mini:is([aria-checked="true"], :hover) .mk-anima-pendulo { animation: mk-pendulo 2.4s var(--ease-in-out) infinite; }
   .mk-mini:is([aria-checked="true"], :hover) .mk-anima-aproximar { animation: mk-aproximar 2.4s var(--ease-in-out) infinite; }
   .mk-mini:is([aria-checked="true"], :hover) .mk-anima-entrada { animation: mk-entrada 2.4s var(--ease-out) infinite; }
+  .mk-mini:is([aria-checked="true"], :hover) .mk-anima-close { animation: mk-close 2.4s var(--ease-in-out) infinite; }
   .mk-mini:is([aria-checked="true"], :hover) .mk-anima-varredura { animation: mk-varredura 2.4s var(--ease-in-out) infinite alternate; }
 }
 
@@ -154,6 +168,11 @@
   .mk-minis { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 4.25rem; overflow-x: auto; margin: 0 -0.75rem; padding: 2px 0.75rem; scroll-padding: 0.75rem; scrollbar-width: none; }
   .mk-minis::-webkit-scrollbar { display: none; }
 }
+
+/* O ponto de foco, sobre a tela em miniatura. */
+.mk-alvo { position: relative; flex: none; margin: 0 auto; overflow: hidden; border-radius: 8px; background: var(--casa-tile); cursor: crosshair; touch-action: none; user-select: none; -webkit-user-select: none; }
+.mk-alvo img { pointer-events: none; }
+.mk-alvo-ponto { position: absolute; aspect-ratio: 1; min-width: 1rem; border-radius: 50%; translate: -50% -50%; box-shadow: 0 0 0 1.5px white, 0 0 0 2.5px oklch(0 0 0 / 0.5), 0 0 0 999px oklch(0 0 0 / 0.35); pointer-events: none; }
 
 /* Amostras e cor. */
 .mk-amostras { display: flex; flex-wrap: wrap; gap: 0.375rem; padding: 0.125rem 0; }

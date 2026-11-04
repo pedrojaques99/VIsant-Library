@@ -7,10 +7,13 @@ import { cn } from "@/lib/utils";
 
 export type DevicePose = "front" | "hero" | "left" | "right" | "flat";
 export type DeviceTilt = "none" | "pointer" | "float" | "scroll";
+export type DeviceModel = "phone" | "tablet" | "laptop";
 
 export interface DeviceFrameProps {
   /** A tela: qualquer coisa viva, com largura e altura de 100%. */
   children?: React.ReactNode;
+  /** O notebook tem base articulada: fica melhor visto de cima, com `rotation` e X negativo. */
+  device?: DeviceModel;
   pose?: DevicePose;
   /** `pointer` cai em `float` no toque, porque celular não tem hover. */
   tilt?: DeviceTilt;
@@ -52,7 +55,7 @@ const ENTRADA = [0.16, 1, 0.3, 1] as const;
  * O ponteiro não mexe no aparelho enquanto há botão apertado: tela que foge do
  * arraste é impossível de usar.
  */
-export function DeviceFrame({ children, pose = "hero", tilt = "none", intro = true, finish = "graphite", scrollContainer, scrollTarget, rotation, className, style }: DeviceFrameProps) {
+export function DeviceFrame({ children, device = "phone", pose = "hero", tilt = "none", intro = true, finish = "graphite", scrollContainer, scrollTarget, rotation, className, style }: DeviceFrameProps) {
   const reduz = useReducedMotion() ?? false;
   const raiz = React.useRef<HTMLDivElement>(null);
   const naTela = useInView(raiz);
@@ -120,18 +123,35 @@ export function DeviceFrame({ children, pose = "hero", tilt = "none", intro = tr
   const brilho = useTransform([rotation?.y ?? py, ay], ([p, a]: number[]) => `${(p + a) * -1.6}%`);
 
   return (
-    <div ref={raiz} className={cn("device-frame", className)} data-finish={finish} style={style}>
+    <div ref={raiz} className={cn("device-frame", className)} data-device={device} data-finish={finish} style={style}>
       <motion.div className="device-frame-corpo" style={{ rotateX: rotation?.x ?? rotateX, rotateY: rotation?.y ?? rotateY, rotateZ: rotation?.z ?? rotateZ, y, opacity: entrada }}>
         {CAMADAS.map((n) => (
           <span key={n} className="device-frame-camada" style={{ "--c": n } as React.CSSProperties} aria-hidden />
         ))}
-        <span className="device-frame-botao" data-lado="e" style={{ "--t": "20%", "--a": "6%" } as React.CSSProperties} aria-hidden />
-        <span className="device-frame-botao" data-lado="e" style={{ "--t": "28%", "--a": "10%" } as React.CSSProperties} aria-hidden />
-        <span className="device-frame-botao" data-lado="d" style={{ "--t": "25%", "--a": "14%" } as React.CSSProperties} aria-hidden />
+        {device === "phone" ? (
+          <>
+            <span className="device-frame-botao" data-lado="e" style={{ "--t": "20%", "--a": "6%" } as React.CSSProperties} aria-hidden />
+            <span className="device-frame-botao" data-lado="e" style={{ "--t": "28%", "--a": "10%" } as React.CSSProperties} aria-hidden />
+            <span className="device-frame-botao" data-lado="d" style={{ "--t": "25%", "--a": "14%" } as React.CSSProperties} aria-hidden />
+          </>
+        ) : null}
+        {device === "tablet" ? <span className="device-frame-botao" data-lado="t" style={{ "--t": "8%", "--a": "6%" } as React.CSSProperties} aria-hidden /> : null}
+        {device === "laptop" ? (
+          <span className="device-frame-base" aria-hidden>
+            {CAMADAS.map((n) => (
+              <span key={n} className="device-frame-camada" style={{ "--c": n } as React.CSSProperties} />
+            ))}
+            <span className="device-frame-deck">
+              <span className="device-frame-teclado" />
+              <span className="device-frame-trackpad" />
+            </span>
+          </span>
+        ) : null}
         <div className="device-frame-frente">
+          {device === "tablet" ? <span className="device-frame-camera" aria-hidden /> : null}
           <div className="device-frame-tela">
             {children}
-            <span className="device-frame-ilha" aria-hidden />
+            {device === "tablet" ? null : <span className="device-frame-ilha" aria-hidden />}
             <motion.span className="device-frame-brilho" style={{ x: brilho }} aria-hidden />
           </div>
         </div>
