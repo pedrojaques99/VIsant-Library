@@ -361,6 +361,10 @@
     "lucide-react",
     "motion"
   ],
+  "color-picker": [
+    "lucide-react",
+    "react-colorful"
+  ],
   "sensor-dial": [
     "lucide-react",
     "motion"

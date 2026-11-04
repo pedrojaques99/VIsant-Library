@@ -92,6 +92,25 @@ export function KanbanCard<T>({
         // ponto exato onde o card cai e o que faz o gesto ter imã.
         (isDragging || landing) && "is-drop-slot"
       )}
+      // Fora do `listeners`, que não usa ponteiro: o cartão responde ao encostar e o
+      // arraste continua esperando o segurar. Solta na `window` porque o cartão pode
+      // trocar de coluna no meio do gesto.
+      onPointerDown={
+        enabled
+          ? (e) => {
+              if (e.pointerType !== "touch") return;
+              const el = e.currentTarget;
+              el.setAttribute("data-apertado", "");
+              const soltar = () => {
+                el.removeAttribute("data-apertado");
+                window.removeEventListener("pointerup", soltar);
+                window.removeEventListener("pointercancel", soltar);
+              };
+              window.addEventListener("pointerup", soltar);
+              window.addEventListener("pointercancel", soltar);
+            }
+          : undefined
+      }
       {...(enabled ? attributes : {})}
       {...(enabled ? listeners : {})}
     >

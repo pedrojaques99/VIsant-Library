@@ -314,12 +314,19 @@ export function PalcoFixo({
   active = true,
   tinta,
   sangra = false,
+  compensaAlvo = false,
   className,
   style,
   children,
 }: {
   w: number;
   h: number;
+  /**
+   * A ficha no celular encolhe a peça até 25%, e o `.alvo-toque` encolhia junto: 44px
+   * viravam 35. Com isto o alvo divide pela escala. Na grade fica de fora: lá a peça é
+   * miniatura, e um alvo que cresce na proporção cobriria o ladrilho inteiro.
+   */
+  compensaAlvo?: boolean;
   /** Quanto da caixa a peça ocupa, de 0 a 1 a partir do centro, em cada eixo. */
   tinta?: readonly number[];
   /** Largura ÷ altura da moldura. Igual para todos os cards da grade. */
@@ -381,6 +388,7 @@ export function PalcoFixo({
           width: w,
           height: h,
           transform: `translate(-50%, -50%) scale(${escala})`,
+          ...(compensaAlvo && escala ? ({ "--alvo-escala": escala } as React.CSSProperties) : null),
           willChange: escala === 1 ? undefined : "transform",
           ...CAIXA_DO_PALCO,
         }}

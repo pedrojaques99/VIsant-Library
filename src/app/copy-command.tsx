@@ -67,9 +67,9 @@ export function CopyCommand({
         "alvo-toque group flex items-center text-left outline-none",
         "transition-[color,background-color,opacity] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
         variant === "cta" &&
-          "min-h-10 w-full gap-3 rounded-control bg-casa-cta px-3.5 py-2 text-casa-cta-fg hover:opacity-90",
+          "min-h-10 pointer-coarse:min-h-11 w-full gap-3 rounded-control bg-casa-cta px-3.5 py-2 text-casa-cta-fg hover:opacity-90",
         variant === "line" &&
-          "h-10 w-full gap-3 rounded-control bg-casa-tile-2 px-3.5 text-casa-fg-2 hover:text-casa-fg",
+          "h-10 pointer-coarse:h-11 w-full gap-3 rounded-control bg-casa-tile-2 px-3.5 text-casa-fg-2 hover:text-casa-fg",
         // O `flex` da base (camada utilities) vence o `inline-grid` + `place-items`
         // do `.casa-icone` (camada components): sem o `justify-center` o ícone
         // encostava na esquerda do quadrado.

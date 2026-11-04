@@ -726,5 +726,9 @@
   "device-frame": {
     "quando": "Mostrar uma tela de app funcionando em hero ou página de produto",
     "evite": "Giro de 360° ou objeto de verdade: lathe-object; só uma foto de tela, photo-frame"
+  },
+  "color-picker": {
+    "quando": "Escolher uma cor livre num editor, tema ou painel de marca",
+    "evite": "Escolher entre poucas cores fixas: chip; ajustar um número: scrub-input"
   }
 }

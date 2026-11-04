@@ -7887,6 +7887,32 @@
       }
     },
     {
+      "name": "color-picker",
+      "type": "registry:ui",
+      "title": "Color Picker",
+      "description": "Seletor de cor de editor: arraste no campo e na matiz, digite o valor exato, pegue uma cor da tela ou use as amostras da marca.",
+      "dependencies": [
+        "react-colorful",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/ui/color-picker.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "categories": [
+        "controles",
+        "cor",
+        "seletor",
+        "editor"
+      ]
+    },
+    {
       "name": "sensor-dial",
       "type": "registry:ui",
       "title": "Sensor Dial",

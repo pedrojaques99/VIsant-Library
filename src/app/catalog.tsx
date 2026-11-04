@@ -184,6 +184,8 @@ export const ESTILOS: { key: Estilo; label: string; regra: string }[] = [
  */
 export interface DemoProps {
   props?: Record<string, unknown>;
+  /** A peça mudou um valor que o painel mostra: o canal de volta da ficha. Ver `demos/dono-do-knob.ts`. */
+  onKnob?: (prop: string, valor: string | number | boolean) => void;
 }
 
 export interface CatalogItem {
@@ -567,6 +569,7 @@ const GlassTabsVidroDemo = React.lazy(() => import("./demos/glass-tabs-demo"));
 const GlassSwitchVidroDemo = React.lazy(() => import("./demos/glass-switch-demo"));
 const GlassBoardVidroDemo = React.lazy(() => import("./demos/glass-board-demo"));
 const SensorDialVidroDemo = React.lazy(() => import("./demos/sensor-dial-demo"));
+const ColorPickerDemo = React.lazy(() => import("./demos/color-picker-demo"));
 const DeviceFrameVidroDemo = React.lazy(() => import("./demos/device-frame-demo"));
 const TexturaTilesColheitaDemo = React.lazy(() => import("./demos/textura-tiles-demo"));
 const TexturaTwistColheitaDemo = React.lazy(() => import("./demos/textura-twist-demo"));
@@ -2916,6 +2919,17 @@ export const CATALOG: CatalogItem[] = [
     preview: { w: 920, h: 640 },
   },
   {
+    name: "color-picker",
+    title: "Color Picker",
+    type: "ui",
+    family: "controles",
+    description:
+      "Seletor de cor de editor: arraste no campo e na matiz, digite o valor exato, pegue uma cor da tela ou use as amostras da marca.",
+    tags: ["cor","seletor","hex","conta-gotas","paleta","editor"],
+    demo: ColorPickerDemo,
+    preview: { w: 380, h: 480 },
+  },
+  {
     name: "sensor-dial",
     title: "Sensor Dial",
     type: "ui",
@@ -2936,7 +2950,7 @@ export const CATALOG: CatalogItem[] = [
       "Aparelho em CSS 3D com a tela viva dentro: cinco poses, entrada animada e balanço por ponteiro, flutuação ou rolagem.",
     tags: ["mockup","celular","aparelho","3d","tela"],
     demo: DeviceFrameVidroDemo,
-    preview: { w: 420, h: 760 },
+    preview: { w: 420, h: 640 },
   },
 ];
 

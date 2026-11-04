@@ -2,12 +2,9 @@
 
 <!-- Gerado por scripts/vite-bug-report.mjs. Não edite à mão: use `npm run bugs -- --resolve <id>`. -->
 
-**1 aberto(s)** · 289 resolvido(s)
+**0 aberto(s)** · 290 resolvido(s)
 
-## scrub-input (1)
-
-- **scrub-input-4** — add um color picker mais profissional nivel apple - talvez até componente novo
-  <sub>Quebrado · 1612×911 · escuro · marca: Visant® · 2026-11-04 18:59</sub>
+_Nada aberto._
 
 ---
 
@@ -295,6 +292,7 @@ mais respiro visual, cards mais óbvcios~~
 - ~~glass-panel-2 · glass-panel — precisa deixar eles mais interativos ou animados  ou hover nao intrusivo (glass style)~~
 - ~~gauge-1 · gauge — add os botões de mais e menos como tinha~~
 - ~~skeleton-medido-1 · skeleton-medido — add uns skeleton menos generico como aparecer pimrimero~~
+- ~~scrub-input-4 · scrub-input — add um color picker mais profissional nivel apple - talvez até componente novo~~
 - ~~measure-picker-4 · measure-picker — sfx ao trocar de tier~~
 - ~~command-search-1 · command-search — paia nao entendi~~
 - ~~searchable-select-2 · searchable-select — paia nao entendi~~

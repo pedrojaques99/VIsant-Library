@@ -18,8 +18,8 @@
   "measure-picker": {
     "min": 130,
     "max": 200,
-    "value": 163,
-    "label": "Sua altura"
+    "label": "Sua altura",
+    "value": 163
   },
   "side-nav": {
     "storageKey": false,
@@ -82,10 +82,10 @@
     "height": 210
   },
   "vintage-oscilloscope": {
-    "mode": "scope",
     "color": "var(--vintage-light)",
     "width": 380,
-    "height": 180
+    "height": 180,
+    "mode": "scope"
   },
   "vintage-soundboard-pad": {
     "size": 72

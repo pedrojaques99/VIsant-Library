@@ -548,6 +548,14 @@
       }
     ]
   },
+  "measure-picker": {
+    "ajustes": {
+      "value": {
+        "min": 130,
+        "max": 200
+      }
+    }
+  },
   "gauge": {
     "ordem": [
       "value",

@@ -1436,8 +1436,8 @@
         {
           "prop": "value",
           "tipo": "numero",
-          "min": 0,
-          "max": 250,
+          "min": 130,
+          "max": 200,
           "step": 1,
           "padrao": null,
           "resumo": null,
@@ -9085,6 +9085,30 @@
           "tipo": "texto",
           "padrao": null,
           "resumo": null
+        }
+      ]
+    }
+  },
+  "color-picker": {
+    "componentes": {
+      "ColorPicker": [
+        {
+          "prop": "eyedropper",
+          "tipo": "chave",
+          "padrao": true,
+          "resumo": "Mostra o conta-gotas nos navegadores que têm a API."
+        },
+        {
+          "prop": "label",
+          "tipo": "texto",
+          "padrao": "Cor",
+          "resumo": "Nome do campo para leitor de tela."
+        },
+        {
+          "prop": "value",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "A cor atual, em hex de seis dígitos."
         }
       ]
     }

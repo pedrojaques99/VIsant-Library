@@ -199,7 +199,7 @@ function PalcoDaPilha({
   return (
     <div ref={caixa} className="h-full w-full">
       {tela.h ? (
-        <PalcoFixo w={peca.w} h={peca.h} ratio={tela.w / tela.h}>
+        <PalcoFixo w={peca.w} h={peca.h} ratio={tela.w / tela.h} compensaAlvo>
           {children}
         </PalcoFixo>
       ) : null}
@@ -553,7 +553,7 @@ export function ComponentFocus({
             <PalcoFixo w={frameW} h={frameH} sangra>
               <ErrorBoundary fallback={null}>
                 <React.Suspense fallback={null}>
-                  <Demo props={knobs.props} />
+                  <Demo props={knobs.props} onKnob={knobs.set} />
                 </React.Suspense>
               </ErrorBoundary>
             </PalcoFixo>
@@ -562,7 +562,7 @@ export function ComponentFocus({
           <CaixaDaPilha key={item.name} controles={Boolean(controles)} w={frameW} h={natural.h} onCresceu={setPalcoCresceu}>
             <ErrorBoundary fallback={null}>
               <React.Suspense fallback={null}>
-                <Demo props={knobs.props} />
+                <Demo props={knobs.props} onKnob={knobs.set} />
               </React.Suspense>
             </ErrorBoundary>
           </CaixaDaPilha>
@@ -596,7 +596,7 @@ export function ComponentFocus({
                 <FitStage w={frameW} h={frameH} maxScale={1}>
                   <ErrorBoundary fallback={<div className="h-full w-full" />}>
                     <React.Suspense fallback={<div className="h-full w-full" />}>
-                      <Demo props={knobs.props} />
+                      <Demo props={knobs.props} onKnob={knobs.set} />
                     </React.Suspense>
                   </ErrorBoundary>
                 </FitStage>
@@ -664,7 +664,7 @@ export function ComponentFocus({
           <div className="empty:hidden max-lg:order-8">
             <Avaliacao item={item.name} />
           </div>
-          <div className="empty:hidden max-lg:order-7 pointer-coarse:[&_a]:inline-flex pointer-coarse:[&_a]:min-h-11 pointer-coarse:[&_a]:items-center">
+          <div className="empty:hidden max-lg:order-7 pointer-coarse:[&_a]:inline-flex pointer-coarse:[&_a]:min-h-11 pointer-coarse:[&_a]:min-w-11 pointer-coarse:[&_a]:items-center pointer-coarse:[&_a]:justify-center">
             <DepResumo name={item.name} />
           </div>
           <div className="max-lg:order-3">

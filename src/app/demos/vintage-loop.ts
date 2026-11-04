@@ -11,6 +11,32 @@ const PASSO = 60 / 112 / 4;
 const BAIXO = [55, 0, 0, 55, 0, 0, 65.4, 0, 49, 0, 0, 49, 0, 0, 73.4, 0];
 const ARPEJO = [440, 0, 523, 0, 659, 0, 523, 0, 392, 0, 494, 0, 587, 0, 494, 0];
 
+/** Uma amostra do mesmo desenho do loop, em função do tempo: bumbo, baixo e arpejo. */
+function amostra(t: number) {
+  const tempo = Math.floor(t / PASSO);
+  const noPasso = (t % PASSO) / PASSO;
+  const noTempo = (t % (PASSO * 4)) / (PASSO * 4);
+  const bumbo = 0.7 * Math.sin(2 * Math.PI * 62 * t) * Math.exp(-5 * noTempo);
+  const baixo = 0.22 * Math.sin(2 * Math.PI * (BAIXO[tempo % 16] || 55) * 2 * t);
+  const arpejo = 0.2 * Math.sin(2 * Math.PI * (ARPEJO[tempo % 16] || 330) * t) * Math.exp(-2.5 * noPasso);
+  return bumbo + baixo + arpejo;
+}
+
+/**
+ * Um analisador de mentira, mudo, para o tubo nascer com sinal.
+ *
+ * Som sem pedido é proibido e o autoplay é bloqueado, então antes do PLAY não existe
+ * `AudioContext`. A peça só chama estes dois membros do `AnalyserNode`, e é ela quem
+ * pede a amostra a cada quadro: não há relógio aqui para parar.
+ */
+export const SINAL_DE_REPOUSO = {
+  fftSize: 1024,
+  getFloatTimeDomainData(saida: Float32Array) {
+    const agora = performance.now() / 1000;
+    for (let i = 0; i < saida.length; i++) saida[i] = amostra(agora + i / 44100);
+  },
+} as unknown as AnalyserNode;
+
 /** O motor do loop: contexto, analisador e um agendador com folga. */
 export function useLoop(ligado: boolean) {
   const [analyser, setAnalyser] = React.useState<AnalyserNode | null>(null);

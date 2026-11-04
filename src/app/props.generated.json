@@ -15341,6 +15341,49 @@
       ]
     }
   ],
+  "color-picker": [
+    {
+      "nome": "ColorPicker",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "onChange",
+          "tipo": "(cor: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "value",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "A cor atual, em hex de seis dígitos."
+        },
+        {
+          "nome": "eyedropper",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "true",
+          "descricao": "Mostra o conta-gotas nos navegadores que têm a API."
+        },
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Cor",
+          "descricao": "Nome do campo para leitor de tela."
+        },
+        {
+          "nome": "swatches",
+          "tipo": "string[]",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Atalhos, como a paleta da marca. Sem isto, a fileira não aparece."
+        }
+      ]
+    }
+  ],
   "sensor-dial": [
     {
       "nome": "SensorDial",

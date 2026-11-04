@@ -83,7 +83,7 @@ function cssConstruido() {
  * que não existe em CSS nenhum. O portão acusava de "não gerou regra" uma
  * classe cuja regra estava lá — falso positivo em toda variante `[@media…]`.
  */
-const escapar = (cls) => cls.replace(/[.[\]()#,%:&>+~*/!'"$^=|?@]/g, (c) => "\\" + c);
+const escapar = (cls) => cls.replace(/[\\.[\]()#,%:&>+~*/!'"$^=|?@]/g, (c) => "\\" + c);
 
 /*
  * A classe é fatiada por ESPAÇO, não por regex de forma.

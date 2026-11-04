@@ -9,6 +9,7 @@
  * chassi mostrando que a tela é uma tela.
  *
  * O PLAY liga o mesmo loop do osciloscópio, e o programa passa a desenhar esse som.
+ * Antes do gesto o programa roda num sinal sintético, mudo: nenhum canal abre reto.
  *
  * O botão de força continua sendo o da peça: desligar apaga o tubo com a
  * animação de CRT; ligar acende com o estalo e o chiado de um tubo de verdade
@@ -21,7 +22,7 @@ import { useStageActive } from "../stage";
 import { VintageTvFrame } from "../../../registry/vintage/ui/vintage-tv-frame";
 import { VintageButton } from "../../../registry/vintage/ui/vintage-button";
 import type { VintageScopeMode } from "../../../registry/vintage/ui/vintage-oscilloscope";
-import { useLoop } from "./vintage-loop";
+import { SINAL_DE_REPOUSO, useLoop } from "./vintage-loop";
 
 const CANAIS: { n: string; modo: VintageScopeMode }[] = [
   { n: "02", modo: "scope" },
@@ -46,7 +47,7 @@ export default function VintageTvFrameDemo() {
           showTimecode="00:12:34"
           program={CANAIS[canal].modo}
           programActive={ativo}
-          programAnalyser={analyser}
+          programAnalyser={analyser ?? SINAL_DE_REPOUSO}
           onPowerToggle={(v) => {
             setLigada(v);
             if (!v) setTocando(false);
@@ -54,7 +55,7 @@ export default function VintageTvFrameDemo() {
         />
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-3">
+      <div className="flex items-center justify-center gap-2 sm:gap-3">
       <div role="radiogroup" aria-label="Canal" className="flex gap-1.5">
         {CANAIS.map((c, i) => {
           const sel = i === canal;

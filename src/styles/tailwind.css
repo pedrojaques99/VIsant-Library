@@ -164,8 +164,8 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      width: max(100%, 44px);
-      height: max(100%, 44px);
+      width: max(100%, calc(44px / var(--alvo-escala, 1)));
+      height: max(100%, calc(44px / var(--alvo-escala, 1)));
       transform: translate(-50%, -50%);
     }
   }

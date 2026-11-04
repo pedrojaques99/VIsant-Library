@@ -169,6 +169,16 @@
 }
 
 /*
+ * No dedo o aviso é outro: `:active` só chega depois do atraso de toque do navegador
+ * (medido em Chrome: nem aos 200ms), e 1,5% ficaria escondido sob a mão. O KanbanCard
+ * marca `data-apertado` no `pointerdown`.
+ */
+.kanban-card-movel[data-apertado]:not(.is-drop-slot) > * {
+  transform: scale(0.96);
+  transition-delay: 60ms;
+}
+
+/*
  * O buraco só anima ao ENTRAR. Ao sair, o fantasma está exatamente em cima dele e
  * os dois trocam de lugar no mesmo quadro: qualquer transição aqui aparece como o
  * cartão aceso pela metade depois de pousado.

@@ -30,8 +30,9 @@ const PONTOS = 56;
 const emDb = (v: number) => ((v - 5) / 5) * 12;
 
 export default function VintageKnobDemo() {
-  const [ganhos, setGanhos] = React.useState([5, 5, 5]);
-  const [nivel, setNivel] = React.useState(5);
+  // Nasce com a curva desenhada: tudo em 0 dB era um risco reto até alguém girar.
+  const [ganhos, setGanhos] = React.useState([8.5, 2.5, 7]);
+  const [nivel, setNivel] = React.useState(6);
 
   const set = (i: number) => (v: number) =>
     setGanhos((p) => p.map((g, j) => (j === i ? v : g)));

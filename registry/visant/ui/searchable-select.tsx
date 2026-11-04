@@ -82,7 +82,7 @@ export interface SearchableSelectProps {
 
 const itemClass = cn(
   "flex cursor-pointer select-none items-center gap-2 rounded-[var(--r-control,0.375rem)]",
-  "px-2 py-1.5 text-sm outline-none",
+  "px-2 py-1.5 pointer-coarse:min-h-11 text-sm outline-none",
   "data-[selected=true]:bg-[var(--accent,var(--muted))]",
   "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
 );
@@ -210,7 +210,7 @@ export function SearchableSelect({
           onValueChange={setSearch}
           placeholder={searchPlaceholder}
           className={cn(
-            "h-10 w-full bg-transparent text-sm outline-none",
+            "h-10 pointer-coarse:h-11 w-full bg-transparent text-sm outline-none",
             "placeholder:text-[var(--muted-foreground)]",
           )}
         />

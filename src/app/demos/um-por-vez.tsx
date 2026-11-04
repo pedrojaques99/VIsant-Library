@@ -69,7 +69,7 @@ export function Trocador({
         type="button"
         onClick={onRepetir}
         aria-label={`Repetir ${nome}`}
-        className="alvo-toque min-w-16 rounded-[var(--r-control,0.5rem)] px-1.5 py-1 text-center font-mono text-micro tabular-nums outline-none transition-[color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:text-foreground focus-visible:[box-shadow:var(--focus)]"
+        className="alvo-toque min-w-16 pointer-coarse:min-w-[max(4rem,calc(2.75rem/var(--alvo-escala,1)))] rounded-[var(--r-control,0.5rem)] px-1.5 py-1 text-center font-mono text-micro tabular-nums outline-none transition-[color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:text-foreground focus-visible:[box-shadow:var(--focus)]"
       >
         {nome}
       </button>
@@ -85,7 +85,7 @@ function Seta({ dir, onClick, rotulo }: { dir: 1 | -1; onClick: () => void; rotu
       type="button"
       onClick={onClick}
       aria-label={dir < 0 ? `${rotulo} anterior` : `Próxima ${rotulo}`}
-      className="alvo-toque grid size-7 place-items-center rounded-[var(--r-pill,9999px)] outline-none transition-[color,background-color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:bg-muted hover:text-foreground focus-visible:[box-shadow:var(--focus)]"
+      className="alvo-toque grid size-7 pointer-coarse:w-[calc(2.75rem/var(--alvo-escala,1))] place-items-center rounded-[var(--r-pill,9999px)] outline-none transition-[color,background-color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:bg-muted hover:text-foreground focus-visible:[box-shadow:var(--focus)]"
     >
       <Icone className="size-4" aria-hidden />
     </button>

@@ -9,6 +9,7 @@ import type * as React from "react";
 
 import { Kanban } from "../../../registry/visant/blocks/kanban";
 import { GlassBoard, type GlassBoardKanbanProps, type GlassBoardRow } from "../../../registry/visant/ui/glass-board";
+import { useDicaDeSegurar } from "./dica-de-segurar";
 import { CenaGranulada } from "./vidro-cenas";
 import { PalcoDeVidro } from "./vidro-palco";
 
@@ -23,14 +24,18 @@ const LINHAS: GlassBoardRow[] = [
 ];
 
 export default function GlassBoardDemo() {
+  const { onPointerDownCapture, dica } = useDicaDeSegurar();
   return (
     <PalcoDeVidro cena={<CenaGranulada />}>
-      <GlassBoard
-        kanban={Kanban as React.ComponentType<GlassBoardKanbanProps>}
-        className="max-h-full w-full max-w-[520px]"
-        stages={ETAPAS}
-        initial={LINHAS}
-      />
+      <div className="relative w-full max-w-[520px]" onPointerDownCapture={onPointerDownCapture}>
+        <GlassBoard
+          kanban={Kanban as React.ComponentType<GlassBoardKanbanProps>}
+          className="max-h-full w-full"
+          stages={ETAPAS}
+          initial={LINHAS}
+        />
+        {dica}
+      </div>
     </PalcoDeVidro>
   );
 }

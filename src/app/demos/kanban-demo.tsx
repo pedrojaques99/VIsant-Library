@@ -17,6 +17,7 @@ import * as React from "react";
 import { CalendarDays } from "lucide-react";
 
 import { useElementWidth } from "../stage";
+import { useDicaDeSegurar } from "./dica-de-segurar";
 
 import { Kanban } from "../../../registry/visant/blocks/kanban";
 import type { KanbanItem } from "../../../registry/visant/blocks/kanban/types";
@@ -99,6 +100,7 @@ export default function KanbanDemo({ denso = false }: { denso?: boolean }) {
   const empilhado = !denso && largura > 0 && largura < ESTREITO;
   const columns = React.useMemo(() => base.columns, [base]);
   const [items, setItems] = React.useState<KanbanItem<Tarefa>[]>(base.items as KanbanItem<Tarefa>[]);
+  const { onPointerDownCapture, dica } = useDicaDeSegurar();
   const contagem = React.useMemo(() => {
     const m = new Map<string, number>();
     for (const it of items) m.set(it.columnId, (m.get(it.columnId) ?? 0) + 1);
@@ -108,8 +110,9 @@ export default function KanbanDemo({ denso = false }: { denso?: boolean }) {
   return (
     <div
       ref={caixa}
+      onPointerDownCapture={onPointerDownCapture}
       // O encaixe em borda de marca: é a única cor do gesto, e só no lugar do cartão.
-      className={`w-full p-3 [--kanban-accent:var(--brand,var(--foreground))] ${
+      className={`relative w-full p-3 [--kanban-accent:var(--brand,var(--foreground))] ${
         // No board denso a rolagem horizontal é o comportamento CERTO: board de
         // verdade tem mais coluna do que tela, e cortar a quarta a faca some com
         // ela. No card do catálogo continua `hidden` — lá a barra seria o palco
@@ -217,6 +220,7 @@ export default function KanbanDemo({ denso = false }: { denso?: boolean }) {
           )
         }
       />
+      {dica}
     </div>
   );
 }

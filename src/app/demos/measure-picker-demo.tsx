@@ -21,6 +21,7 @@ import * as React from "react";
 import { MeasurePicker, type MeasureBand } from "../../../registry/visant/ui/measure-picker";
 import { Media, type Papel } from "../media";
 import type { DemoProps } from "../catalog";
+import { useDonoDoKnob } from "./dono-do-knob";
 
 interface Modelo {
   tier: string;
@@ -50,23 +51,25 @@ const FAIXAS: MeasureBand<Modelo>[] = [
   },
 ];
 
-export default function MeasurePickerDemo({ props }: DemoProps) {
+export default function MeasurePickerDemo({ props, onKnob }: DemoProps) {
   const [altura, setAltura] = React.useState(163);
+  const mudar = useDonoDoKnob<number>("value", 163, setAltura, { props, onKnob });
 
   return (
     // `accent-color` no palco, não no componente: o item não deve decidir a cor
     // do range nativo — quem instala escolhe, e aqui a escolha é o token da marca.
-    <div className="flex h-full w-full flex-col justify-center p-5 [&_input[type=range]]:accent-[var(--brand)]">
+    // A altura do range divide pela escala: a ficha encolhe o palco e o dedo continua igual.
+    <div className="flex h-full w-full flex-col justify-center p-5 [&_input[type=range]]:accent-[var(--brand)] pointer-coarse:[&_input[type=range]]:h-[calc(2.75rem/var(--alvo-escala,1))]">
       <MeasurePicker
         min={130}
         max={200}
-        value={altura}
-        onValueChange={setAltura}
         label="Sua altura"
         edgeLabels={["130 cm", "200 cm"]}
         formatValue={(x) => `${x} cm`}
         bands={FAIXAS}
         {...props}
+        value={altura}
+        onValueChange={mudar}
       >
         {(faixa) => {
           const t = faixa.value;

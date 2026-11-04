@@ -191,6 +191,7 @@
   "glass-tabs": "react",
   "glass-switch": "react",
   "glass-board": "react",
+  "color-picker": "react",
   "sensor-dial": "react",
   "device-frame": "react"
 }

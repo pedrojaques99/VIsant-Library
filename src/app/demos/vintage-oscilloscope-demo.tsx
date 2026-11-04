@@ -9,8 +9,9 @@
  * arpejo), o loop passa por um `AnalyserNode`, e o tubo desenha ESSE sinal: o
  * que se ouve é o que se vê. As teclas embaixo trocam o programa do tubo.
  *
- * Sem som tocando o tubo fica no traço reto, que é o que um osciloscópio sem
- * entrada mostra. Card fora da tela (`useStageActive`) para o som e o relógio.
+ * Sem som tocando o tubo mostra um sinal sintético, mudo: a peça nasce no melhor
+ * estado e o áudio só entra com o gesto. Card fora da tela (`useStageActive`) para
+ * o som e o relógio.
  *
  * `fft` fica fora das teclas: o modo lê magnitudes em dB, não amostras no
  * tempo, e o analisador aqui entrega amostras.
@@ -25,19 +26,18 @@ import {
   type VintageScopeMode,
 } from "../../../registry/vintage/ui/vintage-oscilloscope";
 import { VintageButton } from "../../../registry/vintage/ui/vintage-button";
-import { useLoop } from "./vintage-loop";
+import { SINAL_DE_REPOUSO, useLoop } from "./vintage-loop";
+import { useDonoDoKnob } from "./dono-do-knob";
 
 const MODOS: VintageScopeMode[] = ["scope", "wave", "rings", "grid"];
 const FOSFORO = "var(--vintage-light)";
 
-export default function VintageOscilloscopeDemo({ props }: DemoProps) {
+export default function VintageOscilloscopeDemo({ props, onKnob }: DemoProps) {
   const ativo = useStageActive();
   const [tocando, setTocando] = React.useState(false);
   const [modo, setModo] = React.useState<VintageScopeMode>("scope");
+  const mudarModo = useDonoDoKnob<VintageScopeMode>("mode", "scope", setModo, { props, onKnob });
   const analyser = useLoop(tocando && ativo);
-
-  // Sem entrada: traço reto, como um tubo ligado sem cabo.
-  const silencio = React.useMemo(() => new Float32Array(256), []);
 
   return (
     <div className="flex h-full w-full items-center justify-center p-4">
@@ -52,14 +52,13 @@ export default function VintageOscilloscopeDemo({ props }: DemoProps) {
         }}
       >
         <VintageOscilloscope
-          analyser={analyser}
-          data={silencio}
-          mode={modo}
+          analyser={analyser ?? SINAL_DE_REPOUSO}
           color={FOSFORO}
           width={380}
           height={180}
           active={ativo}
           {...props}
+          mode={modo}
         />
 
         <div className="flex items-center justify-between gap-3">
@@ -72,7 +71,7 @@ export default function VintageOscilloscopeDemo({ props }: DemoProps) {
                   type="button"
                   role="radio"
                   aria-checked={sel}
-                  onClick={() => setModo(m)}
+                  onClick={() => mudarModo(m)}
                   className="alvo-toque group flex items-center gap-1.5 rounded-[4px] px-2 py-1.5 font-vintage-mono text-[10px] font-semibold uppercase tracking-[0.14em] outline-none"
                   style={{
                     color: sel ? "var(--vintage-label)" : "var(--vintage-text-muted)",

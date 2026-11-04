@@ -15,7 +15,7 @@ export default function DeviceFrameDemo() {
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-2 overflow-hidden p-4">
       <div className="min-h-0 w-full max-w-64 flex-1 [display:grid] place-items-center">
-        <div className="w-full max-w-[min(100%,calc((100cqh)/2.05))]">
+        <div className={`w-full max-w-[min(100%,calc((100cqh)/2.05))] ${atual === "flat" ? "max-sm:max-w-48" : ""}`}>
           <DeviceFrame key={rodada} pose={atual} tilt="pointer">
             <video src="/media/video-loop3d.mp4" poster="/media/video-loop3d.webp" autoPlay muted loop playsInline className="h-full w-full object-cover" />
           </DeviceFrame>
