@@ -602,7 +602,7 @@ function Secoes({
   className?: string;
 }) {
   return (
-    <nav aria-label="Seção" className={cn("flex flex-wrap content-center items-center gap-x-3 gap-y-1 sm:gap-x-5", className)}>
+    <nav aria-label="Seção" className={cn("flex items-center gap-2.5 overflow-x-auto [scrollbar-width:none] sm:gap-5 md:overflow-visible", className)}>
       {VIEWS.map((v) => (
         <a
           key={v.value}

@@ -222,6 +222,9 @@ test("em 360 de verdade, o menu cabe e a página não estoura", async ({ page })
     await expect(page.getByRole("navigation", { name: "Seção" }).first()).toBeVisible({ timeout: 20_000 });
     const largura = await page.evaluate(() => document.documentElement.scrollWidth);
     expect(largura, rota).toBeLessThanOrEqual(360);
+    /* Numa linha só: em duas, o bloco transborda a linha e a área de toque invade o cabeçalho. */
+    const alturas = await page.locator('nav[aria-label="Seção"]:visible a').evaluateAll((as) => [...new Set(as.map((a) => Math.round(a.getBoundingClientRect().top)))]);
+    expect(alturas.length, `${rota}: linhas do menu`).toBe(1);
   }
 });
 
