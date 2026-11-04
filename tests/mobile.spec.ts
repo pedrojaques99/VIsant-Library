@@ -252,6 +252,10 @@ test.describe("gesto no dedo", () => {
     const envia = (type: "touchStart" | "touchMove" | "touchEnd", x = 0, y = 0) =>
       cdp.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x, y }] });
     return {
+      mover: async (x: number, y: number) => {
+        await envia("touchMove", x, y);
+        await page.waitForTimeout(16);
+      },
       arrastar: async (x0: number, y0: number, x1: number, y1: number, segurar = 30, antesDeSoltar?: () => Promise<void>) => {
         await envia("touchStart", x0, y0);
         await page.waitForTimeout(segurar);
@@ -330,6 +334,49 @@ test.describe("gesto no dedo", () => {
     await d.arrastar(b.x + b.width / 2, b.y + b.height / 2, b.x + b.width + 80, b.y + b.height / 2);
     await page.waitForTimeout(500);
     expect(await page.locator(seletor).getAttribute("aria-label"), "o de cima foi pro fundo").not.toBe(rotulo);
+  });
+
+  test("photo-compare: quem começou de lado segura a página até soltar, e em pé a cortina não pula", async ({ page }) => {
+    await abrir(page, "/c/photo-compare");
+    await page.waitForTimeout(2500);
+    const seletor = `${FICHA} .photo-compare`;
+    const b = await caixa(page, seletor);
+    const meio = b.y + b.height / 2;
+    const cortina = () => page.locator(seletor).first().evaluate((e) => parseFloat((e as HTMLElement).style.getPropertyValue("--p")));
+    const d = await dedo(page);
+
+    await d.arrastar(b.x + b.width * 0.5, meio, b.x + b.width * 0.25, meio, 30, async () => {
+      for (let i = 1; i <= 8; i++) await d.mover(b.x + b.width * 0.25, meio - i * 18);
+    });
+    expect(await cortina(), "a cortina segue o dedo").toBeCloseTo(25, 0);
+    expect(await rolagem(page), "o dedo desviou para cima e a página ficou parada").toBe(0);
+
+    await d.arrastar(b.x + b.width * 0.7, meio + 40, b.x + b.width * 0.7, meio - 120);
+    expect(await rolagem(page), "em pé a página rola").toBeGreaterThan(40);
+    expect(await cortina(), "e a cortina não foi até o dedo").toBeCloseTo(25, 0);
+  });
+
+  test("knob: o gesto gira e a página não anda, nem começando de lado", async ({ page }) => {
+    await abrir(page, "/c/vintage-large-knob");
+    await page.waitForTimeout(800);
+    const seletor = `${FICHA} [role="slider"]`;
+    const b = await caixa(page, seletor);
+    const cx = b.x + b.width / 2;
+    const cy = b.y + b.height / 2;
+    const valor = async () => Number(await page.locator(seletor).first().getAttribute("aria-valuenow"));
+    const d = await dedo(page);
+    const inicio = await valor();
+
+    await d.arrastar(cx, cy + 30, cx, cy - 70);
+    expect(await valor(), "subir aumenta").toBeGreaterThan(inicio);
+    expect(await rolagem(page)).toBe(0);
+
+    const alto = await valor();
+    await d.arrastar(cx, cy - 30, cx + 60, cy - 20, 30, async () => {
+      for (let i = 1; i <= 8; i++) await d.mover(cx + 60, cy - 20 + i * 10);
+    });
+    expect(await valor(), "começou de lado e o knob não morreu").toBeLessThan(alto);
+    expect(await rolagem(page)).toBe(0);
   });
 
   test("pull-to-refresh: o dedo puxa o painel até o fim do gesto", async ({ page }) => {

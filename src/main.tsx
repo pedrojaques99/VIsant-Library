@@ -1,4 +1,7 @@
 import { createRoot } from "react-dom/client";
+import { instalarTravaDoGesto } from "@/lib/trava-do-gesto";
+
+instalarTravaDoGesto();
 
 /*
  * As fontes da marca padrão entram no bundle, não pela rede de terceiro.

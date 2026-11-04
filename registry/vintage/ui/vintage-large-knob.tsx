@@ -116,25 +116,21 @@ function LargeKnobBody({ rotation }: { rotation: number }) {
         className="absolute inset-0 transition-transform duration-75 motion-reduce:transition-none"
         style={{ transform: `rotate(${rotation}deg)` }}
       >
-        <svg viewBox="0 0 318 318" className="w-full h-full" fill="none">
-          <foreignObject x="20" y="20" width="278" height="278">
-            {/* Sem `xmlns` no div: sobra do export do Figma. Dentro de um SVG
-                inline o conteúdo do foreignObject já é parseado como HTML, e o
-                atributo só existia para o React reclamar e o tsc barrar. */}
-            <div
-              style={{
-                width: "100%",
-                height: "100%",
-                borderRadius: "50%",
-                background:
-                  "conic-gradient(from 90deg, #969AA0 0deg, #5D636C 9deg, #555B69 22deg, #DFDFDF 41deg, #71798A 63deg, #A9ABB3 83deg, #CBD2D6 120deg, #FFFFFF 149deg, #5E646A 186deg, #8E959D 219deg, #FFFFFF 245deg, #7E8691 269deg, #575D6B 284deg, #6C747F 301deg, #F1F1F3 337deg, #979AA3 349deg, #B1B3B9 356deg, #969AA0 360deg)",
-                // Alumínio escovado, não espelho: abaixo de 0,75 ele assenta no
-                // mesmo valor de cinza dos knobs pequenos do kit.
-                opacity: 0.72,
-              }}
-            />
-          </foreignObject>
-
+        {/* HTML ao lado do SVG, e não `foreignObject`: dentro de um SVG girado o
+            Safari desenha o `foreignObject` fora do lugar, e o disco de metal
+            saía deslocado e cortado no iPhone. */}
+        <div
+          className="absolute rounded-full"
+          style={{
+            inset: `${(20 / 318) * 100}%`,
+            background:
+              "conic-gradient(from 90deg, #969AA0 0deg, #5D636C 9deg, #555B69 22deg, #DFDFDF 41deg, #71798A 63deg, #A9ABB3 83deg, #CBD2D6 120deg, #FFFFFF 149deg, #5E646A 186deg, #8E959D 219deg, #FFFFFF 245deg, #7E8691 269deg, #575D6B 284deg, #6C747F 301deg, #F1F1F3 337deg, #979AA3 349deg, #B1B3B9 356deg, #969AA0 360deg)",
+            // Alumínio escovado, não espelho: abaixo de 0,75 ele assenta no
+            // mesmo valor de cinza dos knobs pequenos do kit.
+            opacity: 0.72,
+          }}
+        />
+        <svg viewBox="0 0 318 318" className="absolute inset-0 w-full h-full" fill="none">
           {/* Marcador gravado e pintado: sulco escuro com a tinta dentro. */}
           <rect x="154" y="26" width="10" height="44" rx="5" fill="rgba(0,0,0,0.55)" />
           <rect x="156" y="28" width="6" height="40" rx="3" fill="var(--vintage-light)" />

@@ -24,20 +24,17 @@ import { cn } from "@/lib/utils";
  * `clip-path`. As duas fotos ficam na mesma escala, no mesmo lugar, o tempo
  * todo — a cortina só decide qual metade você vê.
  *
- * ── Erro 2: escrever o arrasto na mão ─────────────────────────────────────
+ * ── Erro 2: confiar o dedo a um range invisível ───────────────────────────
  *
- * `pointerdown` + `pointermove` + `setPointerCapture` + limites + `pointerup`
- * é meia tarde de código, e aí falta o teclado, falta o leitor de tela, falta
- * `Home`/`End`, falta RTL, falta o toque que também rola a página.
+ * O `<input type="range">` dá teclado, `Home`/`End` e leitor de tela de graça,
+ * e continua aqui por isso. Mas no iPhone ele só responde a quem pega o polegar
+ * nativo: tocar ou arrastar em outro ponto não move nada, e com o input
+ * invisível não há polegar à vista para pegar. O Chromium pula pro ponto tocado,
+ * então o defeito não aparece em teste automatizado: apareceu num iPhone.
  *
- * O navegador já implementa tudo isso: é `<input type="range">`. Ele fica
- * invisível por cima da caixa inteira e é ele quem manda no valor — arrastar em
- * qualquer ponto funciona porque o próprio range pula pro ponto do clique e
- * segue o dedo. O que desenhamos é só a alça, e ela é `pointer-events: none`
- * para nunca roubar o gesto do controle de verdade.
- *
- * Consequência boa e de graça: setas movem 1%, `shift` move 10%, `Home`/`End`
- * vão pras pontas, e o leitor de tela anuncia porcentagem.
+ * Por isso o ponteiro é da caixa inteira, e o input fica só com teclado e leitor
+ * de tela. A posição sai de `getBoundingClientRect`, que já vem na escala em que
+ * a peça está desenhada.
  *
  * ── As outras decisões ────────────────────────────────────────────────────
  *
@@ -142,6 +139,10 @@ export function PhotoCompare({
   peek = true,
   label = "Comparar antes e depois",
   onValueChange,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
+  onPointerCancel,
   className,
   style,
   ...props
@@ -150,6 +151,8 @@ export function PhotoCompare({
   const [pos, setPos] = React.useState(defaultValue);
   const raizRef = React.useRef<HTMLDivElement>(null);
   const tocado = React.useRef(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const dedo = React.useRef<{ id: number; x: number; y: number; andou: boolean } | null>(null);
 
   React.useEffect(() => {
     const raiz = raizRef.current;
@@ -191,13 +194,70 @@ export function PhotoCompare({
     onValueChange?.(v);
   };
 
+  const seguir = (e: React.PointerEvent<HTMLDivElement>) => {
+    const caixa = e.currentTarget.getBoundingClientRect();
+    if (!caixa.width) return;
+    mudar(Math.min(100, Math.max(0, ((e.clientX - caixa.left) / caixa.width) * 100)));
+  };
+
+  const descer = (e: React.PointerEvent<HTMLDivElement>) => {
+    onPointerDown?.(e);
+    if (e.defaultPrevented || (e.pointerType === "mouse" && e.button !== 0)) return;
+    const mouse = e.pointerType === "mouse";
+    dedo.current = { id: e.pointerId, x: e.clientX, y: e.clientY, andou: mouse };
+    e.currentTarget.setPointerCapture(e.pointerId);
+    if (mouse) {
+      inputRef.current?.focus({ preventScroll: true });
+      seguir(e);
+    }
+  };
+
+  const mover = (e: React.PointerEvent<HTMLDivElement>) => {
+    onPointerMove?.(e);
+    const d = dedo.current;
+    if (d?.id !== e.pointerId) return;
+    // No toque a cortina espera o dedo mostrar o eixo: quem só começa a rolar a
+    // página por cima da foto não pode ver a cortina pular até o dedo.
+    if (!d.andou) {
+      const dx = Math.abs(e.clientX - d.x);
+      const dy = Math.abs(e.clientY - d.y);
+      if (Math.max(dx, dy) < 4) return;
+      if (dy > dx) {
+        dedo.current = null;
+        return;
+      }
+      d.andou = true;
+    }
+    seguir(e);
+  };
+
+  const subir = (e: React.PointerEvent<HTMLDivElement>) => {
+    onPointerUp?.(e);
+    if (dedo.current?.id !== e.pointerId) return;
+    dedo.current = null;
+    seguir(e); // o toque sem arrasto também leva a cortina até o dedo
+  };
+
+  const cancelar = (e: React.PointerEvent<HTMLDivElement>) => {
+    onPointerCancel?.(e);
+    if (dedo.current?.id === e.pointerId) dedo.current = null;
+  };
+
   return (
     <div
       data-sobreposicao
       ref={raizRef}
-      className={cn("photo-compare", className)}
+      className={cn(
+        // Camadas sem ponteiro: a foto não abre o menu de segurar nem é arrastada.
+        "photo-compare cursor-ew-resize [touch-action:pan-y] [&_.photo-compare-layer]:pointer-events-none",
+        className,
+      )}
       style={{ "--ratio": ratio, "--p": `${pos}%`, ...style } as React.CSSProperties}
       {...props}
+      onPointerDown={descer}
+      onPointerMove={mover}
+      onPointerUp={subir}
+      onPointerCancel={cancelar}
     >
       {/* A cortina recorta sempre a camada de cima pela esquerda: quem fica de
           que lado é só uma questão de qual foto vai em qual camada. */}
@@ -228,18 +288,16 @@ export function PhotoCompare({
         </span>
       </span>
 
-      {/* O controle de verdade. Invisível, do tamanho da caixa, e é dele que
-          vêm teclado, toque, leitor de tela e o arrasto — nenhum deles escrito
-          aqui dentro. */}
+      {/* Teclado e leitor de tela. O ponteiro é da caixa: ver erro 2. */}
       <input
+        ref={inputRef}
         type="range"
         min={0}
         max={100}
         step={0.1}
         value={pos}
         onChange={(e) => mudar(Number(e.target.value))}
-        onPointerDown={() => (tocado.current = true)}
-        className="photo-compare-input"
+        className="photo-compare-input pointer-events-none"
         aria-label={label}
         aria-valuetext={`${Math.round(pos)}% do ${antesEsquerda ? "antes" : "depois"}`}
       />
