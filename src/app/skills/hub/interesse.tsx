@@ -5,6 +5,9 @@
  *
  * O comando continua público no GitHub e no llms.txt: isto é um pedido na porta, sem tranca. Por
  * isso, se o banco falhar, libera do mesmo jeito: instalar não pode depender de a captura funcionar.
+ *
+ * Sem a tabela no ar, nem pede: pedir e-mail que se perderia é pior que não pedir. Quando
+ * `admin/interesse.sql` rodar, o pedido liga sozinho.
  */
 
 import * as React from "react";
@@ -31,7 +34,22 @@ const BOTAO =
 /** Lido no efeito: a página é hidratada no cliente. */
 export function useLiberado() {
   const [liberado, setLiberado] = React.useState(false);
-  React.useEffect(() => setLiberado(lerLiberado()), []);
+  React.useEffect(() => {
+    if (lerLiberado()) {
+      setLiberado(true);
+      return;
+    }
+    let vivo = true;
+    fetch("/api/interesse")
+      .then((r) => (r.ok ? (r.json() as Promise<{ interesse?: boolean }>) : null))
+      .then((d) => {
+        if (vivo && d?.interesse === false) setLiberado(true);
+      })
+      .catch(() => {});
+    return () => {
+      vivo = false;
+    };
+  }, []);
   const liberar = React.useCallback(() => {
     try {
       localStorage.setItem(CHAVE, "1");

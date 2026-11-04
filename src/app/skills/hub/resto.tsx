@@ -59,7 +59,7 @@ export function Resto({ instalando, setInstalando }: { instalando: boolean; setI
           <FotoQueGira largo={largo} assentada />
         </section>
 
-        <section data-feedback-skills className="shell max-w-2xl py-8">
+        <section id="feedback" data-feedback-skills className="shell max-w-2xl scroll-mt-20 py-8">
           <PedirFeedback origem="skills" pergunta="O que você quer que as skills façam?" />
         </section>
 

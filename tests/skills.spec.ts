@@ -50,6 +50,7 @@ test("como usar: um passo por tela, do botão de /skills até o fim", async ({ p
 
 test("e-mail: inválido não libera, válido libera, e o banco fora não segura ninguém", async ({ page }) => {
   await page.route("**/api/interesse", (r) => {
+    if (r.request().method() === "GET") return r.fulfill({ json: { interesse: true } });
     const { email } = r.request().postDataJSON() as { email: string };
     return r.fulfill(email.includes("@") ? { status: 502, json: { error: "banco fora" } } : { status: 400, json: { error: "e-mail inválido" } });
   });
@@ -65,8 +66,15 @@ test("e-mail: inválido não libera, válido libera, e o banco fora não segura 
   await expect(page.locator("[data-copiar-mensagem]")).toBeVisible();
 });
 
+test("sem a tabela no ar, não pede e-mail: nada se perde", async ({ page }) => {
+  await page.route("**/api/interesse", (r) => r.fulfill({ json: { interesse: false } }));
+  await page.goto("/skills/como-usar");
+  await expect(page.locator("[data-copiar-mensagem]")).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator("[data-pedir-email]")).toHaveCount(0);
+});
+
 test("feedback: ao fim do como usar, envia e agradece", async ({ page }) => {
-  await page.route("**/api/interesse", (r) => r.fulfill({ status: 204 }));
+  await page.route("**/api/interesse", (r) => (r.request().method() === "GET" ? r.fulfill({ json: { interesse: true } }) : r.fulfill({ status: 204 })));
   await page.goto("/skills/como-usar");
   await expect(page.locator("[data-continuar]")).toBeHidden();
   await page.locator("[data-pedir-email] input[type=email]").fill("pessoa@exemplo.com");
