@@ -1,7 +1,7 @@
 {
   "auth-button": {
-    "status": "loading",
-    "hint": "signed-in"
+    "hint": "signed-in",
+    "status": "loading"
   },
   "profile-form": {
     "className": "gap-3 border-0 bg-transparent p-0",
@@ -136,8 +136,8 @@
     "className": "text-[clamp(1.6rem,1.2rem+1.6vw,2.25rem)] font-medium leading-[1.12] tracking-[-0.02em]"
   },
   "gleam": {
-    "tilt": 9,
-    "className": "w-full max-w-[300px] shrink-0 overflow-hidden bg-[color-mix(in_oklch,var(--foreground)_5%,var(--card))] p-3"
+    "className": "w-full max-w-[300px] shrink-0 overflow-hidden bg-[color-mix(in_oklch,var(--foreground)_5%,var(--card))] p-3",
+    "tilt": 9
   },
   "photo-flip": {
     "ratio": "4/5",
@@ -291,9 +291,9 @@
   },
   "slosh-slider": {
     "label": "Água hoje",
-    "value": 60,
     "step": 5,
-    "className": "max-w-[360px]"
+    "className": "max-w-[360px]",
+    "value": 60
   },
   "tilt-card": {
     "className": "w-64"
@@ -355,12 +355,13 @@
     "label": "Pedidos de suporte por assunto",
     "unit": "pedidos",
     "categoryLabel": "Semana",
-    "height": 200
+    "height": 200,
+    "className": "w-full"
   },
   "time-dial": {
-    "value": 780,
     "caption": "Expediente",
-    "label": "Horário da reunião"
+    "label": "Horário da reunião",
+    "value": 780
   },
   "voice-note": {
     "duration": 9

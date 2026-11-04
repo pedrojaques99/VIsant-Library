@@ -66,6 +66,16 @@ test("e-mail: inválido não libera, válido libera, e o banco fora não segura 
   await expect(page.locator("[data-copiar-mensagem]")).toBeVisible();
 });
 
+test("sair da lista: o link do pedido leva ao formulário, e ele confirma", async ({ page }) => {
+  await page.route("**/api/interesse", (r) => (r.request().method() === "GET" ? r.fulfill({ json: { interesse: true } }) : r.fulfill({ status: 204 })));
+  await page.goto("/skills/como-usar");
+  await page.getByRole("link", { name: "Sair da lista" }).click();
+  await expect(page).toHaveURL(/sair=1/);
+  await page.locator("[data-sair-da-lista] input[type=email]").fill("pessoa@exemplo.com");
+  await page.locator("[data-sair]").click();
+  await expect(page.locator("h1")).toHaveText("Pronto, saiu.");
+});
+
 test("sem a tabela no ar, não pede e-mail: nada se perde", async ({ page }) => {
   await page.route("**/api/interesse", (r) => r.fulfill({ json: { interesse: false } }));
   await page.goto("/skills/como-usar");

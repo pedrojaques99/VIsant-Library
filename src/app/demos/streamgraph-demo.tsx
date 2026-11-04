@@ -73,18 +73,24 @@ const NOMES = Object.keys(ESTILOS);
 const opcao =
   "alvo-toque h-7 rounded-[var(--r-pill)] px-3 text-apoio font-medium [transition:background-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out)] focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]";
 
-export default function StreamgraphDemo({ props }: DemoProps) {
+export default function StreamgraphDemo({ props, onKnob }: DemoProps) {
   const [periodo, setPeriodo] = React.useState<Periodo>("trimestre");
   const { offset: _o, shape: _s, ...resto } = (props ?? {}) as Pick<StreamgraphProps, "offset" | "shape"> &
     Record<string, unknown>;
-  const { atual, rodada, passo, repetir } = useUmPorVez(NOMES, _s && _s !== "area" ? _s : _o);
+  const { atual, rodada, passo, repetir } = useUmPorVez(NOMES, _s && _s !== "area" ? _s : _o, (nome) => {
+    // Um estilo da seta são dois knobs: o que ele não define volta ao padrão da peça.
+    onKnob?.("offset", ESTILOS[nome]!.offset ?? "wiggle");
+    onKnob?.("shape", ESTILOS[nome]!.shape ?? "area");
+  });
 
   return (
     <div className="flex h-full w-full items-center justify-center">
-      <div className="flex w-[560px] max-w-full flex-col gap-3">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-corpo font-medium text-foreground">Pedidos de suporte</p>
-          <div role="group" aria-label="Período" className="inline-flex gap-1 rounded-[var(--r-pill)] border border-border bg-muted p-0.5">
+      {/* No dedo a pilha não cabe no palco com 44px por controle: o período desce para o lado
+          das setas, e a coluna fica título, legenda, gráfico e uma linha só de controles. */}
+      <div className="flex w-[560px] max-w-full flex-col gap-3 pointer-coarse:flex-row pointer-coarse:flex-wrap pointer-coarse:items-center pointer-coarse:justify-between">
+        <div className="flex items-center justify-between gap-3 pointer-coarse:contents">
+          <p className="text-corpo font-medium text-foreground pointer-coarse:w-full">Pedidos de suporte</p>
+          <div role="group" aria-label="Período" className="inline-flex gap-1 rounded-[var(--r-pill)] border border-border bg-muted p-0.5 pointer-coarse:relative pointer-coarse:z-10 pointer-coarse:order-1">
             {(["trimestre", "semestre"] as const).map((p) => (
               <button
                 key={p}
@@ -106,6 +112,7 @@ export default function StreamgraphDemo({ props }: DemoProps) {
           series={SERIES}
           data={PERIODOS[periodo]}
           height={200}
+          className="w-full"
           {...resto}
           {...ESTILOS[atual!]}
         />

@@ -34,6 +34,7 @@ import { BarChart3, Folder, LayoutDashboard, Package, Settings, Users } from "lu
 
 import { useStageActive } from "../stage";
 import type { DemoProps } from "../catalog";
+import { useDonoDoKnob } from "./dono-do-knob";
 import {
   SideNav,
   SideNavGroup,
@@ -58,7 +59,7 @@ const MARCA = (
   </span>
 );
 
-export default function SideNavDemo({ props }: DemoProps) {
+export default function SideNavDemo({ props, onKnob }: DemoProps) {
   const [rota, setRota] = React.useState("visao");
   const ativo = useStageActive();
 
@@ -66,16 +67,18 @@ export default function SideNavDemo({ props }: DemoProps) {
   // precisam escrever no mesmo estado — dois donos da mesma largura é como o
   // ícone acaba apontando pro lado errado depois de um clique.
   const [fechada, setFechada] = React.useState(false);
+  const mudarFechada = useDonoDoKnob<boolean>("collapsed", false, setFechada, { props, onKnob });
   const [automatico, setAutomatico] = React.useState(true);
 
   React.useEffect(() => {
-    if (!automatico || !ativo) return;
+    // Com valor no painel, o relógio cala: ele mudaria a barra sem o painel saber.
+    if (!automatico || !ativo || props?.collapsed !== undefined) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     // Aberta por mais tempo que fechada: aberta é o estado em que dá pra ler o
     // que a peça faz; fechada é a prova de que ela cede. 2,8s e 1,8s.
     const id = setTimeout(() => setFechada((v) => !v), fechada ? 1800 : 2800);
     return () => clearTimeout(id);
-  }, [automatico, ativo, fechada]);
+  }, [automatico, ativo, fechada, props?.collapsed]);
 
   const ir = (id: string) => (e: React.MouseEvent) => {
     // A demo não navega: `href="#"` num palco de vitrine rolaria a página pro
@@ -116,12 +119,6 @@ export default function SideNavDemo({ props }: DemoProps) {
       <div className="flex min-h-0 flex-1">
         <SideNav
           storageKey={false}
-          collapsed={fechada}
-          onCollapsedChange={(v) => {
-            // A mão ganha do relógio, e ganha pra sempre nesta sessão do card.
-            setAutomatico(false);
-            setFechada(v);
-          }}
           // Aberta, símbolo e nome; compacta, só o símbolo (`brandIcon`).
           brand={
             <span className="flex items-center gap-2">
@@ -141,6 +138,12 @@ export default function SideNavDemo({ props }: DemoProps) {
             </div>
           }
           {...props}
+          collapsed={fechada}
+          onCollapsedChange={(v) => {
+            // A mão ganha do relógio, e ganha pra sempre nesta sessão do card.
+            setAutomatico(false);
+            mudarFechada(v);
+          }}
         >
           <SideNavGroup label="Trabalho">
             <SideNavItem

@@ -52,7 +52,7 @@ function Cena({ qual, props }: { qual: (typeof VARIANTES)[number]; props: DemoPr
             className="px-2 py-4"
             title="Nada salvo ainda."
             art={<EmptyArt seed="favoritos-vazio" className="size-14 rounded-full border border-border" {...props} />}
-            action={<Chip size="sm">Explorar o acervo</Chip>}
+            action={<Chip size="sm" className="pointer-coarse:after:inset-y-[calc((100%-2.75rem/var(--alvo-escala,1))/2)]">Explorar o acervo</Chip>}
           >
             Marque um item e ele aparece aqui, já no ponto em que você parou.
           </EmptyState>

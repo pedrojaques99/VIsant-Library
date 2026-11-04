@@ -47,10 +47,10 @@ const usaMovimento = () =>
   typeof window === "undefined" ||
   !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-export default function FoldMotionDemo({ props }: DemoProps) {
+export default function FoldMotionDemo({ props, onKnob }: DemoProps) {
   const ativo = useStageActive();
   const { variant: _v, ...resto } = (props ?? {}) as { variant?: FoldVariant } & Record<string, unknown>;
-  const { atual, rodada, passo, repetir } = useUmPorVez(VARIANTES, _v);
+  const { atual, rodada, passo, repetir } = useUmPorVez(VARIANTES, _v, (v) => onKnob?.("variant", v));
 
   React.useEffect(() => {
     if (!ativo || !usaMovimento()) return;

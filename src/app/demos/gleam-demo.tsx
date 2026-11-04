@@ -45,17 +45,24 @@ import { Gleam } from "../../../registry/visant/ui/gleam";
 import { Media } from "../media";
 import { ScrubInput } from "../../../registry/visant/ui/scrub-input";
 import type { DemoProps } from "../catalog";
+import { useDonoDoKnob } from "./dono-do-knob";
 
-export default function GleamDemo({ props }: DemoProps) {
+export default function GleamDemo({ props, onKnob }: DemoProps) {
   const [luz, setLuz] = React.useState(100);
   const [inclinacao, setInclinacao] = React.useState(9);
   const [matiz, setMatiz] = React.useState(212);
   const [marca, setMarca] = React.useState(true);
   const [ajustes, setAjustes] = React.useState(false);
+  const mudarInclinacao = useDonoDoKnob<number>("tilt", 9, setInclinacao, { props, onKnob });
+  // O knob `glow` vai de 0 a 1 e o campo daqui mostra porcentagem: um valor, duas escalas.
+  const mudarBrilho = useDonoDoKnob<number>("glow", 1, (v) => setLuz(Math.round(v * 100)), { props, onKnob });
+  // Vazio é a cor da marca. O matiz não volta do painel: `tint` aceita qualquer cor CSS.
+  const mudarTinta = useDonoDoKnob<string>("tint", "", (v) => setMarca(!v), { props, onKnob });
   const painel = React.useId();
 
   // Croma e luminosidade travados: o que se ajusta aqui é matiz. Ver o cabeçalho.
-  const cor = marca ? undefined : `oklch(0.74 0.17 ${matiz})`;
+  const tinta = (h: number) => `oklch(0.74 0.17 ${h})`;
+  const cor = marca ? undefined : tinta(matiz);
 
   /*
    * `flex-wrap` e larguras com teto, não cravadas.
@@ -68,12 +75,12 @@ export default function GleamDemo({ props }: DemoProps) {
   return (
     <div className="relative flex h-full w-full flex-wrap items-center justify-center gap-6 px-5">
       <Gleam
-        tilt={inclinacao}
-        glow={luz / 100}
         tint={cor}
         flat={inclinacao === 0}
         className="w-full max-w-[300px] shrink-0 overflow-hidden bg-[color-mix(in_oklch,var(--foreground)_5%,var(--card))] p-3"
         {...props}
+        tilt={inclinacao}
+        glow={luz / 100}
       >
         {/* A arte é filha do card, não fundo dele: a luz e a borda acesa são
             camadas ACIMA do conteúdo, então o reflexo passa por cima da foto —
@@ -95,7 +102,7 @@ export default function GleamDemo({ props }: DemoProps) {
             min={0}
             max={100}
             value={luz}
-            onChange={setLuz}
+            onChange={(v) => mudarBrilho(v / 100)}
             hint="Opacidade do holofote sob o ponteiro."
           />
           <ScrubInput
@@ -105,7 +112,7 @@ export default function GleamDemo({ props }: DemoProps) {
             min={0}
             max={14}
             value={inclinacao}
-            onChange={setInclinacao}
+            onChange={mudarInclinacao}
             hint="Graus no canto. Zero equivale a flat: só a luz, sem giro."
           />
           <ScrubInput
@@ -116,14 +123,17 @@ export default function GleamDemo({ props }: DemoProps) {
             max={360}
             value={matiz}
             disabled={marca}
-            onChange={setMatiz}
+            onChange={(v) => {
+              setMatiz(v);
+              mudarTinta(tinta(v));
+            }}
             hint="Cor da luz em OKLCH. Só vale com a marca desligada."
           />
           <Chip
             size="sm"
             className="alvo-toque self-start"
             pressed={marca}
-            onClick={() => setMarca((v) => !v)}
+            onClick={() => mudarTinta(marca ? tinta(matiz) : "")}
           >
             cor da marca
           </Chip>

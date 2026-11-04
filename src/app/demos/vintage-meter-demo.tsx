@@ -9,7 +9,9 @@
  * direto: arrastar em volta do pivô empurra a agulha, e o programa fica em
  * silêncio por um segundo antes de retomar, em vez de brigar com o dedo.
  *
- * O relógio obedece ao `useStageActive`: card fora da tela, programa parado.
+ * O relógio obedece ao `useStageActive`: card fora da tela, programa parado. Com
+ * valor no painel (o knob ou a mão, que avisa o painel) o programa também cala: a
+ * agulha fica onde o painel diz, até restaurar o padrão.
  */
 
 import * as React from "react";
@@ -18,16 +20,19 @@ import { useStageActive } from "../stage";
 import { VintageMeter } from "../../../registry/vintage/ui/vintage-meter";
 import { VintageKnob } from "../../../registry/vintage/ui/vintage-knob";
 import type { DemoProps } from "../catalog";
+import { useDonoDoKnob } from "./dono-do-knob";
 
-export default function VintageMeterDemo({ props }: DemoProps) {
+export default function VintageMeterDemo({ props, onKnob }: DemoProps) {
   const ativo = useStageActive();
   const [ganho, setGanho] = React.useState(6);
   const [nivel, setNivel] = React.useState(4);
+  const mudarNivel = useDonoDoKnob<number>("value", 4, setNivel, { props, onKnob });
+  const fixada = props?.value !== undefined;
   const manualAte = React.useRef(0);
   const t = React.useRef(0);
 
   React.useEffect(() => {
-    if (!ativo) return;
+    if (!ativo || fixada) return;
     const id = setInterval(() => {
       if (performance.now() < manualAte.current) return;
       t.current += 1;
@@ -41,20 +46,20 @@ export default function VintageMeterDemo({ props }: DemoProps) {
       setNivel(Math.max(0, Math.min(10, (base + estalo) * (ganho / 5) * 6)));
     }, 120);
     return () => clearInterval(id);
-  }, [ativo, ganho]);
+  }, [ativo, ganho, fixada]);
 
   return (
     <div className="flex h-full w-full items-center justify-center gap-4 p-4">
       <VintageKnob label="GAIN" size={64} value={ganho} onChange={setGanho} />
       <VintageMeter
         label="PROGRAM"
+        {...props}
         value={nivel}
         onChange={(v) => {
           // A mão manda: o programa só volta um segundo depois do último toque.
           manualAte.current = performance.now() + 1000;
-          setNivel(v);
+          mudarNivel(v);
         }}
-        {...props}
       />
     </div>
   );

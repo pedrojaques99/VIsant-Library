@@ -109,8 +109,53 @@ export function PedirEmail({ origem, onLiberar }: { origem: string; onLiberar: (
         </button>
       </div>
       {erro ? <p className="mt-2 text-casa-sm text-casa-fg">Confira o e-mail: esse não parece completo.</p> : null}
-      <p className="mt-2 text-casa-sm text-casa-fg-2">Usamos só para falar com você sobre as skills.</p>
+      <p className="mt-2 text-casa-sm text-casa-fg-2">
+        Usamos só para falar com você sobre as skills.{" "}
+        <a href="/skills/como-usar?sair=1" className="inline-flex min-h-6 items-center underline underline-offset-2 outline-none focus-visible:[box-shadow:var(--focus)] pointer-coarse:min-h-11">
+          Sair da lista
+        </a>
+      </p>
     </form>
+  );
+}
+
+/** Sair da lista: `/skills/como-usar?sair=1`, o endereço que vai no rodapé de todo e-mail. */
+export function SairDaLista() {
+  const [email, setEmail] = React.useState("");
+  const [estado, setEstado] = React.useState<"parado" | "enviando" | "saiu" | "invalido" | "erro">("parado");
+
+  const aoEnviar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEstado("enviando");
+    try {
+      const r = await enviar({ sair: email });
+      setEstado(r.ok ? "saiu" : r.status === 400 ? "invalido" : "erro");
+    } catch {
+      setEstado("erro");
+    }
+  };
+
+  return (
+    <main data-sair-da-lista className="casa shell py-10 lg:mx-auto lg:max-w-2xl">
+      <h1 className="text-[clamp(2.25rem,7vw,4rem)] font-medium leading-[1.08] tracking-[-0.02em]">
+        {estado === "saiu" ? "Pronto, saiu." : "Sair da lista."}
+      </h1>
+      {estado === "saiu" ? (
+        <p className="mt-3 text-casa-lg text-casa-fg-2">Esse e-mail não recebe mais nada nosso.</p>
+      ) : (
+        <form onSubmit={aoEnviar} className="mt-6 flex flex-col gap-2 sm:flex-row">
+          <label className="min-w-0 flex-1">
+            <span className="sr-only">Seu e-mail</span>
+            <input type="email" required autoComplete="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className={CAMPO} />
+          </label>
+          <button type="submit" disabled={estado === "enviando"} data-sair className={BOTAO}>
+            Sair
+          </button>
+        </form>
+      )}
+      {estado === "invalido" ? <p className="mt-2 text-casa-sm text-casa-fg">Confira o e-mail: esse não parece completo.</p> : null}
+      {estado === "erro" ? <p className="mt-2 text-casa-sm text-casa-fg">Não foi. Tente de novo em instantes.</p> : null}
+    </main>
   );
 }
 

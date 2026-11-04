@@ -15,9 +15,9 @@ import { Trocador, useUmPorVez } from "./um-por-vez";
 
 const ORDEM: readonly SectionIntroLayout[] = ["center", "split", "index", "editorial"];
 
-export default function SectionIntroDemo({ props }: DemoProps) {
+export default function SectionIntroDemo({ props, onKnob }: DemoProps) {
   const { layout: _l, ...resto } = (props ?? {}) as { layout?: SectionIntroLayout } & Record<string, unknown>;
-  const { atual, passo, repetir } = useUmPorVez(ORDEM, _l);
+  const { atual, passo, repetir } = useUmPorVez(ORDEM, _l, (v) => onKnob?.("layout", v));
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6">

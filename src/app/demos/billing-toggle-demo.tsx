@@ -9,25 +9,27 @@ import * as React from "react";
 
 import { BillingPrice, BillingToggle } from "../../../registry/visant/ui/billing-toggle";
 import type { DemoProps } from "../catalog";
+import { useDonoDoKnob } from "./dono-do-knob";
 
 const MENSAL = 49;
 const ANUAL_POR_MES = 39;
 
-export default function BillingToggleDemo({ props }: DemoProps) {
+export default function BillingToggleDemo({ props, onKnob }: DemoProps) {
   const [periodo, setPeriodo] = React.useState("mensal");
+  const mudar = useDonoDoKnob<string>("value", "mensal", setPeriodo, { props, onKnob });
   const anual = periodo === "anual";
 
   return (
     <div className="flex h-full w-full items-center justify-center p-6">
       <div className="flex flex-col items-center gap-5">
         <BillingToggle
-          value={periodo}
-          onValueChange={setPeriodo}
           options={[
             { value: "mensal", label: "Mensal" },
             { value: "anual", label: "Anual", badge: "-20%", activeBadge: "Você economiza R$ 120" },
           ]}
           {...props}
+          value={periodo}
+          onValueChange={mudar}
         />
         <BillingPrice amount={anual ? ANUAL_POR_MES : MENSAL} was={anual ? MENSAL : undefined} period="/mês" />
       </div>

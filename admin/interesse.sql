@@ -38,6 +38,15 @@ as $$
   insert into lab.feedback (texto, origem) values (p_texto, p_origem);
 $$;
 
+create or replace function public.interesse_sair(p_email text)
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  delete from lab.interesse where email = p_email;
+$$;
+
 create or replace function public.interesse_lista()
 returns table (email text, origem text, em timestamptz)
 language sql
@@ -58,9 +67,11 @@ $$;
 
 revoke all on function public.interesse_put(text, text) from public, anon, authenticated;
 revoke all on function public.feedback_put(text, text) from public, anon, authenticated;
+revoke all on function public.interesse_sair(text) from public, anon, authenticated;
 revoke all on function public.interesse_lista() from public, anon, authenticated;
 revoke all on function public.feedback_lista() from public, anon, authenticated;
 grant execute on function public.interesse_put(text, text) to service_role;
 grant execute on function public.feedback_put(text, text) to service_role;
+grant execute on function public.interesse_sair(text) to service_role;
 grant execute on function public.interesse_lista() to service_role;
 grant execute on function public.feedback_lista() to service_role;

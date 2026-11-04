@@ -25,9 +25,9 @@ import { Trocador, useUmPorVez } from "./um-por-vez";
 
 const MOVIMENTOS: readonly SkeletonMotion[] = ["pulse", "shimmer", "wave", "none"];
 
-export default function SkeletonRailDemo({ props }: DemoProps) {
+export default function SkeletonRailDemo({ props, onKnob }: DemoProps) {
   const { motion: _m, ...resto } = (props ?? {}) as { motion?: SkeletonMotion } & Record<string, unknown>;
-  const { atual, rodada, passo, repetir } = useUmPorVez(MOVIMENTOS, _m);
+  const { atual, rodada, passo, repetir } = useUmPorVez(MOVIMENTOS, _m, (v) => onKnob?.("motion", v));
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-6">

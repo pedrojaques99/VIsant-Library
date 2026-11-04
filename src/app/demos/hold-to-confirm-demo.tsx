@@ -10,9 +10,11 @@ import * as React from "react";
 
 import { HoldToConfirm } from "../../../registry/visant/ui/hold-to-confirm";
 import type { DemoProps } from "../catalog";
+import { useDonoDoKnob } from "./dono-do-knob";
 
-export default function HoldToConfirmDemo({ props }: DemoProps) {
+export default function HoldToConfirmDemo({ props, onKnob }: DemoProps) {
   const [feito, setFeito] = React.useState(false);
+  const mudar = useDonoDoKnob<boolean>("confirmed", false, setFeito, { props, onKnob });
   const [segurando, setSegurando] = React.useState(false);
 
   return (
@@ -30,13 +32,13 @@ export default function HoldToConfirmDemo({ props }: DemoProps) {
             confirmedLabel="Apagado"
             {...props}
             confirmed={feito}
-            onConfirm={() => setFeito(true)}
+            onConfirm={() => mudar(true)}
             onHoldChange={setSegurando}
           />
           {feito ? (
             <button
               type="button"
-              onClick={() => setFeito(false)}
+              onClick={() => mudar(false)}
               className="rounded-[var(--r-control)] px-2 py-1 text-sm text-muted-foreground underline-offset-4 outline-none hover:underline focus-visible:[box-shadow:var(--focus)]"
             >
               Desfazer

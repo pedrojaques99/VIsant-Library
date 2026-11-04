@@ -10,9 +10,11 @@ import * as React from "react";
 
 import { SlideToConfirm } from "../../../registry/visant/ui/slide-to-confirm";
 import type { DemoProps } from "../catalog";
+import { useDonoDoKnob } from "./dono-do-knob";
 
-export default function SlideToConfirmDemo({ props }: DemoProps) {
+export default function SlideToConfirmDemo({ props, onKnob }: DemoProps) {
   const [feito, setFeito] = React.useState(false);
+  const mudar = useDonoDoKnob<boolean>("confirmed", false, setFeito, { props, onKnob });
 
   return (
     <div className="flex h-full w-full items-center justify-center p-6">
@@ -27,13 +29,13 @@ export default function SlideToConfirmDemo({ props }: DemoProps) {
           className="w-full"
           {...props}
           confirmed={feito}
-          onConfirm={() => setFeito(true)}
+          onConfirm={() => mudar(true)}
         />
         <div className="flex h-6 items-center justify-center">
           {feito && (
             <button
               type="button"
-              onClick={() => setFeito(false)}
+              onClick={() => mudar(false)}
               className="rounded-[var(--r-control)] px-2 py-0.5 text-sm text-muted-foreground underline-offset-4 outline-none hover:underline focus-visible:[box-shadow:var(--focus)]"
             >
               Desfazer

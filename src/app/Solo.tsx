@@ -46,6 +46,13 @@ export const MSG_ALTURA = "visant:solo:altura";
  */
 export const MSG_PROPS = "visant:solo:props";
 
+/**
+ * A peça manda por este nome o valor que a mão mudou: o caminho inverso de `MSG_PROPS`.
+ *
+ * Sem ele, o painel da ficha ficava com o valor antigo nos modos celular e tablet.
+ */
+export const MSG_KNOB = "visant:solo:knob";
+
 /** `?p={"gap":32}` — o estado inicial dos knobs, pra link compartilhado abrir igual. */
 export function propsDaQuery(params: URLSearchParams): Record<string, unknown> {
   const bruto = params.get("p");
@@ -110,6 +117,23 @@ export function Solo({
     return () => window.removeEventListener("message", ouvir);
   }, [name]);
 
+  /*
+   * A mão mudou a peça. Grava aqui também: restaurar só faz efeito se `props` sabe do
+   * valor. Valor igual ao que já está em `props` veio do painel e não volta para ele.
+   */
+  const atuais = React.useRef(props);
+  atuais.current = props;
+  const avisarPai = React.useCallback(
+    (prop: string, valor: string | number | boolean) => {
+      if (typeof window === "undefined" || window.parent === window) return;
+      if (atuais.current[prop] === valor) return;
+      atuais.current = { ...atuais.current, [prop]: valor };
+      setProps(atuais.current);
+      window.parent.postMessage({ type: MSG_KNOB, name, prop, valor }, window.location.origin);
+    },
+    [name],
+  );
+
   React.useEffect(() => {
     const el = ref.current;
     if (!el || typeof window === "undefined" || window.parent === window) return;
@@ -158,7 +182,7 @@ export function Solo({
       {/* A demo é um `React.lazy`. Sem esta fronteira o documento do iframe
           suspende inteiro e o pai mede altura zero. */}
       <React.Suspense fallback={<div className="h-40 w-full animate-pulse bg-muted/40" />}>
-        <Demo props={props} />
+        <Demo props={props} onKnob={avisarPai} />
       </React.Suspense>
     </div>
   );

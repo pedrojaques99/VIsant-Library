@@ -615,7 +615,7 @@ export function Streamgraph({
   const ligado = indice !== null;
 
   return (
-    <figure ref={figura} aria-label={label} className={cn("m-0 grid min-w-0 gap-4 text-foreground", className)}>
+    <figure ref={figura} aria-label={label} className={cn("m-0 grid min-w-0 gap-4 pointer-coarse:gap-[max(1rem,calc(1.375rem/var(--alvo-escala,1)-1rem))] text-foreground", className)}>
       {legend && series.length > 1 && (
         <div
           className="-mx-2 flex min-w-0 flex-wrap gap-x-1 gap-y-0.5 pointer-coarse:gap-y-3"
@@ -641,7 +641,7 @@ export function Streamgraph({
                 }}
                 onBlur={() => setChaveLegenda(null)}
                 className={cn(
-                  "relative inline-flex min-h-8 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-1.5 cursor-pointer items-center gap-2 rounded-[var(--r-pill)] border-0 py-0 pl-2 pr-2.5 text-corpo [-webkit-tap-highlight-color:transparent] [transition:color_var(--dur-fast)_var(--ease-out),background-color_var(--dur-fast)_var(--ease-out),opacity_var(--dur-fast)_var(--ease-out)] hover:text-foreground focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]",
+                  "relative inline-flex min-h-8 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:inset-y-[calc((100%-2.75rem/var(--alvo-escala,1))/2)] cursor-pointer items-center gap-2 rounded-[var(--r-pill)] border-0 py-0 pl-2 pr-2.5 text-corpo [-webkit-tap-highlight-color:transparent] [transition:color_var(--dur-fast)_var(--ease-out),background-color_var(--dur-fast)_var(--ease-out),opacity_var(--dur-fast)_var(--ease-out)] hover:text-foreground focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]",
                   emFoco ? "bg-foreground/5 text-foreground" : "bg-transparent text-muted-foreground",
                   apagada && "opacity-55",
                 )}

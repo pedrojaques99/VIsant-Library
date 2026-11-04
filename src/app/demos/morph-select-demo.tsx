@@ -11,6 +11,7 @@ import { CircleCheck, CircleDashed, CircleDot, CirclePause, CircleX } from "luci
 
 import { MorphSelect } from "../../../registry/visant/ui/morph-select";
 import type { DemoProps } from "../catalog";
+import { useDonoDoKnob } from "./dono-do-knob";
 
 const STATUS = [
   { value: "rascunho", label: "Rascunho", icon: <CircleDashed /> },
@@ -20,8 +21,9 @@ const STATUS = [
   { value: "cancelado", label: "Cancelado", icon: <CircleX />, disabled: true },
 ];
 
-export default function MorphSelectDemo({ props }: DemoProps) {
-  const [status, setStatus] = React.useState<string | null>("andamento");
+export default function MorphSelectDemo({ props, onKnob }: DemoProps) {
+  const [status, setStatus] = React.useState("andamento");
+  const mudar = useDonoDoKnob<string>("value", "andamento", setStatus, { props, onKnob });
 
   return (
     <div className="flex h-full w-full items-center justify-center p-4">
@@ -30,7 +32,7 @@ export default function MorphSelectDemo({ props }: DemoProps) {
           sem corte. Fechado, o gatilho fica no terço de cima, onde a lista
           vai precisar do espaço embaixo. */}
       <div className="flex h-[290px] w-[260px] max-w-full flex-col pt-4">
-        <MorphSelect label="Status" items={STATUS} value={status} onValueChange={setStatus} {...props} />
+        <MorphSelect label="Status" items={STATUS} {...props} value={status} onValueChange={mudar} />
       </div>
     </div>
   );

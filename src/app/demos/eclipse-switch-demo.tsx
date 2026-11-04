@@ -19,6 +19,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { EclipseSwitch, type Theme } from "../../../registry/visant/ui/eclipse-switch";
 import type { DemoProps } from "../catalog";
+import { useDonoDoKnob } from "./dono-do-knob";
 
 /** O tema que a página está usando de fato, acompanhando a troca da vitrine. */
 function useTemaDaPagina(ref: React.RefObject<HTMLElement | null>): Theme {
@@ -33,10 +34,12 @@ function useTemaDaPagina(ref: React.RefObject<HTMLElement | null>): Theme {
   return tema;
 }
 
-export default function EclipseSwitchDemo({ props }: DemoProps) {
+export default function EclipseSwitchDemo({ props, onKnob }: DemoProps) {
   const raiz = React.useRef<HTMLDivElement>(null);
   const pagina = useTemaDaPagina(raiz);
   const [escolha, setEscolha] = React.useState<Theme | null>(null);
+  // Vazio é "sem escolha": a chave segue o tema da página, e é para lá que o restaurar volta.
+  const mudar = useDonoDoKnob<Theme | "">("theme", "", (v) => setEscolha(v || null), { props, onKnob });
   const tema = escolha ?? pagina;
   const invertida = tema !== pagina;
 
@@ -44,8 +47,8 @@ export default function EclipseSwitchDemo({ props }: DemoProps) {
     <div ref={raiz} className="flex h-full w-full items-center justify-center gap-6">
       {/* Uma chave só: a versão `iconOnly` é a mesma ação num quadrado, e as duas
           lado a lado eram o mesmo controle desenhado duas vezes. Os knobs entram
-          primeiro: o tema é da demo, senão a chave travaria no valor do painel. */}
-      <EclipseSwitch {...props} theme={tema} onThemeChange={setEscolha} />
+          primeiro: o tema tem um dono só, o estado daqui, que o painel também escreve. */}
+      <EclipseSwitch {...props} theme={tema} onThemeChange={mudar} />
       <div
         className={cn(
           "w-56 rounded-[var(--r-surface)] border p-4",

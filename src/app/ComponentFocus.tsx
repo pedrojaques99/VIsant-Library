@@ -54,7 +54,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FitStage, PalcoFixo, useElementWidth } from "./stage";
-import { MSG_PROPS } from "./Solo";
+import { MSG_KNOB, MSG_PROPS } from "./Solo";
 import {
   Customize,
   controlesDe,
@@ -257,6 +257,7 @@ function SoloFrame({
   altura,
   escala,
   props,
+  onKnob,
 }: {
   item: CatalogItem;
   largura: number;
@@ -264,6 +265,8 @@ function SoloFrame({
   escala: number;
   /** Os valores dos knobs. Entram na query no primeiro paint e por mensagem depois. */
   props: Record<string, ValorDeKnob>;
+  /** A peça mudou um valor dentro do iframe: atualiza o painel sem recarregar nada. */
+  onKnob: (prop: string, valor: ValorDeKnob) => void;
 }) {
   const { brand } = useBrandTheme();
   const frame = React.useRef<HTMLIFrameElement>(null);
@@ -278,12 +281,42 @@ function SoloFrame({
    */
   const propsIniciais = React.useMemo(() => props, [item.name]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /*
+   * O que o iframe já sabe. O valor que veio dele não volta como mensagem: chegando
+   * atrasado, no meio de um arrasto, puxaria a peça para trás. A primeira carga é da query.
+   */
+  const conhecido = React.useRef({ name: item.name, props });
+
   React.useEffect(() => {
+    const antes = conhecido.current;
+    const chaves = Object.keys(props);
+    const igual =
+      antes.name === item.name &&
+      chaves.length === Object.keys(antes.props).length &&
+      chaves.every((k) => antes.props[k] === props[k]);
+    if (igual) return;
+    conhecido.current = { name: item.name, props };
     frame.current?.contentWindow?.postMessage(
       { type: MSG_PROPS, name: item.name, props },
       window.location.origin,
     );
   }, [props, item.name]);
+
+  React.useEffect(() => {
+    const ouvir = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin || e.source !== frame.current?.contentWindow) return;
+      const { type, name, prop, valor } = (e.data ?? {}) as Record<string, unknown>;
+      if (type !== MSG_KNOB || name !== item.name || typeof prop !== "string") return;
+      if (typeof valor !== "string" && typeof valor !== "number" && typeof valor !== "boolean") return;
+      conhecido.current = {
+        name: item.name,
+        props: { ...conhecido.current.props, [prop]: valor },
+      };
+      onKnob(prop, valor);
+    };
+    window.addEventListener("message", ouvir);
+    return () => window.removeEventListener("message", ouvir);
+  }, [item.name, onKnob]);
 
   const escuro = document.documentElement.classList.contains("dark");
   const query = new URLSearchParams({ solo: "1" });
@@ -589,6 +622,7 @@ export function ComponentFocus({
                 /* 28 = a moldura; 170 = cabeçalho, controles flutuantes e o respiro do palco. */
                 escala={Math.min(1, (util || preset.px) / (preset.px + 28), Math.max(alturaDaJanela - 170, 320) / (preset.alto + 28))}
                 props={knobs.props}
+                onKnob={knobs.set}
               />
             ) : (
               <div style={{ width: Math.min(frameW, util || frameW) }}>

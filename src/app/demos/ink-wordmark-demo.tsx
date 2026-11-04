@@ -24,9 +24,9 @@ import { EASE_IN_OUT } from "@/lib/motion";
 
 const EFEITOS: readonly InkWordmarkFx[] = ["tinta", "escorrer", "fatias", "gota", "grao", "neon"];
 
-export default function InkWordmarkDemo({ props }: DemoProps) {
+export default function InkWordmarkDemo({ props, onKnob }: DemoProps) {
   const { fx: externo, ...resto } = (props ?? {}) as { fx?: InkWordmarkFx };
-  const { atual, rodada, passo, repetir } = useUmPorVez(EFEITOS, externo);
+  const { atual, rodada, passo, repetir } = useUmPorVez(EFEITOS, externo, (v) => onKnob?.("fx", v));
   // Nasce já formando (0,3), não em branco: a grade e o primeiro quadro mostram a marca.
   const progresso = useMotionValue(0.3);
   const reduce = useReducedMotion();

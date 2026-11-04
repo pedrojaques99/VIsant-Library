@@ -29,6 +29,7 @@ import {
 
 import { DynamicIsland } from "../../../registry/visant/ui/dynamic-island";
 import type { DemoProps } from "../catalog";
+import { useDonoDoKnob } from "./dono-do-knob";
 
 type Atividade = "chamada" | "timer" | "musica";
 
@@ -61,9 +62,13 @@ function Controle({
   );
 }
 
-export default function DynamicIslandDemo({ props }: DemoProps) {
-  const [atividade, setAtividade] = React.useState<Atividade>("timer");
+export default function DynamicIslandDemo({ props, onKnob }: DemoProps) {
+  const [chave, setChave] = React.useState<string>("timer");
+  const mudarAtividade = useDonoDoKnob<string>("activityKey", "timer", setChave, { props, onKnob });
+  // O knob é texto livre: valor que não é uma das três atividades cai no timer.
+  const atividade: Atividade = chave in NOMES ? (chave as Atividade) : "timer";
   const [aberta, setAberta] = React.useState(true);
+  const mudarAberta = useDonoDoKnob<boolean>("expanded", true, setAberta, { props, onKnob });
   const [segundos, setSegundos] = React.useState(296);
   const [ligacao, setLigacao] = React.useState(42);
   const [pausado, setPausado] = React.useState(false);
@@ -109,7 +114,7 @@ export default function DynamicIslandDemo({ props }: DemoProps) {
           <Controle aria-label={mudo ? "Ligar microfone" : "Silenciar"} onClick={() => setMudo((m) => !m)}>
             {mudo ? <MicOff /> : <Mic />}
           </Controle>
-          <Controle marca aria-label="Desligar" onClick={() => setAberta(false)}>
+          <Controle marca aria-label="Desligar" onClick={() => mudarAberta(false)}>
             <PhoneOff />
           </Controle>
         </>
@@ -148,11 +153,11 @@ export default function DynamicIslandDemo({ props }: DemoProps) {
       <div className="flex min-h-16 items-start justify-center">
         <DynamicIsland
           label={NOMES[atividade]}
-          activityKey={atividade}
           compact={compacto}
-          expanded={aberta}
-          onExpandedChange={setAberta}
           {...props}
+          activityKey={chave}
+          expanded={aberta}
+          onExpandedChange={mudarAberta}
         >
           {aberto}
         </DynamicIsland>
@@ -168,7 +173,7 @@ export default function DynamicIslandDemo({ props }: DemoProps) {
             key={a}
             type="button"
             aria-pressed={atividade === a}
-            onClick={() => setAtividade(a)}
+            onClick={() => mudarAtividade(a)}
             className={
               "alvo-toque rounded-[var(--r-control)] px-1.5 py-1 text-xs outline-none transition-[color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] focus-visible:[box-shadow:var(--focus)] " +
               (atividade === a ? "text-foreground" : "text-muted-foreground hover:text-foreground")

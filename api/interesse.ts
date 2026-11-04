@@ -2,13 +2,13 @@
  * O e-mail de quem instala as skills e o feedback de quem usou (`admin/interesse.sql`).
  *
  *   GET  /api/interesse  → { contagens, interesse }: as tabelas existem? Sem nenhum dado.
- *   POST /api/interesse  { email, origem }  ou  { feedback, origem }  → 204
+ *   POST /api/interesse  { email, origem }  ou  { feedback, origem }  ou  { sair: email }  → 204
  *        400 entrada inválida · 403 origem estranha · 502 banco fora
  *
  * Público de propósito, e por isso aceita pouco. O campo `site` é isca: gente não vê, robô preenche.
  */
 
-import { listContagens, listFeedback, putFeedback, putInteresse, storeReady } from "./_lab-auth.js";
+import { listContagens, listFeedback, putFeedback, putInteresse, sairInteresse, storeReady } from "./_lab-auth.js";
 
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
 const ORIGEM = /^[a-z-]{1,30}$/;
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   const origin = request.headers.get("origin");
   if (origin && origin !== new URL(request.url).origin) return json({ error: "origem recusada" }, 403);
 
-  let corpo: { email?: unknown; feedback?: unknown; origem?: unknown; site?: unknown };
+  let corpo: { email?: unknown; feedback?: unknown; origem?: unknown; site?: unknown; sair?: unknown };
   try {
     corpo = await request.json();
   } catch {
@@ -37,7 +37,12 @@ export async function POST(request: Request) {
   if (!storeReady()) return json({ error: "banco não configurado" }, 502);
 
   try {
-    if (typeof corpo.email === "string") {
+    if (typeof corpo.sair === "string") {
+      /* A resposta é a mesma com ou sem o e-mail na lista: daqui não se descobre quem está nela. */
+      const email = corpo.sair.trim().toLowerCase();
+      if (!EMAIL.test(email)) return json({ error: "e-mail inválido" }, 400);
+      await sairInteresse(email);
+    } else if (typeof corpo.email === "string") {
       const email = corpo.email.trim().toLowerCase();
       if (!EMAIL.test(email)) return json({ error: "e-mail inválido" }, 400);
       await putInteresse(email, origem);

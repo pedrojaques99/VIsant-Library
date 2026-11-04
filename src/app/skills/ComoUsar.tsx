@@ -13,7 +13,7 @@ import { ArrowLeft, ArrowRight, Check, Copy } from "lucide-react";
 import { useCopy } from "../copy-command";
 import { Acao, cx, DUR, EASE_OUT, useMenosMovimento } from "./hub/base";
 import { COMANDO_COMPLETO } from "./hub/dock";
-import { PedirEmail, PedirFeedback, useLiberado } from "./hub/interesse";
+import { PedirEmail, PedirFeedback, SairDaLista, useLiberado } from "./hub/interesse";
 
 /* O llms.txt ensina o agente a ligar o registry: nada disso precisa ficar na mensagem. */
 const MENSAGEM = `Instale as skills da Visant neste projeto:
@@ -67,6 +67,11 @@ function Digitando({ texto }: { texto: string }) {
 }
 
 export function ComoUsar() {
+  if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("sair")) return <SairDaLista />;
+  return <Passos />;
+}
+
+function Passos() {
   const [i, setI] = React.useState(0);
   const [sentido, setSentido] = React.useState(1);
   const [copiou, setCopiou] = React.useState(false);

@@ -21,9 +21,13 @@ const FORMA: Record<Pele, NonNullable<EyeTrackerProps["face"]>> = {
   tunnel: "glass",
 };
 
-export default function EyeTrackerDemo({ props }: DemoProps) {
+export default function EyeTrackerDemo({ props, onKnob }: DemoProps) {
   const { shader: _s, face: _f, ...resto } = (props ?? {}) as EyeTrackerProps & Record<string, unknown>;
-  const { atual, rodada, passo, repetir } = useUmPorVez(PELES, _s);
+  const { atual, rodada, passo, repetir } = useUmPorVez(PELES, _s, (p) => {
+    // A seta troca a pele e a forma que combina com ela: o painel mostra as duas.
+    onKnob?.("shader", p);
+    onKnob?.("face", FORMA[p]);
+  });
   // A forma dos knobs vale quando alguém mexe nela; senão, a que combina com a pele.
   const face = _f && _f !== "card" ? _f : FORMA[atual];
 

@@ -345,6 +345,8 @@ function Portrait({ item, shell, fill }: { item: PortraitItem; shell: string; fi
           className={cn(
             "no-hover",
             "absolute right-3 top-3 grid size-11 place-items-center rounded-[var(--r-pill,9999px)]",
+            // Encolhida por um palco, a caixa fica abaixo de 44px; o alvo não.
+            "pointer-coarse:after:absolute pointer-coarse:after:inset-[calc((100%-2.75rem/var(--alvo-escala,1))/2)]",
             "bg-[var(--background)] text-[var(--foreground)] [box-shadow:var(--e-raised)]",
             "transition-transform [transition-duration:var(--dur-press,120ms)]",
             "[transition-timing-function:var(--ease-out)]",

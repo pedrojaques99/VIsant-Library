@@ -108,7 +108,8 @@ export function DemoKiller() {
               <p className="text-[1.75rem] text-casa-fg lg:text-[2.25rem]">$49 per month</p>
             </div>
             <div data-cartao="slop" aria-hidden={limpo} className={cx("col-start-1 row-start-1 space-y-3", limpo && "invisible")}>
-              <div className="relative">
+              {/* Dedo: o selo desta linha e o do título têm 44px e não podem se cobrir. */}
+              <div className="relative pointer-coarse:mb-5">
                 <p className="font-casa-mono text-casa-sm uppercase tracking-widest text-casa-fg-3">{SLOP_CARTAO.rotulo}</p>
                 <Marca alvo="rotulo" passo={passo} ativo={ativo} onToque={setAtivo} />
               </div>

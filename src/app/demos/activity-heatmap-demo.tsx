@@ -16,6 +16,7 @@ import * as React from "react";
 
 import { ActivityHeatmap, type ActivityDay } from "../../../registry/visant/ui/activity-heatmap";
 import type { DemoProps } from "../catalog";
+import { useDonoDoKnob } from "./dono-do-knob";
 
 const FIM = Date.parse("2026-10-17T00:00:00Z");
 const DIAS = 26 * 7;
@@ -39,9 +40,11 @@ function gerar(): ActivityDay[] {
 
 const formato = new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "long", timeZone: "UTC" });
 
-export default function ActivityHeatmapDemo({ props }: DemoProps) {
+export default function ActivityHeatmapDemo({ props, onKnob }: DemoProps) {
   const dias = React.useMemo(gerar, []);
-  const [sel, setSel] = React.useState<string | null>(null);
+  // Vazio é "nenhum dia": é o que o campo de texto do painel mostra sem seleção.
+  const [sel, setSel] = React.useState("");
+  const mudar = useDonoDoKnob<string>("selectedDate", "", setSel, { props, onKnob });
   const escolhido = sel ? dias.find((d) => d.date === sel) : undefined;
 
   return (
@@ -52,9 +55,9 @@ export default function ActivityHeatmapDemo({ props }: DemoProps) {
           label="Entregas nos últimos seis meses"
           period="seis meses"
           unit={{ one: "entrega", other: "entregas" }}
-          selectedDate={sel}
-          onSelectDate={setSel}
           {...props}
+          selectedDate={sel || null}
+          onSelectDate={mudar}
         />
         <p className="m-0 h-5 text-apoio text-muted-foreground" aria-live="polite">
           {escolhido

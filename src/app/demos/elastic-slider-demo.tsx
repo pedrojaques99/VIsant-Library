@@ -11,21 +11,23 @@ import { Volume1, Volume2 } from "lucide-react";
 
 import { ElasticSlider } from "../../../registry/visant/ui/elastic-slider";
 import type { DemoProps } from "../catalog";
+import { useDonoDoKnob } from "./dono-do-knob";
 
-export default function ElasticSliderDemo({ props }: DemoProps) {
+export default function ElasticSliderDemo({ props, onKnob }: DemoProps) {
   const [volume, setVolume] = React.useState(64);
+  const mudar = useDonoDoKnob<number>("value", 64, setVolume, { props, onKnob });
 
   return (
     <div className="flex h-full w-full items-center justify-center p-6">
       <div className="w-full max-w-[320px]">
         <ElasticSlider
           label="Volume"
-          value={volume}
-          onValueChange={setVolume}
           format={(v) => `${v}%`}
           startIcon={<Volume1 className="size-4" />}
           endIcon={<Volume2 className="size-4" />}
           {...props}
+          value={volume}
+          onValueChange={mudar}
         />
       </div>
     </div>

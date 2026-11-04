@@ -11,9 +11,12 @@
  * palco deixaria de ficar à vista. O cabeçalho continua ali, com as mesmas portas.
  */
 
+import { siX } from "simple-icons";
 import { cn } from "@/lib/utils";
 
 export type PortaDoRodape = "catalogo" | "skills" | "marca" | "docs";
+
+const PERFIL = "https://x.com/pejaques_";
 
 const PORTAS: { view: PortaDoRodape; rotulo: string; href: string }[] = [
   { view: "catalogo", rotulo: "Catálogo", href: "/" },
@@ -41,10 +44,30 @@ export function Rodape({
   return (
     <footer className={cn("casa shell mt-auto", className)}>
       <div className="flex flex-col border-t border-casa-line py-1 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-        <a href="https://visantlabs.com" className={`${LINK} gap-2 self-start sm:self-auto`}>
-          <span aria-hidden className="h-3 w-3 rounded-[4px] bg-casa-fg" />
-          Visant Labs
-        </a>
+        <div className="flex flex-wrap items-center gap-x-4 self-start sm:self-auto">
+          <a href="https://visantlabs.com" className={`${LINK} gap-2`}>
+            <span aria-hidden className="h-3 w-3 rounded-[4px] bg-casa-fg" />
+            Visant Labs
+          </a>
+          <span data-autor className="flex items-center gap-1 text-casa-sm text-casa-fg-2">
+            Criado por
+            <a href={PERFIL} target="_blank" rel="noreferrer" className={`${LINK} text-casa-fg`}>
+              @pejaques_
+            </a>
+            <a
+              href={PERFIL}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="@pejaques_ no X"
+              title="@pejaques_ no X"
+              className={`${LINK} justify-center px-1 pointer-coarse:size-11 pointer-coarse:px-0`}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="size-3.5 fill-current">
+                <path d={siX.path} />
+              </svg>
+            </a>
+          </span>
+        </div>
         <nav aria-label="Rodapé" className="flex flex-wrap items-center gap-x-2 sm:gap-x-5 pointer-coarse:-mx-2 pointer-coarse:gap-x-0 pointer-coarse:sm:gap-x-0">
           {PORTAS.map((p) => (
             <a

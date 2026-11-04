@@ -13,20 +13,22 @@ import * as React from "react";
 
 import { SloshSlider } from "../../../registry/visant/ui/slosh-slider";
 import type { DemoProps } from "../catalog";
+import { useDonoDoKnob } from "./dono-do-knob";
 
-export default function SloshSliderDemo({ props }: DemoProps) {
+export default function SloshSliderDemo({ props, onKnob }: DemoProps) {
   const [valor, setValor] = React.useState(60);
+  const mudar = useDonoDoKnob<number>("value", 60, setValor, { props, onKnob });
 
   return (
     <div className="flex h-full w-full items-center justify-center">
       <SloshSlider
         label="Água hoje"
-        value={valor}
-        onValueChange={setValor}
         step={5}
         format={(v) => `${(v / 50).toLocaleString("pt-BR", { minimumFractionDigits: 1 })} de 2 L`}
         className="max-w-[360px]"
         {...props}
+        value={valor}
+        onValueChange={mudar}
       />
     </div>
   );

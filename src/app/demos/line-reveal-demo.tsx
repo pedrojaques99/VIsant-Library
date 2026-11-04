@@ -28,9 +28,9 @@ const FRASE = "A quebra de linha é do navegador. O corte, do desenho.";
 
 const VARIACOES: readonly LineRevealVariant[] = ["mask", "blur", "curtain", "rise"];
 
-export default function LineRevealDemo({ props }: DemoProps) {
+export default function LineRevealDemo({ props, onKnob }: DemoProps) {
   const { variant: _v, ...resto } = (props ?? {}) as { variant?: LineRevealVariant } & Record<string, unknown>;
-  const { atual, rodada, passo, repetir } = useUmPorVez(VARIACOES, _v);
+  const { atual, rodada, passo, repetir } = useUmPorVez(VARIACOES, _v, (v) => onKnob?.("variant", v));
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-6 px-6">

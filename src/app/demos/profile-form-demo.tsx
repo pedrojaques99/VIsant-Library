@@ -18,6 +18,7 @@ import * as React from "react";
 import { ProfileForm, type ProfileValue } from "../../../registry/visant/ui/profile-form";
 import { midia } from "../media";
 import type { DemoProps } from "../catalog";
+import { useDonoDoKnob } from "./dono-do-knob";
 
 const INICIAL: ProfileValue = {
   name: "Marina",
@@ -25,17 +26,17 @@ const INICIAL: ProfileValue = {
   avatarUrl: midia("retrato", 1)?.src ?? null,
 };
 
-export default function ProfileFormDemo({ props }: DemoProps) {
+export default function ProfileFormDemo({ props, onKnob }: DemoProps) {
   const [valor, setValor] = React.useState<ProfileValue>(INICIAL);
   const [verificado, setVerificado] = React.useState(true);
+  const mudarVerificado = useDonoDoKnob<boolean>("emailVerified", true, setVerificado, { props, onKnob });
 
   return (
     <div className="mx-auto flex h-full w-full max-w-[420px] items-center">
       <ProfileForm
         className="gap-3 border-0 bg-transparent p-0"
         value={valor}
-        emailVerified={verificado}
-        onResendVerification={() => setVerificado(true)}
+        onResendVerification={() => mudarVerificado(true)}
         validate={(d) =>
           /@(mailinator|tempmail|guerrillamail)\./i.test(d.email)
             ? { email: "E-mail descartável não serve para recuperar a conta." }
@@ -43,7 +44,7 @@ export default function ProfileFormDemo({ props }: DemoProps) {
         }
         onSave={async (proximo, { avatarFile }) => {
           await new Promise((r) => setTimeout(r, 900));
-          setVerificado((v) => (proximo.email === valor.email ? v : false));
+          if (proximo.email !== valor.email) mudarVerificado(false);
           setValor({
             ...proximo,
             // Sem backend: a foto escolhida vira URL local só pra prévia
@@ -52,6 +53,7 @@ export default function ProfileFormDemo({ props }: DemoProps) {
           });
         }}
         {...props}
+        emailVerified={verificado}
       />
     </div>
   );

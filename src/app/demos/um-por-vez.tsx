@@ -17,21 +17,27 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 /**
  * Índice + rodada. `externo` é o valor que veio dos controles da ficha (knob ou
- * preset): quando ele muda, o seletor acompanha em vez de brigar com ele.
+ * preset): quando ele muda, o seletor acompanha em vez de brigar com ele. Quando ele
+ * some ("restaurar o padrão"), volta ao primeiro da lista, que é o padrão da demo.
+ *
+ * `aoPassar` avisa o painel que a seta mudou o valor. O valor volta como `externo`,
+ * e aí não é troca nova: sem a comparação com o índice atual, a peça remontaria duas vezes.
  */
-export function useUmPorVez<T>(lista: readonly T[], externo?: unknown) {
+export function useUmPorVez<T>(lista: readonly T[], externo?: unknown, aoPassar?: (valor: T) => void) {
   const [i, setI] = React.useState(() => {
     const k = lista.indexOf(externo as T);
     return k >= 0 ? k : 0;
   });
   const [rodada, setRodada] = React.useState(0);
+  const indice = React.useRef(i);
+  indice.current = i;
 
   const anterior = React.useRef(externo);
   React.useEffect(() => {
     if (anterior.current === externo) return;
     anterior.current = externo;
-    const k = lista.indexOf(externo as T);
-    if (k >= 0) {
+    const k = externo === undefined ? 0 : lista.indexOf(externo as T);
+    if (k >= 0 && k !== indice.current) {
       setI(k);
       setRodada((n) => n + 1);
     }
@@ -41,10 +47,15 @@ export function useUmPorVez<T>(lista: readonly T[], externo?: unknown) {
 
   const passo = React.useCallback(
     (d: number) => {
-      setI((v) => (v + d + lista.length) % lista.length);
+      const proximo = (indice.current + d + lista.length) % lista.length;
+      indice.current = proximo;
+      setI(proximo);
       setRodada((n) => n + 1);
+      aoPassar?.(lista[proximo]!);
     },
-    [lista.length],
+    // a lista é constante de módulo em todas as demos
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [lista.length, aoPassar],
   );
   const repetir = React.useCallback(() => setRodada((n) => n + 1), []);
 

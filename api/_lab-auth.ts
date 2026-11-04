@@ -114,6 +114,7 @@ export const listContagens = (dias: number) =>
 
 /** E-mails e feedback de quem instala as skills. Tabelas em `admin/interesse.sql`. */
 export const putInteresse = (email: string, origem: string) => rpc<unknown>("interesse_put", { p_email: email, p_origem: origem });
+export const sairInteresse = (email: string) => rpc<unknown>("interesse_sair", { p_email: email });
 export const putFeedback = (texto: string, origem: string) => rpc<unknown>("feedback_put", { p_texto: texto, p_origem: origem });
 export const listInteresse = () => rpc<{ email: string; origem: string; em: string }[]>("interesse_lista");
 export const listFeedback = () => rpc<{ texto: string; origem: string; em: string }[]>("feedback_lista");

@@ -10,6 +10,7 @@ import { Bell, Bookmark, Folder, House, Search, User } from "lucide-react";
 
 import { MagnifyDock } from "../../../registry/visant/ui/magnify-dock";
 import type { DemoProps } from "../catalog";
+import { useDonoDoKnob } from "./dono-do-knob";
 
 const ITENS = [
   { id: "inicio", label: "Início", icon: <House /> },
@@ -20,17 +21,18 @@ const ITENS = [
   { id: "perfil", label: "Perfil", icon: <User /> },
 ];
 
-export default function MagnifyDockDemo({ props }: DemoProps) {
+export default function MagnifyDockDemo({ props, onKnob }: DemoProps) {
   const [atual, setAtual] = React.useState("inicio");
+  const mudar = useDonoDoKnob<string>("active", "inicio", setAtual, { props, onKnob });
 
   return (
     <div className="flex h-full w-full items-center justify-center">
       <MagnifyDock
         aria-label="Navegação"
         items={ITENS}
-        active={atual}
-        onSelect={setAtual}
         {...props}
+        active={atual}
+        onSelect={mudar}
       />
     </div>
   );
