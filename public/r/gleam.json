@@ -3,7 +3,7 @@
   "name": "gleam",
   "title": "Gleam",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "A superfície que sabe onde o cursor está: luz sob o ponteiro, borda acesa do lado da luz e inclinação de 5 graus. Quatro números por quadro no JS, o desenho inteiro no CSS; nasce inclinado e aceso (rest).",
+  "description": "A superfície que sabe onde o cursor está: luz sob o ponteiro, borda acesa do lado da luz e inclinação de 5 graus. Quatro números por quadro no JS, o desenho inteiro no CSS. Nasce inclinado e aceso (rest).",
   "registryDependencies": [
     "utils"
   ],

@@ -3,7 +3,7 @@
   "name": "auth-button",
   "title": "Auth Button",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "O canto da conta nos três estados. Enquanto a sessão não responde ele não escreve “Entrar” — e não muda de tamanho quando ela chega.",
+  "description": "O canto da conta nos três estados. Enquanto a sessão não responde ele não escreve “Entrar”, e não muda de tamanho quando ela chega.",
   "dependencies": [
     "lucide-react"
   ],

@@ -3,7 +3,7 @@
   "name": "book-shelf",
   "title": "Book Shelf",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Estante em vez de vitrine: os itens soltos, sem moldura, e o rótulo só no hover — porque o objeto já tem silhueta e a moldura passa a competir com ela.",
+  "description": "Estante em vez de vitrine: os itens soltos, sem moldura, e o rótulo só no hover, porque o objeto já tem silhueta e a moldura passa a competir com ela.",
   "registryDependencies": [
     "utils",
     "@visant/book-3d"

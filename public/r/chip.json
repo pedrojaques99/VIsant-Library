@@ -3,7 +3,7 @@
   "name": "chip",
   "title": "Chip",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Pastilha de filtro com contagem; a faceta sem resultado apaga em vez de mostrar zero. Com onRemove vira o chip do filtro já aplicado, sem aria-pressed.",
+  "description": "Pastilha de filtro com contagem. A faceta sem resultado apaga em vez de mostrar zero. Com onRemove vira o chip do filtro já aplicado, sem aria-pressed.",
   "registryDependencies": [
     "utils"
   ],

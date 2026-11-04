@@ -3,7 +3,7 @@
   "name": "anatomia-fichario",
   "title": "Anatomia: o fichário de receitas",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Fig 2.6 do curso IA para Designers: o agente lê só as etiquetas das skills e abre a receita que casa com o pedido; a pasta references/ só sobe quando a receita pede.",
+  "description": "Fig 2.6 do curso IA para Designers: o agente lê só as etiquetas das skills e abre a receita que casa com o pedido. A pasta references/ só sobe quando a receita pede.",
   "registryDependencies": [
     "@visant/anatomia"
   ],

@@ -3,7 +3,7 @@
   "name": "rail",
   "title": "Rail",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Trilho horizontal com snap: anda por arrasto, Shift + roda, setas e teclado; as setas somem nas pontas.",
+  "description": "Trilho horizontal com snap: anda por arrasto, Shift + roda, setas e teclado. As setas somem nas pontas.",
   "registryDependencies": [
     "utils"
   ],

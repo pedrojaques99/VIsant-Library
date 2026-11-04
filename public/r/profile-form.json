@@ -3,7 +3,7 @@
   "name": "profile-form",
   "title": "Profile Form",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Editar o perfil com foto, nome e e-mail verificado. Quando não dá pra salvar, o motivo aparece no campo — não num toast.",
+  "description": "Editar o perfil com foto, nome e e-mail verificado. Quando não dá pra salvar, o motivo aparece no campo, não num toast.",
   "dependencies": [
     "lucide-react"
   ],

@@ -3,7 +3,7 @@
   "name": "skeleton-medido",
   "title": "Skeleton Medido",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Esqueleto medido do conteúdo real, sem escrever as medidas à mão. Experimental: usa o Skullet 0.0.x.",
+  "description": "Esqueleto medido do próprio conteúdo, sem escrever as medidas à mão. Experimental: usa o Skullet 0.0.x.",
   "dependencies": [
     "skullet@0.0.3"
   ],

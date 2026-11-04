@@ -3,7 +3,7 @@
   "name": "textura-watch",
   "title": "Textura Watch",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Grade de mostradores de relógio cujos ponteiros apontam para o cursor; o curto chega atrasado, como hora.",
+  "description": "Grade de mostradores de relógio cujos ponteiros apontam para o cursor. O curto chega atrasado, como hora.",
   "dependencies": [],
   "registryDependencies": [
     "utils",

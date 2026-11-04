@@ -3,7 +3,7 @@
   "name": "mist-dialog",
   "title": "Mist Dialog",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Modal em <dialog> nativo que entra e sai em névoa só com CSS (@starting-style + allow-discrete), controlado, fecha no Esc e no clique fora, com ganchos onOpen/onClose para pausar o scroll suave; quatro entradas por variant: mist, rise, zoom e wipe.",
+  "description": "Modal em <dialog> nativo que entra e sai em névoa só com CSS (@starting-style + allow-discrete), controlado, fecha no Esc e no clique fora, com ganchos onOpen/onClose para pausar o scroll suave. Quatro entradas por variant: mist, rise, zoom e wipe.",
   "registryDependencies": [
     "utils",
     "@visant/motion"

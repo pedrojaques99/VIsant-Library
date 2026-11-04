@@ -3,7 +3,7 @@
   "name": "card-stack",
   "title": "Card Stack",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Pilha de cards em que o de cima vai pro fundo quando você arrasta e solta, como baralho de verdade.",
+  "description": "Pilha de cards em que o de cima vai pro fundo quando você arrasta e solta, como num baralho.",
   "dependencies": [
     "motion"
   ],

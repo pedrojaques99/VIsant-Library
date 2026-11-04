@@ -10,5 +10,12 @@
       "type": "registry:lib"
     }
   ],
+  "categories": [
+    "fundacao",
+    "tokens",
+    "motion",
+    "easing",
+    "duracao"
+  ],
   "type": "registry:lib"
 }

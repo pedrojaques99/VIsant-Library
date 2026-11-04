@@ -3,7 +3,7 @@
   "name": "empty-state",
   "title": "Empty State",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "O estado vazio canônico: arte por slot, frase do que vai aparecer ali e no máximo uma ação; com ou sem caixa.",
+  "description": "O estado vazio canônico: arte por slot, frase do que vai aparecer ali e no máximo uma ação. Com ou sem caixa.",
   "registryDependencies": [
     "utils"
   ],

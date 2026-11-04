@@ -3,7 +3,7 @@
   "name": "photo-split",
   "title": "Photo Split",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "A dobra alternada foto ↔ texto: a moldura revela a imagem, o texto entra deslizando da borda externa e o lado inverte a cada dobra sem ninguém escrever nada.",
+  "description": "A dobra alternada de foto e texto: a moldura revela a imagem, o texto entra deslizando da borda externa e o lado inverte a cada dobra sem ninguém escrever nada.",
   "dependencies": [
     "gsap"
   ],

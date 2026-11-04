@@ -3,7 +3,7 @@
   "name": "mist-swap",
   "title": "Mist Swap",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Troca de slides em névoa: o que sai se desfaz no desfoque enquanto o próximo assenta no mesmo lugar, só gira em tela e para sob movimento reduzido; preenche o pai, que precisa ter tamanho.",
+  "description": "Troca de slides em névoa: o que sai se desfaz no desfoque enquanto o próximo assenta no mesmo lugar, só gira em tela e para sob movimento reduzido. Preenche o pai, que precisa ter tamanho.",
   "dependencies": [
     "framer-motion"
   ],

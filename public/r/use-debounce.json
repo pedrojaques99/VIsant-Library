@@ -3,7 +3,7 @@
   "name": "use-debounce",
   "title": "useDebounce",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Atrasa um valor até ele parar de mudar. Só borda de saída, e o valor inicial não é atrasado.",
+  "description": "Atrasa um valor até ele parar de mudar. Só borda de saída, e o valor inicial passa sem atraso.",
   "dependencies": [
     "react"
   ],

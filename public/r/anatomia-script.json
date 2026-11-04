@@ -3,7 +3,7 @@
   "name": "anatomia-script",
   "title": "Anatomia: do briefing ao script",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Fig B.8 do curso IA para Designers: o agente resolve o pedido novo e gasta uso; o que se repete vira script, que roda sem IA e para quando não entende.",
+  "description": "Fig B.8 do curso IA para Designers: o agente resolve o pedido novo e gasta uso. O que se repete vira script, que roda sem IA e para quando não entende.",
   "registryDependencies": [
     "@visant/anatomia"
   ],
