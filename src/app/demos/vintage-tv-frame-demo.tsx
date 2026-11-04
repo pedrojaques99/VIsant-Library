@@ -8,6 +8,8 @@
  * do `vintage-oscilloscope`, e trocar de canal troca o programa: é o mesmo
  * chassi mostrando que a tela é uma tela.
  *
+ * O PLAY liga o mesmo loop do osciloscópio, e o programa passa a desenhar esse som.
+ *
  * O botão de força continua sendo o da peça: desligar apaga o tubo com a
  * animação de CRT; ligar acende com o estalo e o chiado de um tubo de verdade
  * (se o som da casa estiver ligado).
@@ -17,7 +19,9 @@ import * as React from "react";
 
 import { useStageActive } from "../stage";
 import { VintageTvFrame } from "../../../registry/vintage/ui/vintage-tv-frame";
+import { VintageButton } from "../../../registry/vintage/ui/vintage-button";
 import type { VintageScopeMode } from "../../../registry/vintage/ui/vintage-oscilloscope";
+import { useLoop } from "./vintage-loop";
 
 const CANAIS: { n: string; modo: VintageScopeMode }[] = [
   { n: "02", modo: "scope" },
@@ -29,6 +33,9 @@ const CANAIS: { n: string; modo: VintageScopeMode }[] = [
 export default function VintageTvFrameDemo() {
   const ativo = useStageActive();
   const [canal, setCanal] = React.useState(1);
+  const [tocando, setTocando] = React.useState(false);
+  const [ligada, setLigada] = React.useState(true);
+  const analyser = useLoop(tocando && ligada && ativo);
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-4">
@@ -39,9 +46,12 @@ export default function VintageTvFrameDemo() {
           showTimecode="00:12:34"
           program={CANAIS[canal].modo}
           programActive={ativo}
+          programAnalyser={analyser}
+          onPowerToggle={setLigada}
         />
       </div>
 
+      <div className="flex flex-wrap items-center justify-center gap-3">
       <div role="radiogroup" aria-label="Canal" className="flex gap-1.5">
         {CANAIS.map((c, i) => {
           const sel = i === canal;
@@ -60,8 +70,8 @@ export default function VintageTvFrameDemo() {
                   ? "linear-gradient(180deg, var(--vintage-surface-2), var(--vintage-surface-3))"
                   : "linear-gradient(180deg, var(--vintage-surface-4), var(--vintage-surface-3))",
                 boxShadow: sel
-                  ? "inset 0 1px 3px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,0,0,0.6)"
-                  : "inset 0 1px 0 rgba(255,255,255,0.12), 0 0 0 1px rgba(0,0,0,0.6), 0 2px 3px rgba(0,0,0,0.5)",
+                  ? "inset 0 1px 3px rgba(0,0,0,0.7), 0 0 0 1px var(--vintage-edge)"
+                  : "inset 0 1px 0 rgba(255,255,255,0.12), 0 0 0 1px var(--vintage-edge), 0 2px 3px rgba(0,0,0,0.5)",
                 transition:
                   "color var(--dur-fast,160ms) var(--ease-out,ease), box-shadow var(--dur-press,120ms) var(--ease-out,ease)",
               }}
@@ -82,6 +92,8 @@ export default function VintageTvFrameDemo() {
             </button>
           );
         })}
+      </div>
+      <VintageButton label={tocando ? "STOP" : "PLAY"} active={tocando} onClick={() => setTocando((v) => !v)} />
       </div>
     </div>
   );

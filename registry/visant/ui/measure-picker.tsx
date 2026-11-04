@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { playSfx } from "@/lib/sfx-bus";
 import { cn } from "@/lib/utils";
 
 /**
@@ -94,6 +95,14 @@ export function MeasurePicker<T>({
   );
   const band = bands[bandIndex] ?? bands[bands.length - 1];
   const id = React.useId();
+
+  // Cruzar a faixa é o único tique: arrastar dentro dela fica em silêncio.
+  const faixaAnterior = React.useRef(bandIndex);
+  React.useEffect(() => {
+    if (faixaAnterior.current === bandIndex) return;
+    faixaAnterior.current = bandIndex;
+    playSfx("detent");
+  }, [bandIndex]);
 
   const span = max - min || 1;
   const pct = (v: number) => `${((Math.min(max, Math.max(min, v)) - min) / span) * 100}%`;

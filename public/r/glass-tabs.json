@@ -1,0 +1,97 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "glass-tabs",
+  "title": "Glass Tabs",
+  "author": "Visant Labs <visantsupply@gmail.com>",
+  "description": "Abas em que a seleção é uma lente de vidro andando sobre o trilho, com setas, Home e End.",
+  "dependencies": [],
+  "registryDependencies": [
+    "utils",
+    "@visant/liquid-glass",
+    "@visant/motion"
+  ],
+  "files": [
+    {
+      "path": "registry/visant/ui/glass-tabs.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nimport { LiquidGlass } from \"@/components/ui/liquid-glass\";\nimport { EASE_ESTICA_CSS } from \"@/lib/motion\";\nimport { cn } from \"@/lib/utils\";\n\nexport interface GlassTabsItem {\n  value: string;\n  label: string;\n  icon?: React.ReactNode;\n}\n\nexport interface GlassTabsProps {\n  items: GlassTabsItem[];\n  value?: string;\n  defaultValue?: string;\n  onChange?: (value: string) => void;\n  /** Nome do grupo para leitor de tela. */\n  label: string;\n  className?: string;\n}\n\nconst TRILHO = (h: number) => ({\n  borderRadius: 999,\n  scale: -h * 0.3,\n  aberration: [0, h * 0.02, h * 0.04],\n  blur: h * 0.06,\n  border: 0.05,\n  displaceBlur: h * 0.08,\n});\nconst LENTE = (h: number) => ({\n  borderRadius: 999,\n  scale: -h * 0.9,\n  aberration: [0, h * 0.1, h * 0.2],\n  blur: h * 0.08,\n  border: 0.1,\n  displaceBlur: h * 0.01,\n});\n\n// A lente chega com mola (no CSS) e estica pelo caminho; o volume se mantém.\nconst ESTICA_MS = 420;\nconst ESTICA_POR_ABA = 0.14;\nconst ESTICA_TETO = 0.3;\n\n/**\n * Abas em que a seleção é uma lente de vidro andando sobre o trilho. As abas têm\n * largura igual porque a lente tem tamanho fixo: refazer o mapa a cada troca pesaria\n * mais do que a animação vale; o esticar é `scale`, por cima do mapa. Setas, Home e\n * End movem o foco, como numa tablist.\n */\nexport function GlassTabs({ items, value, defaultValue, onChange, label, className }: GlassTabsProps) {\n  const [proprio, setProprio] = React.useState(defaultValue ?? items[0]?.value);\n  const atual = value ?? proprio;\n  const i = Math.max(0, items.findIndex((t) => t.value === atual));\n  const raiz = React.useRef<HTMLDivElement>(null);\n  const anterior = React.useRef(i);\n\n  React.useEffect(() => {\n    const passos = Math.abs(i - anterior.current);\n    anterior.current = i;\n    if (!passos || matchMedia(\"(prefers-reduced-motion: reduce)\").matches) return;\n    const estica = Math.min(ESTICA_TETO, ESTICA_POR_ABA * passos);\n    raiz.current?.querySelector(\".glass-tabs-lente\")?.animate(\n      [{ scale: \"1 1\" }, { scale: `${1 + estica} ${1 - estica / 2}`, offset: 0.32 }, { scale: \"1 1\" }],\n      { duration: ESTICA_MS, easing: EASE_ESTICA_CSS },\n    );\n  }, [i]);\n\n  const escolher = (n: number, foco = false) => {\n    const alvo = items[(n + items.length) % items.length];\n    if (!alvo) return;\n    setProprio(alvo.value);\n    onChange?.(alvo.value);\n    if (foco) raiz.current?.querySelectorAll<HTMLButtonElement>('[role=\"tab\"]')[(n + items.length) % items.length]?.focus();\n  };\n  const onKeyDown = (e: React.KeyboardEvent) => {\n    const passo = ({ ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: items.length - 1 } as Record<string, number>)[e.key];\n    if (passo === undefined) return;\n    e.preventDefault();\n    escolher(passo, true);\n  };\n\n  return (\n    <div\n      ref={raiz}\n      className={cn(\"glass-tabs\", className)}\n      role=\"tablist\"\n      aria-label={label}\n      onKeyDown={onKeyDown}\n      style={{ \"--n\": items.length, \"--i\": i } as React.CSSProperties}\n    >\n      <LiquidGlass className=\"glass-tabs-trilho\" options={TRILHO} aria-hidden />\n      <LiquidGlass className=\"glass-tabs-lente\" options={LENTE} aria-hidden />\n      {items.map((t, n) => (\n        <button\n          key={t.value}\n          type=\"button\"\n          role=\"tab\"\n          aria-selected={n === i}\n          tabIndex={n === i ? 0 : -1}\n          onClick={() => escolher(n)}\n        >\n          {t.icon}\n          <span>{t.label}</span>\n        </button>\n      ))}\n    </div>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "css": {
+    ".glass-tabs": {
+      "--folga": "4px",
+      "position": "relative",
+      "display": "inline-grid",
+      "grid-auto-flow": "column",
+      "grid-auto-columns": "1fr",
+      "padding": "var(--folga)",
+      "border-radius": "999px",
+      "color": "white",
+      "font": "500 0.875rem/1 var(--font-sans, system-ui)"
+    },
+    ".glass-tabs-trilho": {
+      "position": "absolute",
+      "inset": "0",
+      "border-radius": "inherit",
+      "background": "color-mix(in srgb, white 10%, transparent)",
+      "box-shadow": "inset 0 0 0 1px color-mix(in srgb, white 24%, transparent), inset 0 1.5px 0 color-mix(in srgb, white 28%, transparent)"
+    },
+    ".glass-tabs-lente": {
+      "position": "absolute",
+      "top": "var(--folga)",
+      "bottom": "var(--folga)",
+      "left": "var(--folga)",
+      "width": "calc((100% - 2 * var(--folga)) / var(--n))",
+      "border-radius": "999px",
+      "background": "color-mix(in srgb, white 16%, transparent)",
+      "box-shadow": "inset 0 0 0 1px color-mix(in srgb, white 40%, transparent)",
+      "transform": "translateX(calc(var(--i) * 100%))",
+      "transition": "transform 460ms cubic-bezier(0.3, 1.15, 0.4, 1)",
+      "will-change": "transform"
+    },
+    ".glass-tabs button": {
+      "position": "relative",
+      "display": "inline-flex",
+      "align-items": "center",
+      "justify-content": "center",
+      "gap": "0.5rem",
+      "min-height": "2.75rem",
+      "padding": "0 1.25rem",
+      "border": "0",
+      "border-radius": "999px",
+      "background": "none",
+      "color": "color-mix(in srgb, white 72%, transparent)",
+      "font": "inherit",
+      "white-space": "nowrap",
+      "cursor": "pointer",
+      "transition": "color var(--dur-base, 200ms) var(--ease-out)"
+    },
+    ".glass-tabs button[aria-selected=\"true\"]": {
+      "color": "white"
+    },
+    ".glass-tabs button:focus-visible": {
+      "outline": "2px solid white",
+      "outline-offset": "-2px"
+    },
+    "@media (prefers-reduced-motion: reduce)": {
+      ".glass-tabs-lente, .glass-tabs button": {
+        "transition": "none"
+      }
+    }
+  },
+  "meta": {
+    "uso": {
+      "quando": "Alternar de 2 a 5 opções sobre foto ou vídeo, como barra flutuante ou seletor de modo",
+      "evite": "Fundo liso ou claro: segmented-control; muitas opções, morph-select"
+    }
+  },
+  "categories": [
+    "controles",
+    "vidro",
+    "abas",
+    "segmentado",
+    "navegacao",
+    "lente"
+  ],
+  "type": "registry:ui"
+}

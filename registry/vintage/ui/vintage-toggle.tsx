@@ -84,7 +84,7 @@ clique ou setas`}
         background: "linear-gradient(180deg, var(--vintage-surface-3), var(--vintage-surface-2))",
         border: "1px solid var(--vintage-surface-1)",
         boxShadow:
-          "inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 1px rgba(0,0,0,0.5), 0 10px 24px -8px rgba(0,0,0,0.6)",
+          "var(--vintage-panel-shadow)",
       }}
     >
       {/* Anel de foco num filho: o relevo mora no `box-shadow` inline, que
@@ -97,7 +97,7 @@ clique ou setas`}
         className="font-vintage-mono text-[10px] font-semibold uppercase tracking-[0.18em] whitespace-nowrap"
         style={{
           color: "var(--vintage-text-muted)",
-          textShadow: "0 -1px 0 rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06)",
+          textShadow: "var(--vintage-engrave)",
         }}
       >
         {title}
@@ -109,7 +109,7 @@ clique ou setas`}
           className="relative h-[132px] w-[26px] rounded-full"
           style={{
             background: "var(--vintage-surface-1)",
-            boxShadow: "inset 0 2px 5px rgba(0,0,0,0.85), 0 1px 0 rgba(255,255,255,0.06)",
+            boxShadow: "inset 0 2px 5px rgba(0,0,0,0.85), 0 1px 0 var(--vintage-lip)",
           }}
         >
           <div
@@ -123,7 +123,7 @@ clique ou setas`}
               background:
                 "linear-gradient(180deg, var(--vintage-metal-channel-light) 0%, var(--vintage-metal-mid) 48%, var(--vintage-metal-light) 52%, var(--vintage-metal-channel-dark) 100%)",
               boxShadow:
-                "inset 0 1px 0 rgba(255,255,255,0.6), 0 0 0 1px rgba(0,0,0,0.55), 0 4px 6px rgba(0,0,0,0.55)",
+                "inset 0 1px 0 rgba(255,255,255,0.6), 0 0 0 1px var(--vintage-edge), 0 4px 6px rgba(0,0,0,0.55)",
             }}
           >
             {/* Frisos de pega. */}

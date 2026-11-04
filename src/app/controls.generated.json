@@ -7565,6 +7565,16 @@
     "componentes": {
       "FilterBar": [
         {
+          "prop": "size",
+          "tipo": "escolha",
+          "valores": [
+            "md",
+            "lg"
+          ],
+          "padrao": "md",
+          "resumo": "`lg` junta busca e filtro numa cápsula centrada."
+        },
+        {
           "prop": "filteredCount",
           "tipo": "numero",
           "min": 0,
@@ -7587,6 +7597,25 @@
           "tipo": "texto",
           "padrao": "Limpar tudo",
           "resumo": null
+        },
+        {
+          "prop": "filtersLabel",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "query",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "Texto da busca. Com `onQueryChange`, a barra monta o campo sozinha."
+        },
+        {
+          "prop": "queryPlaceholder",
+          "tipo": "texto",
+          "padrao": "Buscar...",
+          "resumo": null,
+          "secundario": true
         }
       ]
     }
@@ -7623,6 +7652,12 @@
           "resumo": "Esconde o item \"nenhum\" — use quando toda opção real já é um valor válido."
         },
         {
+          "prop": "inline",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "A lista direto na página, sem gatilho nem popover. Para painel lateral e vitrine."
+        },
+        {
           "prop": "createEntityLabel",
           "tipo": "texto",
           "padrao": null,
@@ -7632,7 +7667,8 @@
           "prop": "createLabel",
           "tipo": "texto",
           "padrao": "Criar",
-          "resumo": null
+          "resumo": null,
+          "secundario": true
         },
         {
           "prop": "creatingLabel",
@@ -7696,6 +7732,12 @@
           "resumo": "Só o ícone, sem rótulo nem atalho. Para barras estreitas e sidebar recolhida."
         },
         {
+          "prop": "inline",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "O painel direto na página, sem gatilho nem diálogo. Para tela de busca e vitrine."
+        },
+        {
           "prop": "delay",
           "tipo": "numero",
           "min": 0,
@@ -7729,7 +7771,8 @@
           "prop": "placeholder",
           "tipo": "texto",
           "padrao": "O que você está procurando?",
-          "resumo": null
+          "resumo": null,
+          "secundario": true
         },
         {
           "prop": "quickLinksLabel",
@@ -8879,6 +8922,261 @@
           "step": 1,
           "padrao": 10,
           "resumo": "Quantas fileiras de pilares na altura."
+        }
+      ]
+    }
+  },
+  "glass-panel": {
+    "componentes": {
+      "GlassPanel": [
+        {
+          "prop": "grain",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Grão por cima do fosco: é o que tira a cara de CSS numa superfície grande."
+        }
+      ]
+    }
+  },
+  "glass-button": {
+    "componentes": {
+      "GlassButton": [
+        {
+          "prop": "shape",
+          "tipo": "escolha",
+          "valores": [
+            "pill",
+            "circle"
+          ],
+          "padrao": "pill",
+          "resumo": "`pill` leva texto; `circle` leva só ícone e pede `aria-label`."
+        }
+      ]
+    }
+  },
+  "glass-slider": {
+    "componentes": {
+      "GlassSlider": [
+        {
+          "prop": "defaultValue",
+          "tipo": "numero",
+          "min": 0,
+          "max": 130,
+          "step": 1,
+          "padrao": 50,
+          "resumo": null
+        },
+        {
+          "prop": "max",
+          "tipo": "numero",
+          "min": 0,
+          "max": 250,
+          "step": 1,
+          "padrao": 100,
+          "resumo": null
+        },
+        {
+          "prop": "min",
+          "tipo": "numero",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "padrao": 0,
+          "resumo": null
+        },
+        {
+          "prop": "step",
+          "tipo": "numero",
+          "min": 0,
+          "max": 1,
+          "step": 0.05,
+          "padrao": 1,
+          "resumo": null
+        },
+        {
+          "prop": "value",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "label",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "Nome para leitor de tela."
+        }
+      ]
+    }
+  },
+  "glass-tabs": {
+    "componentes": {
+      "GlassTabs": [
+        {
+          "prop": "defaultValue",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "label",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "Nome do grupo para leitor de tela."
+        },
+        {
+          "prop": "value",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null
+        }
+      ]
+    }
+  },
+  "glass-switch": {
+    "componentes": {
+      "GlassSwitch": [
+        {
+          "prop": "checked",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": null
+        },
+        {
+          "prop": "defaultChecked",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": null
+        }
+      ]
+    }
+  },
+  "glass-board": {
+    "componentes": {
+      "GlassBoard": [
+        {
+          "prop": "clearable",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Mostra a lixeira que esvazia a coluna; aparece só ao passar por ela."
+        },
+        {
+          "prop": "addLabel",
+          "tipo": "texto",
+          "padrao": "Adicionar",
+          "resumo": null
+        },
+        {
+          "prop": "liftedId",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "Cartão que nasce no ar, pra tela dizer \"isto arrasta\" antes de alguém tocar."
+        },
+        {
+          "prop": "searchLabel",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "Com rótulo, o quadro ganha o campo de busca."
+        },
+        {
+          "prop": "title",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null
+        }
+      ]
+    }
+  },
+  "sensor-dial": {
+    "componentes": {
+      "SensorDial": [
+        {
+          "prop": "guide",
+          "tipo": "chave",
+          "padrao": true,
+          "resumo": "Contorno do aparelho no pé da folha: mostra como segurar. Desligue fora de pareamento."
+        },
+        {
+          "prop": "target",
+          "tipo": "numero",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "padrao": 8,
+          "resumo": "Ângulo onde o alvo está, em graus (0 = topo, sentido horário)."
+        },
+        {
+          "prop": "action",
+          "tipo": "texto",
+          "padrao": "Iniciar",
+          "resumo": null
+        },
+        {
+          "prop": "activeAction",
+          "tipo": "texto",
+          "padrao": "Rastreando",
+          "resumo": null
+        },
+        {
+          "prop": "foundTitle",
+          "tipo": "texto",
+          "padrao": "Sensor encontrado.\nNão se mexa",
+          "resumo": null
+        },
+        {
+          "prop": "title",
+          "tipo": "texto",
+          "padrao": "Aproxime a câmera\ndo sensor",
+          "resumo": "Quebra de linha com `\\n`."
+        }
+      ]
+    }
+  },
+  "device-frame": {
+    "componentes": {
+      "DeviceFrame": [
+        {
+          "prop": "finish",
+          "tipo": "escolha",
+          "valores": [
+            "graphite",
+            "silver"
+          ],
+          "padrao": "graphite",
+          "resumo": null
+        },
+        {
+          "prop": "pose",
+          "tipo": "escolha",
+          "valores": [
+            "front",
+            "hero",
+            "left",
+            "right",
+            "flat"
+          ],
+          "padrao": "hero",
+          "resumo": null
+        },
+        {
+          "prop": "tilt",
+          "tipo": "escolha",
+          "valores": [
+            "none",
+            "pointer",
+            "float",
+            "scroll"
+          ],
+          "padrao": "none",
+          "resumo": "`pointer` cai em `float` no toque, porque celular não tem hover."
+        },
+        {
+          "prop": "intro",
+          "tipo": "chave",
+          "padrao": true,
+          "resumo": "Entra girando até a pose. Com movimento reduzido, já nasce nela."
         }
       ]
     }

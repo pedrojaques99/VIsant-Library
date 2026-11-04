@@ -46,9 +46,9 @@ export const ROTULO_FILTRO: Record<string, string> = Object.fromEntries(
   GRUPOS_FILTRO.flatMap((g) => g.options.map((o) => [o.id, o.label])),
 );
 
-export function useFilaFiltrada() {
+export function useFilaFiltrada(inicial: Record<string, string[]> = {}) {
   const [busca, setBusca] = React.useState("");
-  const [marcado, setMarcado] = React.useState<Record<string, string[]>>({});
+  const [marcado, setMarcado] = React.useState<Record<string, string[]>>(inicial);
 
   const alternar = React.useCallback((grupo: string, id: string) => {
     setMarcado((atual) => {

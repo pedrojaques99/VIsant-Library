@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Uma caixa de entrada com duas conversas já marcadas: basta apertar
- * "Apagar 2" para ver o buraco. Os retratos vêm do acervo, então a lista tem
+ * Uma caixa de entrada curta com uma conversa já marcada: basta apertar
+ * "Apagar 1" para ver o buraco. Os retratos vêm do acervo, então a lista tem
  * cara de produto e não de wireframe.
  */
 
@@ -14,8 +14,6 @@ const CONVERSAS = [
   { id: "1", nome: "Marina", assunto: "Copy da dobra, segunda passada", hora: "9:41" },
   { id: "2", nome: "Rafael", assunto: "Relatório da semana", hora: "9:12" },
   { id: "3", nome: "Júlia", assunto: "Revisão do layout mudou pra quinta", hora: "8:30" },
-  { id: "4", nome: "Caio", assunto: "A nota está pronta", hora: "Ontem" },
-  { id: "5", nome: "Bia Ramos", assunto: "Planejamento do trimestre", hora: "Ontem" },
 ];
 
 export default function BlackHoleDemo({ props }: DemoProps) {
@@ -24,7 +22,7 @@ export default function BlackHoleDemo({ props }: DemoProps) {
       <BlackHole
         className="w-[380px] max-w-full"
         items={CONVERSAS}
-        defaultSelected={["2", "4"]}
+        defaultSelected={["2"]}
         itemLabel={(c) => `${c.nome}: ${c.assunto}`}
         renderItem={(c) => (
           <span className="flex items-center gap-3">

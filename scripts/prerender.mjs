@@ -350,6 +350,18 @@ const FAMILIAS = familias.map(({ key, label }) => {
   };
 });
 
+/* Estilo é o outro eixo (`ESTILOS` em catalog.tsx), com página própria e pré-renderizada como a família. */
+const catalogoFonte = readFileSync(join(ROOT, "src", "app", "catalog.tsx"), "utf8");
+const PAGINAS_DE_ESTILO = [
+  ...catalogoFonte
+    .slice(catalogoFonte.indexOf("export const ESTILOS"), catalogoFonte.indexOf("export const FAMILIES"))
+    .matchAll(/\{ key: "([\w-]+)", label: "([^"]+)"/g),
+].map(([, key, label]) => ({
+  slug: `estilo/${key}`,
+  titulo: `${label} / estilos @visant/ui`,
+  descricao: `As peças de estilo ${label}, de todas as categorias, com demo viva e comando de instalação.`,
+}));
+
 /* Família declarada e vazia é rota que abre em branco — o portão é aqui, não
    na tela de quem abriu o link. */
 const vazias = familias.filter((f) => !pecasPorFamilia.get(f.key)).map((f) => f.key);
@@ -373,7 +385,7 @@ const comDobraFinal = (slug, meta) => comDobra(comMeta(meta), slug);
 /* As páginas que têm versão em Markdown própria, gerada por scripts/llms.mjs. */
 const COM_MARKDOWN = new Set(["docs", "skills", "skills/killer", "marca"]);
 
-for (const s of [...SECOES, ...FAMILIAS, ...KITS]) {
+for (const s of [...SECOES, ...FAMILIAS, ...PAGINAS_DE_ESTILO, ...KITS]) {
   escrever(s.slug, comDobraFinal(s.slug, {
     titulo: s.titulo,
     descricao: s.descricao,
@@ -400,7 +412,7 @@ for (const item of registry.items) {
 }
 
 console.log(
-  `páginas: ${registry.items.length + SECOES.length + FAMILIAS.length + KITS.length + 1}`,
+  `páginas: ${registry.items.length + SECOES.length + FAMILIAS.length + PAGINAS_DE_ESTILO.length + KITS.length + 1}`,
 );
 
 /*
@@ -416,6 +428,7 @@ const rotas = [
   "",
   ...SECOES.filter((s) => !s.noindex).map((s) => s.slug),
   ...familias.filter((f) => !f.oculta).map((f) => `catalogo/${f.key}`),
+  ...PAGINAS_DE_ESTILO.map((p) => p.slug),
   ...registry.items
     .filter((i) => !arquivada(notas[i.name]))
     .filter((i) => i.categories?.[0] === "fundacao" || !familiaOculta.has(i.categories?.[0]))

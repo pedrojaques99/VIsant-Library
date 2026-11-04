@@ -62,8 +62,6 @@ const AssigneeStackDemo = React.lazy(() => import("./demos/assignee-stack-demo")
 const DataTableDemo = React.lazy(() => import("./demos/data-table-demo"));
 const BrandSelectorDemo = React.lazy(() => import("./demos/brand-selector-demo"));
 const ChipDemo = React.lazy(() => import("./demos/chip-demo"));
-const SearchFieldDemo = React.lazy(() => import("./demos/search-field-demo"));
-const FilterMenuDemo = React.lazy(() => import("./demos/filter-menu-demo"));
 const FilterBarDemo = React.lazy(() => import("./demos/filter-bar-demo"));
 const SearchableSelectDemo = React.lazy(() => import("./demos/searchable-select-demo"));
 const CommandSearchDemo = React.lazy(() => import("./demos/command-search-demo"));
@@ -166,7 +164,16 @@ export type Family =
  * 2026-10-29 "Vintage" era aba, e um knob vintage não aparecia em Controles pra
  * quem procurava knob. Agora o knob mora em Controles e carrega o estilo.
  */
-export type Estilo = "vintage";
+export type Estilo = "vintage" | "liquid-glass";
+
+/**
+ * Os estilos que têm página própria (`/estilo/<key>`). A peça continua na família
+ * dela: isto é outra forma de chegar até lá, não outra gaveta.
+ */
+export const ESTILOS: { key: Estilo; label: string; regra: string }[] = [
+  { key: "vintage", label: "Vintage", regra: "madeira, metal e LED: painel de aparelho antigo" },
+  { key: "liquid-glass", label: "Liquid Glass", regra: "vidro que refrata ou embaça o que está atrás, para pousar sobre foto ou vídeo" },
+];
 
 /**
  * O que uma demo recebe.
@@ -234,7 +241,19 @@ export const previewOf = (item: CatalogItem) => item.preview ?? DEFAULT_PREVIEW;
  * Peça que é fundo: textura, shader, campo de partículas. Ocupa o palco inteiro, de borda a
  * borda, porque recortada numa caixinha no meio ela lê como miniatura de si mesma.
  */
-const FUNDOS = new Set(["spring-dots", "grid-dots", "fog-tree", "fog-garden"]);
+const FUNDOS = new Set([
+  "spring-dots",
+  "grid-dots",
+  "fog-tree",
+  "fog-garden",
+  // Vidro sem fundo não é nada: a cena tem de ir até a borda do palco.
+  "glass-panel",
+  "glass-button",
+  "glass-slider",
+  "glass-tabs",
+  "glass-switch",
+  "glass-board",
+]);
 export const sangra = (item: Pick<CatalogItem, "name">) => /^(shader|textura)-/.test(item.name) || FUNDOS.has(item.name);
 
 export const stageSurfaceOf = (item: CatalogItem) =>
@@ -541,6 +560,14 @@ const TexturaPillarsColheitaDemo = React.lazy(() => import("./demos/textura-pill
 const TexturaPinchColheitaDemo = React.lazy(() => import("./demos/textura-pinch-demo"));
 const TexturaSettleColheitaDemo = React.lazy(() => import("./demos/textura-settle-demo"));
 const TexturaSphereColheitaDemo = React.lazy(() => import("./demos/textura-sphere-demo"));
+const GlassPanelVidroDemo = React.lazy(() => import("./demos/glass-panel-demo"));
+const GlassButtonVidroDemo = React.lazy(() => import("./demos/glass-button-demo"));
+const GlassSliderVidroDemo = React.lazy(() => import("./demos/glass-slider-demo"));
+const GlassTabsVidroDemo = React.lazy(() => import("./demos/glass-tabs-demo"));
+const GlassSwitchVidroDemo = React.lazy(() => import("./demos/glass-switch-demo"));
+const GlassBoardVidroDemo = React.lazy(() => import("./demos/glass-board-demo"));
+const SensorDialVidroDemo = React.lazy(() => import("./demos/sensor-dial-demo"));
+const DeviceFrameVidroDemo = React.lazy(() => import("./demos/device-frame-demo"));
 const TexturaTilesColheitaDemo = React.lazy(() => import("./demos/textura-tiles-demo"));
 const TexturaTwistColheitaDemo = React.lazy(() => import("./demos/textura-twist-demo"));
 const TexturaWarpColheitaDemo = React.lazy(() => import("./demos/textura-warp-demo"));
@@ -850,39 +877,32 @@ export const CATALOG: CatalogItem[] = [
   },
   {
     name: "filter-bar",
-    // palco-check: a barra fica acima do centro de propósito, a lista filtrada abre embaixo
     title: "Filter Bar",
     type: "ui",
     family: "controles",
     description:
-      "Esqueleto da barra de filtro: controles por slot, chips aplicados embaixo, e a contagem que some quando nada foi filtrado.",
+      "Busca e filtro numa peça só: campo, menu de facetas, chips aplicados e a contagem que some quando nada foi filtrado.",
     tags: ["filtro", "busca", "chips"],
     demo: () => <FilterBarDemo />,
-    preview: { w: 520, h: 300 },
+    preview: { w: 640, h: 420 },
   },
   {
     name: "search-field",
-    // palco-check: o campo fica acima do centro de propósito, a lista filtrada abre embaixo
     title: "Search Field",
     type: "ui",
     family: "controles",
     description:
       "Campo de busca com debounce que não se limpa sozinho: negocia o texto local com o valor de fora por referência acordada.",
     tags: ["busca", "debounce", "formulário"],
-    demo: () => <SearchFieldDemo />,
-    preview: { w: 420, h: 220 },
   },
   {
     name: "filter-menu",
-    // palco-check: o gatilho fica no terço de cima de propósito, o menu abre embaixo dentro do palco
     title: "Filter Menu",
     type: "ui",
     family: "controles",
     description:
       "Menu de facetas que não conhece o domínio: grupos múltiplos ou excludentes, e o contador conta grupos, não opções.",
     tags: ["filtro", "menu", "facetas"],
-    demo: () => <FilterMenuDemo />,
-    preview: { w: 420, h: 240 },
   },
   {
     name: "searchable-select",
@@ -894,7 +914,7 @@ export const CATALOG: CatalogItem[] = [
       "Combobox com busca em rótulo e keywords ocultos, grupos, e criação no lugar que sobrevive à falha. Digita dentro de Dialog.",
     tags: ["combobox", "busca", "formulário"],
     demo: () => <SearchableSelectDemo />,
-    preview: { w: 420, h: 240 },
+    preview: { w: 420, h: 340 },
   },
   {
     name: "command-search",
@@ -906,7 +926,7 @@ export const CATALOG: CatalogItem[] = [
       "Busca ⌘K que não sabe buscar nem navegar: onSearch entra por prop, e resposta fora de ordem não repovoa a lista.",
     tags: ["busca", "comando", "teclado"],
     demo: () => <CommandSearchDemo />,
-    preview: { w: 420, h: 200 },
+    preview: { w: 520, h: 360 },
   },
   {
     name: "store-status",
@@ -1273,7 +1293,7 @@ export const CATALOG: CatalogItem[] = [
     type: "theme",
     family: "fundacao",
     estilo: ["vintage"],
-    description: "O tema do kit de áudio, o contraponto escuro aos temas de marca.",
+    description: "O tema do kit de áudio, em claro e escuro: as chapas saem dos tokens do projeto e a luz sai da marca.",
     tags: ["tema", "css"],
   },
   {
@@ -2810,6 +2830,110 @@ export const CATALOG: CatalogItem[] = [
     demo: TexturaWatchColheitaDemo,
     knobs: "TexturaWatch",
     preview: { w: 600, h: 390 },
+  },
+  {
+    name: "liquid-glass",
+    title: "Liquid Glass",
+    type: "ui",
+    family: "efeitos",
+    estilo: ["liquid-glass"],
+    description:
+      "A superfície que refrata o fundo de verdade, com franja cromática nas bordas. É a base de todas as peças de vidro.",
+    tags: ["vidro","refração","backdrop-filter","primitiva"],
+  },
+  {
+    name: "glass-panel",
+    title: "Glass Panel",
+    type: "ui",
+    family: "conteudo",
+    estilo: ["liquid-glass"],
+    description:
+      "Vidro fosco com borda em degradê, acesa nos cantos, e grão opcional. O cartão pra pôr sobre foto ou fundo com forma.",
+    tags: ["vidro","fosco","superfície","card"],
+    demo: GlassPanelVidroDemo,
+    preview: { w: 560, h: 420 },
+  },
+  {
+    name: "glass-button",
+    title: "Glass Button",
+    type: "ui",
+    family: "controles",
+    estilo: ["liquid-glass"],
+    description:
+      "Botão de vidro, em pílula ou círculo, que refrata o fundo. Com aria-pressed vira alternância.",
+    tags: ["vidro","botão","ícone","alternância"],
+    demo: GlassButtonVidroDemo,
+    preview: { w: 480, h: 360 },
+  },
+  {
+    name: "glass-slider",
+    title: "Glass Slider",
+    type: "ui",
+    family: "controles",
+    estilo: ["liquid-glass"],
+    description:
+      "Slider cuja lente de vidro refrata o fundo enquanto anda. Volume, brilho ou qualquer nível sobre imagem.",
+    tags: ["vidro","slider","volume","brilho","lente"],
+    demo: GlassSliderVidroDemo,
+    preview: { w: 640, h: 480 },
+  },
+  {
+    name: "glass-tabs",
+    title: "Glass Tabs",
+    type: "ui",
+    family: "controles",
+    estilo: ["liquid-glass"],
+    description:
+      "Abas em que a seleção é uma lente de vidro andando sobre o trilho, com setas, Home e End.",
+    tags: ["vidro","abas","segmentado","navegação","lente"],
+    demo: GlassTabsVidroDemo,
+    preview: { w: 560, h: 360 },
+  },
+  {
+    name: "glass-switch",
+    title: "Glass Switch",
+    type: "ui",
+    family: "controles",
+    estilo: ["liquid-glass"],
+    description:
+      "Interruptor com polegar de vidro: o ligado aparece refratado através dele, em --brand.",
+    tags: ["vidro","switch","toggle","formulário"],
+    demo: GlassSwitchVidroDemo,
+    preview: { w: 420, h: 300 },
+  },
+  {
+    name: "glass-board",
+    title: "Glass Board",
+    type: "ui",
+    family: "conteudo",
+    estilo: ["liquid-glass"],
+    description:
+      "Quadro em vidro fosco sobre foto, com busca e cartões que arrastam entre colunas. A roupa de vidro do kanban.",
+    tags: ["vidro","fosco","kanban","board","dnd"],
+    demo: GlassBoardVidroDemo,
+    preview: { w: 920, h: 640 },
+  },
+  {
+    name: "sensor-dial",
+    title: "Sensor Dial",
+    type: "ui",
+    family: "controles",
+    description:
+      "Mira de pareamento: gire o feixe até o alvo, e o disco cresce conforme chega perto. Em repouso, o feixe procura sozinho.",
+    tags: ["mostrador","pareamento","mira","sensor","câmera"],
+    demo: SensorDialVidroDemo,
+    preview: { w: 380, h: 640 },
+  },
+  {
+    name: "device-frame",
+    title: "Device Frame",
+    type: "ui",
+    family: "conteudo",
+    description:
+      "Aparelho em CSS 3D com a tela viva dentro: cinco poses, entrada animada e balanço por ponteiro, flutuação ou rolagem.",
+    tags: ["mockup","celular","aparelho","3d","tela"],
+    demo: DeviceFrameVidroDemo,
+    preview: { w: 420, h: 760 },
   },
 ];
 

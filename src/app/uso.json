@@ -690,5 +690,41 @@
   "agent-rules": {
     "quando": "Projeto em que um agente de IA escreve a UI: instala as regras que fazem ele buscar a peça @visant certa antes de criar",
     "evite": "Projeto sem agente de IA escrevendo código; quem escolhe à mão consulta o catálogo direto"
+  },
+  "liquid-glass": {
+    "quando": "Superfície própria que precise refratar o fundo, como barra flutuante ou lente",
+    "evite": "Painel grande com conteúdo: glass-panel; controle pronto: glass-button ou glass-slider"
+  },
+  "glass-panel": {
+    "quando": "Cartão ou painel sobre foto, vídeo ou gradiente, em landing ou tela de produto",
+    "evite": "Fundo liso, onde o fosco não tem o que borrar: um card comum; lista de dados densa"
+  },
+  "glass-button": {
+    "quando": "Ação sobre foto ou vídeo, como player, câmera ou barra flutuante",
+    "evite": "Ação principal em fundo claro ou liso: button; a ação que define a dobra, cta-surface"
+  },
+  "glass-slider": {
+    "quando": "Nível contínuo sobre foto ou vídeo, como volume ou brilho em player e painel de casa",
+    "evite": "Slider em formulário comum: elastic-slider; projeção com conta, sim-slider"
+  },
+  "glass-tabs": {
+    "quando": "Alternar de 2 a 5 opções sobre foto ou vídeo, como barra flutuante ou seletor de modo",
+    "evite": "Fundo liso ou claro: segmented-control; muitas opções, morph-select"
+  },
+  "glass-switch": {
+    "quando": "Liga e desliga sobre foto ou vídeo, em painel flutuante ou tela de produto",
+    "evite": "Sem vidro, com a bolinha escorrendo como gota: liquid-toggle; formulário comum, switch"
+  },
+  "glass-board": {
+    "quando": "Pipeline ou board de tarefas com a foto da marca atrás, em produto com visual próprio",
+    "evite": "Ferramenta interna densa, com seleção múltipla: kanban; lista pra ordenar e editar, data-table"
+  },
+  "sensor-dial": {
+    "quando": "Passo de parear ou alinhar um dispositivo, em app de IoT ou de câmera",
+    "evite": "Escolher uma hora: time-dial; mostrar um nível sem interação, gauge"
+  },
+  "device-frame": {
+    "quando": "Mostrar uma tela de app funcionando em hero ou página de produto",
+    "evite": "Giro de 360° ou objeto de verdade: lathe-object; só uma foto de tela, photo-frame"
   }
 }

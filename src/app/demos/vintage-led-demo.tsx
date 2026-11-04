@@ -53,7 +53,7 @@ export default function VintageLedDemo() {
           background: "linear-gradient(180deg, var(--vintage-surface-3), var(--vintage-surface-2))",
           border: "1px solid var(--vintage-surface-1)",
           boxShadow:
-            "inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 1px rgba(0,0,0,0.5), 0 10px 24px -8px rgba(0,0,0,0.6)",
+            "var(--vintage-panel-shadow)",
         }}
       >
         <VintageButton label="POWER" active={ligado} onClick={() => setLigado((v) => !v)} />

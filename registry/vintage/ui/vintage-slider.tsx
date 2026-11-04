@@ -199,7 +199,7 @@ export function VintageSlider({
   const percentage = ((currentValue - min) / (max - min)) * 100;
   const cor = accent || "var(--vintage-light)";
   const leitura = fmt ? fmt(currentValue) : currentValue.toFixed(1);
-  const gravado = "0 -1px 0 rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06)";
+  const gravado = "var(--vintage-engrave)";
 
   return (
     <div
@@ -222,7 +222,7 @@ arraste · shift = fino · roda · duplo clique = centro`}
         background: "linear-gradient(180deg, var(--vintage-surface-3), var(--vintage-surface-2))",
         border: "1px solid var(--vintage-surface-1)",
         boxShadow:
-          "inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 1px rgba(0,0,0,0.5), 0 10px 24px -8px rgba(0,0,0,0.6)",
+          "var(--vintage-panel-shadow)",
       }}
     >
       {/* Rótulo e leitura na mesma linha: o número fica onde o olho já está. */}
@@ -290,7 +290,7 @@ arraste · shift = fino · roda · duplo clique = centro`}
           className="absolute inset-x-0 top-1/2 h-[6px] -translate-y-1/2 overflow-hidden rounded-full"
           style={{
             background: "var(--vintage-surface-1)",
-            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.9), 0 1px 0 rgba(255,255,255,0.06)",
+            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.9), 0 1px 0 var(--vintage-lip)",
           }}
         >
           <div
@@ -320,7 +320,7 @@ arraste · shift = fino · roda · duplo clique = centro`}
             background:
               "linear-gradient(90deg, var(--vintage-metal-channel-dark) 0%, var(--vintage-metal-channel-light) 35%, var(--vintage-metal-mid) 65%, var(--vintage-metal-light) 100%)",
             boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.55), 0 0 0 1px rgba(0,0,0,0.6), 0 3px 4px rgba(0,0,0,0.55)",
+              "inset 0 1px 0 rgba(255,255,255,0.55), 0 0 0 1px var(--vintage-edge), 0 3px 4px rgba(0,0,0,0.55)",
           }}
         >
           <div

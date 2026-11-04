@@ -5,6 +5,8 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { DUR, EASE_OUT, INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { Chip } from "@/components/ui/chip";
+import { FilterMenu, type FilterGroup } from "@/components/ui/filter-menu";
+import { SearchField } from "@/components/ui/search-field";
 
 /**
  * FilterBar — o esqueleto de uma barra de filtro: controles em cima, filtros
@@ -38,6 +40,11 @@ import { Chip } from "@/components/ui/chip";
  * 4. **A busca ocupa a sobra.** É o controle que recebe texto de tamanho
  *    imprevisível; os outros têm largura de rótulo.
  *
+ * ── Busca e filtro numa peça só ──────────────────────────────────────────────
+ * Com `query` e `groups`, a barra monta sozinha o `search-field`, o `filter-menu`
+ * e os chips, e `size="lg"` junta os dois numa cápsula. Os slots continuam valendo
+ * para quem precisa de outro controle, e os dois itens seguem instaláveis.
+ *
  * Compõe com `sticky-filterbar`, que resolve grudar e condensar e não sabe
  * montar nada: `<StickyFilterbar><FilterBar … /></StickyFilterbar>`.
  */
@@ -62,7 +69,24 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   clearAllLabel?: string;
   /** `(filtrados, total) => texto`. Trocável para plural, idioma ou substantivo. */
   countLabel?: (filtered: number, total: number) => string;
+  /** Texto da busca. Com `onQueryChange`, a barra monta o campo sozinha. */
+  query?: string;
+  onQueryChange?: (query: string) => void;
+  queryPlaceholder?: string;
+  /** Facetas. Com `selected` e `onToggle`, a barra monta o menu e os chips sozinha. */
+  groups?: FilterGroup[];
+  selected?: Record<string, string[]>;
+  onToggle?: (groupKey: string, optionId: string) => void;
+  filtersLabel?: string;
+  /** `lg` junta busca e filtro numa cápsula centrada. */
+  size?: "md" | "lg";
 }
+
+// Dentro da cápsula quem desenha a borda e o foco é ela; o campo só leva o texto.
+const CAMPO_DA_CAPSULA =
+  "min-w-0 [&_input]:h-12 [&_input]:rounded-none [&_input]:border-0 [&_input]:bg-transparent [&_input]:pl-10 [&_input]:text-base [&_input:focus-visible]:[box-shadow:none] [&_svg:first-child]:left-3.5";
+const FILTRO_DA_CAPSULA =
+  "h-10 rounded-[var(--r-pill,9999px)] border-transparent bg-[var(--muted)] pointer-coarse:h-11";
 
 export function FilterBar({
   chips = [],
@@ -76,6 +100,14 @@ export function FilterBar({
   onClearAll,
   clearAllLabel = "Limpar tudo",
   countLabel = (filtered, total) => `${filtered} de ${total}`,
+  query,
+  onQueryChange,
+  queryPlaceholder = "Buscar...",
+  groups,
+  selected = {},
+  onToggle,
+  filtersLabel,
+  size = "md",
   className,
   ...props
 }: FilterBarProps) {
@@ -85,16 +117,61 @@ export function FilterBar({
     typeof totalCount === "number" &&
     filteredCount !== totalCount;
 
-  const hasChips = chips.length > 0;
+  const capsula = size === "lg";
+  const campo =
+    search ??
+    (onQueryChange ? (
+      <SearchField
+        value={query ?? ""}
+        onChange={onQueryChange}
+        placeholder={queryPlaceholder}
+        delay={120}
+        className={capsula ? CAMPO_DA_CAPSULA : undefined}
+      />
+    ) : null);
+  const menu =
+    filters ??
+    (groups && onToggle ? (
+      <FilterMenu
+        groups={groups}
+        selected={selected}
+        onToggle={onToggle}
+        onClear={onClearAll}
+        label={filtersLabel}
+        className={capsula ? FILTRO_DA_CAPSULA : undefined}
+      />
+    ) : null);
+  // Sem chips prontos, eles saem do que está marcado: o menu já sabe o rótulo de cada opção.
+  const chipsVistos: FilterBarChip[] =
+    chips.length > 0 || !groups || !onToggle
+      ? chips
+      : groups.flatMap((g) =>
+          g.options
+            .filter((o) => selected[g.key]?.includes(o.id))
+            .map((o) => ({ key: `${g.key}-${o.id}`, label: o.label, onRemove: () => onToggle(g.key, o.id) })),
+        );
+  const hasChips = chipsVistos.length > 0;
   const reduzir = useReducedMotion();
   const passo = reduzir ? INSTANT : { duration: DUR.fast, ease: EASE_OUT };
 
   return (
     <div className={cn("flex w-full flex-col", className)} {...props}>
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div
+        className={cn(
+          "flex items-center",
+          capsula
+            ? cn(
+                "min-h-14 gap-1 rounded-[var(--r-pill,9999px)] border border-[var(--border)] bg-[var(--card,var(--background))] pr-2",
+                "[box-shadow:var(--e-raised,0_8px_24px_-16px_rgb(0_0_0/0.35))]",
+                "transition-[border-color,box-shadow] [transition-duration:var(--dur-base,200ms)] [transition-timing-function:var(--ease-out)]",
+                "focus-within:border-[color-mix(in_oklab,var(--ring)_60%,var(--foreground))] focus-within:[box-shadow:0_0_0_3px_color-mix(in_oklab,var(--ring)_25%,transparent)]",
+              )
+            : "gap-2 sm:gap-3",
+        )}
+      >
         {/* A busca recebe texto de tamanho imprevisível — fica com a sobra. */}
-        {search ? <div className="min-w-0 flex-1">{search}</div> : null}
-        {filters}
+        {campo ? <div className="min-w-0 flex-1">{campo}</div> : null}
+        {menu}
         {sort}
         {view}
         {extras}
@@ -111,9 +188,9 @@ export function FilterBar({
       >
         {/* `-m-1 p-1`: o recorte que dobra a linha não pode comer o anel de foco do chip. */}
         <div className="-m-1 min-h-0 overflow-hidden p-1">
-          <div className="flex flex-wrap items-center gap-1.5 pt-2">
+          <div className={cn("flex flex-wrap items-center gap-1.5 pt-2", capsula && "justify-center pt-3")}>
             <AnimatePresence initial={false} mode="popLayout">
-              {chips.map((chip) => (
+              {chipsVistos.map((chip) => (
                 <motion.span
                   key={chip.key}
                   layout={reduzir ? false : "position"}
@@ -150,7 +227,7 @@ export function FilterBar({
               // leitor de tela digita e não recebe sinal nenhum de que encolheu.
               <span
                 aria-live="polite"
-                className="ml-auto shrink-0 text-xs tabular-nums text-[var(--muted-foreground)]"
+                className={cn("shrink-0 text-xs tabular-nums text-[var(--muted-foreground)]", !capsula && "ml-auto", capsula && "ml-2")}
               >
                 {countLabel(filteredCount as number, totalCount as number)}
               </span>

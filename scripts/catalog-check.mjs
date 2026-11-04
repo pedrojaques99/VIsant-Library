@@ -106,6 +106,21 @@ const foraDaFundacao = itens
 const semFamilia = catalogNames.filter((n) => !itens.some((i) => i.name === n));
 
 /*
+ * Estilo é o outro eixo: diz como a peça se parece, nunca o que ela é. Um estilo
+ * fora de ESTILOS some da navegação sem erro nenhum, e um nome repetido em
+ * FAMILIES faria a mesma palavra abrir duas páginas diferentes.
+ */
+const estilosValidos = [
+  ...catalogSrc
+    .slice(catalogSrc.indexOf("export const ESTILOS"), catalogSrc.indexOf("export const FAMILIES"))
+    .matchAll(/\{ key:\s*"([^"]+)"/g),
+].map((m) => m[1]);
+const estiloInvalido = [...catalogBlock.matchAll(/^\s{4}name: "([^"]+)",(?:(?!\n\s{4}name: ")[\s\S])*?\n\s{4}estilo: \[([^\]]*)\]/gm)].flatMap(([, nome, lista]) =>
+  [...lista.matchAll(/"([^"]+)"/g)].filter((m) => !estilosValidos.includes(m[1])).map((m) => `${nome}: "${m[1]}"`),
+);
+const estiloEFamilia = estilosValidos.filter((e) => familiasValidas.includes(e));
+
+/*
  * O site é pré-renderizado: só existe HTML pra família atual. O nome antigo
  * (`/catalogo/shaders`) só abre se a Vercel redirecionar — a `FAMILIA_ANTIGA`
  * resolve dentro do app, mas o link de fora bate no 404 antes do app carregar.
@@ -145,6 +160,9 @@ if (missingFromRegistry.length)
   problems.push(["Na vitrine, sem item no registry (o `add` vai falhar)", missingFromRegistry]);
 if (!familiasValidas.length) problems.push(["FAMILIES não lida de catalog.tsx — o formato mudou?", ["-"]]);
 if (semFamilia.length) problems.push(["Sem type/family legível no catálogo", semFamilia]);
+if (!estilosValidos.length) problems.push(["ESTILOS não lido de catalog.tsx — o formato mudou?", ["-"]]);
+if (estiloInvalido.length) problems.push(["Estilo fora de ESTILOS", estiloInvalido]);
+if (estiloEFamilia.length) problems.push(["O mesmo nome é estilo e família", estiloEFamilia]);
 if (familiaInvalida.length) problems.push(["Família fora de FAMILIES", familiaInvalida]);
 if (foraDaFundacao.length) problems.push(["Sem interface própria e fora de Fundação", foraDaFundacao]);
 if (!antigas.length) problems.push(["FAMILIA_ANTIGA não lida de catalog.tsx — o formato mudou?", ["-"]]);

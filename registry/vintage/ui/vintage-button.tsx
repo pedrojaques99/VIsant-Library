@@ -63,8 +63,8 @@ export function VintageButton({
             ? `radial-gradient(circle at 50% 35%, color-mix(in srgb, ${lamp} 40%, white) 0%, ${lamp} 45%, color-mix(in srgb, ${lamp} 70%, black) 100%)`
             : "radial-gradient(circle at 50% 35%, var(--vintage-surface-4) 0%, var(--vintage-surface-2) 100%)",
           boxShadow: active
-            ? `0 0 0 1px rgba(0,0,0,0.6), 0 0 8px color-mix(in srgb, ${lamp} 70%, transparent)`
-            : "0 0 0 1px rgba(0,0,0,0.6), inset 0 1px 1px rgba(0,0,0,0.6)",
+            ? `0 0 0 1px var(--vintage-edge), 0 0 8px color-mix(in srgb, ${lamp} 70%, transparent)`
+            : "0 0 0 1px var(--vintage-edge), inset 0 1px 1px rgba(0,0,0,0.6)",
           transition:
             "background var(--dur-fast,160ms) var(--ease-out,ease), box-shadow var(--dur-fast,160ms) var(--ease-out,ease)",
         }}
@@ -76,7 +76,7 @@ export function VintageButton({
         style={{
           background: "var(--vintage-surface-1)",
           boxShadow:
-            "inset 0 2px 4px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.06)",
+            "inset 0 2px 4px rgba(0,0,0,0.8), 0 1px 0 var(--vintage-lip)",
         }}
       >
         <span
@@ -96,7 +96,7 @@ export function VintageButton({
             className="font-vintage-mono text-[10px] font-semibold uppercase tracking-[0.16em]"
             style={{
               color: active ? "var(--vintage-label)" : "var(--vintage-text-muted)",
-              textShadow: "0 -1px 0 rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06)",
+              textShadow: "var(--vintage-engrave)",
               transition: "color var(--dur-fast,160ms) var(--ease-out,ease)",
             }}
           >

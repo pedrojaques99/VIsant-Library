@@ -104,9 +104,8 @@
     "lead": "Uma linha de contexto, em medida mais estreita que o título."
   },
   "showcase-card": {
-    "className": "mx-auto w-full max-w-[320px]",
-    "href": "#/c/showcase-card",
-    "title": "Identidade que quer dizer alguma coisa"
+    "className": "mx-auto w-full max-w-[300px]",
+    "href": "#/c/showcase-card"
   },
   "step-cards": {
     "className": "w-full",
@@ -244,8 +243,8 @@
     "className": "w-52",
     "size": 208,
     "label": "Espaço do plano",
-    "value": 84,
-    "detail": "de 500 GB"
+    "detail": "de 500 GB",
+    "value": 84
   },
   "hold-to-confirm": {
     "label": "Segure pra apagar",

@@ -3,12 +3,13 @@
 /**
  * O medidor numa cena de cota: espaço do plano, com as três faixas nomeadas.
  *
- * Valor e régua são literais de propósito: é o que o painel lê pra nascer igual
- * ao palco. Os botões de mais e menos que moravam aqui eram um segundo dono do
- * valor, e o painel seguia em 0 com a peça em 84%. Quem mexe agora é o knob
- * `value`, e a regra da peça continua à vista: a faixa troca quando a contagem
- * cruza o limite. O qualificador é só o teto, verdadeiro em qualquer valor.
+ * Os botões mostram a regra que a peça defende: a faixa troca quando a contagem
+ * CRUZA o limite, no meio da mola. O valor tem um dono só, o estado daqui: o knob
+ * `value` do painel entra nele, e o painel continua nascendo do `useState`.
  */
+
+import * as React from "react";
+import { Minus, Plus } from "lucide-react";
 
 import { Gauge } from "../../../registry/visant/ui/gauge";
 import type { DemoProps } from "../catalog";
@@ -18,19 +19,34 @@ const FAIXAS = [
   { from: 70, label: "Quase cheio" },
   { from: 90, label: "Lotado", alert: true },
 ];
+const PASSO = 8;
+const botao =
+  "alvo-toque inline-flex size-9 shrink-0 items-center justify-center rounded-[var(--r-control)] border border-border bg-card text-foreground [transition:background-color_var(--dur-fast)_var(--ease-out)] hover:bg-muted focus-visible:outline-none focus-visible:[box-shadow:var(--focus)] disabled:opacity-40";
 
 export default function GaugeDemo({ props }: DemoProps) {
+  const [pct, setPct] = React.useState(84);
+  const doPainel = props?.value as number | undefined;
+  React.useEffect(() => {
+    if (typeof doPainel === "number") setPct(doPainel);
+  }, [doPainel]);
+
   return (
-    <div className="flex h-full w-full items-center justify-center">
+    <div className="flex h-full w-full items-center justify-center gap-4">
+      <button type="button" className={botao} aria-label="Liberar espaço" disabled={pct <= 0} onClick={() => setPct((p) => Math.max(0, p - PASSO))}>
+        <Minus className="size-4" aria-hidden="true" />
+      </button>
       <Gauge
         className="w-52"
         size={208}
         label="Espaço do plano"
-        value={84}
         detail="de 500 GB"
         bands={FAIXAS}
         {...props}
+        value={pct}
       />
+      <button type="button" className={botao} aria-label="Ocupar espaço" disabled={pct >= 100} onClick={() => setPct((p) => Math.min(100, p + PASSO))}>
+        <Plus className="size-4" aria-hidden="true" />
+      </button>
     </div>
   );
 }

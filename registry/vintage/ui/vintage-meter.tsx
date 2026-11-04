@@ -178,7 +178,7 @@ export function VintageMeter({
         background: "linear-gradient(180deg, var(--vintage-surface-3), var(--vintage-surface-2))",
         border: "1px solid var(--vintage-surface-1)",
         boxShadow:
-          "inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 1px rgba(0,0,0,0.5), 0 10px 24px -8px rgba(0,0,0,0.6)",
+          "var(--vintage-panel-shadow)",
       }}
     >
       {/*
@@ -191,9 +191,9 @@ export function VintageMeter({
         className="relative flex-1 overflow-hidden rounded-[6px]"
         style={{
           background:
-            "radial-gradient(130% 120% at 50% 100%, #f7e2a4 0%, #ecc86f 50%, #b98a33 100%)",
+            "radial-gradient(130% 120% at 50% 100%, var(--vintage-face-hi) 0%, var(--vintage-face-mid) 50%, var(--vintage-face-lo) 100%)",
           boxShadow:
-            "inset 0 2px 6px rgba(0,0,0,0.75), inset 0 0 0 1px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.06)",
+            "var(--vintage-well-shadow)",
         }}
       >
         <div
@@ -340,7 +340,7 @@ export function VintageMeter({
           className="text-[10px] font-semibold uppercase tracking-[0.18em]"
           style={{
             color: "var(--vintage-text-muted)",
-            textShadow: "0 -1px 0 rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06)",
+            textShadow: "var(--vintage-engrave)",
           }}
         >
           {label}
@@ -359,8 +359,8 @@ export function VintageMeter({
             style={{
               background: isClipping ? "var(--vintage-meter-red)" : "var(--vintage-surface-1)",
               boxShadow: isClipping
-                ? "0 0 6px var(--vintage-meter-red), 0 0 0 1px rgba(0,0,0,0.6)"
-                : "inset 0 1px 1px rgba(0,0,0,0.8), 0 0 0 1px rgba(0,0,0,0.6)",
+                ? "0 0 6px var(--vintage-meter-red), 0 0 0 1px var(--vintage-edge)"
+                : "inset 0 1px 1px rgba(0,0,0,0.8), 0 0 0 1px var(--vintage-edge)",
               transition: "background var(--dur-fast,160ms) var(--ease-out,ease)",
             }}
           />
@@ -370,8 +370,8 @@ export function VintageMeter({
   );
 }
 
-/** Tinta da serigrafia do mostrador. Material, não tema: papel creme leva tinta escura. */
-const TINTA = "#2a2014";
+/** Tinta da serigrafia do mostrador: papel creme leva tinta escura nos dois temas. */
+const TINTA = "var(--vintage-face-ink)";
 
 /** Ponto da escala `n` (0…1) a `r` do pivô (70,65), no arco de ±45°. */
 function polar(n: number, r: number): [number, number] {

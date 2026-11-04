@@ -38,6 +38,9 @@
   "reels-rail": [
     "lucide-react"
   ],
+  "measure-picker": [
+    "react"
+  ],
   "motion-layer": [
     "gsap"
   ],
@@ -46,7 +49,8 @@
     "@dnd-kit/core",
     "@dnd-kit/sortable",
     "@dnd-kit/utilities",
-    "framer-motion"
+    "framer-motion",
+    "motion"
   ],
   "data-table": [
     "@tanstack/react-table@^8.21.3",
@@ -335,6 +339,7 @@
     "react"
   ],
   "filter-bar": [
+    "@radix-ui/react-dropdown-menu",
     "motion",
     "react"
   ],
@@ -346,5 +351,21 @@
   "command-search": [
     "cmdk",
     "react"
+  ],
+  "glass-board": [
+    "@air/react-drag-to-select",
+    "@dnd-kit/core",
+    "@dnd-kit/sortable",
+    "@dnd-kit/utilities",
+    "framer-motion",
+    "lucide-react",
+    "motion"
+  ],
+  "sensor-dial": [
+    "lucide-react",
+    "motion"
+  ],
+  "device-frame": [
+    "motion"
   ]
 }

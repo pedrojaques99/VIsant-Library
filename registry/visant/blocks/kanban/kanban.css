@@ -100,13 +100,13 @@
  * vizinhos) direto no atributo style — dois tempos e duas curvas que ninguém
  * desta casa escolheu, e que nenhum arquivo de tokens alcançava. O KanbanCard
  * parou de repassar aquele valor pro style inline e o tempo passou a morar
- * aqui. Curva `in-out` porque isto é movimento DENTRO da tela (um vizinho
- * andando pro lado), não uma entrada nem uma saída.
+ * aqui. Curva `out` e tempo longo: o vizinho sai na hora em que o cartão chega e
+ * desacelera até o lugar, e um novo gesto pega ele de onde estiver.
  */
 .kanban-card {
   transition-property: transform;
-  transition-duration: var(--dur-base, 200ms);
-  transition-timing-function: var(--ease-in-out);
+  transition-duration: var(--dur-slow, 300ms);
+  transition-timing-function: var(--ease-out);
 
   /*
    * O contorno do slot existe SEMPRE, transparente — e é isso que faz a entrada
@@ -192,7 +192,8 @@
      que viaja tem o mesmo peso visual dos parados e o gesto parece um bug de
      render. O anel é a metade que vale no escuro: preto sobre palco escuro não se
      vê, e no toque o cartão levantava sem mudar nada à vista.
-     Nada de `scale` aqui: o cartão levanta do tamanho que tem. */
+     Nada de `scale` aqui: o cartão levanta do tamanho que tem. A inclinação com
+     mola vem do `CartaoNaMao`, em Kanban.tsx. */
   box-shadow:
     0 0 0 1px color-mix(in oklch, var(--foreground, black) 16%, transparent),
     0 1px 2px color-mix(in oklch, black 16%, transparent),
@@ -205,14 +206,14 @@
      Só `box-shadow` anima, e o motivo está no comentário acima: o dnd-kit lê o
      transform computado DESTE nó pra calcular o pouso, então escala ou
      deslocamento nossos entrariam na conta e errariam o alvo. */
-  animation: kanban-overlay-erguer var(--dur-fast, 160ms)
+  animation: kanban-overlay-erguer var(--dur-base, 200ms)
     var(--ease-out) backwards;
 }
 
 /* O pouso: a sombra assenta enquanto o cartão desce, em vez de sumir com ele. */
 .kanban-pousando .kanban-card-overlay {
   box-shadow: none;
-  transition: box-shadow var(--dur-base, 200ms) var(--ease-out);
+  transition: box-shadow var(--dur-slow, 300ms) var(--ease-out);
 }
 
 @keyframes kanban-overlay-erguer {

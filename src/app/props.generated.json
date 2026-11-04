@@ -1797,6 +1797,16 @@
       "props": []
     },
     {
+      "nome": "EASE_POUSO_CSS",
+      "descricao": "O cartão encaixando com imã: passa 2% do alvo e assenta. O pouso do `kanban`.",
+      "props": []
+    },
+    {
+      "nome": "EASE_ESTICA_CSS",
+      "descricao": "Sobe rápido e solta devagar: o esticar do vidro em `glass-tabs` e `glass-switch`.",
+      "props": []
+    },
+    {
       "nome": "EASE_VARREDURA_CSS",
       "descricao": "Varredura de indicador: anda decidida no meio e não para seco nas pontas.",
       "props": []
@@ -13114,10 +13124,52 @@
           "descricao": null
         },
         {
+          "nome": "filtersLabel",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "groups",
+          "tipo": "FilterGroup[]",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Facetas. Com `selected` e `onToggle`, a barra monta o menu e os chips sozinha."
+        },
+        {
           "nome": "onClearAll",
           "tipo": "() => void",
           "obrigatoria": false,
           "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onQueryChange",
+          "tipo": "(query: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onToggle",
+          "tipo": "(groupKey: string, optionId: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "query",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Texto da busca. Com `onQueryChange`, a barra monta o campo sozinha."
+        },
+        {
+          "nome": "queryPlaceholder",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Buscar...",
           "descricao": null
         },
         {
@@ -13126,6 +13178,24 @@
           "obrigatoria": false,
           "padrao": null,
           "descricao": null
+        },
+        {
+          "nome": "selected",
+          "tipo": "Record<string, string[]>",
+          "obrigatoria": false,
+          "padrao": "{}",
+          "descricao": null
+        },
+        {
+          "nome": "size",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "md",
+          "descricao": "`lg` junta busca e filtro numa cápsula centrada.",
+          "valores": [
+            "md",
+            "lg"
+          ]
         },
         {
           "nome": "sort",
@@ -13245,6 +13315,13 @@
           ]
         },
         {
+          "nome": "inline",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": "A lista direto na página, sem gatilho nem popover. Para painel lateral e vitrine."
+        },
+        {
           "nome": "noneValue",
           "tipo": "string",
           "obrigatoria": false,
@@ -13349,6 +13426,13 @@
           "obrigatoria": false,
           "padrao": "Não foi possível buscar agora.",
           "descricao": null
+        },
+        {
+          "nome": "inline",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": "O painel direto na página, sem gatilho nem diálogo. Para tela de busca e vitrine."
         },
         {
           "nome": "minChars",
@@ -14934,6 +15018,491 @@
             "max": 24,
             "step": 1
           }
+        }
+      ]
+    }
+  ],
+  "liquid-glass": [
+    {
+      "nome": "LiquidGlass",
+      "descricao": "A superfície que refrata o que está atrás dela. Chromium refrata de verdade; Safari e Firefox caem em blur sozinhos.\n\nVidro sobre vidro tem de ser IRMÃO, nunca filho: backdrop-filter faz do elemento uma \"backdrop root\", e um filho com backdrop-filter só enxerga o que está dentro do pai. Por isso as peças de vidro põem esta camada ao lado do conteúdo.\n\nO tamanho vem de offsetWidth/Height, não do retângulo na tela: dentro de um palco escalado por transform, o retângulo mente e o mapa sai no tamanho errado.",
+      "props": [
+        {
+          "nome": "options",
+          "tipo": "GlassOptions",
+          "obrigatoria": false,
+          "padrao": "{}",
+          "descricao": null
+        }
+      ]
+    }
+  ],
+  "glass-panel": [
+    {
+      "nome": "GlassPanel",
+      "descricao": "Vidro fosco com borda em degradê: acesa num canto, quase apagada no meio, volta no canto oposto. Só faz sentido sobre algo com forma e cor; sobre fundo liso o blur não tem o que borrar e a peça vira um retângulo cinza.\n\nSem refração de propósito: mapa de deslocamento numa superfície deste tamanho pesa e distorce o conteúdo de trás. Para isso existe `liquid-glass`.\n\nA luz segue o ponteiro devagar e nasce acesa num canto: o hover intensifica, não revela, e no toque ela fica parada. Nada se move além dela.\n\nSem `backdrop-filter` no navegador, o tom do fundo segura a leitura sozinho. Ajuste por `--glass-panel-filter` e `--glass-panel-fill`.",
+      "props": [
+        {
+          "nome": "grain",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": "Grão por cima do fosco: é o que tira a cara de CSS numa superfície grande."
+        }
+      ]
+    }
+  ],
+  "glass-button": [
+    {
+      "nome": "GlassButton",
+      "descricao": "Botão de vidro que refrata o fundo. Com `aria-pressed` vira alternância, e o estado aceso é o miolo branco: cor nenhuma entra na peça. O vidro não sustenta contraste sozinho, então só use sobre fundo escuro ou foto com véu.",
+      "props": [
+        {
+          "nome": "shape",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "pill",
+          "descricao": "`pill` leva texto; `circle` leva só ícone e pede `aria-label`.",
+          "valores": [
+            "pill",
+            "circle"
+          ]
+        }
+      ]
+    }
+  ],
+  "glass-slider": [
+    {
+      "nome": "GlassSlider",
+      "descricao": "Slider de vidro cuja lente refrata o fundo. Três decisões que não se veem:\n\n- A lente nunca muda de tamanho: refazer o mapa a cada quadro do arraste trava. Ela tem a largura do trilho, anda por transform e uma máscara corta a sobra. Com clip-path ou `overflow`, sob um palco com `scale` o Chrome solta os cantos do backdrop-filter e aparece um retângulo atrás da lente; a máscara segura. Só o anel, que não tem filtro, muda de largura.\n- O arraste é da caixa, não do <input range>. Invisível por cima, o input só responde ao polegar nativo no iOS; ele fica para teclado e leitor de tela.\n- No toque, o valor só muda em gesto de lado ou toque parado. Quem começa a rolar a página em cima da peça não altera nada.\n\nA mancha clara e a franja colorida não são pintura: são o fundo refratado. Sobre fundo sem luz elas somem, e em Safari e Firefox a lente vira blur.",
+      "props": [
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "Nome para leitor de tela."
+        },
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "defaultValue",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "50",
+          "descricao": null
+        },
+        {
+          "nome": "format",
+          "tipo": "(value: number) => string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Como o número aparece: `(v) => \\`${v}%\\``."
+        },
+        {
+          "nome": "icon",
+          "tipo": "(value: number) => any",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Ícone à esquerda do número; recebe o valor pra trocar de desenho conforme o nível."
+        },
+        {
+          "nome": "max",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "100",
+          "descricao": null
+        },
+        {
+          "nome": "min",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "0",
+          "descricao": null
+        },
+        {
+          "nome": "onChange",
+          "tipo": "(value: number) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "step",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "1",
+          "descricao": null
+        },
+        {
+          "nome": "value",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    }
+  ],
+  "glass-tabs": [
+    {
+      "nome": "GlassTabs",
+      "descricao": "Abas em que a seleção é uma lente de vidro andando sobre o trilho. As abas têm largura igual porque a lente tem tamanho fixo: refazer o mapa a cada troca pesaria mais do que a animação vale; o esticar é `scale`, por cima do mapa. Setas, Home e End movem o foco, como numa tablist.",
+      "props": [
+        {
+          "nome": "items",
+          "tipo": "GlassTabsItem[]",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "Nome do grupo para leitor de tela."
+        },
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "defaultValue",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onChange",
+          "tipo": "(value: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "value",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    }
+  ],
+  "glass-switch": [
+    {
+      "nome": "GlassSwitch",
+      "descricao": "Interruptor com polegar de vidro. O ligado se lê pelo preenchimento em `--brand`, que aparece refratado através do polegar, e pela posição: nunca pela cor sozinha. Para o interruptor sem vidro, cuja bolinha escorre como gota, use `liquid-toggle`.",
+      "props": [
+        {
+          "nome": "aria-label",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "Obrigatório: um interruptor sozinho não diz o que liga."
+        },
+        {
+          "nome": "checked",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "defaultChecked",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": null
+        },
+        {
+          "nome": "onCheckedChange",
+          "tipo": "(checked: boolean) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    }
+  ],
+  "glass-board": [
+    {
+      "nome": "GlassBoard",
+      "descricao": "Quadro em vidro fosco sobre foto. O arraste é o bloco `kanban`, sem uma linha alterada: aqui só a roupa (`renderCard`, cabeçalho e os `--kanban-*`).\n\n\"Adicionar\" é um item que nunca sai do fim da coluna e engole o gesto, porque o Kanban ainda não tem rodapé. Com um `renderColumnFooter` no bloco, ele some.",
+      "props": [
+        {
+          "nome": "initial",
+          "tipo": "GlassBoardRow[]",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "Estado inicial. O quadro cuida da lista dali em diante; `onChange` entrega cada mudança."
+        },
+        {
+          "nome": "kanban",
+          "tipo": "ComponentType<GlassBoardKanbanProps>",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "O `Kanban` do bloco `@visant/kanban`, importado do lugar onde ele foi instalado. Vem por prop porque o bloco cai em `~/components/kanban`, e o alias `@/` muda de projeto para projeto: um import fixo aqui não compilaria em quem usa `src/`."
+        },
+        {
+          "nome": "stages",
+          "tipo": "GlassBoardStage[]",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "actions",
+          "tipo": "any",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Slots do topo e da barra lateral: o quadro não sabe navegar nem importar nada."
+        },
+        {
+          "nome": "addLabel",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Adicionar",
+          "descricao": null
+        },
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "clearable",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": "Mostra a lixeira que esvazia a coluna; aparece só ao passar por ela."
+        },
+        {
+          "nome": "corner",
+          "tipo": "any",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Canto inferior direito, para o botão de assistente ou equivalente."
+        },
+        {
+          "nome": "liftedId",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Cartão que nasce no ar, pra tela dizer \"isto arrasta\" antes de alguém tocar."
+        },
+        {
+          "nome": "newCard",
+          "tipo": "(stage: string) => GlassBoardCard",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Cria o rascunho de \"Adicionar\". Sem isto, o botão não aparece."
+        },
+        {
+          "nome": "onChange",
+          "tipo": "(rows: GlassBoardRow[]) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "rail",
+          "tipo": "any",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "searchLabel",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Com rótulo, o quadro ganha o campo de busca."
+        },
+        {
+          "nome": "title",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    }
+  ],
+  "sensor-dial": [
+    {
+      "nome": "SensorDial",
+      "descricao": "Mira de pareamento: gire o feixe até o alvo, e o disco cresce conforme chega perto. Em repouso o feixe procura sozinho, sem nunca chegar, porque celular não tem hover.\n\n`touch-none` no mostrador de propósito: gesto circular não tem eixo para ceder à rolagem. A página continua rolando em todo o resto da peça. O SVG é só traço; o botão e o texto são HTML ao lado, porque `foreignObject` em SVG girado sai do lugar no Safari.",
+      "props": [
+        {
+          "nome": "action",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Iniciar",
+          "descricao": null
+        },
+        {
+          "nome": "activeAction",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Rastreando",
+          "descricao": null
+        },
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "foundTitle",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Sensor encontrado.\nNão se mexa",
+          "descricao": null
+        },
+        {
+          "nome": "guide",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "true",
+          "descricao": "Contorno do aparelho no pé da folha: mostra como segurar. Desligue fora de pareamento."
+        },
+        {
+          "nome": "onAction",
+          "tipo": "(active: boolean) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onLock",
+          "tipo": "(locked: boolean) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Avisa quando o feixe entra ou sai do alvo."
+        },
+        {
+          "nome": "target",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "8",
+          "descricao": "Ângulo onde o alvo está, em graus (0 = topo, sentido horário)."
+        },
+        {
+          "nome": "title",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Aproxime a câmera\ndo sensor",
+          "descricao": "Quebra de linha com `\\n`."
+        }
+      ]
+    }
+  ],
+  "device-frame": [
+    {
+      "nome": "DeviceFrame",
+      "descricao": "Aparelho em CSS 3D com a tela viva dentro. Só `transform`, então a animação não refaz layout. A espessura são camadas empilhadas em Z: convence até uns 60° de giro, mas não dá a volta inteira. Para isso seria preciso um modelo em WebGL, e a tela deixaria de ser HTML de verdade.\n\nO ponteiro não mexe no aparelho enquanto há botão apertado: tela que foge do arraste é impossível de usar.",
+      "props": [
+        {
+          "nome": "children",
+          "tipo": "any",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "A tela: qualquer coisa viva, com largura e altura de 100%."
+        },
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "finish",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "graphite",
+          "descricao": null,
+          "valores": [
+            "graphite",
+            "silver"
+          ]
+        },
+        {
+          "nome": "intro",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "true",
+          "descricao": "Entra girando até a pose. Com movimento reduzido, já nasce nela."
+        },
+        {
+          "nome": "pose",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "hero",
+          "descricao": null,
+          "valores": [
+            "front",
+            "hero",
+            "left",
+            "right",
+            "flat"
+          ]
+        },
+        {
+          "nome": "rotation",
+          "tipo": "{ x: MotionValue<number>; y: MotionValue<number>; z: MotionValue<number>; }",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Ângulos dirigidos por fora: ignora `pose`, `tilt` e `intro`. Para quem controla o tempo, como uma exportação quadro a quadro, onde mola nenhuma pode interferir."
+        },
+        {
+          "nome": "scrollContainer",
+          "tipo": "RefObject<HTMLElement>",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Quem rola, se não for a página. Só vale com `tilt=\"scroll\"`."
+        },
+        {
+          "nome": "scrollTarget",
+          "tipo": "RefObject<HTMLElement>",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "O que tem a rolagem medida. Aparelho em `sticky` não sai do lugar: passe o trilho dele aqui."
+        },
+        {
+          "nome": "style",
+          "tipo": "CSSProperties",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "tilt",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "none",
+          "descricao": "`pointer` cai em `float` no toque, porque celular não tem hover.",
+          "valores": [
+            "none",
+            "pointer",
+            "float",
+            "scroll"
+          ]
         }
       ]
     }

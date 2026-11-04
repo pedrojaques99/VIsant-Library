@@ -735,11 +735,11 @@ export function VintageOscilloscope({
       // resolvida, e é o que mantém a cor sendo token em vez de hex no JS.
       style={{
         color,
-        background: "#080a07",
+        background: "var(--vintage-tube)",
         // Janela rebaixada na chapa, a mesma do EQ e do XY: sombra por dentro
         // em cima, lábio de luz embaixo. Luz de cima, sempre.
         boxShadow: chrome
-          ? "inset 0 2px 6px rgba(0,0,0,0.75), inset 0 0 0 1px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.06)"
+          ? "var(--vintage-well-shadow)"
           : undefined,
         width: fill ? undefined : width,
         height: fill ? undefined : height,

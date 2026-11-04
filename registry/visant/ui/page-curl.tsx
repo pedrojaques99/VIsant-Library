@@ -135,7 +135,9 @@ const MOLA = { type: "spring" as const, stiffness: 240, damping: 30, mass: 0.7 }
 
 /** A virada inteira: longa porque é o gesto da peça, não um controle respondendo. */
 // Virar página é gesto de objeto: dura o que a folha leva para cair, acima do teto de UI.
-const VIRADA_S = 0.62;
+const VIRADA_S = 0.5;
+/** Clicou de novo no meio da virada: esta acelera e a próxima já sai. */
+const VIRADA_APRESSADA = 2.4;
 const VIRADA = { duration: VIRADA_S, ease: EASE_DRAWER };
 /** Quanto o canto sobe no meio da virada, em fração da altura da folha. */
 const ARCO = 0.26;
@@ -177,6 +179,10 @@ export function PageCurl({
   const vistaRef = React.useRef(vistaInicial);
   const folhaRef = React.useRef(vistaInicial);
   const ocupado = React.useRef(false);
+  // Cliques em `próxima` durante a virada: nada se perde, a fila vira em sequência.
+  const fila = React.useRef(0);
+  const avancando = React.useRef(false);
+  const viradaAtual = React.useRef<{ speed: number } | null>(null);
   // Escala do livro fechado e do aberto, pra caber na largura que ele tem.
   const [caber, setCaber] = React.useState({ fechado: 1, aberto: 1 });
   const caberRef = React.useRef(caber);
@@ -213,8 +219,9 @@ export function PageCurl({
     if (folha.current) {
       folha.current.style.transform = `translateX(${((abre * w) / 2) * escalaLivro}px) scale(${escalaLivro})`;
     }
-    if (miolosEsq.current) miolosEsq.current.style.opacity = String(abre);
-    if (lombadaEsq.current) lombadaEsq.current.style.opacity = String(abre);
+    // O miolo cresce da lombada em vez de surgir por opacidade: papel não fica translúcido.
+    if (miolosEsq.current) miolosEsq.current.style.transform = `scaleX(${abre})`;
+    if (lombadaEsq.current) lombadaEsq.current.style.transform = `scaleX(${abre})`;
     if (sombraEsq.current) sombraEsq.current.style.opacity = String(Math.sin(Math.PI * prog));
     if (dist < 0.5) {
       f.style.clipPath = "";
@@ -335,7 +342,7 @@ export function PageCurl({
     px.stop();
     py.stop();
     const parte = Math.abs(ate - de);
-    return animate(0, 1, {
+    const virada = animate(0, 1, {
       ...VIRADA,
       // Volta curta anda em tempo curto; a ida inteira é `VIRADA.duration`.
       duration: Math.max(0.24, VIRADA.duration * parte),
@@ -344,7 +351,11 @@ export function PageCurl({
         px.set(q.x);
         py.set(q.y);
       },
-    }).then(() => {
+    });
+    if (fila.current > 0) virada.speed = VIRADA_APRESSADA;
+    viradaAtual.current = virada;
+    return virada.then(() => {
+      viradaAtual.current = null;
       px.set(ate === 1 ? -w : w);
       py.set(h);
     });
@@ -367,15 +378,28 @@ export function PageCurl({
 
   const proxima = async () => {
     const i = vistaRef.current;
-    if (ocupado.current || i >= ultimaVista) return;
+    if (ocupado.current) {
+      if (!avancando.current || i + 1 + fila.current >= ultimaVista) return;
+      fila.current += 1;
+      if (viradaAtual.current) viradaAtual.current.speed = VIRADA_APRESSADA;
+      return;
+    }
+    if (i >= ultimaVista) return;
     ocupado.current = true;
+    avancando.current = true;
     await virar(1);
     assentar(i + 1);
+    avancando.current = false;
     ocupado.current = false;
+    if (fila.current > 0) {
+      fila.current -= 1;
+      void proxima();
+    }
   };
 
   const anterior = async () => {
     const i = vistaRef.current;
+    fila.current = 0;
     if (ocupado.current || i <= 0) return;
     ocupado.current = true;
     // A anterior entra virada por cima e desvira até cobrir a atual.
@@ -567,8 +591,8 @@ export function PageCurl({
         <div
           ref={miolosEsq}
           aria-hidden
-          className="pointer-events-none absolute inset-y-0 right-full -z-10 w-full"
-          style={{ opacity: 0 }}
+          className="pointer-events-none absolute inset-y-0 right-full -z-10 w-full origin-right"
+          style={{ transform: "scaleX(0)" }}
         >
           {[3, 2, 1].map((k) => (
             <div
@@ -655,9 +679,9 @@ export function PageCurl({
         <div
           ref={lombadaEsq}
           aria-hidden
-          className="pointer-events-none absolute inset-y-0 right-full w-full"
+          className="pointer-events-none absolute inset-y-0 right-full w-full origin-right"
           style={{
-            opacity: 0,
+            transform: "scaleX(0)",
             backgroundImage:
               "linear-gradient(to left, color-mix(in oklab, black 22%, transparent), color-mix(in oklab, black 5%, transparent) 3.5%, transparent 10%)",
           }}

@@ -113,6 +113,8 @@ interface Route {
    * foco. Quem valida é `RotaCatalogo`, que é quem conhece as famílias.
    */
   familia: string | null;
+  /** Página de estilo (`/estilo/vintage`). Outro eixo: uma rota tem família OU estilo. */
+  estilo?: string | null;
 }
 
 /**
@@ -147,7 +149,7 @@ const VIEWS: { value: View; label: string }[] = [
 const ROTAS_SEM_PORTA: View[] = ["kits", "docs"];
 const SUBPAGINAS_DE_SKILLS = ["filme", "killer", "como-usar"];
 /* `callback` é a volta do OAuth (`visant-auth.tsx`), que cai no catálogo. */
-const ROTAS_CONHECIDAS = ["catalogo", "marca", "skills", "kits", "kit", "c", "rig", "lab", "burilar", "admin", "docs", "callback"];
+const ROTAS_CONHECIDAS = ["catalogo", "estilo", "marca", "skills", "kits", "kit", "c", "rig", "lab", "burilar", "admin", "docs", "callback"];
 
 const TITULO_DA_VIEW: Partial<Record<View, string>> = {
   marca: "Marca / @visant/ui",
@@ -187,6 +189,7 @@ function parsePath(loc: Location): Route {
   }
   /* Endereço errado precisa parecer errado: abrir o catálogo faz link quebrado passar por link certo. */
   if (partes[0] && !ROTAS_CONHECIDAS.includes(partes[0])) return { view: "404", focus: null, kit: null, familia: null };
+  if (partes[0] === "estilo") return { view: "catalogo", focus: null, kit: null, familia: null, estilo: partes[1] ?? null };
   if (partes[0] === "c" && partes[1]) {
     const focus = decodeURIComponent(partes[1]);
     return { view: "catalogo", focus, kit: null, familia: FAMILIA_DA_PECA };
@@ -236,10 +239,11 @@ function navegarSemRecarregar(e: React.MouseEvent<HTMLAnchorElement>, navegar: (
   navegar();
 }
 
-function formatPath({ view, focus, kit, familia }: Route): string {
+function formatPath({ view, focus, kit, familia, estilo }: Route): string {
   if (focus) return `/c/${encodeURIComponent(focus)}`;
   if (view === "skills") return kit ? `/skills/${kit}` : "/skills";
   if (view === "kits") return kit ? `/kit/${encodeURIComponent(kit)}` : "/kits";
+  if (view === "catalogo" && estilo) return `/estilo/${estilo}`;
   if (view === "catalogo") return familia ? `/catalogo/${familia}` : "/";
   return `/${view}`;
 }
@@ -340,11 +344,11 @@ function Shell() {
   /* O prerender só cuida da primeira carga: navegar por dentro precisa trocar o título também. */
   React.useEffect(() => {
     /* O título da peça e o da família quem põe é `RotaCatalogo`: só ela conhece os dois. */
-    if (route.focus || route.familia) return;
+    if (route.focus || route.familia || route.estilo) return;
     document.title = route.view === "skills"
         ? (TITULO_DA_SKILL[route.kit ?? ""] ?? "Skills / Visant")
         : (TITULO_DA_VIEW[route.view] ?? "A library da Visant / @visant/ui");
-  }, [route.focus, route.familia, route.view, route.kit]);
+  }, [route.focus, route.familia, route.estilo, route.view, route.kit]);
   const [dark, setDark] = useDarkMode();
   const setView = React.useCallback(
     // Clicar na aba "Catálogo" volta ao índice das categorias, nunca à última
@@ -358,10 +362,15 @@ function Shell() {
   /* Fechar o foco devolve à fatia de onde a peça foi aberta — se ela foi aberta
      por link direto (`/c/kanban`), não há fatia e o retorno é o índice. */
   const familiaAtual = route.familia;
+  const estiloAtual = route.estilo;
   const setFocus = React.useCallback(
     (focus: string | null) =>
-      navigate({ view: "catalogo", focus, kit: null, familia: familiaAtual }),
-    [navigate, familiaAtual],
+      navigate({ view: "catalogo", focus, kit: null, familia: familiaAtual, estilo: estiloAtual }),
+    [navigate, familiaAtual, estiloAtual],
+  );
+  const setEstilo = React.useCallback(
+    (estilo: string | null) => navigate({ view: "catalogo", focus: null, kit: null, familia: null, estilo }),
+    [navigate],
   );
   const setFamilia = React.useCallback(
     (familia: string | null) => navigate({ view: "catalogo", focus: null, kit: null, familia }),
@@ -484,9 +493,11 @@ function Shell() {
             <RotaCatalogo
               focus={route.focus}
               familia={route.familia}
-              onNavegar={(focus, familia) => navigate({ view: "catalogo", focus, kit: null, familia })}
+              estilo={route.estilo ?? null}
+              onNavegar={(focus, familia) => navigate({ view: "catalogo", focus, kit: null, familia, estilo: route.estilo })}
               onFocus={setFocus}
               onFamilia={setFamilia}
+              onEstilo={setEstilo}
             />
           </React.Suspense>
         </main>

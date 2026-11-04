@@ -8,7 +8,7 @@
  */
 
 import * as React from "react";
-import { CATALOG, FAMILIA_ANTIGA, FAMILIES, familyLabel, type Family } from "./catalog";
+import { CATALOG, ESTILOS, FAMILIA_ANTIGA, FAMILIES, familyLabel, type Family } from "./catalog";
 import { Gallery } from "./Gallery";
 import { FAMILIA_DA_PECA } from "./rota-familia";
 
@@ -24,18 +24,24 @@ const familiaValida = (parte: string | null): Family | null =>
 export function RotaCatalogo({
   focus,
   familia: parte,
+  estilo: estiloParte = null,
   onNavegar,
   onFocus,
   onFamilia,
+  onEstilo,
 }: {
   focus: string | null;
   familia: string | null;
+  estilo?: string | null;
   onNavegar: (focus: string | null, familia: string | null) => void;
   onFocus: (focus: string | null) => void;
   onFamilia: (familia: string | null) => void;
+  onEstilo?: (estilo: string | null) => void;
 }) {
   const peca = React.useMemo(() => (focus ? (CATALOG.find((i) => i.name === focus) ?? null) : null), [focus]);
   const familia = parte === FAMILIA_DA_PECA ? (peca?.family ?? null) : familiaValida(parte);
+
+  const estilo = ESTILOS.find((e) => e.key === estiloParte) ?? null;
 
   /* O mesmo título que o `prerender.mjs` escreve: navegar por dentro não pode trocar um pelo outro. */
   React.useEffect(() => {
@@ -45,8 +51,10 @@ export function RotaCatalogo({
         ? "Peça não encontrada / @visant/ui"
         : familia
         ? `${familyLabel(familia)} / catálogo @visant/ui`
+        : estilo
+        ? `${estilo.label} / estilos @visant/ui`
         : "A library da Visant / @visant/ui";
-  }, [peca, familia, focus]);
+  }, [peca, familia, estilo, focus]);
 
   /*
    * A vizinhança da peça em foco: a família dela, na ordem do catálogo.
@@ -104,5 +112,5 @@ export function RotaCatalogo({
       </React.Suspense>
     );
   }
-  return <Gallery onFocus={onFocus} familia={familia} onFamilia={onFamilia} />;
+  return <Gallery onFocus={onFocus} familia={familia} onFamilia={onFamilia} estilo={estilo?.key ?? null} onEstilo={onEstilo} />;
 }

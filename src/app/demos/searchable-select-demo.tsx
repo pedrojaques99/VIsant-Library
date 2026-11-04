@@ -1,13 +1,13 @@
 "use client";
 
-/** Combobox com grupos, busca em keywords e criação no lugar. */
+/** A lista aberta: grupos, busca que acha por palavra escondida e "Criar" quando não acha. */
 
 import * as React from "react";
 
 import { SearchableSelect } from "../../../registry/visant/ui/searchable-select";
 
 export default function SearchableSelectDemo() {
-  const [valor, setValor] = React.useState("");
+  const [valor, setValor] = React.useState("produto");
   const [extras, setExtras] = React.useState<{ value: string; label: string }[]>([]);
 
   const grupos = React.useMemo(
@@ -25,13 +25,16 @@ export default function SearchableSelectDemo() {
   );
 
   return (
-    <div className="flex h-full w-full items-start p-3">
+    <div className="flex h-full w-full items-center justify-center p-4">
       <SearchableSelect
+        inline
+        hideEmptyOption
+        className="max-w-[340px]"
         value={valor}
         onValueChange={setValor}
         groups={grupos}
-        placeholder="Escolher cliente..."
-        createEntityLabel="cliente"
+        searchPlaceholder="Buscar ou criar"
+        createEntityLabel="time"
         onCreate={async (label) => {
           const value = label.toLowerCase().replace(/\s+/g, "-");
           setExtras((atual) => [...atual, { value, label }]);

@@ -1,0 +1,123 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "glass-slider",
+  "title": "Glass Slider",
+  "author": "Visant Labs <visantsupply@gmail.com>",
+  "description": "Slider cuja lente de vidro refrata o fundo enquanto anda. Volume, brilho ou qualquer nível sobre imagem.",
+  "dependencies": [],
+  "registryDependencies": [
+    "utils",
+    "@visant/liquid-glass"
+  ],
+  "files": [
+    {
+      "path": "registry/visant/ui/glass-slider.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nimport { LiquidGlass } from \"@/components/ui/liquid-glass\";\nimport { cn } from \"@/lib/utils\";\n\nexport interface GlassSliderProps {\n  value?: number;\n  defaultValue?: number;\n  min?: number;\n  max?: number;\n  step?: number;\n  onChange?: (value: number) => void;\n  /** Nome para leitor de tela. */\n  label: string;\n  /** Ícone à esquerda do número; recebe o valor pra trocar de desenho conforme o nível. */\n  icon?: (value: number) => React.ReactNode;\n  /** Como o número aparece: `(v) => \\`${v}%\\``. */\n  format?: (value: number) => string;\n  className?: string;\n}\n\n// Abaixo disto o anel deixa de ser pílula e vira risco.\nconst MENOR = 0.26;\nconst TRILHO = (h: number) => ({\n  borderRadius: 999,\n  scale: -h * 0.3,\n  aberration: [0, h * 0.02, h * 0.04],\n  blur: h * 0.05,\n  border: 0.05,\n  displaceBlur: h * 0.07,\n});\nconst LENTE = (h: number) => ({\n  borderRadius: 999,\n  scale: -h * 1.2,\n  aberration: [0, h * 0.12, h * 0.24],\n  blur: h * 0.05,\n  border: 0.09,\n  displaceBlur: h * 0.012,\n});\n\n/**\n * Slider de vidro cuja lente refrata o fundo. Três decisões que não se veem:\n *\n * - A lente nunca muda de tamanho: refazer o mapa a cada quadro do arraste trava.\n *   Ela tem a largura do trilho, anda por transform e uma máscara corta a sobra. Com\n *   clip-path ou `overflow`, sob um palco com `scale` o Chrome solta os cantos do\n *   backdrop-filter e aparece um retângulo atrás da lente; a máscara segura. Só o\n *   anel, que não tem filtro, muda de largura.\n * - O arraste é da caixa, não do <input range>. Invisível por cima, o input só\n *   responde ao polegar nativo no iOS; ele fica para teclado e leitor de tela.\n * - No toque, o valor só muda em gesto de lado ou toque parado. Quem começa a rolar\n *   a página em cima da peça não altera nada.\n *\n * A mancha clara e a franja colorida não são pintura: são o fundo refratado. Sobre\n * fundo sem luz elas somem, e em Safari e Firefox a lente vira blur.\n */\nexport function GlassSlider({\n  value,\n  defaultValue = 50,\n  min = 0,\n  max = 100,\n  step = 1,\n  onChange,\n  label,\n  icon,\n  format = String,\n  className,\n}: GlassSliderProps) {\n  const [proprio, setProprio] = React.useState(defaultValue);\n  const v = value ?? proprio;\n  const gesto = React.useRef<{ x: number; y: number; toque: boolean; ativo: boolean } | null>(null);\n\n  const definir = (n: number) => {\n    const preso = Math.min(max, Math.max(min, min + Math.round((n - min) / step) * step));\n    if (preso === v) return;\n    setProprio(preso);\n    onChange?.(preso);\n  };\n  const doPonteiro = (e: React.PointerEvent<HTMLDivElement>) => {\n    // Retângulo na tela e clientX estão na mesma escala, então palco com transform não atrapalha.\n    const r = e.currentTarget.getBoundingClientRect();\n    definir(min + ((e.clientX - r.left) / r.width) * (max - min));\n  };\n\n  const p = { \"--p\": Math.max((v - min) / (max - min), MENOR) } as React.CSSProperties;\n  return (\n    <div\n      className={cn(\"glass-slider\", className)}\n      onPointerDown={(e) => {\n        const toque = e.pointerType !== \"mouse\";\n        gesto.current = { x: e.clientX, y: e.clientY, toque, ativo: !toque };\n        e.currentTarget.setPointerCapture(e.pointerId);\n        if (!toque) doPonteiro(e);\n      }}\n      onPointerMove={(e) => {\n        const g = gesto.current;\n        if (!g) return;\n        if (!g.ativo && Math.abs(e.clientX - g.x) > 6 && Math.abs(e.clientX - g.x) > Math.abs(e.clientY - g.y)) g.ativo = true;\n        if (g.ativo) doPonteiro(e);\n      }}\n      onPointerUp={(e) => {\n        const g = gesto.current;\n        if (g?.toque && !g.ativo && Math.hypot(e.clientX - g.x, e.clientY - g.y) < 8) doPonteiro(e);\n        gesto.current = null;\n      }}\n      onPointerCancel={() => (gesto.current = null)}\n    >\n      <LiquidGlass className=\"glass-slider-trilho\" options={TRILHO} aria-hidden />\n      <LiquidGlass className=\"glass-slider-lente\" options={LENTE} style={p} aria-hidden />\n      <div className=\"glass-slider-anel\" style={p} aria-hidden />\n      <div className=\"glass-slider-leitura\" aria-hidden>\n        {icon?.(v)}\n        <span>{format(v)}</span>\n      </div>\n      <input\n        type=\"range\"\n        aria-label={label}\n        aria-valuetext={format(v)}\n        min={min}\n        max={max}\n        step={step}\n        value={v}\n        onChange={(e) => definir(Number(e.target.value))}\n      />\n    </div>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "css": {
+    ".glass-slider": {
+      "--u": "calc(100cqw / 1425)",
+      "--folga": "calc(30 * var(--u))",
+      "--largura": "calc(1365 * var(--u))",
+      "position": "relative",
+      "width": "100%",
+      "aspect-ratio": "1425 / 413",
+      "container-type": "inline-size",
+      "border-radius": "999px",
+      "color": "white",
+      "cursor": "grab",
+      "touch-action": "pan-y",
+      "user-select": "none",
+      "-webkit-user-select": "none"
+    },
+    ".glass-slider:active": {
+      "cursor": "grabbing"
+    },
+    ".glass-slider-trilho": {
+      "position": "absolute",
+      "inset": "0",
+      "border-radius": "inherit",
+      "background": "linear-gradient(170deg, color-mix(in srgb, white 9%, transparent), color-mix(in srgb, white 15%, transparent))",
+      "box-shadow": "inset 0 0 0 1px color-mix(in srgb, white 26%, transparent), inset 0 1.5px 0 color-mix(in srgb, white 34%, transparent)"
+    },
+    ".glass-slider-lente": {
+      "--h": "calc(353 * var(--u))",
+      "position": "absolute",
+      "top": "var(--folga)",
+      "bottom": "var(--folga)",
+      "left": "var(--folga)",
+      "width": "var(--largura)",
+      "border-radius": "999px",
+      "background": "color-mix(in srgb, black 12%, transparent)",
+      "transform": "translateX(calc((var(--p) - 1) * var(--largura)))",
+      "-webkit-mask-image": "radial-gradient(circle closest-side, black calc(100% - 0.5px), transparent), radial-gradient(circle closest-side, black calc(100% - 0.5px), transparent), linear-gradient(black 0 0)",
+      "mask-image": "radial-gradient(circle closest-side, black calc(100% - 0.5px), transparent), radial-gradient(circle closest-side, black calc(100% - 0.5px), transparent), linear-gradient(black 0 0)",
+      "-webkit-mask-repeat": "no-repeat",
+      "mask-repeat": "no-repeat",
+      "-webkit-mask-size": "var(--h) var(--h), var(--h) var(--h), calc(var(--p) * var(--largura) - var(--h)) 100%",
+      "mask-size": "var(--h) var(--h), var(--h) var(--h), calc(var(--p) * var(--largura) - var(--h)) 100%",
+      "-webkit-mask-position": "calc((1 - var(--p)) * var(--largura)) 0, 100% 0, calc(calc((1 - var(--p)) * var(--largura)) + var(--h) / 2) 0",
+      "mask-position": "calc((1 - var(--p)) * var(--largura)) 0, 100% 0, calc(calc((1 - var(--p)) * var(--largura)) + var(--h) / 2) 0"
+    },
+    ".glass-slider-anel": {
+      "position": "absolute",
+      "top": "var(--folga)",
+      "bottom": "var(--folga)",
+      "left": "var(--folga)",
+      "width": "calc(var(--p) * var(--largura))",
+      "border-radius": "999px",
+      "padding": "1.5px",
+      "pointer-events": "none",
+      "background": "linear-gradient(100deg, color-mix(in srgb, white 34%, transparent) 0%, color-mix(in srgb, white 52%, transparent) 62%, color-mix(in srgb, white 80%, transparent) 100%)",
+      "-webkit-mask": "linear-gradient(black 0 0) content-box exclude, linear-gradient(black 0 0)",
+      "mask": "linear-gradient(black 0 0) content-box exclude, linear-gradient(black 0 0)"
+    },
+    ".glass-slider-leitura": {
+      "position": "absolute",
+      "left": "calc(132 * var(--u))",
+      "top": "50%",
+      "translate": "0 -50%",
+      "display": "flex",
+      "align-items": "center",
+      "gap": "calc(36 * var(--u))",
+      "opacity": "0.84",
+      "pointer-events": "none",
+      "font": "700 calc(62 * var(--u))/1 var(--font-sans, system-ui)",
+      "font-variant-numeric": "tabular-nums"
+    },
+    ".glass-slider-leitura svg": {
+      "width": "calc(102 * var(--u))",
+      "height": "calc(102 * var(--u))"
+    },
+    ".glass-slider input": {
+      "position": "absolute",
+      "inset": "0",
+      "width": "100%",
+      "height": "100%",
+      "margin": "0",
+      "opacity": "0",
+      "pointer-events": "none"
+    },
+    ".glass-slider:has(input:focus-visible)": {
+      "outline": "2px solid white",
+      "outline-offset": "3px"
+    }
+  },
+  "meta": {
+    "uso": {
+      "quando": "Nível contínuo sobre foto ou vídeo, como volume ou brilho em player e painel de casa",
+      "evite": "Slider em formulário comum: elastic-slider; projeção com conta, sim-slider"
+    }
+  },
+  "categories": [
+    "controles",
+    "vidro",
+    "slider",
+    "volume",
+    "brilho",
+    "lente"
+  ],
+  "type": "registry:ui"
+}

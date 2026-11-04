@@ -31,6 +31,7 @@ import { ArrowUpRight, Check, Copy, Grid2x2, Grid3x3, LayoutGrid, Play, SlidersH
 import { cn } from "@/lib/utils";
 import {
   CATALOG,
+  ESTILOS,
   FAMILIES,
   MIN_ABA,
   TYPE_LABEL,
@@ -40,6 +41,7 @@ import {
   previewOf,
   stageSurfaceOf,
   type CatalogItem,
+  type Estilo,
   type Family,
   sangra,
 } from "./catalog";
@@ -516,10 +518,13 @@ export interface GalleryProps {
   /** `null` = o acervo inteiro. Uma família = aquela fatia, com demo viva. */
   familia?: Family | null;
   onFamilia?: (f: Family | null) => void;
+  /** Página de estilo: atravessa as famílias, sem substituir nenhuma. */
+  estilo?: Estilo | null;
+  onEstilo?: (e: Estilo | null) => void;
   /** Abre a busca do cabeçalho — a única da casa. */
 }
 
-export function Gallery({ onFocus, familia = null, onFamilia }: GalleryProps) {
+export function Gallery({ onFocus, familia = null, onFamilia, estilo = null, onEstilo }: GalleryProps) {
   /** `null` = não filtra por dependência. `SEM_DEPS` = só o que não puxa nada. */
   const [dep, setDep] = React.useState<string | null>(null);
   const [tipo, setTipo] = React.useState<TipoFilter>(null);
@@ -549,7 +554,7 @@ export function Gallery({ onFocus, familia = null, onFamilia }: GalleryProps) {
     const ativa = barraRef.current?.querySelector<HTMLElement>('button[aria-pressed="true"]');
     const linha = ativa?.parentElement;
     if (ativa && linha) linha.scrollLeft = Math.max(0, ativa.offsetLeft - linha.offsetLeft - 16);
-  }, [familia]);
+  }, [familia, estilo]);
 
   /*
    * A curadoria entra antes de tudo: peça arquivada (nota ≤ 2 ou marcada pra
@@ -566,10 +571,12 @@ export function Gallery({ onFocus, familia = null, onFamilia }: GalleryProps) {
 
   const pool = React.useMemo(
     () =>
-      (familia ? porNovidade : destaquesPrimeiro(notas))(
-        CATALOG.filter((i) => ehPecaVisual(i) && (familia ? i.family === familia : i.family !== "shaders")).filter(naVitrine),
+      (familia || estilo ? porNovidade : destaquesPrimeiro(notas))(
+        CATALOG.filter(
+          (i) => ehPecaVisual(i) && (estilo ? i.estilo?.includes(estilo) : familia ? i.family === familia : i.family !== "shaders"),
+        ).filter(naVitrine),
       ),
-    [familia, naVitrine, notas],
+    [familia, estilo, naVitrine, notas],
   );
 
   const results = React.useMemo(
@@ -724,9 +731,9 @@ export function Gallery({ onFocus, familia = null, onFamilia }: GalleryProps) {
       <section ref={heroRef} className="casa shell flex flex-col gap-4 pt-5 pb-5 sm:flex-row sm:items-end sm:justify-between sm:gap-8 sm:pt-16 sm:pb-8">
         <div className="min-w-0">
         <h1 className="text-casa-xl font-medium">
-          {familia ? familyLabel(familia) : "A library da Visant"}
+          {familia ? familyLabel(familia) : estilo ? ESTILOS.find((e) => e.key === estilo)?.label : "A library da Visant"}
         </h1>
-        {familia ? null : (
+        {familia || estilo ? null : (
           <p className="mt-3 max-w-xl text-casa-lg text-casa-fg-2">
             {/* Conta componente (fora Fundação e Anatomia): o mesmo número da aba
                 "Tudo" e da descrição de SEO (`prerender.mjs`). */}
@@ -734,9 +741,9 @@ export function Gallery({ onFocus, familia = null, onFamilia }: GalleryProps) {
             veste a marca que você escolher.
           </p>
         )}
-        {familia ? null : <MarcasNaDobra className="mt-2" />}
+        {familia || estilo ? null : <MarcasNaDobra className="mt-2" />}
         </div>
-        {familia ? null : <PilulaAgente />}
+        {familia || estilo ? null : <PilulaAgente />}
       </section>
 
       {/* controles */}
@@ -748,7 +755,7 @@ export function Gallery({ onFocus, familia = null, onFamilia }: GalleryProps) {
             {/* A categoria NAVEGA: cada palavra é uma rota (`/catalogo/motion`),
                 então o link de uma fatia pode ser mandado no chat. */}
             <Aba
-              ativa={!familia}
+              ativa={!familia && !estilo}
               onClick={() => onFamilia?.(null)}
               count={CATALOG.filter((i) => contaComoComponente(i) && i.family !== "shaders" && naVitrine(i)).length}
             >
@@ -771,6 +778,16 @@ export function Gallery({ onFocus, familia = null, onFamilia }: GalleryProps) {
                 {CURTO[f.key]}
               </Aba>
             ))}
+            {/* Estilo é outro eixo: a peça segue na família, aqui é outra forma de chegar nela. */}
+            <span aria-hidden className="h-4 w-px shrink-0 bg-casa-line" />
+            {ESTILOS.map((e) => {
+              const quantas = CATALOG.filter((i) => i.estilo?.includes(e.key) && ehPecaVisual(i) && naVitrine(i)).length;
+              return estilo === e.key || quantas >= MIN_ABA ? (
+                <Aba key={e.key} ativa={estilo === e.key} onClick={() => onEstilo?.(e.key)} count={quantas}>
+                  {e.label}
+                </Aba>
+              ) : null;
+            })}
           </div>
 
           <div className="flex shrink-0 items-center gap-1 pointer-coarse:gap-0">

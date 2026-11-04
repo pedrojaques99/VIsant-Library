@@ -2,9 +2,12 @@
 
 <!-- Gerado por scripts/vite-bug-report.mjs. Não edite à mão: use `npm run bugs -- --resolve <id>`. -->
 
-**0 aberto(s)** · 266 resolvido(s)
+**1 aberto(s)** · 289 resolvido(s)
 
-_Nada aberto._
+## scrub-input (1)
+
+- **scrub-input-4** — add um color picker mais profissional nivel apple - talvez até componente novo
+  <sub>Quebrado · 1612×911 · escuro · marca: Visant® · 2026-11-04 18:59</sub>
 
 ---
 
@@ -277,5 +280,28 @@ mais respiro visual, cards mais óbvcios~~
 - ~~page-curl-3 · page-curl — falta aparecer o livro aberto com duas paginas dps q abre a capa - e parece q a folha dobrando tá mt finininha, dá pra deixar mais grossinha?~~
 - ~~streamgraph-1 · streamgraph — precisa de mais estilos de gráficos em cima do tanstack~~
 - ~~wallet-stack-2 · wallet-stack — diminua a quantidade de linhas conforme o tamanho do grid catálogo pra nao ficar nada cortado~~
+- ~~glass-slider-1 · glass-slider — bug na mascara corner radius bg div~~
+- ~~liquid-glass-1 · liquid-glass — remover~~
+- ~~glass-switch-1 · glass-switch — faltou ser buriladinho morph/se achatando na animacao fluida~~
+- ~~glass-tabs-1 · glass-tabs — faltou fluidez~~
+- ~~glass-waitlist-1 · glass-waitlist — remover, mt coisa~~
+- ~~glass-panel-1 · glass-panel — add um botão pra deixar levemente interativo ou útil~~
+- ~~glass-board-1 · glass-board — limpar, mt coisa na tela~~
+- ~~glass-tabs-2 · glass-tabs — deixar os bg do estilo glass mais minimal e menos pesado, tem q ser só uns gradient sutil e granulado~~
+- ~~vintage-knob-2 · vintage-knob — todos precisam respeitar tanto theme da brand tokens quanto theme light ou shadow, remover hardcoded design tokens~~
+- ~~kanban-7 · kanban — deixar a animacao mais fluida e profissional, com conceitos de motion avançados e gostosinhos~~
+- ~~vintage-tv-frame-4 · vintage-tv-frame — ter som pra reagir igual o similar q tem scope wave etc~~
+- ~~showcase-card-3 · showcase-card — mt podre nao entendi, as vezes pode até escondfer~~
+- ~~glass-panel-2 · glass-panel — precisa deixar eles mais interativos ou animados  ou hover nao intrusivo (glass style)~~
+- ~~gauge-1 · gauge — add os botões de mais e menos como tinha~~
+- ~~skeleton-medido-1 · skeleton-medido — add uns skeleton menos generico como aparecer pimrimero~~
+- ~~measure-picker-4 · measure-picker — sfx ao trocar de tier~~
+- ~~command-search-1 · command-search — paia nao entendi~~
+- ~~searchable-select-2 · searchable-select — paia nao entendi~~
+- ~~filter-bar-2 · filter-bar — deixar maior e mais centralizado nivel apple~~
+- ~~search-field-2 · search-field — mesclar com filterbar pra ser um componente de search/filter só~~
+- ~~filter-menu-1 · filter-menu — mesclar com filter bar pra ser 1 componente só super burilado e dinamico~~
+- ~~page-curl-4 · page-curl — permitir avançar de pagina mais rapidamente e nao deixar a pagina transparente ao animar transicionar mudar~~
+- ~~black-hole-3 · black-hole — mostrar apenas 2-3 itens~~
 
 </details>

@@ -216,7 +216,7 @@ export function VintageParametricEQ({
         background: "linear-gradient(180deg, var(--vintage-surface-3), var(--vintage-surface-2))",
         border: "1px solid var(--vintage-surface-1)",
         boxShadow:
-          "inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 1px rgba(0,0,0,0.5), 0 10px 24px -8px rgba(0,0,0,0.6)",
+          "var(--vintage-panel-shadow)",
       }}
     >
       {/* Cabeçalho: nome, leitura da banda em foco e o A/B. */}
@@ -226,7 +226,7 @@ export function VintageParametricEQ({
           style={{
             color: "var(--vintage-text-muted)",
             fontFamily: "var(--font-vintage-mono, monospace)",
-            textShadow: "0 -1px 0 rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06)",
+            textShadow: "var(--vintage-engrave)",
           }}
         >
           {title}
@@ -258,8 +258,8 @@ export function VintageParametricEQ({
               ? "linear-gradient(180deg, var(--vintage-surface-2), var(--vintage-surface-3))"
               : "linear-gradient(180deg, var(--vintage-surface-4), var(--vintage-surface-3))",
             boxShadow: bypass
-              ? "inset 0 1px 3px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,0,0,0.6)"
-              : "inset 0 1px 0 rgba(255,255,255,0.12), 0 0 0 1px rgba(0,0,0,0.6), 0 2px 3px rgba(0,0,0,0.5)",
+              ? "inset 0 1px 3px rgba(0,0,0,0.7), 0 0 0 1px var(--vintage-edge)"
+              : "inset 0 1px 0 rgba(255,255,255,0.12), 0 0 0 1px var(--vintage-edge), 0 2px 3px rgba(0,0,0,0.5)",
             transition:
               "color var(--dur-fast,160ms) var(--ease-out,ease), box-shadow var(--dur-press,120ms) var(--ease-out,ease)",
           }}
@@ -292,7 +292,7 @@ export function VintageParametricEQ({
           background:
             "radial-gradient(ellipse at 50% 40%, var(--vintage-surface-2), var(--vintage-surface-1))",
           boxShadow:
-            "inset 0 2px 6px rgba(0,0,0,0.75), inset 0 0 0 1px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.06)",
+            "var(--vintage-well-shadow)",
           cursor: arrastando.current ? "grabbing" : "default",
         }}
         onPointerMove={(e) => {

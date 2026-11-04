@@ -1,0 +1,90 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "glass-switch",
+  "title": "Glass Switch",
+  "author": "Visant Labs <visantsupply@gmail.com>",
+  "description": "Interruptor com polegar de vidro: o ligado aparece refratado através dele, em --brand.",
+  "dependencies": [],
+  "registryDependencies": [
+    "utils",
+    "@visant/liquid-glass",
+    "@visant/motion"
+  ],
+  "files": [
+    {
+      "path": "registry/visant/ui/glass-switch.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nimport { LiquidGlass } from \"@/components/ui/liquid-glass\";\nimport { EASE_ESTICA_CSS } from \"@/lib/motion\";\nimport { cn } from \"@/lib/utils\";\n\nexport interface GlassSwitchProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, \"onChange\" | \"role\"> {\n  checked?: boolean;\n  defaultChecked?: boolean;\n  onCheckedChange?: (checked: boolean) => void;\n  /** Obrigatório: um interruptor sozinho não diz o que liga. */\n  \"aria-label\": string;\n}\n\nconst VIDRO = (h: number) => ({\n  borderRadius: 999,\n  scale: -h * 0.5,\n  aberration: [0, h * 0.06, h * 0.12],\n  blur: h * 0.06,\n  border: 0.08,\n  displaceBlur: h * 0.03,\n});\n\n// O polegar achata no caminho e assenta com mola (no CSS). Largura e altura trocam\n// volume entre si; `scale` em vez de tamanho, porque refazer o mapa do vidro trava.\nconst ACHATA_MS = 440;\nconst ACHATA = \"1.3 0.8\";\n\n/**\n * Interruptor com polegar de vidro. O ligado se lê pelo preenchimento em `--brand`,\n * que aparece refratado através do polegar, e pela posição: nunca pela cor sozinha.\n * Para o interruptor sem vidro, cuja bolinha escorre como gota, use `liquid-toggle`.\n */\nexport function GlassSwitch({ checked, defaultChecked = false, onCheckedChange, className, onClick, ...props }: GlassSwitchProps) {\n  const [proprio, setProprio] = React.useState(defaultChecked);\n  const ligado = checked ?? proprio;\n  const raiz = React.useRef<HTMLButtonElement>(null);\n  const anterior = React.useRef(ligado);\n\n  React.useEffect(() => {\n    if (anterior.current === ligado) return;\n    anterior.current = ligado;\n    if (matchMedia(\"(prefers-reduced-motion: reduce)\").matches) return;\n    raiz.current?.querySelector(\".glass-switch-polegar\")?.animate(\n      [{ scale: \"1 1\" }, { scale: ACHATA, offset: 0.34 }, { scale: \"1 1\" }],\n      { duration: ACHATA_MS, easing: EASE_ESTICA_CSS },\n    );\n  }, [ligado]);\n  return (\n    <button\n      ref={raiz}\n      type=\"button\"\n      role=\"switch\"\n      aria-checked={ligado}\n      className={cn(\"glass-switch\", className)}\n      onClick={(e) => {\n        onClick?.(e);\n        setProprio(!ligado);\n        onCheckedChange?.(!ligado);\n      }}\n      {...props}\n    >\n      <span className=\"glass-switch-fundo\" aria-hidden />\n      <LiquidGlass className=\"glass-switch-polegar\" options={VIDRO} aria-hidden />\n    </button>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "css": {
+    ".glass-switch": {
+      "position": "relative",
+      "display": "inline-block",
+      "flex": "none",
+      "width": "5rem",
+      "height": "2.75rem",
+      "padding": "0",
+      "border": "0",
+      "border-radius": "999px",
+      "background": "color-mix(in srgb, white 10%, transparent)",
+      "box-shadow": "inset 0 0 0 1px color-mix(in srgb, white 24%, transparent), inset 0 1.5px 0 color-mix(in srgb, white 28%, transparent)",
+      "cursor": "pointer"
+    },
+    ".glass-switch:focus-visible": {
+      "outline": "2px solid white",
+      "outline-offset": "2px"
+    },
+    ".glass-switch:disabled": {
+      "opacity": "0.5",
+      "cursor": "default"
+    },
+    ".glass-switch-fundo": {
+      "position": "absolute",
+      "inset": "0",
+      "border-radius": "inherit",
+      "background": "var(--brand)",
+      "opacity": "0",
+      "transition": "opacity var(--dur-slow, 300ms) var(--ease-out)"
+    },
+    ".glass-switch[aria-checked=\"true\"] .glass-switch-fundo": {
+      "opacity": "1"
+    },
+    ".glass-switch-polegar": {
+      "position": "absolute",
+      "top": "3px",
+      "bottom": "3px",
+      "left": "3px",
+      "width": "3rem",
+      "border-radius": "999px",
+      "background": "color-mix(in srgb, white 22%, transparent)",
+      "box-shadow": "inset 0 0 0 1px color-mix(in srgb, white 50%, transparent), 0 3px 10px color-mix(in srgb, black 35%, transparent)",
+      "transition": "transform 440ms cubic-bezier(0.34, 1.4, 0.64, 1), scale var(--dur-press, 120ms) var(--ease-out)"
+    },
+    ".glass-switch[aria-checked=\"true\"] .glass-switch-polegar": {
+      "transform": "translateX(calc(5rem - 3rem - 6px))"
+    },
+    ".glass-switch:active:not(:disabled) .glass-switch-polegar": {
+      "scale": "1.14 0.9"
+    },
+    "@media (prefers-reduced-motion: reduce)": {
+      ".glass-switch-fundo, .glass-switch-polegar": {
+        "transition": "none"
+      }
+    }
+  },
+  "meta": {
+    "uso": {
+      "quando": "Liga e desliga sobre foto ou vídeo, em painel flutuante ou tela de produto",
+      "evite": "Sem vidro, com a bolinha escorrendo como gota: liquid-toggle; formulário comum, switch"
+    }
+  },
+  "categories": [
+    "controles",
+    "vidro",
+    "switch",
+    "toggle",
+    "formulario"
+  ],
+  "type": "registry:ui"
+}

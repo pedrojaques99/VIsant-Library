@@ -183,5 +183,14 @@
   "textura-beam": "react",
   "textura-current": "react",
   "textura-curtain": "react",
-  "textura-pillars": "react"
+  "textura-pillars": "react",
+  "liquid-glass": "react",
+  "glass-panel": "react",
+  "glass-button": "react",
+  "glass-slider": "react",
+  "glass-tabs": "react",
+  "glass-switch": "react",
+  "glass-board": "react",
+  "sensor-dial": "react",
+  "device-frame": "react"
 }

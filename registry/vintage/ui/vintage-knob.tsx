@@ -50,8 +50,8 @@ function KnobBody() {
             gradientTransform="translate(18 27) rotate(-62) scale(21 24)"
             gradientUnits="userSpaceOnUse"
           >
-            <stop offset="0.28" stopColor="#424344" />
-            <stop offset="0.85" stopColor="#16171B" />
+            <stop offset="0.28" stopColor="var(--vintage-base-hi)" />
+            <stop offset="0.85" stopColor="var(--vintage-base-lo)" />
           </radialGradient>
           <linearGradient
             id="vk-stroke"
@@ -61,8 +61,8 @@ function KnobBody() {
             y2="36"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stopColor="#000000" />
-            <stop offset="1" stopColor="#909090" />
+            <stop stopColor="var(--vintage-depth-edge)" />
+            <stop offset="1" stopColor="var(--vintage-metal-channel-dark)" />
           </linearGradient>
           <linearGradient
             id="vk-depth"
@@ -72,12 +72,12 @@ function KnobBody() {
             y2="18.6"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stopColor="#1D1D1D" />
-            <stop offset="0.21" stopColor="#4C4A48" />
-            <stop offset="0.34" stopColor="#6A6A6A" />
-            <stop offset="0.53" stopColor="#6A6A6A" />
-            <stop offset="0.69" stopColor="#4C4A48" />
-            <stop offset="0.96" stopColor="#1D1D1D" />
+            <stop stopColor="var(--vintage-depth-edge)" />
+            <stop offset="0.21" stopColor="var(--vintage-depth-mid)" />
+            <stop offset="0.34" stopColor="var(--vintage-depth-core)" />
+            <stop offset="0.53" stopColor="var(--vintage-depth-core)" />
+            <stop offset="0.69" stopColor="var(--vintage-depth-mid)" />
+            <stop offset="0.96" stopColor="var(--vintage-depth-edge)" />
           </linearGradient>
           <radialGradient
             id="vk-front"
@@ -87,8 +87,8 @@ function KnobBody() {
             gradientTransform="translate(19 14) rotate(82) scale(23)"
             gradientUnits="userSpaceOnUse"
           >
-            <stop offset="0.04" stopColor="#878584" />
-            <stop offset="1" stopColor="#33322F" />
+            <stop offset="0.04" stopColor="var(--vintage-cap-hi)" />
+            <stop offset="1" stopColor="var(--vintage-cap-lo)" />
           </radialGradient>
           <linearGradient
             id="vk-fstroke"
@@ -98,8 +98,8 @@ function KnobBody() {
             y2="38"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stopColor="#EFEFEF" />
-            <stop offset="0.57" stopColor="#343333" />
+            <stop stopColor="var(--vintage-ring-hi)" />
+            <stop offset="0.57" stopColor="var(--vintage-ring-lo)" />
           </linearGradient>
           <filter id="vk-shadow" x="0" y="0" width="46.6" height="50.2">
             <feDropShadow
@@ -149,7 +149,7 @@ function KnobPointer({ rotation }: { rotation: number }) {
     >
       <svg viewBox="0 0 46 50" className="w-full h-full" fill="none">
         <rect
-          fill="var(--vintage-light, #ffd700)"
+          fill="var(--vintage-light)"
           height="6"
           width="1.2"
           x="21.7"
@@ -158,7 +158,7 @@ function KnobPointer({ rotation }: { rotation: number }) {
         />
         <path
           d="M21.66 8.54H22.87L23.28 7.45H22.07L21.66 8.54Z"
-          fill="var(--vintage-light, #ffd700)"
+          fill="var(--vintage-light)"
         />
       </svg>
     </div>

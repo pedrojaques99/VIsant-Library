@@ -63,6 +63,8 @@ export interface CommandSearchProps {
   errorLabel?: string;
   /** Só o ícone, sem rótulo nem atalho. Para barras estreitas e sidebar recolhida. */
   compact?: boolean;
+  /** O painel direto na página, sem gatilho nem diálogo. Para tela de busca e vitrine. */
+  inline?: boolean;
   /**
    * Tecla do atalho global, combinada com ⌘/Ctrl. `null` desliga o atalho e
    * deixa só o clique no gatilho.
@@ -105,6 +107,7 @@ export function CommandSearch({
   emptyLabel = "Nenhum resultado encontrado.",
   errorLabel = "Não foi possível buscar agora.",
   compact = false,
+  inline = false,
   shortcut = "k",
   className,
 }: CommandSearchProps) {
@@ -115,10 +118,11 @@ export function CommandSearch({
   const [failed, setFailed] = React.useState(false);
 
   const debounced = useDebounce(query, delay);
+  const aberto = inline || open;
   const seq = React.useRef(0);
 
   React.useEffect(() => {
-    if (!shortcut) return;
+    if (!shortcut || inline) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key.toLowerCase() === shortcut.toLowerCase() && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
@@ -127,10 +131,10 @@ export function CommandSearch({
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [shortcut]);
+  }, [shortcut, inline]);
 
   React.useEffect(() => {
-    if (!open) return;
+    if (!aberto) return;
 
     const needle = debounced.trim();
     if (needle.length < minChars) {
@@ -168,7 +172,7 @@ export function CommandSearch({
       });
 
     return () => controller.abort();
-  }, [debounced, open, minChars, onSearch]);
+  }, [debounced, aberto, minChars, onSearch]);
 
   const choose = (result: CommandSearchResult) => {
     setOpen(false);
@@ -205,6 +209,81 @@ export function CommandSearch({
       ) : null}
     </Command.Item>
   );
+
+  const corpo = (
+    <>
+      <div className="flex items-center gap-2.5 border-b border-[var(--border)] px-4">
+        <SearchGlyph className="h-4 w-4 shrink-0 text-[var(--muted-foreground)]" />
+        <Command.Input
+          value={query}
+          onValueChange={setQuery}
+          placeholder={placeholder}
+          className="h-12 w-full bg-transparent text-sm outline-none placeholder:text-[var(--muted-foreground)]"
+        />
+        {loading ? (
+          <span
+            aria-hidden="true"
+            className="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--foreground)] motion-reduce:animate-none"
+          />
+        ) : null}
+      </div>
+
+      <Command.List className="max-h-[min(24rem,60vh)] overflow-y-auto p-2">
+        {showQuick ? (
+          <Command.Group
+            heading={quickLinksLabel}
+            className={cn(
+              "[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5",
+              "[&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-bold",
+              "[&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.08em]",
+              "[&_[cmdk-group-heading]]:text-[var(--muted-foreground)]",
+            )}
+          >
+            {quickLinks.map(row)}
+          </Command.Group>
+        ) : null}
+
+        {results.length > 0 ? (
+          <Command.Group
+            heading={resultsLabel}
+            className={cn(
+              "[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5",
+              "[&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-bold",
+              "[&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.08em]",
+              "[&_[cmdk-group-heading]]:text-[var(--muted-foreground)]",
+            )}
+          >
+            {results.map(row)}
+          </Command.Group>
+        ) : null}
+
+        {failed ? (
+          <p className="px-2 py-8 text-center text-sm text-[var(--destructive)]">{errorLabel}</p>
+        ) : null}
+
+        {!failed && !loading && !showQuick && results.length === 0 && query.trim().length >= minChars ? (
+          <p className="px-2 py-8 text-center text-sm text-[var(--muted-foreground)]">{emptyLabel}</p>
+        ) : null}
+      </Command.List>
+    </>
+  );
+
+  if (inline) {
+    return (
+      <Command
+        label={triggerLabel}
+        shouldFilter={false}
+        className={cn(
+          "w-full overflow-hidden rounded-[var(--r-surface,0.75rem)] border border-[var(--border)]",
+          "bg-[var(--popover,var(--background))] text-[var(--popover-foreground,var(--foreground))]",
+          "[box-shadow:var(--e-overlay,0_12px_32px_-12px_rgb(0_0_0/0.35))]",
+          className,
+        )}
+      >
+        {corpo}
+      </Command>
+    );
+  }
 
   return (
     <>
@@ -254,59 +333,7 @@ export function CommandSearch({
           "[box-shadow:var(--e-modal,0_24px_64px_-16px_rgb(0_0_0/0.45))]",
         )}
       >
-        <div className="flex items-center gap-2.5 border-b border-[var(--border)] px-4">
-          <SearchGlyph className="h-4 w-4 shrink-0 text-[var(--muted-foreground)]" />
-          <Command.Input
-            value={query}
-            onValueChange={setQuery}
-            placeholder={placeholder}
-            className="h-12 w-full bg-transparent text-sm outline-none placeholder:text-[var(--muted-foreground)]"
-          />
-          {loading ? (
-            <span
-              aria-hidden="true"
-              className="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--foreground)] motion-reduce:animate-none"
-            />
-          ) : null}
-        </div>
-
-        <Command.List className="max-h-[min(24rem,60vh)] overflow-y-auto p-2">
-          {showQuick ? (
-            <Command.Group
-              heading={quickLinksLabel}
-              className={cn(
-                "[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5",
-                "[&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-bold",
-                "[&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.08em]",
-                "[&_[cmdk-group-heading]]:text-[var(--muted-foreground)]",
-              )}
-            >
-              {quickLinks.map(row)}
-            </Command.Group>
-          ) : null}
-
-          {results.length > 0 ? (
-            <Command.Group
-              heading={resultsLabel}
-              className={cn(
-                "[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5",
-                "[&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-bold",
-                "[&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.08em]",
-                "[&_[cmdk-group-heading]]:text-[var(--muted-foreground)]",
-              )}
-            >
-              {results.map(row)}
-            </Command.Group>
-          ) : null}
-
-          {failed ? (
-            <p className="px-2 py-8 text-center text-sm text-[var(--destructive)]">{errorLabel}</p>
-          ) : null}
-
-          {!failed && !loading && !showQuick && results.length === 0 && query.trim().length >= minChars ? (
-            <p className="px-2 py-8 text-center text-sm text-[var(--muted-foreground)]">{emptyLabel}</p>
-          ) : null}
-        </Command.List>
+        {corpo}
       </Command.Dialog>
     </>
   );

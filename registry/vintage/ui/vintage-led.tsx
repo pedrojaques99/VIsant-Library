@@ -18,10 +18,10 @@ interface VintageLedProps {
 }
 
 const presetColors: Record<string, { on: string; off: string }> = {
-  green: { on: "var(--vintage-meter-green)", off: "#1a3a1a" },
-  red: { on: "var(--vintage-meter-red)", off: "#3a1a1a" },
-  yellow: { on: "var(--vintage-meter-yellow)", off: "#3a3a1a" },
-  orange: { on: "var(--vintage-accent)", off: "#3a2a1a" },
+  green: { on: "var(--vintage-meter-green)", off: "color-mix(in srgb, var(--vintage-meter-green) 22%, var(--vintage-surface-1))" },
+  red: { on: "var(--vintage-meter-red)", off: "color-mix(in srgb, var(--vintage-meter-red) 22%, var(--vintage-surface-1))" },
+  yellow: { on: "var(--vintage-meter-yellow)", off: "color-mix(in srgb, var(--vintage-meter-yellow) 22%, var(--vintage-surface-1))" },
+  orange: { on: "var(--vintage-accent)", off: "color-mix(in srgb, var(--vintage-accent) 22%, var(--vintage-surface-1))" },
 };
 
 const sizeMap = {
@@ -71,7 +71,7 @@ export function VintageLed({
 
   const preset = presetColors[color];
   const onColor = preset ? preset.on : color;
-  const offColor = preset ? preset.off : `color-mix(in srgb, ${color} 20%, #1a1a1a)`;
+  const offColor = preset ? preset.off : `color-mix(in srgb, ${color} 20%, var(--vintage-surface-1))`;
   const s = sizeMap[size];
   const i = Math.max(0, Math.min(1, intensity));
   const brilho = active
@@ -117,7 +117,7 @@ export function VintageLed({
           style={{
             fontSize: Math.max(9, s.w * 0.65),
             color: active ? "var(--vintage-label)" : "var(--vintage-text-muted)",
-            textShadow: "0 -1px 0 rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06)",
+            textShadow: "var(--vintage-engrave)",
             transition: "color var(--dur-fast,160ms) var(--ease-out,ease)",
           }}
         >

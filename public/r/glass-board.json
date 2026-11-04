@@ -1,0 +1,273 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "glass-board",
+  "title": "Glass Board",
+  "author": "Visant Labs <visantsupply@gmail.com>",
+  "description": "Quadro em vidro fosco sobre foto, com busca e cartões que arrastam entre colunas. A roupa de vidro do kanban.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "utils",
+    "@visant/glass-panel",
+    "@visant/kanban"
+  ],
+  "files": [
+    {
+      "path": "registry/visant/ui/glass-board.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { Plus, Search, Trash2 } from \"lucide-react\";\n\nimport { GlassPanel } from \"@/components/ui/glass-panel\";\nimport { cn } from \"@/lib/utils\";\n\nexport interface GlassBoardCard {\n  name: string;\n  line: string;\n  /** Avatar, tempo e linha de apoio são opcionais: o cartão pede pouco para nascer. */\n  initials?: string;\n  when?: string;\n  detail?: string;\n  /** Pontinho de não lido. */\n  fresh?: boolean;\n}\nexport interface GlassBoardStage {\n  id: string;\n  title: string;\n}\nexport interface GlassBoardRow {\n  id: string;\n  stage: string;\n  card: GlassBoardCard;\n}\n\ntype Coluna = { id: string; data?: unknown };\ntype Item = { id: string; columnId: string; data: GlassBoardCard | null };\ntype Movimento = { itemId: string; toColumnId: string; columnOrder: string[] };\n\n/** O pedaço do bloco `kanban` que o quadro usa. */\nexport interface GlassBoardKanbanProps {\n  columns: Coluna[];\n  items: Item[];\n  onMove?: (m: Movimento) => void;\n  renderColumnHeader?: (c: Coluna) => React.ReactNode;\n  renderCard: (a: { item: Item; overlay?: boolean }) => React.ReactNode;\n}\n\nexport interface GlassBoardProps {\n  /**\n   * O `Kanban` do bloco `@visant/kanban`, importado do lugar onde ele foi instalado.\n   * Vem por prop porque o bloco cai em `~/components/kanban`, e o alias `@/` muda de\n   * projeto para projeto: um import fixo aqui não compilaria em quem usa `src/`.\n   */\n  kanban: React.ComponentType<GlassBoardKanbanProps>;\n  title?: string;\n  stages: GlassBoardStage[];\n  /** Estado inicial. O quadro cuida da lista dali em diante; `onChange` entrega cada mudança. */\n  initial: GlassBoardRow[];\n  onChange?: (rows: GlassBoardRow[]) => void;\n  /** Cria o rascunho de \"Adicionar\". Sem isto, o botão não aparece. */\n  newCard?: (stage: string) => GlassBoardCard;\n  /** Cartão que nasce no ar, pra tela dizer \"isto arrasta\" antes de alguém tocar. */\n  liftedId?: string;\n  addLabel?: string;\n  /** Com rótulo, o quadro ganha o campo de busca. */\n  searchLabel?: string;\n  /** Mostra a lixeira que esvazia a coluna; aparece só ao passar por ela. */\n  clearable?: boolean;\n  /** Slots do topo e da barra lateral: o quadro não sabe navegar nem importar nada. */\n  actions?: React.ReactNode;\n  rail?: React.ReactNode;\n  /** Canto inferior direito, para o botão de assistente ou equivalente. */\n  corner?: React.ReactNode;\n  className?: string;\n}\n\n/**\n * Quadro em vidro fosco sobre foto. O arraste é o bloco `kanban`, sem uma linha\n * alterada: aqui só a roupa (`renderCard`, cabeçalho e os `--kanban-*`).\n *\n * \"Adicionar\" é um item que nunca sai do fim da coluna e engole o gesto, porque o\n * Kanban ainda não tem rodapé. Com um `renderColumnFooter` no bloco, ele some.\n */\nexport function GlassBoard({\n  kanban: Kanban,\n  title,\n  stages,\n  initial,\n  onChange,\n  newCard,\n  liftedId,\n  addLabel = \"Adicionar\",\n  searchLabel,\n  clearable = false,\n  actions,\n  rail,\n  corner,\n  className,\n}: GlassBoardProps) {\n  const [rows, setRowsCru] = React.useState(initial);\n  const setRows = (next: (r: GlassBoardRow[]) => GlassBoardRow[]) => {\n    const n = next(rows);\n    setRowsCru(n);\n    onChange?.(n);\n  };\n  const [busca, setBusca] = React.useState(\"\");\n  const [lifted, setLifted] = React.useState(liftedId);\n  const proximo = React.useRef(0);\n\n  const adicionar = (stage: string) => {\n    if (newCard) setRows((rs) => [...rs, { id: `novo-${++proximo.current}`, stage, card: newCard(stage) }]);\n  };\n\n  const q = busca.trim().toLowerCase();\n  const vistos = rows.filter((r) => !q || `${r.card.name} ${r.card.line}`.toLowerCase().includes(q));\n  const items: Item[] = stages.flatMap((s) => [\n    ...vistos.filter((r) => r.stage === s.id).map((r) => ({ id: r.id, columnId: s.id, data: r.card as GlassBoardCard | null })),\n    ...(newCard ? [{ id: `add:${s.id}`, columnId: s.id, data: null }] : []),\n  ]);\n\n  const onMove = (m: Movimento) =>\n    setRows((rs) => {\n      const movidos = rs.map((r) => (r.id === m.itemId ? { ...r, stage: m.toColumnId } : r));\n      const ordem = m.columnOrder.filter((id) => !id.startsWith(\"add:\"));\n      return [...movidos.filter((r) => r.stage !== m.toColumnId), ...ordem.flatMap((id) => movidos.filter((r) => r.id === id))];\n    });\n\n  return (\n    <GlassPanel grain className={cn(\"glass-board\", className)} onPointerDownCapture={() => setLifted(undefined)}>\n      {rail ? <aside className=\"glass-board-lateral\">{rail}</aside> : null}\n      <div className=\"glass-board-corpo\">\n        {searchLabel || actions ? (\n          <header className=\"glass-board-topo\">\n            {searchLabel ? (\n              <label className=\"glass-board-busca\">\n                <Search size={13} aria-hidden />\n                <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder={searchLabel} aria-label={searchLabel} />\n              </label>\n            ) : null}\n            {actions}\n          </header>\n        ) : null}\n        {title ? <h1 className=\"glass-board-titulo\">{title}</h1> : null}\n        <div className=\"glass-board-rolagem\">\n          <Kanban\n            columns={stages.map((s) => ({ id: s.id, data: s }))}\n            items={items}\n            onMove={onMove}\n            renderColumnHeader={(c) => {\n              const n = vistos.filter((r) => r.stage === c.id).length;\n              const nome = (c.data as GlassBoardStage).title;\n              return (\n                <div className=\"glass-board-coluna\">\n                  <h2>{nome}</h2>\n                  <span>{n}</span>\n                  {clearable ? (\n                    <button\n                      type=\"button\"\n                      aria-label={`Limpar ${nome}`}\n                      disabled={n === 0}\n                      onClick={() => setRows((rs) => rs.filter((r) => r.stage !== c.id))}\n                    >\n                      <Trash2 size={14} />\n                    </button>\n                  ) : null}\n                </div>\n              );\n            }}\n            renderCard={({ item, overlay }) =>\n              item.data ? (\n                <article className=\"glass-board-cartao\" data-no-ar={overlay || item.id === lifted || undefined}>\n                  <header>\n                    {item.data.initials ? <i aria-hidden>{item.data.initials}</i> : null}\n                    <b>{item.data.name}</b>\n                    {item.data.when ? <time>{item.data.when}</time> : null}\n                    {item.data.fresh ? <em aria-label=\"Novo\" /> : null}\n                  </header>\n                  <p>{item.data.line}</p>\n                  {item.data.detail ? <small>{item.data.detail}</small> : null}\n                </article>\n              ) : (\n                <button\n                  type=\"button\"\n                  className=\"glass-board-adicionar\"\n                  onMouseDown={(e) => e.stopPropagation()}\n                  onTouchStart={(e) => e.stopPropagation()}\n                  onKeyDown={(e) => e.stopPropagation()}\n                  onClick={() => adicionar(item.columnId)}\n                >\n                  <Plus size={15} aria-hidden />\n                  {addLabel}\n                </button>\n              )\n            }\n          />\n        </div>\n        {corner ? <div className=\"glass-board-canto\">{corner}</div> : null}\n      </div>\n    </GlassPanel>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "css": {
+    ".glass-board": {
+      "--glass-panel-radius": "14px",
+      "--glass-panel-filter": "blur(24px) saturate(0.72)",
+      "--glass-panel-fill": "linear-gradient(180deg, color-mix(in srgb, black 40%, transparent), color-mix(in srgb, black 30%, transparent))",
+      "display": "flex",
+      "overflow": "hidden",
+      "color": "color-mix(in srgb, white 92%, transparent)",
+      "font": "500 12px/1.3 var(--font-sans, system-ui)"
+    },
+    ".glass-board button": {
+      "font": "inherit",
+      "color": "inherit",
+      "cursor": "pointer",
+      "border": "0",
+      "background": "none"
+    },
+    ".glass-board :focus-visible": {
+      "outline": "2px solid white",
+      "outline-offset": "2px"
+    },
+    ".glass-board-lateral": {
+      "flex": "none",
+      "width": "56px",
+      "display": "flex",
+      "flex-direction": "column",
+      "align-items": "center",
+      "gap": "22px",
+      "padding": "12px 0 16px",
+      "border-right": "1px solid color-mix(in srgb, white 8%, transparent)"
+    },
+    ".glass-board-corpo": {
+      "position": "relative",
+      "flex": "1",
+      "min-width": "0",
+      "display": "flex",
+      "flex-direction": "column",
+      "padding": "12px 12px 0 16px"
+    },
+    ".glass-board-topo": {
+      "display": "flex",
+      "align-items": "center",
+      "gap": "10px"
+    },
+    ".glass-board-busca": {
+      "display": "flex",
+      "align-items": "center",
+      "gap": "8px",
+      "flex": "0 1 212px",
+      "min-width": "0",
+      "height": "32px",
+      "padding": "0 9px",
+      "margin-right": "auto",
+      "border-radius": "7px",
+      "color": "color-mix(in srgb, white 60%, transparent)",
+      "box-shadow": "inset 0 0 0 1px color-mix(in srgb, white 10%, transparent)",
+      "background": "color-mix(in srgb, white 3%, transparent)"
+    },
+    ".glass-board-busca input": {
+      "flex": "1",
+      "min-width": "0",
+      "height": "100%",
+      "border": "0",
+      "outline": "0",
+      "background": "none",
+      "color": "white",
+      "font": "400 11px var(--font-sans, system-ui)"
+    },
+    ".glass-board-busca input::placeholder": {
+      "color": "color-mix(in srgb, white 56%, transparent)"
+    },
+    ".glass-board-titulo": {
+      "margin": "13px 0 10px",
+      "font": "600 16px var(--font-sans, system-ui)"
+    },
+    ".glass-board-rolagem": {
+      "flex": "1",
+      "min-height": "0",
+      "margin-top": "10px",
+      "overflow": "auto hidden",
+      "padding-bottom": "12px"
+    },
+    ".glass-board-titulo + .glass-board-rolagem": {
+      "margin-top": "0"
+    },
+    ".glass-board .kanban-root": {
+      "--kanban-gap": "12px",
+      "--kanban-col-min": "132px",
+      "--kanban-col-max": "none",
+      "--kanban-card-gap": "8px",
+      "--kanban-card-radius": "7px",
+      "--kanban-column-min-h": "0",
+      "--kanban-accent": "white",
+      "width": "100%",
+      "align-items": "flex-start"
+    },
+    ".glass-board .kanban-column": {
+      "flex": "1 1 0",
+      "padding": "8px",
+      "border-radius": "12px",
+      "background": "color-mix(in srgb, white 11%, transparent)",
+      "min-width": "132px"
+    },
+    ".glass-board .kanban-column-body": {
+      "max-height": "none",
+      "overflow": "visible"
+    },
+    ".glass-board-coluna": {
+      "display": "flex",
+      "align-items": "center",
+      "gap": "7px",
+      "height": "28px",
+      "margin": "0 -4px 5px 11px"
+    },
+    ".glass-board-coluna h2": {
+      "margin": "0",
+      "font": "500 12.5px var(--font-sans, system-ui)"
+    },
+    ".glass-board-coluna span": {
+      "display": "grid",
+      "place-items": "center",
+      "min-width": "16px",
+      "height": "16px",
+      "border-radius": "999px",
+      "font-size": "10px",
+      "background": "color-mix(in srgb, black 34%, transparent)"
+    },
+    ".glass-board-coluna button": {
+      "margin-left": "auto",
+      "display": "grid",
+      "place-items": "center",
+      "width": "28px",
+      "height": "28px",
+      "color": "color-mix(in srgb, white 42%, transparent)"
+    },
+    ".glass-board-coluna button:disabled": {
+      "opacity": "0.5",
+      "cursor": "default"
+    },
+    ".glass-board-coluna button:not(:focus-visible)": {
+      "opacity": "0",
+      "transition": "opacity var(--dur-fast, 160ms) var(--ease-out)"
+    },
+    ".glass-board .kanban-column:hover .glass-board-coluna button": {
+      "opacity": "1"
+    },
+    "@media (hover: none)": {
+      ".glass-board-coluna button": {
+        "opacity": "1 !important"
+      }
+    },
+    ".glass-board-cartao": {
+      "position": "relative",
+      "display": "block",
+      "padding": "10px 11px 9px",
+      "border-radius": "7px",
+      "background": "color-mix(in srgb, black 32%, transparent)",
+      "color": "color-mix(in srgb, white 92%, transparent)",
+      "font": "500 10.5px/1.45 var(--font-sans, system-ui)"
+    },
+    ".glass-board-cartao header": {
+      "position": "relative",
+      "display": "flex",
+      "align-items": "center",
+      "gap": "6px",
+      "margin-bottom": "8px"
+    },
+    ".glass-board-cartao i": {
+      "display": "grid",
+      "place-items": "center",
+      "width": "16px",
+      "height": "16px",
+      "border-radius": "50%",
+      "font": "600 7px var(--font-sans, system-ui)",
+      "background": "color-mix(in srgb, white 16%, transparent)"
+    },
+    ".glass-board-cartao b": {
+      "font-weight": "600",
+      "font-size": "10px"
+    },
+    ".glass-board-cartao time": {
+      "margin-left": "auto",
+      "font-size": "10px",
+      "color": "color-mix(in srgb, white 62%, transparent)"
+    },
+    ".glass-board-cartao em": {
+      "position": "absolute",
+      "top": "-5px",
+      "right": "-6px",
+      "width": "5px",
+      "height": "5px",
+      "border-radius": "50%",
+      "background": "var(--destructive)"
+    },
+    ".glass-board-cartao p": {
+      "margin": "0"
+    },
+    ".glass-board-cartao small": {
+      "font-size": "10.5px",
+      "color": "color-mix(in srgb, white 62%, transparent)"
+    },
+    ".glass-board-cartao[data-no-ar]": {
+      "rotate": "-4.5deg",
+      "background": "color-mix(in srgb, black 78%, transparent)",
+      "color": "white",
+      "box-shadow": "0 16px 28px -8px color-mix(in srgb, black 55%, transparent)"
+    },
+    ".glass-board-adicionar": {
+      "display": "flex",
+      "align-items": "center",
+      "gap": "9px",
+      "width": "100%",
+      "height": "34px",
+      "padding": "0 12px",
+      "font-size": "11.5px !important",
+      "font-weight": "600 !important",
+      "border-radius": "7px"
+    },
+    ".kanban-card:has(> .glass-board-adicionar)": {
+      "cursor": "default"
+    },
+    ".glass-board-canto": {
+      "position": "absolute",
+      "right": "12px",
+      "bottom": "12px",
+      "z-index": "2"
+    },
+    "@media (max-width: 639px)": {
+      ".glass-board-lateral": {
+        "display": "none"
+      },
+      ".glass-board-corpo": {
+        "padding-left": "12px"
+      }
+    }
+  },
+  "meta": {
+    "uso": {
+      "quando": "Pipeline ou board de tarefas com a foto da marca atrás, em produto com visual próprio",
+      "evite": "Ferramenta interna densa, com seleção múltipla: kanban; lista pra ordenar e editar, data-table"
+    }
+  },
+  "categories": [
+    "conteudo",
+    "vidro",
+    "fosco",
+    "kanban",
+    "board",
+    "dnd"
+  ],
+  "type": "registry:ui"
+}

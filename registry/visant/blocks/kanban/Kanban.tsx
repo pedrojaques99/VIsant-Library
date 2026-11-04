@@ -10,6 +10,7 @@ import {
   TouchSensor,
   closestCorners,
   defaultDropAnimationSideEffects,
+  useDndMonitor,
   useSensor,
   useSensors,
   type Announcements,
@@ -19,7 +20,8 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useSelectionContainer, boxesIntersect, type Box } from "@air/react-drag-to-select";
-import { EASE_OUT_CSS } from "@/lib/motion";
+import { motion, useReducedMotion, useSpring } from "motion/react";
+import { EASE_POUSO_CSS } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { KanbanColumn } from "./KanbanColumn";
 import type { KanbanItem, KanbanProps } from "./types";
@@ -70,6 +72,47 @@ import "./kanban.css";
  * acontece, só não há percurso — e essa é a única forma de alcançar isto, já
  * que o guard global de `prefers-reduced-motion` só enxerga transição CSS.
  */
+/** O cartão na mão: inclina um grau parado e até seis no embalo, com mola. */
+const INCLINA_PARADO = -1;
+const INCLINA_TETO = 6;
+const INCLINA_POR_VELOCIDADE = 5;
+const MOLA_INCLINA = { stiffness: 320, damping: 22, mass: 0.6 };
+
+/**
+ * O cartão que voa inclina na direção do gesto e volta a assentar quando a mão para.
+ * A rotação fica neste nó, nunca no de fora: é o de fora que o dnd-kit mede para pousar.
+ */
+function CartaoNaMao({ children }: { children: React.ReactNode }) {
+  const reduzir = useReducedMotion();
+  const inclina = useSpring(reduzir ? 0 : INCLINA_PARADO, MOLA_INCLINA);
+  const ultimo = useRef({ x: 0, t: 0 });
+  const calma = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const parar = (alvo: number) => {
+    if (calma.current) clearTimeout(calma.current);
+    if (!reduzir) inclina.set(alvo);
+  };
+  useEffect(() => () => { if (calma.current) clearTimeout(calma.current); }, []);
+  useDndMonitor({
+    onDragMove: ({ delta }) => {
+      if (reduzir) return;
+      const agora = performance.now();
+      const dt = Math.max(8, agora - ultimo.current.t);
+      const v = (delta.x - ultimo.current.x) / dt;
+      ultimo.current = { x: delta.x, t: agora };
+      inclina.set(Math.max(-INCLINA_TETO, Math.min(INCLINA_TETO, INCLINA_PARADO + v * INCLINA_POR_VELOCIDADE)));
+      if (calma.current) clearTimeout(calma.current);
+      calma.current = setTimeout(() => inclina.set(INCLINA_PARADO), 90);
+    },
+    onDragEnd: () => parar(0),
+    onDragCancel: () => parar(0),
+  });
+  return (
+    <motion.div className="kanban-card-overlay" style={{ rotate: inclina }}>
+      {children}
+    </motion.div>
+  );
+}
+
 // Sem anotar `: DropAnimation`: aquele tipo é uma união que inclui a forma
 // "função", e por ela o `duration` some — e o guard de pouso abaixo precisa ler
 // essa duração. O objeto inferido continua sendo aceito pelo DragOverlay.
@@ -78,7 +121,7 @@ function readDropAnimation(aoPousar: () => void) {
   const token = (name: string, fallback: string) =>
     (css?.getPropertyValue(name).trim() || "") || fallback;
 
-  const raw = token("--dur-base", "200ms");
+  const raw = token("--dur-slow", "300ms");
   const ms = raw.endsWith("ms") ? parseFloat(raw) : parseFloat(raw) * 1000;
   const reduzido =
     typeof window !== "undefined" &&
@@ -90,8 +133,8 @@ function readDropAnimation(aoPousar: () => void) {
   });
 
   return {
-    duration: reduzido ? 0 : Number.isFinite(ms) ? ms : 200,
-    easing: token("--ease-out", EASE_OUT_CSS),
+    duration: reduzido ? 0 : Number.isFinite(ms) ? ms : 300,
+    easing: EASE_POUSO_CSS,
     sideEffects: (args: Parameters<typeof assentar>[0]) => {
       const desfazer = assentar(args);
       return () => {
@@ -506,9 +549,7 @@ export function Kanban<T = unknown, C = unknown>({
     <DragOverlay dropAnimation={dropAnimation}>
       {activeItem ? (
         <div style={fantasma ? { width: fantasma.largura, transform: `scale(${fantasma.escala})`, transformOrigin: "top left" } : undefined}>
-          <div className="kanban-card-overlay">
-            {renderCard({ item: activeItem, overlay: true })}
-          </div>
+          <CartaoNaMao>{renderCard({ item: activeItem, overlay: true })}</CartaoNaMao>
         </div>
       ) : null}
     </DragOverlay>

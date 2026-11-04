@@ -105,7 +105,7 @@ export function VintageEQ({
 
   const handleDoubleClick = (index: number) => definir(index, 5);
 
-  const gravado = "0 -1px 0 rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06)";
+  const gravado = "var(--vintage-engrave)";
   const cor = accent || "var(--vintage-light)";
 
   return (
@@ -119,7 +119,7 @@ export function VintageEQ({
         background: "linear-gradient(180deg, var(--vintage-surface-3), var(--vintage-surface-2))",
         border: "1px solid var(--vintage-surface-1)",
         boxShadow:
-          "inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 1px rgba(0,0,0,0.5), 0 10px 24px -8px rgba(0,0,0,0.6)",
+          "var(--vintage-panel-shadow)",
       }}
     >
       <h3
@@ -193,7 +193,7 @@ export function VintageEQ({
                   className="absolute inset-y-0 left-1/2 w-[6px] -translate-x-1/2 rounded-full"
                   style={{
                     background: "var(--vintage-surface-1)",
-                    boxShadow: "inset 0 1px 2px rgba(0,0,0,0.9), 0 1px 0 rgba(255,255,255,0.06)",
+                    boxShadow: "inset 0 1px 2px rgba(0,0,0,0.9), 0 1px 0 var(--vintage-lip)",
                   }}
                 />
 
@@ -205,8 +205,8 @@ export function VintageEQ({
                     background:
                       "linear-gradient(180deg, var(--vintage-metal-channel-light) 0%, var(--vintage-metal-mid) 48%, var(--vintage-metal-light) 52%, var(--vintage-metal-channel-dark) 100%)",
                     boxShadow: isActive
-                      ? `inset 0 1px 0 rgba(255,255,255,0.6), 0 0 0 1px rgba(0,0,0,0.6), 0 3px 4px rgba(0,0,0,0.55), 0 0 8px color-mix(in srgb, ${cor} 35%, transparent)`
-                      : "inset 0 1px 0 rgba(255,255,255,0.6), 0 0 0 1px rgba(0,0,0,0.6), 0 3px 4px rgba(0,0,0,0.55)",
+                      ? `inset 0 1px 0 rgba(255,255,255,0.6), 0 0 0 1px var(--vintage-edge), 0 3px 4px rgba(0,0,0,0.55), 0 0 8px color-mix(in srgb, ${cor} 35%, transparent)`
+                      : "inset 0 1px 0 rgba(255,255,255,0.6), 0 0 0 1px var(--vintage-edge), 0 3px 4px rgba(0,0,0,0.55)",
                     transition: "box-shadow var(--dur-fast,160ms) var(--ease-out,ease)",
                   }}
                 >

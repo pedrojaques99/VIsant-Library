@@ -74,6 +74,8 @@ export interface SearchableSelectProps {
   /** "trailing" (padrão) é selo esmaecido; "leading" é para avatar e thumbnail. */
   iconPosition?: "leading" | "trailing";
   onOpenChange?: (open: boolean) => void;
+  /** A lista direto na página, sem gatilho nem popover. Para painel lateral e vitrine. */
+  inline?: boolean;
   disabled?: boolean;
   className?: string;
 }
@@ -103,6 +105,7 @@ export function SearchableSelect({
   creatingLabel = "Criando",
   iconPosition = "trailing",
   onOpenChange,
+  inline = false,
   disabled,
   className,
 }: SearchableSelectProps) {
@@ -180,12 +183,128 @@ export function SearchableSelect({
 
   // Sobrou uma: escolhe sozinha. É o que faz a edição em célula ser uma digitada.
   React.useEffect(() => {
-    if (!autoSelect || !open || visibleCount !== 1) return;
+    if (!autoSelect || !(open || inline) || visibleCount !== 1) return;
     const only = filteredGroups.find((g) => g.options.length > 0)?.options[0];
     if (only && only.value !== value) select(only.value);
-  }, [filteredGroups, visibleCount, autoSelect, open, value, select]);
+  }, [filteredGroups, visibleCount, autoSelect, open, inline, value, select]);
 
   const showCreate = Boolean(onCreate && search.trim());
+
+  // Quem filtra é `matches`, acima. Duas fontes discordariam.
+  const lista = (
+        <Command shouldFilter={false}>
+      <div className="flex items-center gap-2 border-b border-[var(--border)] px-3">
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          className="h-3.5 w-3.5 shrink-0 text-[var(--muted-foreground)]"
+        >
+          <circle cx="7" cy="7" r="4.5" />
+          <path d="M10.5 10.5L14 14" strokeLinecap="round" />
+        </svg>
+        <Command.Input
+          value={search}
+          onValueChange={setSearch}
+          placeholder={searchPlaceholder}
+          className={cn(
+            "h-10 w-full bg-transparent text-sm outline-none",
+            "placeholder:text-[var(--muted-foreground)]",
+          )}
+        />
+      </div>
+
+      <Command.List className="max-h-[min(18.75rem,var(--radix-popover-content-available-height,18.75rem))] overflow-y-auto p-1">
+        {!hideEmptyOption ? (
+          <Command.Item value={noneValue} onSelect={() => select(noneValue)} className={cn(itemClass, "italic text-[var(--muted-foreground)]")}>
+            {emptyLabel}
+          </Command.Item>
+        ) : null}
+
+        {filteredGroups.map((group, index) => (
+          <Command.Group
+            key={group.label || index}
+            heading={group.label || undefined}
+            className={cn(
+              "[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5",
+              "[&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-bold",
+              "[&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.08em]",
+              "[&_[cmdk-group-heading]]:text-[var(--muted-foreground)]",
+            )}
+          >
+            {group.options.map((option) => (
+              <Command.Item key={option.value} value={option.value} onSelect={() => select(option.value)} className={itemClass}>
+                {option.icon && iconPosition === "leading" ? (
+                  <span className="flex shrink-0 items-center">{option.icon}</span>
+                ) : null}
+                <span className="min-w-0 truncate">{option.label}</span>
+                {option.icon && iconPosition === "trailing" ? (
+                  <span className="ml-auto opacity-50">{option.icon}</span>
+                ) : null}
+                {option.value === value ? (
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={cn("h-3 w-3 shrink-0", !(option.icon && iconPosition === "trailing") && "ml-auto")}
+                  >
+                    <path d="M2 6.5l2.5 2.5L10 3.5" />
+                  </svg>
+                ) : null}
+              </Command.Item>
+            ))}
+          </Command.Group>
+        ))}
+
+        {/* Vazio só é vazio quando não há saída oferecida abaixo. */}
+        {visibleCount === 0 && !showCreate ? (
+          <p className="px-2 py-6 text-center text-sm text-[var(--muted-foreground)]">
+            {noResultsLabel}
+          </p>
+        ) : null}
+
+        {showCreate ? (
+          <Command.Group>
+            <Command.Item
+              value={`__create__${search}`}
+              disabled={creating}
+              onSelect={handleCreate}
+              className={itemClass}
+            >
+              <span aria-hidden="true" className={cn("shrink-0 text-base leading-none", creating && "animate-pulse")}>
+                +
+              </span>
+              <span className="min-w-0 truncate">
+                {creating ? creatingLabel : createLabel}
+                {createEntityLabel ? ` ${createEntityLabel}` : ""} “{search.trim()}”
+              </span>
+            </Command.Item>
+          </Command.Group>
+        ) : null}
+      </Command.List>
+    </Command>
+  );
+
+  if (inline) {
+    return (
+      <div
+        className={cn(
+          "w-full overflow-hidden rounded-[var(--r-surface,0.625rem)] border border-[var(--border)]",
+          "bg-[var(--popover,var(--background))] text-[var(--popover-foreground,var(--foreground))]",
+          "[box-shadow:var(--e-overlay,0_12px_32px_-12px_rgb(0_0_0/0.35))]",
+          className,
+        )}
+      >
+        {lista}
+      </div>
+    );
+  }
 
   return (
     // `modal`: ver o bloco no topo. Não remova.
@@ -240,90 +359,7 @@ export function SearchableSelect({
             "[animation-duration:var(--dur-fast,160ms)] [animation-timing-function:var(--ease-out)]",
           )}
         >
-          {/* Quem filtra é `matches`, acima. Duas fontes discordariam. */}
-          <Command shouldFilter={false}>
-            <div className="flex items-center gap-2 border-b border-[var(--border)] px-3">
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                className="h-3.5 w-3.5 shrink-0 text-[var(--muted-foreground)]"
-              >
-                <circle cx="7" cy="7" r="4.5" />
-                <path d="M10.5 10.5L14 14" strokeLinecap="round" />
-              </svg>
-              <Command.Input
-                value={search}
-                onValueChange={setSearch}
-                placeholder={searchPlaceholder}
-                className={cn(
-                  "h-10 w-full bg-transparent text-sm outline-none",
-                  "placeholder:text-[var(--muted-foreground)]",
-                )}
-              />
-            </div>
-
-            <Command.List className="max-h-[min(18.75rem,var(--radix-popover-content-available-height))] overflow-y-auto p-1">
-              {!hideEmptyOption ? (
-                <Command.Item value={noneValue} onSelect={() => select(noneValue)} className={cn(itemClass, "italic text-[var(--muted-foreground)]")}>
-                  {emptyLabel}
-                </Command.Item>
-              ) : null}
-
-              {filteredGroups.map((group, index) => (
-                <Command.Group
-                  key={group.label || index}
-                  heading={group.label || undefined}
-                  className={cn(
-                    "[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5",
-                    "[&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-bold",
-                    "[&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.08em]",
-                    "[&_[cmdk-group-heading]]:text-[var(--muted-foreground)]",
-                  )}
-                >
-                  {group.options.map((option) => (
-                    <Command.Item key={option.value} value={option.value} onSelect={() => select(option.value)} className={itemClass}>
-                      {option.icon && iconPosition === "leading" ? (
-                        <span className="flex shrink-0 items-center">{option.icon}</span>
-                      ) : null}
-                      <span className="min-w-0 truncate">{option.label}</span>
-                      {option.icon && iconPosition === "trailing" ? (
-                        <span className="ml-auto opacity-50">{option.icon}</span>
-                      ) : null}
-                    </Command.Item>
-                  ))}
-                </Command.Group>
-              ))}
-
-              {/* Vazio só é vazio quando não há saída oferecida abaixo. */}
-              {visibleCount === 0 && !showCreate ? (
-                <p className="px-2 py-6 text-center text-sm text-[var(--muted-foreground)]">
-                  {noResultsLabel}
-                </p>
-              ) : null}
-
-              {showCreate ? (
-                <Command.Group>
-                  <Command.Item
-                    value={`__create__${search}`}
-                    disabled={creating}
-                    onSelect={handleCreate}
-                    className={itemClass}
-                  >
-                    <span aria-hidden="true" className={cn("shrink-0 text-base leading-none", creating && "animate-pulse")}>
-                      +
-                    </span>
-                    <span className="min-w-0 truncate">
-                      {creating ? creatingLabel : createLabel}
-                      {createEntityLabel ? ` ${createEntityLabel}` : ""} “{search.trim()}”
-                    </span>
-                  </Command.Item>
-                </Command.Group>
-              ) : null}
-            </Command.List>
-          </Command>
+          {lista}
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>

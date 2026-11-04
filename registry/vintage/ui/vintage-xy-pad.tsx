@@ -113,7 +113,7 @@ export function VintageXYPad({
         background: "linear-gradient(180deg, var(--vintage-surface-3), var(--vintage-surface-2))",
         border: "1px solid var(--vintage-surface-1)",
         boxShadow:
-          "inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 1px rgba(0,0,0,0.5), 0 10px 24px -8px rgba(0,0,0,0.6)",
+          "var(--vintage-panel-shadow)",
       }}
     >
       <div
@@ -131,7 +131,7 @@ export function VintageXYPad({
           background:
             "radial-gradient(ellipse at 50% 40%, var(--vintage-surface-2), var(--vintage-surface-1))",
           boxShadow:
-            "inset 0 2px 6px rgba(0,0,0,0.75), inset 0 0 0 1px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.06)",
+            "var(--vintage-well-shadow)",
         }}
         onPointerDown={(e) => {
           if (e.pointerType === "mouse" && e.button !== 0) return;
@@ -270,7 +270,7 @@ export function VintageXYPad({
             style={{
               color: "var(--vintage-text-muted)",
               fontFamily: "var(--font-vintage-mono, monospace)",
-              textShadow: "0 -1px 0 rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06)",
+              textShadow: "var(--vintage-engrave)",
             }}
           >
             {rotulo}: {((v as number) * 100).toFixed(0)}%

@@ -82,9 +82,9 @@ function LargeKnobBody({ rotation }: { rotation: number }) {
       <svg viewBox="0 0 318 318" className="w-full h-full" fill="none">
         <defs>
           <radialGradient id="lk-outer" cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0" stopColor="#4a4a4a" />
-            <stop offset="0.7" stopColor="#2a2a2a" />
-            <stop offset="1" stopColor="#1a1a1a" />
+            <stop offset="0" stopColor="var(--vintage-surface-4)" />
+            <stop offset="0.7" stopColor="var(--vintage-surface-3)" />
+            <stop offset="1" stopColor="var(--vintage-surface-2)" />
           </radialGradient>
           <linearGradient id="lk-sheen" x1="0.15" y1="0" x2="0.85" y2="1">
             <stop offset="0" stopColor="#ffffff" stopOpacity="0.28" />
@@ -94,7 +94,7 @@ function LargeKnobBody({ rotation }: { rotation: number }) {
         </defs>
 
         <circle cx="159" cy="159" r="159" fill="url(#lk-outer)" />
-        <circle cx="159" cy="159" r="145" fill="#323336" fillOpacity="0.96" />
+        <circle cx="159" cy="159" r="145" fill="var(--vintage-cap-lo)" fillOpacity="0.96" />
       </svg>
 
       {/* Serrilha da saia: 72 frisos, o que o dedo sente antes de girar. Fica
@@ -124,7 +124,7 @@ function LargeKnobBody({ rotation }: { rotation: number }) {
           style={{
             inset: `${(20 / 318) * 100}%`,
             background:
-              "conic-gradient(from 90deg, #969AA0 0deg, #5D636C 9deg, #555B69 22deg, #DFDFDF 41deg, #71798A 63deg, #A9ABB3 83deg, #CBD2D6 120deg, #FFFFFF 149deg, #5E646A 186deg, #8E959D 219deg, #FFFFFF 245deg, #7E8691 269deg, #575D6B 284deg, #6C747F 301deg, #F1F1F3 337deg, #979AA3 349deg, #B1B3B9 356deg, #969AA0 360deg)",
+              "var(--vintage-brushed)",
             // Alumínio escovado, não espelho: abaixo de 0,75 ele assenta no
             // mesmo valor de cinza dos knobs pequenos do kit.
             opacity: 0.72,

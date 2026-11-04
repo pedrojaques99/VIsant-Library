@@ -1,0 +1,80 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "glass-panel",
+  "title": "Glass Panel",
+  "author": "Visant Labs <visantsupply@gmail.com>",
+  "description": "Vidro fosco com borda em degradê, acesa nos cantos, e grão opcional. O cartão pra pôr sobre foto ou fundo com forma.",
+  "dependencies": [],
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "registry/visant/ui/glass-panel.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\nimport { cn } from \"@/lib/utils\";\n\nexport interface GlassPanelProps extends React.HTMLAttributes<HTMLDivElement> {\n  /** Grão por cima do fosco: é o que tira a cara de CSS numa superfície grande. */\n  grain?: boolean;\n}\n\n/**\n * Vidro fosco com borda em degradê: acesa num canto, quase apagada no meio, volta\n * no canto oposto. Só faz sentido sobre algo com forma e cor; sobre fundo liso o\n * blur não tem o que borrar e a peça vira um retângulo cinza.\n *\n * Sem refração de propósito: mapa de deslocamento numa superfície deste tamanho\n * pesa e distorce o conteúdo de trás. Para isso existe `liquid-glass`.\n *\n * A luz segue o ponteiro devagar e nasce acesa num canto: o hover intensifica, não\n * revela, e no toque ela fica parada. Nada se move além dela.\n *\n * Sem `backdrop-filter` no navegador, o tom do fundo segura a leitura sozinho.\n * Ajuste por `--glass-panel-filter` e `--glass-panel-fill`.\n */\nexport function GlassPanel({ grain = false, className, children, onPointerMove, ...props }: GlassPanelProps) {\n  return (\n    <div\n      className={cn(\"glass-panel\", className)}\n      data-grain={grain || undefined}\n      onPointerMove={(e) => {\n        onPointerMove?.(e);\n        if (e.pointerType !== \"mouse\") return;\n        const r = e.currentTarget.getBoundingClientRect();\n        e.currentTarget.style.setProperty(\"--glass-panel-x\", `${((e.clientX - r.left) / r.width) * 100}%`);\n        e.currentTarget.style.setProperty(\"--glass-panel-y\", `${((e.clientY - r.top) / r.height) * 100}%`);\n      }}\n      {...props}\n    >\n      <span className=\"glass-panel-luz\" aria-hidden />\n      {children}\n    </div>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "css": {
+    ".glass-panel": {
+      "position": "relative",
+      "isolation": "isolate",
+      "border-radius": "var(--glass-panel-radius, var(--r-surface, 1rem))",
+      "color": "white",
+      "background": "var(--glass-panel-fill, linear-gradient(180deg, color-mix(in srgb, black 34%, transparent), color-mix(in srgb, white 5%, transparent)))",
+      "-webkit-backdrop-filter": "var(--glass-panel-filter, blur(20px) saturate(1.1))",
+      "backdrop-filter": "var(--glass-panel-filter, blur(20px) saturate(1.1))",
+      "box-shadow": "0 30px 60px -28px black"
+    },
+    ".glass-panel-luz": {
+      "position": "absolute",
+      "inset": "0",
+      "z-index": "-1",
+      "border-radius": "inherit",
+      "pointer-events": "none",
+      "opacity": "0.55",
+      "background": "radial-gradient(60% 80% at var(--glass-panel-x, 22%) var(--glass-panel-y, 0%), color-mix(in srgb, white 16%, transparent), transparent 72%)",
+      "transition": "opacity var(--dur-slow, 300ms) var(--ease-out)"
+    },
+    ".glass-panel:hover .glass-panel-luz": {
+      "opacity": "1"
+    },
+    ".glass-panel::after": {
+      "content": "\"\"",
+      "position": "absolute",
+      "inset": "0",
+      "z-index": "2",
+      "border-radius": "inherit",
+      "padding": "1px",
+      "pointer-events": "none",
+      "background": "linear-gradient(135deg, color-mix(in srgb, white 62%, transparent), color-mix(in srgb, white 10%, transparent) 38%, color-mix(in srgb, white 8%, transparent) 66%, color-mix(in srgb, white 42%, transparent))",
+      "-webkit-mask": "linear-gradient(black 0 0) content-box exclude, linear-gradient(black 0 0)",
+      "mask": "linear-gradient(black 0 0) content-box exclude, linear-gradient(black 0 0)"
+    },
+    ".glass-panel[data-grain]::before": {
+      "content": "\"\"",
+      "position": "absolute",
+      "inset": "0",
+      "z-index": "-1",
+      "border-radius": "inherit",
+      "pointer-events": "none",
+      "opacity": "0.22",
+      "mix-blend-mode": "overlay",
+      "background-image": "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E\")"
+    }
+  },
+  "meta": {
+    "uso": {
+      "quando": "Cartão ou painel sobre foto, vídeo ou gradiente, em landing ou tela de produto",
+      "evite": "Fundo liso, onde o fosco não tem o que borrar: um card comum; lista de dados densa"
+    }
+  },
+  "categories": [
+    "conteudo",
+    "vidro",
+    "fosco",
+    "superficie",
+    "card"
+  ],
+  "type": "registry:ui"
+}

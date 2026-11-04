@@ -260,8 +260,8 @@ export function VintageSoundboardPad({
           ? `radial-gradient(90% 90% at 50% 55%, color-mix(in srgb, ${color} 38%, var(--vintage-surface-2)) 0%, color-mix(in srgb, ${color} 12%, var(--vintage-surface-2)) 100%)`
           : "radial-gradient(110% 90% at 50% 20%, var(--vintage-surface-3) 0%, var(--vintage-surface-2) 100%)",
         boxShadow: isActive
-          ? `inset 0 1px 3px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.65), 0 0 14px color-mix(in srgb, ${color} 22%, transparent)`
-          : "inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(0,0,0,0.65), 0 3px 4px rgba(0,0,0,0.5)",
+          ? `inset 0 1px 3px rgba(0,0,0,0.55), 0 0 0 1px var(--vintage-edge), 0 0 14px color-mix(in srgb, ${color} 22%, transparent)`
+          : "inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px var(--vintage-edge), 0 3px 4px rgba(0,0,0,0.5)",
         transform: `translateY(${afundado}px)`,
         transition:
           "transform var(--dur-press,120ms) var(--ease-out,ease), box-shadow var(--dur-fast,160ms) var(--ease-out,ease), background var(--dur-fast,160ms) var(--ease-out,ease)",
@@ -311,7 +311,7 @@ export function VintageSoundboardPad({
           fontFamily: "var(--font-vintage-mono, monospace)",
           textShadow: isActive
             ? "0 1px 2px rgba(0,0,0,0.6)"
-            : "0 -1px 0 rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06)",
+            : "var(--vintage-engrave)",
         }}
       >
         {label}
@@ -324,8 +324,8 @@ export function VintageSoundboardPad({
         style={{
           background: isActive ? color : "var(--vintage-surface-1)",
           boxShadow: isActive
-            ? `0 0 6px ${color}, 0 0 0 1px rgba(0,0,0,0.5)`
-            : "inset 0 1px 1px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.06)",
+            ? `0 0 6px ${color}, 0 0 0 1px var(--vintage-edge)`
+            : "inset 0 1px 1px rgba(0,0,0,0.8), 0 1px 0 var(--vintage-lip)",
           transition: "background var(--dur-fast,160ms) var(--ease-out,ease)",
         }}
       />

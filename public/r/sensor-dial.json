@@ -1,0 +1,174 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "sensor-dial",
+  "title": "Sensor Dial",
+  "author": "Visant Labs <visantsupply@gmail.com>",
+  "description": "Mira de pareamento: gire o feixe até o alvo, e o disco cresce conforme chega perto. Em repouso, o feixe procura sozinho.",
+  "dependencies": [
+    "motion",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "registry/visant/ui/sensor-dial.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { motion, useMotionValue, useMotionValueEvent, useReducedMotion, useSpring, useTransform } from \"motion/react\";\nimport { Plus, X } from \"lucide-react\";\n\nimport { cn } from \"@/lib/utils\";\n\nexport interface SensorDialProps {\n  /** Ângulo onde o alvo está, em graus (0 = topo, sentido horário). */\n  target?: number;\n  /** Quebra de linha com `\\n`. */\n  title?: string;\n  foundTitle?: string;\n  action?: string;\n  activeAction?: string;\n  /** Contorno do aparelho no pé da folha: mostra como segurar. Desligue fora de pareamento. */\n  guide?: boolean;\n  /** Avisa quando o feixe entra ou sai do alvo. */\n  onLock?: (locked: boolean) => void;\n  onAction?: (active: boolean) => void;\n  className?: string;\n}\n\nconst N = 120;\nconst C = 200;\nconst FOLGA = 8;\nconst INICIO = 222;\nconst distancia = (a: number, b: number) => Math.abs((((a - b + 540) % 360) + 360) % 360 - 180);\nconst ponto = (grau: number, r: number) => {\n  const t = ((grau - 90) * Math.PI) / 180;\n  return [C + r * Math.cos(t), C + r * Math.sin(t)].map((n) => +n.toFixed(2));\n};\nconst MARCAS = Array.from({ length: N }, (_, i) => (i * 360) / N);\nconst EIXOS = [8, 100, 188, 280];\n// O feixe: o traço de destaque no meio, os brancos abrindo em volta dele.\nconst FEIXE = [-14, -9, -4, 1, 6];\n\n/**\n * Mira de pareamento: gire o feixe até o alvo, e o disco cresce conforme chega perto.\n * Em repouso o feixe procura sozinho, sem nunca chegar, porque celular não tem hover.\n *\n * `touch-none` no mostrador de propósito: gesto circular não tem eixo para ceder à\n * rolagem. A página continua rolando em todo o resto da peça. O SVG é só traço; o\n * botão e o texto são HTML ao lado, porque `foreignObject` em SVG girado sai do lugar\n * no Safari.\n */\nexport function SensorDial({\n  target = 8,\n  title = \"Aproxime a câmera\\ndo sensor\",\n  foundTitle = \"Sensor encontrado.\\nNão se mexa\",\n  action = \"Iniciar\",\n  activeAction = \"Rastreando\",\n  guide = true,\n  onLock,\n  onAction,\n  className,\n}: SensorDialProps) {\n  const reduz = useReducedMotion();\n  const angulo = useMotionValue(INICIO);\n  const visto = useSpring(angulo, reduz ? { stiffness: 2000, damping: 100 } : { stiffness: 170, damping: 24 });\n  const perto = useTransform(visto, (a) => Math.max(0, 1 - distancia(a, target) / 150));\n  const disco = useTransform(perto, (n) => 0.86 + 0.26 * n * n);\n  const [grau, setGrau] = React.useState(INICIO);\n  const [travado, setTravado] = React.useState(false);\n  const [ativo, setAtivo] = React.useState(false);\n  const preso = React.useRef(false);\n  const tocado = React.useRef(false);\n  const eco = React.useRef(onLock);\n  eco.current = onLock;\n\n  useMotionValueEvent(angulo, \"change\", (a) => {\n    setGrau(Math.round(((a % 360) + 360) % 360));\n    setTravado(distancia(a, target) <= FOLGA);\n  });\n  const primeira = React.useRef(true);\n  React.useEffect(() => {\n    if (primeira.current) {\n      primeira.current = false;\n      return;\n    }\n    eco.current?.(travado);\n  }, [travado]);\n\n  React.useEffect(() => {\n    if (reduz) return;\n    let raf = 0;\n    const t0 = performance.now();\n    const passo = (t: number) => {\n      if (tocado.current) return;\n      angulo.set(INICIO + 16 * Math.sin((t - t0) / 1400));\n      raf = requestAnimationFrame(passo);\n    };\n    raf = requestAnimationFrame(passo);\n    return () => cancelAnimationFrame(raf);\n  }, [reduz, angulo]);\n\n  const doPonteiro = (e: React.PointerEvent<SVGSVGElement>) => {\n    const r = e.currentTarget.getBoundingClientRect();\n    const a = (Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180) / Math.PI + 90;\n    // Caminho mais curto, senão o feixe dá a volta inteira ao cruzar o zero.\n    const agora = angulo.get();\n    angulo.set(agora + ((((a - agora + 540) % 360) + 360) % 360) - 180);\n  };\n  const onKeyDown = (e: React.KeyboardEvent) => {\n    const passo = ({ ArrowRight: 3, ArrowUp: 3, ArrowLeft: -3, ArrowDown: -3 } as Record<string, number>)[e.key];\n    if (!passo) return;\n    e.preventDefault();\n    tocado.current = true;\n    angulo.set(angulo.get() + passo);\n  };\n\n  return (\n    <div className={cn(\"sensor-dial\", className)} data-travado={travado || undefined}>\n      <p className=\"sensor-dial-titulo\" aria-live=\"polite\">{travado ? foundTitle : title}</p>\n      <svg\n        className=\"sensor-dial-mostrador\"\n        viewBox=\"0 0 400 400\"\n        role=\"slider\"\n        tabIndex={0}\n        aria-label=\"Direção do feixe\"\n        aria-valuemin={0}\n        aria-valuemax={359}\n        aria-valuenow={grau}\n        aria-valuetext={travado ? \"No alvo\" : `${grau} graus`}\n        onPointerDown={(e) => {\n          e.currentTarget.setPointerCapture(e.pointerId);\n          tocado.current = true;\n          preso.current = true;\n          doPonteiro(e);\n        }}\n        onPointerMove={(e) => {\n          if (preso.current) doPonteiro(e);\n        }}\n        onPointerUp={() => (preso.current = false)}\n        onPointerCancel={() => (preso.current = false)}\n        onKeyDown={onKeyDown}\n      >\n        {MARCAS.map((d) => {\n          const [x1, y1] = ponto(d, d % 15 === 0 ? 158 : 162);\n          const [x2, y2] = ponto(d, 170);\n          return <line key={d} x1={x1} y1={y1} x2={x2} y2={y2} className=\"sensor-dial-marca\" />;\n        })}\n        {EIXOS.map((d) => {\n          const [x1, y1] = ponto(d, 92);\n          const [x2, y2] = ponto(d, 156);\n          return <line key={d} x1={x1} y1={y1} x2={x2} y2={y2} className=\"sensor-dial-eixo\" />;\n        })}\n        <circle cx={C} cy={C} r={84} className=\"sensor-dial-orbita\" />\n        <motion.g style={{ rotate: visto, transformOrigin: \"200px 200px\", transformBox: \"view-box\" }}>\n          {FEIXE.map((off) => {\n            const [x1, y1] = ponto(off, 92);\n            const [x2, y2] = ponto(off, 156);\n            return <line key={off} x1={x1} y1={y1} x2={x2} y2={y2} className={off === 1 ? \"sensor-dial-feixe sensor-dial-alvo\" : \"sensor-dial-feixe\"} />;\n          })}\n        </motion.g>\n        <motion.g style={{ scale: disco, transformOrigin: \"200px 200px\", transformBox: \"view-box\" }}>\n          <circle cx={C} cy={C} r={70} className=\"sensor-dial-disco\" />\n          <circle cx={C} cy={C} r={62} className=\"sensor-dial-aro\" />\n          <circle cx={C} cy={C} r={5} className=\"sensor-dial-lente\" />\n        </motion.g>\n      </svg>\n      {guide ? (\n        <svg className=\"sensor-dial-guia\" viewBox=\"0 0 220 180\" aria-hidden>\n          <path d=\"M2 180V24A22 22 0 0 1 24 2H196A22 22 0 0 1 218 24V180\" />\n          <path d=\"M62 2v6a12 12 0 0 0 12 12h72a12 12 0 0 0 12-12V2\" />\n          <rect x=\"84\" y=\"9\" width=\"30\" height=\"4\" rx=\"2\" />\n          <circle cx=\"128\" cy=\"11\" r=\"3.5\" />\n        </svg>\n      ) : null}\n      <button\n        type=\"button\"\n        className=\"sensor-dial-acao\"\n        aria-pressed={ativo}\n        onClick={() => {\n          setAtivo(!ativo);\n          onAction?.(!ativo);\n        }}\n      >\n        <span>{ativo ? activeAction : action}</span>\n        <i aria-hidden>{ativo ? <X size={18} /> : <Plus size={20} />}</i>\n      </button>\n    </div>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "css": {
+    ".sensor-dial": {
+      "--folha": "var(--sensor-sheet, var(--brand))",
+      "--tinta": "var(--sensor-ink, color-mix(in srgb, black 88%, navy))",
+      "position": "relative",
+      "display": "flex",
+      "flex-direction": "column",
+      "align-items": "center",
+      "width": "100%",
+      "height": "100%",
+      "min-height": "26rem",
+      "overflow": "hidden",
+      "container-type": "inline-size",
+      "border-radius": "inherit",
+      "font-family": "var(--font-sans, system-ui)",
+      "background": "radial-gradient(64cqw 84cqw at 50% 74cqw, var(--tinta) 58%, color-mix(in srgb, var(--tinta) 62%, var(--folha)) 78%, var(--folha) 100%)"
+    },
+    ".sensor-dial-titulo": {
+      "margin": "6.5cqw 0 0",
+      "color": "var(--sensor-title, var(--brand-foreground))",
+      "font-size": "5.2cqw",
+      "font-weight": "400",
+      "line-height": "1.2",
+      "text-align": "center",
+      "white-space": "pre-line"
+    },
+    ".sensor-dial-mostrador": {
+      "flex": "none",
+      "width": "92cqw",
+      "aspect-ratio": "1",
+      "margin-top": "1cqw",
+      "border-radius": "50%",
+      "cursor": "grab",
+      "outline": "0",
+      "touch-action": "none"
+    },
+    ".sensor-dial-mostrador:active": {
+      "cursor": "grabbing"
+    },
+    ".sensor-dial-mostrador:focus-visible": {
+      "outline": "2px solid white",
+      "outline-offset": "-6px"
+    },
+    ".sensor-dial-marca": {
+      "stroke": "white",
+      "stroke-width": "1.8",
+      "stroke-linecap": "round"
+    },
+    ".sensor-dial-eixo": {
+      "stroke": "color-mix(in srgb, white 72%, transparent)",
+      "stroke-width": "1",
+      "stroke-dasharray": "2 3"
+    },
+    ".sensor-dial-orbita": {
+      "fill": "none",
+      "stroke": "color-mix(in srgb, white 48%, transparent)",
+      "stroke-width": "1.2"
+    },
+    ".sensor-dial-feixe": {
+      "stroke": "color-mix(in srgb, white 76%, transparent)",
+      "stroke-width": "1.5"
+    },
+    ".sensor-dial-alvo": {
+      "stroke": "var(--sensor-hit, var(--brand))",
+      "stroke-width": "2.2"
+    },
+    ".sensor-dial-disco": {
+      "fill": "white",
+      "filter": "drop-shadow(0 3px 7px color-mix(in srgb, black 60%, transparent))"
+    },
+    ".sensor-dial-aro": {
+      "fill": "none",
+      "stroke": "color-mix(in srgb, white 82%, black)",
+      "stroke-width": "1.5"
+    },
+    ".sensor-dial-lente": {
+      "fill": "color-mix(in srgb, white 65%, black)"
+    },
+    ".sensor-dial-guia": {
+      "position": "absolute",
+      "left": "13cqw",
+      "bottom": "-2cqw",
+      "width": "74cqw",
+      "height": "auto",
+      "overflow": "visible",
+      "fill": "none",
+      "stroke": "color-mix(in srgb, white 62%, transparent)",
+      "stroke-width": "1.1",
+      "pointer-events": "none"
+    },
+    ".sensor-dial-guia circle": {
+      "fill": "white",
+      "stroke": "none"
+    },
+    ".sensor-dial-acao": {
+      "position": "absolute",
+      "bottom": "8cqw",
+      "left": "50%",
+      "translate": "-50% 0",
+      "display": "flex",
+      "align-items": "center",
+      "justify-content": "space-between",
+      "width": "62cqw",
+      "min-height": "2.75rem",
+      "height": "14.5cqw",
+      "padding": "0 2cqw 0 7cqw",
+      "border": "0",
+      "border-radius": "4.5cqw",
+      "color": "white",
+      "font": "400 max(0.8125rem, 4.3cqw) var(--font-sans, system-ui)",
+      "cursor": "pointer",
+      "background": "color-mix(in srgb, black 44%, transparent)",
+      "-webkit-backdrop-filter": "blur(10px)",
+      "backdrop-filter": "blur(10px)"
+    },
+    ".sensor-dial-acao i": {
+      "display": "grid",
+      "place-items": "center",
+      "width": "10.5cqw",
+      "height": "10.5cqw",
+      "border-radius": "50%",
+      "color": "black",
+      "background": "white",
+      "transition": "transform var(--dur-fast, 160ms) var(--ease-out)"
+    },
+    ".sensor-dial-acao:active i": {
+      "transform": "scale(0.94)"
+    },
+    ".sensor-dial-acao:focus-visible": {
+      "outline": "2px solid white",
+      "outline-offset": "2px"
+    },
+    "@media (prefers-reduced-motion: reduce)": {
+      ".sensor-dial-acao i": {
+        "transition": "none"
+      }
+    }
+  },
+  "meta": {
+    "uso": {
+      "quando": "Passo de parear ou alinhar um dispositivo, em app de IoT ou de câmera",
+      "evite": "Escolher uma hora: time-dial; mostrar um nível sem interação, gauge"
+    }
+  },
+  "categories": [
+    "controles",
+    "mostrador",
+    "pareamento",
+    "mira",
+    "sensor",
+    "camera"
+  ],
+  "type": "registry:ui"
+}

@@ -1,41 +1,142 @@
 @import "https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Red+Hat+Mono:wght@400;500;600;700&display=swap";
 
+/* O kit lê os tokens do projeto: fundo e texto dão as chapas, a marca dá a luz. Só o que é
+   objeto fica em cor própria: LED e medidor de nível, tubo de CRT, mostrador creme. */
 :root {
-  --vintage-surface-1: #0f0f0f;
-  --vintage-surface-2: #1a1a1a;
-  --vintage-surface-3: #2a2a2a;
-  --vintage-surface-3a: #3a3a3a;
-  --vintage-surface-4: #4a4a4a;
-  --vintage-border: #333333;
-  --vintage-label: #f0e68c;
-  --vintage-value: #ffd700;
-  --vintage-accent: #ff6b35;
-  --vintage-accent-deep: #ff4500;
-  --vintage-accent-glow: rgba(255, 107, 53, 0.6);
-  --vintage-needle: #ff0000;
-  --vintage-needle-glow: rgba(255, 0, 0, 0.5);
-  --vintage-text-muted: #888888;
-  --vintage-text-dim: #5c5c5c;
   --vintage-meter-green: #22c55e;
   --vintage-meter-yellow: #eab308;
   --vintage-meter-orange: #f97316;
   --vintage-meter-red: #ef4444;
-  --vintage-metal-light: #6a6a6a;
-  --vintage-metal-dark: #3a3a3a;
-  --vintage-metal-mid: #9ba0a6;
-  --vintage-metal-channel-light: #bebebe;
-  --vintage-metal-channel-dark: #a9a9a9;
-  --vintage-toggle-track: #403f3f;
-  --vintage-grid: #bbbaba;
-  /* A luz do kit (ponteiro, faixa do fader, LED, fósforo, curva) é a MARCA do
-     projeto. Leitura em texto segue no --vintage-value: marca nunca vira texto. */
+  --vintage-needle: #ef2b2b;
+  --vintage-needle-glow: color-mix(in srgb, var(--vintage-needle) 50%, transparent);
+  --vintage-accent: var(--vintage-light);
+  --vintage-accent-deep: color-mix(in oklab, var(--vintage-light) 82%, var(--foreground));
+  --vintage-accent-glow: color-mix(in srgb, var(--vintage-light) 60%, transparent);
+  --vintage-label: var(--foreground);
+  --vintage-value: var(--foreground);
+  --vintage-tube: #0c0e0b;
+  --vintage-tube-hi: #1e201d;
+  --vintage-face-ink: #2a2014;
   --vintage-light: var(--brand, #ffd700);
+  --vintage-brushed: conic-gradient(from 90deg, #969aa0 0deg, #5d636c 9deg, #555b69 22deg, #dfdfdf 41deg, #71798a 63deg, #a9abb3 83deg, #cbd2d6 120deg, #ffffff 149deg, #5e646a 186deg, #8e959d 219deg, #ffffff 245deg, #7e8691 269deg, #575d6b 284deg, #6c747f 301deg, #f1f1f3 337deg, #979aa3 349deg, #b1b3b9 356deg, #969aa0 360deg);
+  --vintage-surface-1: color-mix(in oklab, var(--foreground) 14%, var(--background));
+  --vintage-surface-2: color-mix(in oklab, var(--foreground) 8%, var(--background));
+  --vintage-surface-3: color-mix(in oklab, var(--foreground) 4%, var(--background));
+  --vintage-surface-3a: color-mix(in oklab, var(--foreground) 2%, var(--background));
+  --vintage-surface-4: var(--background);
+  --vintage-border: color-mix(in oklab, var(--foreground) 18%, var(--background));
+  --vintage-text-muted: color-mix(in oklab, var(--foreground) 62%, var(--background));
+  --vintage-text-dim: color-mix(in oklab, var(--foreground) 44%, var(--background));
+  --vintage-metal-light: color-mix(in oklab, var(--foreground) 24%, var(--background));
+  --vintage-metal-dark: color-mix(in oklab, var(--foreground) 46%, var(--background));
+  --vintage-metal-mid: color-mix(in oklab, var(--foreground) 34%, var(--background));
+  --vintage-metal-channel-light: color-mix(in oklab, var(--foreground) 10%, var(--background));
+  --vintage-metal-channel-dark: color-mix(in oklab, var(--foreground) 20%, var(--background));
+  --vintage-toggle-track: color-mix(in oklab, var(--foreground) 24%, var(--background));
+  --vintage-grid: color-mix(in oklab, var(--foreground) 70%, var(--background));
+  --vintage-cap-hi: color-mix(in oklab, var(--foreground) 2%, var(--background));
+  --vintage-cap-lo: color-mix(in oklab, var(--foreground) 20%, var(--background));
+  --vintage-base-hi: color-mix(in oklab, var(--foreground) 12%, var(--background));
+  --vintage-base-lo: color-mix(in oklab, var(--foreground) 36%, var(--background));
+  --vintage-depth-edge: color-mix(in oklab, var(--foreground) 38%, var(--background));
+  --vintage-depth-mid: color-mix(in oklab, var(--foreground) 20%, var(--background));
+  --vintage-depth-core: color-mix(in oklab, var(--foreground) 8%, var(--background));
+  --vintage-ring-hi: var(--background);
+  --vintage-ring-lo: color-mix(in oklab, var(--foreground) 40%, var(--background));
+  --vintage-face-hi: color-mix(in oklab, var(--vintage-light) 12%, #fdf6e0);
+  --vintage-face-mid: color-mix(in oklab, var(--vintage-light) 14%, #f3e3b4);
+  --vintage-face-lo: color-mix(in oklab, var(--vintage-light) 16%, #d9b970);
+  --vintage-panel-shadow: inset 0 1px 0 rgb(255 255 255 / 0.7), 0 1px 1px rgb(0 0 0 / 0.12), 0 10px 24px -8px rgb(0 0 0 / 0.2);
+  --vintage-well-shadow: inset 0 2px 5px rgb(0 0 0 / 0.22), inset 0 0 0 1px rgb(0 0 0 / 0.14), 0 1px 0 rgb(255 255 255 / 0.7);
+  --vintage-engrave: 0 1px 0 rgb(255 255 255 / 0.7);
+  --vintage-edge: rgb(0 0 0 / 0.2);
+  --vintage-lip: rgb(255 255 255 / 0.7);
+  --vintage-tv-body-hi: #c6beb6;
+  --vintage-tv-body-lo: #8c8782;
+  --vintage-tv-console: #cdc4bb;
+  --vintage-tv-edge: #4d4946;
+  --vintage-tv-foot-hi: #ccc3bb;
+  --vintage-tv-foot-lo: #9a938d;
+  --vintage-tv-bezel: #bfb7ab;
+  --vintage-tv-dial-hi: #ccc4b7;
+  --vintage-tv-dial-lo: #736d68;
+  --vintage-tv-ink: #4a4540;
 }
 
-/* Marca escura sumiria no painel preto: a luz nunca fica abaixo de L 0,72. */
+.dark {
+  --vintage-meter-green: #22c55e;
+  --vintage-meter-yellow: #eab308;
+  --vintage-meter-orange: #f97316;
+  --vintage-meter-red: #ef4444;
+  --vintage-needle: #ef2b2b;
+  --vintage-needle-glow: color-mix(in srgb, var(--vintage-needle) 50%, transparent);
+  --vintage-accent: var(--vintage-light);
+  --vintage-accent-deep: color-mix(in oklab, var(--vintage-light) 82%, var(--foreground));
+  --vintage-accent-glow: color-mix(in srgb, var(--vintage-light) 60%, transparent);
+  --vintage-label: var(--foreground);
+  --vintage-value: var(--foreground);
+  --vintage-tube: #0c0e0b;
+  --vintage-tube-hi: #1e201d;
+  --vintage-face-ink: #2a2014;
+  --vintage-light: var(--brand, #ffd700);
+  --vintage-brushed: conic-gradient(from 90deg, #969aa0 0deg, #5d636c 9deg, #555b69 22deg, #dfdfdf 41deg, #71798a 63deg, #a9abb3 83deg, #cbd2d6 120deg, #ffffff 149deg, #5e646a 186deg, #8e959d 219deg, #ffffff 245deg, #7e8691 269deg, #575d6b 284deg, #6c747f 301deg, #f1f1f3 337deg, #979aa3 349deg, #b1b3b9 356deg, #969aa0 360deg);
+  --vintage-surface-1: color-mix(in oklab, var(--background) 55%, black);
+  --vintage-surface-2: var(--background);
+  --vintage-surface-3: color-mix(in oklab, var(--foreground) 8%, var(--background));
+  --vintage-surface-3a: color-mix(in oklab, var(--foreground) 14%, var(--background));
+  --vintage-surface-4: color-mix(in oklab, var(--foreground) 20%, var(--background));
+  --vintage-border: color-mix(in oklab, var(--foreground) 14%, var(--background));
+  --vintage-text-muted: color-mix(in oklab, var(--foreground) 55%, var(--background));
+  --vintage-text-dim: color-mix(in oklab, var(--foreground) 34%, var(--background));
+  --vintage-metal-light: color-mix(in oklab, var(--foreground) 38%, var(--background));
+  --vintage-metal-dark: color-mix(in oklab, var(--foreground) 16%, var(--background));
+  --vintage-metal-mid: color-mix(in oklab, var(--foreground) 60%, var(--background));
+  --vintage-metal-channel-light: color-mix(in oklab, var(--foreground) 72%, var(--background));
+  --vintage-metal-channel-dark: color-mix(in oklab, var(--foreground) 62%, var(--background));
+  --vintage-toggle-track: color-mix(in oklab, var(--foreground) 20%, var(--background));
+  --vintage-grid: color-mix(in oklab, var(--foreground) 72%, var(--background));
+  --vintage-cap-hi: color-mix(in oklab, var(--foreground) 50%, var(--background));
+  --vintage-cap-lo: color-mix(in oklab, var(--foreground) 14%, var(--background));
+  --vintage-base-hi: color-mix(in oklab, var(--foreground) 22%, var(--background));
+  --vintage-base-lo: color-mix(in oklab, var(--background) 55%, black);
+  --vintage-depth-edge: color-mix(in oklab, var(--foreground) 8%, var(--background));
+  --vintage-depth-mid: color-mix(in oklab, var(--foreground) 26%, var(--background));
+  --vintage-depth-core: color-mix(in oklab, var(--foreground) 38%, var(--background));
+  --vintage-ring-hi: color-mix(in oklab, var(--foreground) 90%, var(--background));
+  --vintage-ring-lo: color-mix(in oklab, var(--foreground) 18%, var(--background));
+  --vintage-face-hi: color-mix(in oklab, var(--vintage-light) 14%, #f7e2a4);
+  --vintage-face-mid: color-mix(in oklab, var(--vintage-light) 16%, #ecc86f);
+  --vintage-face-lo: color-mix(in oklab, var(--vintage-light) 18%, #b98a33);
+  --vintage-panel-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 1px 1px rgb(0 0 0 / 0.5), 0 10px 24px -8px rgb(0 0 0 / 0.6);
+  --vintage-well-shadow: inset 0 2px 6px rgb(0 0 0 / 0.75), inset 0 0 0 1px rgb(0 0 0 / 0.6), 0 1px 0 rgb(255 255 255 / 0.06);
+  --vintage-engrave: 0 -1px 0 rgb(0 0 0 / 0.55), 0 1px 0 rgb(255 255 255 / 0.06);
+  --vintage-edge: rgb(0 0 0 / 0.6);
+  --vintage-lip: rgb(255 255 255 / 0.06);
+  --vintage-tv-body-hi: color-mix(in oklab, var(--foreground) 24%, var(--background));
+  --vintage-tv-body-lo: color-mix(in oklab, var(--foreground) 8%, var(--background));
+  --vintage-tv-console: color-mix(in oklab, var(--foreground) 18%, var(--background));
+  --vintage-tv-edge: color-mix(in oklab, var(--background) 55%, black);
+  --vintage-tv-foot-hi: color-mix(in oklab, var(--foreground) 26%, var(--background));
+  --vintage-tv-foot-lo: color-mix(in oklab, var(--foreground) 12%, var(--background));
+  --vintage-tv-bezel: color-mix(in oklab, var(--foreground) 16%, var(--background));
+  --vintage-tv-dial-hi: color-mix(in oklab, var(--foreground) 52%, var(--background));
+  --vintage-tv-dial-lo: color-mix(in oklab, var(--foreground) 20%, var(--background));
+  --vintage-tv-ink: color-mix(in oklab, var(--foreground) 72%, var(--background));
+}
+
+/* A luz e a leitura saem da marca, com o brilho preso ao que o fundo aguenta:
+   marca clara sumiria no painel claro, e marca escura, no painel escuro. */
 @supports (color: oklch(from red l c h)) {
   :root {
+    --vintage-light: oklch(from var(--brand, #b8860b) min(l, 0.62) max(c, 0.06) h);
+    --vintage-label: oklch(from var(--brand, #b8860b) min(l, 0.38) min(c, 0.1) h);
+    --vintage-value: oklch(from var(--brand, #b8860b) min(l, 0.42) c h);
+  }
+
+  .dark {
     --vintage-light: oklch(from var(--brand, #ffd700) max(l, 0.72) c h);
+    --vintage-label: oklch(from var(--brand, #ffd700) max(l, 0.86) min(c, 0.12) h);
+    --vintage-value: oklch(from var(--brand, #ffd700) max(l, 0.86) c h);
   }
 }
 

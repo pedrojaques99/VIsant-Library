@@ -41,6 +41,10 @@ export const EASE_OUT_CSS = "cubic-bezier(0.23, 1, 0.32, 1)";
 export const EASE_SAIDA_CSS = "cubic-bezier(0.55, 0, 1, 0.45)";
 /** Passa cerca de 6% do alvo e volta: a mola do `segmented-control`, sem mola de JS. */
 export const EASE_MOLA_CSS = "cubic-bezier(0.34, 1.4, 0.64, 1)";
+/** O cartão encaixando com imã: passa 2% do alvo e assenta. O pouso do `kanban`. */
+export const EASE_POUSO_CSS = "cubic-bezier(0.2, 1.08, 0.36, 1)";
+/** Sobe rápido e solta devagar: o esticar do vidro em `glass-tabs` e `glass-switch`. */
+export const EASE_ESTICA_CSS = "cubic-bezier(0.3, 0.7, 0.2, 1)";
 /** Varredura de indicador: anda decidida no meio e não para seco nas pontas. */
 export const EASE_VARREDURA_CSS = "cubic-bezier(0.45, 0, 0.25, 1)";
 /** O rebote assentando depois da batida do martelo do `working-glyph`. */

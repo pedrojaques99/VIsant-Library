@@ -57,43 +57,39 @@ interface VintageTvFrameProps {
   className?: string;
 }
 
-// Hex cru aqui é exceção declarada: isto não é superfície de tema, é a pintura
-// de um objeto — plástico bege queimado, alumínio do dial, fósforo do LED. Ligar
-// esses valores ao token da marca faria a TV mudar de material a cada cliente.
+// A pintura do móvel: plástico bege no tema claro, grafite no escuro. O tubo e os LEDs
+// são objeto e não seguem o tema; o resto vem dos tokens `--vintage-tv-*`.
 const RETRO = {
-  bodyGradient:
-    "linear-gradient(180deg, rgba(230,219,209,0.75) 0%, rgba(153,146,140,0.75) 100%), #676665",
-  consoleSurface: "#CDC4BB",
-  consoleBottomEdge: "linear-gradient(180deg, #CDC4BB 0%, #4D4946 100%)",
+  bodyGradient: "linear-gradient(180deg, var(--vintage-tv-body-hi) 0%, var(--vintage-tv-body-lo) 100%)",
+  consoleSurface: "var(--vintage-tv-console)",
+  consoleBottomEdge: "linear-gradient(180deg, var(--vintage-tv-console) 0%, var(--vintage-tv-edge) 100%)",
   footGradient:
-    "linear-gradient(90deg, #9A938D 0%, #C1B8B1 40%, #CCC3BB 51%, #BDB4AD 65%, #9A938D 100%)",
+    "linear-gradient(90deg, var(--vintage-tv-foot-lo) 0%, var(--vintage-tv-foot-hi) 45%, var(--vintage-tv-foot-lo) 100%)",
   bezelOuter:
     "linear-gradient(0deg, rgba(81,76,73,0.5), rgba(81,76,73,0.5)), linear-gradient(135deg, rgba(70,70,70,0.45) -1%, rgba(13,13,13,0.27) 42%, rgba(0,0,0,0.45) 49%, rgba(13,13,13,0.32) 56%, rgba(49,49,49,0.45) 92%)",
   bezelInner:
-    "linear-gradient(178deg, rgba(0,0,0,0) -21%, rgba(0,0,0,0.25) -10%, rgba(0,0,0,0.5) -6%, rgba(0,0,0,0.25) 8%, rgba(0,0,0,0) 75%), linear-gradient(183deg, rgba(70,70,70,0.45) 7%, rgba(13,13,13,0.27) 93%, rgba(0,0,0,0.45) 114%), #BFB7AB",
-  screenOn: "#1E201D",
-  screenOff:
-    "radial-gradient(ellipse at 50% 50%, #1a1c18 0%, #111310 40%, #080a07 100%)",
+    "linear-gradient(178deg, rgba(0,0,0,0) -21%, rgba(0,0,0,0.25) -10%, rgba(0,0,0,0.5) -6%, rgba(0,0,0,0.25) 8%, rgba(0,0,0,0) 75%), linear-gradient(183deg, rgba(70,70,70,0.45) 7%, rgba(13,13,13,0.27) 93%, rgba(0,0,0,0.45) 114%), var(--vintage-tv-bezel)",
+  screenOn: "var(--vintage-tube-hi)",
+  screenOff: "radial-gradient(ellipse at 50% 50%, var(--vintage-tube-hi) 0%, var(--vintage-tube) 100%)",
   screenInsetShadow: "inset 0 0 28px rgba(0,0,0,0.8)",
   screenVignette: "inset 0 0 60px rgba(0,0,0,0.5)",
   scanlines:
     "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px)",
-  dialGradient:
-    "linear-gradient(143deg, #CCC4B7 20%, #BAB4AB 40%, #ABA49C 50%, #736D68 86%)",
+  dialGradient: "linear-gradient(143deg, var(--vintage-tv-dial-hi) 20%, var(--vintage-tv-dial-lo) 86%)",
   dialShadow:
     "0 1.5px 1.5px rgba(0,0,0,0.25), 0 3px 3px rgba(0,0,0,0.15)",
-  dialRed: "#EA5959",
-  dialGreen: "#39AE5A",
-  powerOn: "#CEC5BC",
-  powerOff: "#706B66",
+  dialRed: "var(--vintage-meter-red)",
+  dialGreen: "var(--vintage-meter-green)",
+  powerOn: "var(--vintage-tv-console)",
+  powerOff: "var(--vintage-tv-dial-lo)",
   powerShadowOn:
     "inset 0 -1.5px 3px rgba(0,0,0,0.25), inset 0 1.5px 3px rgba(255,255,255,0.25)",
   powerShadowOff: "inset 0 1.5px 3px rgba(0,0,0,0.4)",
-  ledPowerOn: "#72956F",
-  ledPowerOff: "#4a5248",
-  ledSignalOn: "#CD8A8A",
-  ledSignalOff: "#6e5050",
-  textOnChassis: "#4a4540",
+  ledPowerOn: "var(--vintage-meter-green)",
+  ledPowerOff: "color-mix(in srgb, var(--vintage-meter-green) 25%, var(--vintage-surface-1))",
+  ledSignalOn: "var(--vintage-meter-red)",
+  ledSignalOff: "color-mix(in srgb, var(--vintage-meter-red) 25%, var(--vintage-surface-1))",
+  textOnChassis: "var(--vintage-tv-ink)",
   radiusBody: 6,
   radiusBezelOuter: 4,
   radiusBezelInner: 20,
