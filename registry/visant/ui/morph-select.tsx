@@ -8,6 +8,7 @@ import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion, type Variants } from "motion/react";
 import { Check, ChevronDown } from "lucide-react";
 
+import { DUR, INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -223,7 +224,7 @@ export function MorphSelect({
   };
 
   const larguraAberta = Math.max(panelWidth, fechado.w);
-  const transicao = reduzido ? { duration: 0 } : MOLA;
+  const transicao = reduzido ? INSTANT : MOLA;
 
   const conteudoGatilho = (texto: string, icone?: React.ReactNode) => (
     <>
@@ -297,7 +298,7 @@ export function MorphSelect({
                   initial="entra"
                   animate="fica"
                   exit="sai"
-                  transition={reduzido ? { duration: 0.12 } : { type: "spring", visualDuration: 0.24, bounce: 0 }}
+                  transition={reduzido ? { duration: DUR.press } : { type: "spring", visualDuration: 0.24, bounce: 0 }}
                   className="flex min-w-0 items-center gap-2 [grid-area:1/1]"
                 >
                   {conteudoGatilho(item?.label ?? placeholder, item?.icon)}
@@ -350,7 +351,7 @@ export function MorphSelect({
                       layoutId={`${id}-realce`}
                       aria-hidden="true"
                       className="absolute inset-0 rounded-[inherit] bg-muted"
-                      transition={reduzido ? { duration: 0 } : { type: "spring", visualDuration: 0.2, bounce: 0 }}
+                      transition={reduzido ? INSTANT : { type: "spring", visualDuration: 0.2, bounce: 0 }}
                     />
                   )}
                   {op.icon && <span className="relative flex shrink-0 text-muted-foreground [&>svg]:size-4">{op.icon}</span>}

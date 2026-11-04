@@ -32,6 +32,7 @@ const desloca = (d: number) => ({
   transform: `translate3d(calc(var(--px, 0) * ${d}px), calc(var(--py, 0) * ${d}px), 0)`,
 });
 
+/* EXCEPTION to noise-scan/dot-grid: a malha é a camada de referência do parallax, ela anda devagar e mede a profundidade dos objetos */
 const PONTOS = {
   backgroundImage:
     "radial-gradient(circle, color-mix(in oklab, var(--foreground) 14%, transparent) 1px, transparent 1.2px)",

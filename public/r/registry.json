@@ -950,6 +950,18 @@
       }
     },
     {
+      "name": "motion",
+      "type": "registry:lib",
+      "title": "Motion Tokens",
+      "description": "Curvas e durações da casa em JS, espelho de --ease-* e --dur-*: Motion, GSAP e Web Animations API importam daqui em vez de escrever o número na peça.",
+      "files": [
+        {
+          "path": "registry/visant/lib/motion.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "motion-layer",
       "type": "registry:lib",
       "title": "Motion Layer",
@@ -983,7 +995,8 @@
       "description": "Quadro de tarefas por etapa: arraste o cartão de uma coluna para outra. No celular as colunas empilham.",
       "author": "Visant Labs <visantsupply@gmail.com>",
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "dependencies": [
         "@dnd-kit/core",
@@ -1087,7 +1100,8 @@
       "description": "Alternador de poucas opções. Substitui um select quando as opções cabem na tela.",
       "author": "Visant Labs <visantsupply@gmail.com>",
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -1356,7 +1370,8 @@
       "registryDependencies": [
         "utils",
         "https://visant-ui.vercel.app/r/glitch-chars.json",
-        "@visant/glitch-chars"
+        "@visant/glitch-chars",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -1416,7 +1431,8 @@
       "registryDependencies": [
         "utils",
         "https://visant-ui.vercel.app/r/glitch-chars.json",
-        "@visant/glitch-chars"
+        "@visant/glitch-chars",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -1446,7 +1462,8 @@
         "framer-motion"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -3795,7 +3812,8 @@
         "framer-motion"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -3830,7 +3848,8 @@
         "framer-motion"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -3865,7 +3884,8 @@
         "framer-motion"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -3896,7 +3916,8 @@
       "description": "Modal em <dialog> nativo que entra e sai em névoa só com CSS (@starting-style + allow-discrete), controlado, fecha no Esc e no clique fora, com ganchos onOpen/onClose para pausar o scroll suave; quatro entradas por variant: mist, rise, zoom e wipe.",
       "author": "Visant Labs <visantsupply@gmail.com>",
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4073,7 +4094,8 @@
         "motion"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4106,7 +4128,8 @@
         "motion"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4174,7 +4197,8 @@
         "lucide-react"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4207,7 +4231,8 @@
       ],
       "registryDependencies": [
         "utils",
-        "@visant/sfx-bus"
+        "@visant/sfx-bus",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4242,7 +4267,8 @@
         "lucide-react"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4276,7 +4302,8 @@
         "lucide-react"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4309,7 +4336,8 @@
         "motion"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4344,7 +4372,8 @@
       ],
       "registryDependencies": [
         "utils",
-        "@visant/sfx-bus"
+        "@visant/sfx-bus",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4376,7 +4405,8 @@
         "motion"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4409,7 +4439,8 @@
         "lucide-react"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4442,7 +4473,8 @@
         "motion"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4476,7 +4508,8 @@
         "@radix-ui/react-dropdown-menu"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4508,7 +4541,8 @@
         "motion"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4541,7 +4575,8 @@
         "lucide-react"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4573,7 +4608,8 @@
         "motion"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4705,7 +4741,8 @@
         "motion"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4739,7 +4776,8 @@
       ],
       "registryDependencies": [
         "utils",
-        "@visant/sfx-bus"
+        "@visant/sfx-bus",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4842,7 +4880,8 @@
         "motion"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4876,7 +4915,8 @@
         "lucide-react"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -4910,7 +4950,8 @@
         "motion"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -5011,7 +5052,8 @@
       ],
       "registryDependencies": [
         "utils",
-        "@visant/css-color"
+        "@visant/css-color",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -5051,7 +5093,8 @@
         "lucide-react"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -5085,7 +5128,8 @@
         "lucide-react"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -5154,7 +5198,8 @@
         "@radix-ui/react-popover"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -5188,7 +5233,8 @@
         "lucide-react"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -5255,7 +5301,8 @@
         "motion"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -5355,7 +5402,8 @@
         "lucide-react"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -5388,7 +5436,8 @@
         "lucide-react"
       ],
       "registryDependencies": [
-        "utils"
+        "utils",
+        "@visant/motion"
       ],
       "files": [
         {
@@ -6035,7 +6084,8 @@
       "author": "Visant Labs <visantsupply@gmail.com>",
       "registryDependencies": [
         "utils",
-        "@visant/chip"
+        "@visant/chip",
+        "@visant/motion"
       ],
       "files": [
         {

@@ -1,3 +1,7 @@
+
+// A demo precisa que o efeito seja visto: longo de propósito, ida mais lenta que a volta.
+const IDA_S = 2.6;
+const VOLTA_S = 1.4;
 "use client";
 
 /**
@@ -16,6 +20,7 @@ import { animate, useMotionValue, useReducedMotion } from "framer-motion";
 import { InkWordmark, type InkWordmarkFx } from "../../../registry/visant/ui/ink-wordmark";
 import type { DemoProps } from "../catalog";
 import { Trocador, useUmPorVez } from "./um-por-vez";
+import { EASE_IN_OUT } from "@/lib/motion";
 
 const EFEITOS: readonly InkWordmarkFx[] = ["tinta", "escorrer", "fatias", "gota", "grao", "neon"];
 
@@ -38,14 +43,14 @@ export default function InkWordmarkDemo({ props }: DemoProps) {
       progresso.jump(0.3);
       while (vivo) {
         // Longo e em `in-out`: o efeito precisa ser visto; com `ease-out` ele já tinha acabado.
-        atualAnim = animate(progresso, 1, { duration: 2.6, ease: [0.77, 0, 0.175, 1] });
+        atualAnim = animate(progresso, 1, { duration: IDA_S, ease: EASE_IN_OUT });
         await atualAnim;
         if (!vivo) break;
         await new Promise<void>((r) => {
           espera = window.setTimeout(r, 3200);
         });
         if (!vivo) break;
-        atualAnim = animate(progresso, 0.3, { duration: 1.4, ease: [0.77, 0, 0.175, 1] });
+        atualAnim = animate(progresso, 0.3, { duration: VOLTA_S, ease: EASE_IN_OUT });
         await atualAnim;
       }
     };

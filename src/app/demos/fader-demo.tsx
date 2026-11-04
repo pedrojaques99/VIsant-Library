@@ -27,7 +27,7 @@ export default function FaderDemo() {
     if (!el) return;
     const on = (e: Event) => {
       const t = e.target as HTMLElement;
-      setRead(`${t.getAttribute("label")} → ${(e as CustomEvent<{ value: number }>).detail.value}`);
+      setRead(`${t.getAttribute("label")}: ${(e as CustomEvent<{ value: number }>).detail.value}`);
     };
     el.addEventListener("valuechange", on);
     return () => el.removeEventListener("valuechange", on);

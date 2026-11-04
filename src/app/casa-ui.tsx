@@ -13,6 +13,10 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
+/** O dedo é o ponteiro principal. Lido a cada chamada: só muda trocando de aparelho. */
+export const ehToque = () =>
+  typeof window !== "undefined" && (window.matchMedia?.("(pointer: coarse)").matches ?? false);
+
 /**
  * Uma palavra que liga e desliga: tom cheio quando ativa, tom de apoio quando
  * não. Sem fundo, sem borda. A contagem, quando há, vai colada no tom mais baixo.
@@ -36,7 +40,7 @@ export function Aba({
       onClick={onClick}
       aria-pressed={ativa}
       className={cn(
-        "flex shrink-0 items-baseline gap-1.5 rounded-control py-1 text-casa-base transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
+        "flex shrink-0 items-baseline gap-1.5 rounded-control py-1 text-casa-base pointer-coarse:h-11 pointer-coarse:items-center pointer-coarse:py-0 transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
         ativa ? "text-casa-fg" : "text-casa-fg-2 hover:text-casa-fg",
         className,
       )}

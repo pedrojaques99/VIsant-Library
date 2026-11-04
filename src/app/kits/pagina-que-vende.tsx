@@ -467,7 +467,7 @@ export default function PaginaQueVende() {
 
       <footer className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-border px-5 py-6 text-apoio text-muted-foreground sm:px-10">
         <Wordmark />
-        <span>Rua das Flores, 120 · São Paulo</span>
+        <span>Rua das Flores, 120, São Paulo</span>
         <span>oi@faro.studio</span>
         <span className="sm:ml-auto">© 2026 Faro Estúdio</span>
       </footer>

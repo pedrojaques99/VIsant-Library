@@ -52,8 +52,6 @@
     "@tanstack/react-table@^8.21.3",
     "class-variance-authority",
     "lucide-react",
-    "next",
-    "next-auth",
     "react"
   ],
   "segmented-control": [

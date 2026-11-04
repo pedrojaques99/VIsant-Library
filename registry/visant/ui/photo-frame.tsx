@@ -60,6 +60,10 @@ import { cn } from "@/lib/utils";
  *    lá, inteira, desde o primeiro quadro — o desfecho nunca é o que se corta.
  */
 
+// Foto entrando no scroll, marketing. A diferença entre as duas é o que produz profundidade.
+const ABERTURA_S = 0.9;
+const ZOOM_S = 1.4;
+
 gsap.registerPlugin(ScrollTrigger);
 
 export interface PhotoFrameProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -124,13 +128,13 @@ export function PhotoFrame({
       tl.fromTo(
         janela,
         { clipPath: CLIP_FECHADO[from] },
-        { clipPath: "inset(0% 0% 0% 0%)", duration: 0.9, ease: "power3.out" },
+        { clipPath: "inset(0% 0% 0% 0%)", duration: ABERTURA_S, ease: "power3.out" },
       ).fromTo(
         media,
         { scale: 1.12 },
         // Mais longa que a abertura, e começando junto (`<`): é o atraso entre
         // as duas que produz a profundidade. Iguais, viram um efeito só.
-        { scale: parallax ? 1 + parallax / 100 : 1, duration: 1.4, ease: "power3.out" },
+        { scale: parallax ? 1 + parallax / 100 : 1, duration: ZOOM_S, ease: "power3.out" },
         "<",
       );
 

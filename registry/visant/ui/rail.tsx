@@ -692,7 +692,7 @@ export function Rail({
         // porcentagem, seria ruído sobre um dado que ele não pode usar.
         <div aria-hidden="true" className="mt-1 h-[3px] w-full overflow-hidden rounded-full bg-[var(--muted)]">
           <div
-            className="h-full rounded-full bg-[var(--brand,var(--foreground))] transition-transform [transition-duration:var(--dur-press,120ms)] ease-[var(--ease-out,cubic-bezier(0.23,1,0.32,1))] motion-reduce:transition-none"
+            className="h-full rounded-full bg-[var(--brand,var(--foreground))] transition-transform [transition-duration:var(--dur-press,120ms)] ease-[var(--ease-out)] motion-reduce:transition-none"
             style={{
               width: `${Math.min(1, vista.fatia) * 100}%`,
               // A translação é em % da PRÓPRIA largura, então o polegar anda

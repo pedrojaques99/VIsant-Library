@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Cog, Hammer, Paintbrush, Pickaxe, Sparkles, type LucideIcon } from "lucide-react";
 
+import { EASE_ASSENTA_CSS, EASE_SAIDA_CSS } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { GlitchChars } from "@/components/ui/glitch-chars";
 
@@ -36,6 +37,9 @@ import { GlitchChars } from "@/components/ui/glitch-chars";
  * `prefers-reduced-motion` o ícone fica parado e sem brilho.
  */
 
+// Um ciclo de cada gesto, em laço: é o ritmo da ferramenta, não transição de UI.
+const CICLO_MS = { picareta: 900, martelo: 1000, engrenagem: 2800, pincel: 1100, faisca: 1600, brilho: 2600 } as const;
+
 export type WorkingGlyphVariant = "picareta" | "martelo" | "engrenagem" | "pincel" | "faisca";
 
 type Gesto = {
@@ -56,7 +60,7 @@ const GESTOS: Record<WorkingGlyphVariant, Gesto> = {
       { transform: "rotate(3deg) translateY(2px)", offset: 0.6 },
       { transform: "rotate(-8deg) translateY(0)" },
     ],
-    opcoes: { duration: 900, iterations: Infinity, easing: "ease-in-out" },
+    opcoes: { duration: CICLO_MS.picareta, iterations: Infinity, easing: "ease-in-out" },
     origem: "60% 80%",
     faisca: true,
   },
@@ -64,19 +68,19 @@ const GESTOS: Record<WorkingGlyphVariant, Gesto> = {
     icone: Hammer,
     // Golpe em 25% do ciclo, volta no resto: a assimetria é o peso do martelo.
     quadros: [
-      { transform: "rotate(-28deg)", easing: "cubic-bezier(0.55, 0, 1, 0.45)" },
+      { transform: "rotate(-28deg)", easing: EASE_SAIDA_CSS },
       { transform: "rotate(6deg)", offset: 0.25, easing: "ease-out" },
-      { transform: "rotate(2deg)", offset: 0.35, easing: "cubic-bezier(0.22, 0.61, 0.36, 1)" },
+      { transform: "rotate(2deg)", offset: 0.35, easing: EASE_ASSENTA_CSS },
       { transform: "rotate(-28deg)" },
     ],
-    opcoes: { duration: 1000, iterations: Infinity },
+    opcoes: { duration: CICLO_MS.martelo, iterations: Infinity },
     origem: "20% 85%",
     faisca: true,
   },
   engrenagem: {
     icone: Cog,
     quadros: [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
-    opcoes: { duration: 2800, iterations: Infinity, easing: "linear" },
+    opcoes: { duration: CICLO_MS.engrenagem, iterations: Infinity, easing: "linear" },
     origem: "50% 50%",
     faisca: false,
   },
@@ -87,7 +91,7 @@ const GESTOS: Record<WorkingGlyphVariant, Gesto> = {
       { transform: "translate(2px, -1px) rotate(4deg)", offset: 0.5 },
       { transform: "translate(-2px, 1px) rotate(-6deg)" },
     ],
-    opcoes: { duration: 1100, iterations: Infinity, easing: "ease-in-out" },
+    opcoes: { duration: CICLO_MS.pincel, iterations: Infinity, easing: "ease-in-out" },
     origem: "80% 20%",
     faisca: false,
   },
@@ -98,7 +102,7 @@ const GESTOS: Record<WorkingGlyphVariant, Gesto> = {
       { transform: "scale(1.08) rotate(4deg)", opacity: 1, offset: 0.5 },
       { transform: "scale(0.9) rotate(-4deg)", opacity: 0.75 },
     ],
-    opcoes: { duration: 1600, iterations: Infinity, easing: "ease-in-out" },
+    opcoes: { duration: CICLO_MS.faisca, iterations: Infinity, easing: "ease-in-out" },
     origem: "50% 50%",
     faisca: false,
   },
@@ -166,7 +170,7 @@ export function WorkingGlyph({
   useAnimacao(
     luz,
     shine ? BRILHO : null,
-    { duration: 2600, iterations: Infinity, easing: "ease-in-out", delay: 300 },
+    { duration: CICLO_MS.brilho, iterations: Infinity, easing: "ease-in-out", delay: 300 },
     `${variant}-${shine}`,
   );
 

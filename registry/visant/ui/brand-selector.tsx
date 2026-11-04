@@ -141,7 +141,7 @@ export function BrandSelector({ className, shortcut = "b" }: BrandSelectorProps)
         aria-haspopup="dialog"
         className={cn(
           "group flex items-center gap-2.5 rounded-[var(--r-pill,9999px)] border border-border bg-card/80 py-1.5 pl-1.5 pr-3 text-left backdrop-blur",
-          "transition-[background-color,border-color,box-shadow,transform] [transition-duration:var(--dur-fast)] ease-[var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+          "transition-[background-color,border-color,box-shadow,transform] [transition-duration:var(--dur-fast)] ease-[var(--ease-out)]",
           "hover:border-[var(--brand,var(--border))] hover:[box-shadow:var(--e-raised)] active:scale-[0.985]",
           "focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]",
           "disabled:opacity-60",
@@ -258,8 +258,14 @@ export function BrandSelector({ className, shortcut = "b" }: BrandSelectorProps)
         </Command.List>
 
         {/* Rodapé de uma linha só: a instrução enquanto nada está em foco, o
-            comando de instalar o tema quando uma marca está. */}
-        <div className="border-t border-border px-3.5 py-2 text-[10px] text-muted-foreground">
+            comando de instalar o tema quando uma marca está. No toque não há
+            setas nem Enter: sem marca em foco, o rodapé some. */}
+        <div
+          className={cn(
+            "border-t border-border px-3.5 py-2 text-[10px] text-muted-foreground",
+            !highlight && "[@media(pointer:coarse)]:hidden",
+          )}
+        >
           <span className="block truncate font-mono">
             {highlight ? `npx shadcn add @visant/theme-${highlight}` : "Setas percorrem, Enter aplica"}
           </span>

@@ -26,7 +26,7 @@ const SO = iOnly >= 0 ? argv[iOnly + 1] : null;
 const BASE = argv.find((a, i) => !a.startsWith("--") && argv[i - 1] !== "--only") ?? "http://localhost:5182";
 
 /* A ordem é a de `PADROES` em src/app/demos/imagem-do-shader.tsx. */
-const IMAGENS = ["tv", "mao", "forma", "gradiente"];
+const IMAGENS = ["mao", "tv", "forma", "gradiente"];
 
 const catalogo = readFileSync(join(ROOT, "src", "app", "catalog.tsx"), "utf8");
 const pecas = [...catalogo.matchAll(/^\s{4}name: "([^"]+)",(?:(?!\n\s{4}name: ")[\s\S])*?family: "shaders"/gm)]

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { DUR, EASE_OUT, INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { Chip } from "@/components/ui/chip";
 
@@ -86,7 +87,7 @@ export function FilterBar({
 
   const hasChips = chips.length > 0;
   const reduzir = useReducedMotion();
-  const passo = reduzir ? { duration: 0 } : { duration: 0.16, ease: [0.23, 1, 0.32, 1] as const };
+  const passo = reduzir ? INSTANT : { duration: DUR.fast, ease: EASE_OUT };
 
   return (
     <div className={cn("flex w-full flex-col", className)} {...props}>
@@ -103,7 +104,7 @@ export function FilterBar({
         className={cn(
           "grid transition-[grid-template-rows,opacity]",
           "[transition-duration:var(--dur-base,200ms)]",
-          "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+          "[transition-timing-function:var(--ease-out)]",
           "motion-reduce:transition-none",
           hasChips || showCount ? "grid-rows-[1fr]" : "grid-rows-[0fr] opacity-0",
         )}

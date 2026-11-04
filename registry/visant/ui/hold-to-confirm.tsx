@@ -17,6 +17,7 @@ import {
 import { Check, Trash2 } from "lucide-react";
 
 import { playSfx } from "@/lib/sfx-bus";
+import { DUR, EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -70,8 +71,6 @@ export interface HoldToConfirmProps
 const MOLA_FIRME: Transition = { type: "spring", visualDuration: 0.2, bounce: 0.15 };
 const MOLA_LISA: Transition = { type: "spring", visualDuration: 0.3, bounce: 0 };
 const MOLA_FORMA: Transition = { type: "spring", visualDuration: 0.3, bounce: 0.2 };
-// O `--ease-out` da casa, em números, pro motion.
-const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 const FOLGA = 24;
 
 const TOM = {
@@ -136,8 +135,8 @@ function Rosto({
 }) {
   const entra = reduzido ? { opacity: 0 } : { opacity: 0, y: "0.3em", filter: "blur(4px)" };
   const sai = reduzido
-    ? { opacity: 0, transition: { duration: 0.12 } }
-    : { opacity: 0, y: "-0.3em", filter: "blur(2px)", transition: { duration: 0.16 } };
+    ? { opacity: 0, transition: { duration: DUR.press } }
+    : { opacity: 0, y: "-0.3em", filter: "blur(2px)", transition: { duration: DUR.fast } };
   const pousa = { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" };
   return (
     <span className="inline-flex items-center gap-2 whitespace-nowrap">
@@ -148,8 +147,8 @@ function Rosto({
             className="col-start-1 row-start-1 grid place-items-center"
             initial={reduzido ? { opacity: 0 } : { opacity: 0, scale: 0.6 }}
             animate={pousa}
-            exit={reduzido ? { opacity: 0 } : { opacity: 0, scale: 0.6, transition: { duration: 0.16 } }}
-            transition={reduzido ? { duration: 0.16 } : { ...MOLA_FIRME, opacity: { duration: 0.16 } }}
+            exit={reduzido ? { opacity: 0 } : { opacity: 0, scale: 0.6, transition: { duration: DUR.fast } }}
+            transition={reduzido ? { duration: DUR.fast } : { ...MOLA_FIRME, opacity: { duration: DUR.fast } }}
           >
             {feito ? <Check strokeWidth={2} /> : icon}
           </motion.span>
@@ -169,7 +168,7 @@ function Rosto({
             initial={entra}
             animate={pousa}
             exit={sai}
-            transition={{ duration: reduzido ? 0.16 : 0.2, ease: EASE_OUT }}
+            transition={{ duration: reduzido ? DUR.fast : DUR.base, ease: EASE_OUT }}
           >
             {texto}
           </motion.span>

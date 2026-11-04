@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 
+import { DUR, INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -25,6 +26,9 @@ import { cn } from "@/lib/utils";
  * `prefers-reduced-motion`: papéis parados no meio do trajeto, texto e barra
  * (que são informação real) intactos.
  */
+
+// O voo em laço é o próprio indicador de espera: precisa ser visto inteiro.
+const VOO_S = 1.2;
 export function PaperShuttle({
   progress,
   label,
@@ -70,9 +74,9 @@ export function PaperShuttle({
               }
               transition={
                 reduced
-                  ? { duration: 0 }
+                  ? INSTANT
                   : {
-                      duration: 1.2,
+                      duration: VOO_S,
                       repeat: Infinity,
                       delay,
                       ease: "easeInOut",
@@ -98,7 +102,7 @@ export function PaperShuttle({
               className="h-full rounded-full bg-[var(--brand,var(--foreground))]"
               initial={{ width: 0 }}
               animate={{ width: `${pct}%` }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
+              transition={{ duration: DUR.slow, ease: "easeOut" }}
             />
           </div>
         )}

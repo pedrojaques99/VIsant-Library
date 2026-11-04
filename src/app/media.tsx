@@ -139,8 +139,8 @@ export function WireframeToggle({ className }: { className?: string }) {
       type="button"
       onClick={alternar}
       aria-pressed={wireframe}
-      aria-label={wireframe ? "Mostrar a mídia real" : "Ver só o wireframe"}
-      title={wireframe ? "Mostrar a mídia real" : "Ver só o wireframe"}
+      aria-label={wireframe ? "Mostrar a mídia" : "Ver só o wireframe"}
+      title={wireframe ? "Mostrar a mídia" : "Ver só o wireframe"}
       className={cn("casa-icone alvo-toque", className)}
     >
       <Icone className="h-4 w-4" />

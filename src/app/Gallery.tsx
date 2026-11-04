@@ -50,7 +50,7 @@ import { PalcoFixo, useInView, useLazyDemo } from "./stage";
 import { GRID_GAP, useFundoEscuro } from "./mosaic";
 import { ehNovo } from "./novidades";
 import { WireframeToggle } from "./media";
-import { Aba } from "./casa-ui";
+import { Aba, ehToque } from "./casa-ui";
 import { LogoAgente, abrirConectar } from "./conectar";
 import { Miniatura } from "./miniatura";
 import { nivelDoAparelho, pesoGpu, useVaga } from "./aparelho";
@@ -188,6 +188,12 @@ function Pronto({ onPronto }: { onPronto: () => void }) {
  * enquadramento da caixa do palco e sem fundo (`?solo=1&caixa=1`), mora dentro
  * do mesmo `PalcoFixo`, e só desbota quando a peça já pintou (`Pronto`) —
  * nenhum quadro mostra as duas fora de registro, e nenhum mostra o palco vazio.
+ *
+ * No toque a foto mostraria controle que não responde (as setas de variação, os
+ * botões da peça). Então tocar nela nunca leva embora: o primeiro toque acorda a
+ * peça ali mesmo, e daí em diante o controle é de verdade. A ficha é o nome, no
+ * rodapé. Sobrou foto depois do toque (sem vaga de GPU, peça que quebrou): o
+ * segundo toque abre a ficha, para o card nunca virar beco.
  */
 const Ladrilho = React.memo(function Ladrilho({
   item,
@@ -231,7 +237,8 @@ const Ladrilho = React.memo(function Ladrilho({
    * - médio: foto, e a peça acorda por intenção: cursor, foco ou toque no
    *   ladrilho. Acordada, fica viva enquanto estiver perto da tela (`active`);
    *   tirar o cursor não a devolve pra foto, que seria a troca no pior momento.
-   * - baixo: a grade é foto. A peça vive na ficha, que abre no toque.
+   * - baixo: a grade é foto até o toque na própria foto, que acorda aquela peça.
+   *   Rolar não acorda nada, e sair de perto da tela devolve à foto.
    * Peça de GPU, em qualquer nível, só vive na tela e com vaga no orçamento de
    * contextos; no médio, toda peça também disputa uma das 6 vagas de viva. Sem
    * vaga, mostra a foto.
@@ -239,16 +246,13 @@ const Ladrilho = React.memo(function Ladrilho({
   const nivel = nivelDoAparelho();
   const gpu = pesoGpu(item.name) > 0;
   const comFoto = (foto || gpu || nivel !== "alto") && Boolean(Demo) && !semFoto;
-  const soFoto = nivel === "baixo" && comFoto;
   const [acordada, setAcordada] = React.useState(false);
   React.useEffect(() => {
     if (!active) setAcordada(false);
   }, [active]);
   const acordar = nivel === "medio" && !acordada ? () => setAcordada(true) : undefined;
-  const quer =
-    Boolean(Demo) &&
-    !soFoto &&
-    (nivel === "medio" ? acordada && active : gpu ? active : foto ? perto : mounted);
+  const porIntencao = nivel === "medio" || (nivel === "baixo" && comFoto);
+  const quer = Boolean(Demo) && (porIntencao ? acordada && active : gpu ? active : foto ? perto : mounted);
   const viva = useVaga(item.name, quer, naVista);
 
   React.useEffect(() => {
@@ -256,6 +260,7 @@ const Ladrilho = React.memo(function Ladrilho({
   }, [viva]);
 
   const fotoVisivel = comFoto && !(viva && pronto);
+  const tocarNaFoto = ehToque() && !acordada ? () => setAcordada(true) : onOpen;
 
   return (
     <article
@@ -278,7 +283,7 @@ const Ladrilho = React.memo(function Ladrilho({
           clique é DELA (arrastar o knob de dentro da grade) — e o nome no canto
           continua sendo o botão que sempre abre.
         */
-        <div onClick={fotoVisivel ? onOpen : undefined} className={fotoVisivel ? "cursor-pointer" : undefined}>
+        <div onClick={fotoVisivel ? tocarNaFoto : undefined} className={fotoVisivel ? "cursor-pointer" : undefined}>
           <PalcoFixo w={w} h={h} ratio={16 / 10} active={active} style={stageSurfaceOf(item)}>
             {viva ? (
               /* Peça que quebra (ou chunk que o deploy novo apagou) cai sozinha:
@@ -330,10 +335,9 @@ const Ladrilho = React.memo(function Ladrilho({
           onClick={onOpen}
           aria-label={`Ver ${item.title}`}
           className={cn(
-            "group/abrir pointer-events-auto flex min-w-0 cursor-pointer items-center gap-1.5 rounded-[8px] bg-casa-bg py-1 pl-2 pr-2 text-casa-sm text-casa-fg outline-none",
-            // motion-lint-disable-next-line layout-property-animation  a etiqueta cresce só no hover para revelar a seta; transform deformaria o texto
-            "transition-[background-color,padding] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
-            "hover:bg-casa-tile-2 hover:pr-1.5 focus-visible:pr-1.5 focus-visible:[box-shadow:var(--focus)]",
+            "group/abrir pointer-events-auto flex min-w-0 cursor-pointer items-center gap-1.5 rounded-[8px] bg-casa-bg py-1 pl-2 pr-2 text-casa-sm text-casa-fg outline-none pointer-coarse:min-h-11",
+            "transition-[background-color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
+            "hover:bg-casa-tile-2 focus-visible:[box-shadow:var(--focus)]",
           )}
         >
           <span className="truncate">{item.title}</span>
@@ -345,18 +349,19 @@ const Ladrilho = React.memo(function Ladrilho({
           <span
             aria-hidden
             className={cn(
-              "grid w-0 shrink-0 -translate-x-1 place-items-center overflow-hidden opacity-0",
-              // motion-lint-disable-next-line layout-property-animation  a etiqueta cresce só no hover para revelar a seta; transform deformaria o texto
-              "transition-[width,opacity,transform] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
-              "group-hover/abrir:w-3.5 group-hover/abrir:translate-x-0 group-hover/abrir:opacity-100",
-              "group-focus-visible/abrir:w-3.5 group-focus-visible/abrir:translate-x-0 group-focus-visible/abrir:opacity-100",
+              "grid w-3.5 shrink-0 -translate-x-1 place-items-center opacity-0",
+              "transition-[opacity,transform] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
+              "group-hover/abrir:translate-x-0 group-hover/abrir:opacity-100",
+              "group-focus-visible/abrir:translate-x-0 group-focus-visible/abrir:opacity-100",
+              /* No toque a seta fica: é ela que diz que o nome abre a ficha. */
+              "pointer-coarse:translate-x-0 pointer-coarse:opacity-100",
             )}
           >
             <ArrowUpRight className="h-3.5 w-3.5" />
           </span>
         </button>
         <span className="pointer-events-auto shrink-0 rounded-[8px] bg-casa-bg">
-          <CopyCommand variant="chip" text={installCommand(item.name)} className="size-7" />
+          <CopyCommand variant="chip" text={installCommand(item.name)} className="size-7 pointer-coarse:size-11" />
         </span>
       </div>
     </article>
@@ -399,7 +404,7 @@ function PilulaAgente() {
         type="button"
         onClick={abrirConectar}
         // casa-lint/pilula: o alvo de foco acompanha a pílula
-        className={cn("flex items-center gap-2.5 rounded-full py-0.5 pl-0.5 pr-2 hover:text-casa-fg-2", foco)}
+        className={cn("flex items-center gap-2.5 rounded-full py-0.5 pl-0.5 pr-2 hover:text-casa-fg-2 pointer-coarse:min-h-11", foco)}
       >
         <span className="flex" aria-hidden>
           {AGENTES.map((icone, i) => (
@@ -423,7 +428,7 @@ function PilulaAgente() {
         aria-label={done ? "Comando copiado" : `Copiar: ${COMANDO_AGENTE}`}
         title={COMANDO_AGENTE}
         // casa-lint/pilula: o alvo de foco do ícone é um círculo, dentro da pílula
-        className={cn("grid size-7 place-items-center rounded-full text-casa-fg-2 hover:text-casa-fg", foco)}
+        className={cn("grid size-7 place-items-center rounded-full text-casa-fg-2 hover:text-casa-fg pointer-coarse:size-11", foco)}
       >
         <Icon className="size-3.5" aria-hidden />
       </button>
@@ -469,6 +474,14 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
   const [abertos, setAbertos] = React.useState(false);
   const listRef = React.useRef<HTMLDivElement | null>(null);
   const heroRef = React.useRef<HTMLElement>(null);
+  const barraRef = React.useRef<HTMLDivElement>(null);
+
+  /* A linha de abas rola de lado: quem chega por link numa fatia precisa ver a aba acesa. */
+  React.useEffect(() => {
+    const ativa = barraRef.current?.querySelector<HTMLElement>('button[aria-pressed="true"]');
+    const linha = ativa?.parentElement;
+    if (ativa && linha) linha.scrollLeft = Math.max(0, ativa.offsetLeft - linha.offsetLeft - 16);
+  }, [familia]);
 
   /*
    * A curadoria entra antes de tudo: peça arquivada (nota ≤ 2 ou marcada pra
@@ -646,7 +659,7 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
        * título, tese com número de marcas e a contagem repetida na barra. Numa
        * página cuja única promessa é mostrar componente, a tese cabe numa linha.
        */}
-      <section ref={heroRef} className="casa shell pt-12 pb-8 sm:pt-16">
+      <section ref={heroRef} className="casa shell pt-5 pb-5 sm:pt-16 sm:pb-8">
         <h1 className="text-casa-xl font-medium">
           {familia ? familyLabel(familia) : "A library da Visant"}
         </h1>
@@ -663,7 +676,7 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
 
       {/* controles */}
       <div className="casa sticky top-[var(--shell-header-h)] z-30 bg-casa-bg">
-        <div className="shell flex items-center gap-5 py-2">
+        <div ref={barraRef} className="shell flex items-center gap-5 py-2 pointer-coarse:py-0">
           {/* No celular a linha rola de lado; o esmaecido na borda é o que diz
               que tem mais palavra depois da última visível. */}
           <div className="flex min-w-0 flex-1 items-center gap-5 overflow-x-auto [mask-image:linear-gradient(to_right,black_85%,transparent)] [scrollbar-width:none] sm:[mask-image:none] [&::-webkit-scrollbar]:hidden">
@@ -694,7 +707,7 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
             ))}
           </div>
 
-          <div className="flex shrink-0 items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1 pointer-coarse:gap-0">
             <button
               type="button"
               onClick={() => setAbertos((v) => !v)}
@@ -727,7 +740,7 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
           cada, com o nome do eixo no tom mais baixo.
         */}
         {abertos ? (
-          <div className="shell space-y-1 pb-3">
+          <div className="shell max-h-[60svh] space-y-1 overflow-y-auto pb-3">
             <div className="flex items-center gap-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <span className="w-16 shrink-0 text-casa-sm text-casa-fg-3">Linguagem</span>
               <Aba ativa={lang === null} count={escopoLang.length} onClick={() => setLang(null)}>

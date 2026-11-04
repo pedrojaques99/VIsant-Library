@@ -1,3 +1,10 @@
+
+// Tudo aqui é entrada no scroll, em página de marketing: acima do teto de UI de propósito.
+const LINHAS_S = 0.9;
+const ITENS_S = 0.62;
+const ITENS_DOBRA_S = 0.42;
+// Inércia do botão magnético: longa para o botão seguir o cursor, não grudar nele.
+const IMA_S = 0.4;
 /**
  * MotionLayer — a camada de movimento, ligável por atributo.
  *
@@ -65,7 +72,7 @@ function revealLines(root: ParentNode) {
       { yPercent: 108 },
       {
         yPercent: 0,
-        duration: 0.9,
+        duration: LINHAS_S,
         ease: "power3.out",
         stagger: 0.07,
         scrollTrigger: { trigger: el, start: "top 88%", once: true },
@@ -95,7 +102,7 @@ function revealItems(root: ParentNode) {
       {
         opacity: 1,
         y: 0,
-        duration: 0.62,
+        duration: ITENS_S,
         ease: "power2.out",
         stagger: { each: 0.035, amount: Math.min(items.length * 0.035, 0.35) },
         scrollTrigger: { trigger: el, start: "top 92%", once: true },
@@ -145,8 +152,8 @@ function magnetic(root: ParentNode) {
     // que o cursor chegou, antes do clique. Só onde há ponteiro de verdade:
     // num telefone isto seria código morto disparando a cada toque.
     const strength = Number(el.dataset.magnetic) || 5;
-    const x = gsap.quickTo(el, "x", { duration: 0.4, ease: "power3.out" });
-    const y = gsap.quickTo(el, "y", { duration: 0.4, ease: "power3.out" });
+    const x = gsap.quickTo(el, "x", { duration: IMA_S, ease: "power3.out" });
+    const y = gsap.quickTo(el, "y", { duration: IMA_S, ease: "power3.out" });
 
     el.addEventListener("pointermove", (e) => {
       const r = el.getBoundingClientRect();
@@ -179,7 +186,7 @@ export function enterItems(items: Element[]) {
     {
       opacity: 1,
       y: 0,
-      duration: 0.42,
+      duration: ITENS_DOBRA_S,
       ease: "power2.out",
       stagger: { each: 0.022, amount: Math.min(items.length * 0.022, 0.28) },
     },

@@ -200,7 +200,7 @@ export function SearchableSelect({
           "hover:bg-[var(--muted)] disabled:hover:bg-transparent",
           "transition-[background-color,border-color,box-shadow]",
           "[transition-duration:var(--dur-fast,160ms)]",
-          "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+          "[transition-timing-function:var(--ease-out)]",
           "outline-none focus-visible:border-[color-mix(in_oklab,var(--ring)_60%,var(--foreground))] focus-visible:[box-shadow:0_0_0_1px_color-mix(in_oklab,var(--ring)_30%,transparent)]",
           "disabled:cursor-not-allowed disabled:opacity-50",
           className,
@@ -217,7 +217,7 @@ export function SearchableSelect({
           strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="h-4 w-4 shrink-0 opacity-50 transition-transform [transition-duration:var(--dur-base,200ms)] [transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))] group-data-[state=open]:rotate-180 motion-reduce:transition-none"
+          className="h-4 w-4 shrink-0 opacity-50 transition-transform [transition-duration:var(--dur-base,200ms)] [transition-timing-function:var(--ease-out)] group-data-[state=open]:rotate-180 motion-reduce:transition-none"
         >
           <path d="M4 6l4 4 4-4" />
         </svg>
@@ -237,7 +237,7 @@ export function SearchableSelect({
             "origin-[var(--radix-popover-content-transform-origin)]",
             "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
             "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
-            "[animation-duration:var(--dur-fast,160ms)] [animation-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+            "[animation-duration:var(--dur-fast,160ms)] [animation-timing-function:var(--ease-out)]",
           )}
         >
           {/* Quem filtra é `matches`, acima. Duas fontes discordariam. */}

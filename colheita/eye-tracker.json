@@ -35,7 +35,8 @@
     ],
     "registryDependencies": [
       "utils",
-      "@visant/css-color"
+      "@visant/css-color",
+      "@visant/motion"
     ],
     "files": [
       {

@@ -4,6 +4,7 @@ import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Check, Trash2 } from "lucide-react";
 
+import { DUR, EASE_OUT, INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -44,6 +45,9 @@ import { cn } from "@/lib/utils";
  * 5. **Com `prefers-reduced-motion`** não há buraco nem poeira: a linha sai,
  *    a lista fecha, o desfazer continua lá.
  */
+
+/** O item acelera rumo ao centro: aqui a demora no começo é a física da queda. */
+const QUEDA = [0.4, 0, 0.7, 0.2] as const;
 
 export interface BlackHoleProps<T extends { id: string }>
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
@@ -295,10 +299,10 @@ export function BlackHole<T extends { id: string }>({
                           }
                         : { x: 0, y: 0, scale: 1, rotate: 0, opacity: 1, filter: "blur(0px)" }
                   }
-                  exit={{ opacity: 0, transition: { duration: 0 } }}
+                  exit={{ opacity: 0, transition: INSTANT }}
                   transition={
                     vai || puxa
-                      ? { duration: SUGAR / 1000, ease: [0.4, 0, 0.7, 0.2] }
+                      ? { duration: SUGAR / 1000, ease: QUEDA }
                       : { type: "spring", stiffness: 320, damping: 32, mass: 0.8 }
                   }
                   onAnimationComplete={() => {
@@ -360,8 +364,8 @@ export function BlackHole<T extends { id: string }>({
                 }}
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 0.8 }}
-                exit={{ scale: 0.95, opacity: 0, transition: { duration: 0.12 } }}
-                transition={{ duration: SUGAR / 2000, ease: [0.22, 1, 0.36, 1] }}
+                exit={{ scale: 0.95, opacity: 0, transition: { duration: DUR.press } }}
+                transition={{ duration: SUGAR / 2000, ease: EASE_OUT }}
               />
             )}
           </AnimatePresence>
@@ -380,7 +384,7 @@ export function BlackHole<T extends { id: string }>({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 6 }}
-              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: DUR.base, ease: EASE_OUT }}
               className="flex items-center gap-3 rounded-[var(--r-pill)] bg-card py-1.5 pr-1.5 pl-4 text-sm text-muted-foreground [box-shadow:var(--e-raised)]"
             >
               {deletedText(lote.itens.length)}

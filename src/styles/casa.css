@@ -36,6 +36,14 @@
   --casa-cta: oklch(0.17 0 0);
   --casa-cta-fg: oklch(0.985 0 0);
   --casa-shadow: 0 1px 2px oklch(0 0 0 / 0.06), 0 12px 32px oklch(0 0 0 / 0.12);
+  /* A barra de abas da grade fechada: quem gruda embaixo dela soma esta altura. */
+  --barra-h: 3rem;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --barra-h: 2.75rem;
+  }
 }
 
 .dark {
@@ -187,6 +195,13 @@
     color: var(--casa-fg-2);
     transition: color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
   }
+  /* No dedo o botão tem 44 de verdade: com um pseudo por cima, dois vizinhos disputam a mesma área. */
+  @media (pointer: coarse) {
+    .casa-icone {
+      height: 2.75rem;
+      width: 2.75rem;
+    }
+  }
   .casa-icone:hover {
     color: var(--casa-fg);
     background: var(--casa-tile);
@@ -194,5 +209,18 @@
   .casa-icone[aria-pressed="true"] {
     color: var(--casa-fg);
     background: var(--casa-tile-2);
+  }
+}
+
+/*
+ * Campo abaixo de 16px dá zoom no iOS ao ganhar foco, e a tela não volta sozinha.
+ * Fora de camada de propósito: tem de vencer os utilitários de tamanho de cada campo,
+ * inclusive os das peças no palco. Com mouse nada muda.
+ */
+@media (pointer: coarse) {
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"], [type="file"]),
+  textarea,
+  select {
+    font-size: 16px;
   }
 }

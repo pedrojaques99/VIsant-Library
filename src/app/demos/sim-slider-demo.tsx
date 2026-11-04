@@ -32,7 +32,7 @@ export default function SimSliderDemo({ props }: DemoProps) {
       curve={(v) =>
         Array.from({ length: 12 }, (_, i) => (v / 20000) * (1 - Math.exp(-(i + 1) / 3.5)))
       }
-      assumption="Conta de exemplo: cada R$ 1 investido volta R$ 3,20. Não é garantia."
+      assumption="Conta de exemplo: cada R$ 1 investido volta R$ 3,20. Sem garantia."
       {...props}
     />
   );

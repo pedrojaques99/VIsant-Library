@@ -3,6 +3,7 @@
 import * as React from "react";
 import { animate, useMotionValue, useReducedMotion, useSpring } from "motion/react";
 
+import { DUR, EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -46,6 +47,11 @@ import { cn } from "@/lib/utils";
  *    estado do React re-renderizaria o conteúdo do adesivo 60 vezes por
  *    segundo sem mudar nada nele.
  */
+
+// Descolar é gesto de objeto: a dobra atravessa devagar e só depois o adesivo se solta.
+const DOBRA_S = 0.72;
+const SOLTA_S = 0.26;
+const EM_MEIO = [0.65, 0, 0.35, 1] as const;
 
 type Ponto = { x: number; y: number };
 
@@ -228,13 +234,13 @@ export function StickerPeel({
     }
     // A mira leva a dobra para a diagonal sem salto, e a dobra atravessa em vez de
     // estourar: começo lento (vê-se o canto subindo), meio decidido, fim assentado.
-    animate(angulo, Math.atan2(-h, -w), { duration: 0.18, ease: [0.23, 1, 0.32, 1] });
-    animate(dobra, Math.hypot(w, h) * 2.05, { duration: 0.72, ease: [0.65, 0, 0.35, 1] });
+    animate(angulo, Math.atan2(-h, -w), { duration: DUR.fast, ease: EASE_OUT });
+    animate(dobra, Math.hypot(w, h) * 2.05, { duration: DOBRA_S, ease: EM_MEIO });
     // Só depois de o verso aparecer ele se solta: sobe, gira um nada e apaga. Um por vez.
     animate(
       el,
       { opacity: 0, y: -22, scale: 1.05, rotate: 7 },
-      { duration: 0.26, delay: 0.5, ease: [0.23, 1, 0.32, 1] },
+      { duration: SOLTA_S, delay: 0.5, ease: EASE_OUT },
     ).then(fim);
   };
 
@@ -242,7 +248,7 @@ export function StickerPeel({
   const erguer = (sim: boolean) => {
     const el = raiz.current;
     if (!el || reduzir) return;
-    animate(el, { scale: sim ? 1.05 : 1 }, sim ? { duration: 0.14, ease: [0.23, 1, 0.32, 1] } : MOLA);
+    animate(el, { scale: sim ? 1.05 : 1 }, sim ? { duration: DUR.fast, ease: EASE_OUT } : MOLA);
   };
 
   /** Ponteiro em px locais do adesivo: sem escala do palco e sem a rotação. */

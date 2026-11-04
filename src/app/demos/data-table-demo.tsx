@@ -14,9 +14,8 @@
  * colunas somem por `hideOnMobile`, a prop da própria peça, e `sm:hidden` no ponto
  * usa o mesmo corte de 640px.
  *
- * Na vitrine, `next-auth` e `next/navigation` são substituídos em `src/app/shims`
- * (ver `vite.config.ts`): a sessão é de administrador, senão a edição nem aparece,
- * e a ordenação não escreve na URL do catálogo.
+ * `canEdit` ligado porque aqui não há sessão a respeitar, e sem `onSortingChange`
+ * porque a URL é do catálogo: a ordenação fica no estado da tabela.
  */
 
 import * as React from "react";
@@ -109,6 +108,7 @@ export default function DataTableDemo() {
         getRowId={(t) => t.id}
         enableRowSelection
         initialSorting={POR_PRAZO}
+        canEdit
         onCellUpdate={atualizar}
       />
     </div>

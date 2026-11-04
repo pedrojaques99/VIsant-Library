@@ -135,7 +135,7 @@ function Secao({
   return (
     <section id={id} className="scroll-mt-4 border-t border-border px-5 py-10 sm:px-8 sm:py-12">
       <div className="mb-7 flex items-baseline gap-3">
-        <span className="font-mono text-micro tabular-nums text-muted-foreground">{numero}</span>
+        <span className="text-micro tabular-nums text-muted-foreground">{numero}</span>
         <h3 className="text-titulo font-semibold tracking-[-0.02em]" style={{ fontFamily: "var(--font-display, inherit)" }}>
           {titulo}
         </h3>
@@ -149,7 +149,7 @@ function Selo({ ok, children }: { ok: boolean; children: React.ReactNode }) {
   return (
     <span
       className={cn(
-        "rounded-[var(--r-pill,9999px)] border px-2 py-px font-mono text-micro",
+        "rounded-[var(--r-pill,9999px)] border px-2 py-px text-micro",
         ok ? "border-[var(--brand)] text-foreground" : "border-border text-muted-foreground",
       )}
     >
@@ -262,9 +262,9 @@ export default function BrandSystem() {
           <Pecas nomes={["brand-theme", "cover-art"]} canto="topo-fim">
             <div className="grid gap-8 bg-[var(--brand)] px-5 py-10 text-[var(--brand-foreground)] sm:px-8 sm:py-14 md:grid-cols-[1fr_auto] md:items-end">
               <div className="min-w-0">
-                <p className="font-mono text-micro opacity-75">
-                  Sistema de marca{active?.version ? ` · versão ${active.version}` : ""}
-                  {status === "loading" ? " · carregando" : ""}
+                <p className="text-micro opacity-75">
+                  Sistema de marca{active?.version ? `, versão ${active.version}` : ""}
+                  {status === "loading" ? ", carregando" : ""}
                 </p>
                 <h2
                   className="mt-3 text-[clamp(2.6rem,7vw,5.5rem)] font-semibold leading-[0.92] tracking-[-0.04em] [overflow-wrap:anywhere]"
@@ -337,7 +337,7 @@ export default function BrandSystem() {
                       key={p.hex + (p.name ?? "")}
                       className="flex-1"
                       style={{ background: p.hex }}
-                      title={[p.name, p.role, p.hex].filter(Boolean).join(" · ")}
+                      title={[p.name, p.role, p.hex].filter(Boolean).join(", ")}
                     />
                   ))}
                 </div>
@@ -378,7 +378,7 @@ export default function BrandSystem() {
                   Aa
                 </p>
                 <p className="mt-3 text-apoio">{fonte(v["--font-display"])}</p>
-                <p className="text-micro text-muted-foreground">títulos · texto em {fonte(v["--font-sans"])}</p>
+                <p className="text-micro text-muted-foreground">títulos, texto em {fonte(v["--font-sans"])}</p>
               </div>
               <ol className="min-w-0">
                 {[

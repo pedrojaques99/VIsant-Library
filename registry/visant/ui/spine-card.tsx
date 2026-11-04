@@ -146,7 +146,7 @@ export function SpineCard({
         "[--tilt:var(--tilt-base,-5deg)] [--lift:0px]",
         "[transform:rotate(var(--tilt))_translateY(var(--lift))] [transform-origin:bottom_center]",
         "transition-[transform,border-color] [transition-duration:var(--dur-slow,700ms)]",
-        "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+        "[transition-timing-function:var(--ease-out)]",
         "hover:[--tilt:0deg] hover:[--lift:-10px]",
         "focus-visible:[--tilt:0deg] focus-visible:[--lift:-10px]",
         // Sem hover não existe "o que a pessoa está olhando": no toque o objeto

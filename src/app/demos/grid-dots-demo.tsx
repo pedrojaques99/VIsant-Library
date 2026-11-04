@@ -18,6 +18,7 @@ const HALO_INICIAL = { "--lit": 1, "--gx": "50%", "--gy": "50%" } as React.CSSPr
 export default function GridDotsDemo({ props }: DemoProps) {
   return (
     <div className="relative h-full w-full" style={HALO_INICIAL}>
+      {/* EXCEPTION to noise-scan/dot-grid: esta é a demo da própria grade de pontos, a peça é o assunto do palco */}
       <GridDots opacity={0.16} spacing={18} dotSize={1.4} spotlight={150} spotlightOpacity={0.9} {...props} />
     </div>
   );

@@ -1,0 +1,4 @@
+{
+  "dispensa": ["hyphen-as-dash"],
+  "motivo": "O único ' -- ' de src/app é o separador de argumentos do CLI em `claude mcp add shadcn -- npx shadcn@latest mcp` (conectar.tsx e Gallery.tsx): é sintaxe de comando copiável, trocar quebra o comando, e o gate de copy não tem exceção por linha."
+}

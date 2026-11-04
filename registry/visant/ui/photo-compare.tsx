@@ -67,6 +67,9 @@ import { cn } from "@/lib/utils";
  *    "não aparece" sem erro nenhum.
  */
 
+// Abertura de cena: a cortina atravessa a foto uma vez para ensinar que ela se move.
+const CORTINA_S = 0.9;
+
 gsap.registerPlugin(ScrollTrigger);
 
 /**
@@ -157,7 +160,7 @@ export function PhotoCompare({
     const ctx = gsap.context(() => {
       gsap.to(alvo, {
         v: defaultValue > 50 ? defaultValue - 22 : defaultValue + 22,
-        duration: 0.9,
+        duration: CORTINA_S,
         // `inOut` porque a cortina está se MOVENDO na tela, com as duas pontas
         // conhecidas — não é entrada nem saída. É o mesmo critério do
         // `@visant/photo-flip`, e o contrário do `@visant/photo-frame`.
@@ -190,6 +193,7 @@ export function PhotoCompare({
 
   return (
     <div
+      data-sobreposicao
       ref={raizRef}
       className={cn("photo-compare", className)}
       style={{ "--ratio": ratio, "--p": `${pos}%`, ...style } as React.CSSProperties}

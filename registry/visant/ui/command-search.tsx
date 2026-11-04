@@ -220,7 +220,7 @@ export function CommandSearch({
           "text-[var(--muted-foreground)]",
           "transition-[background-color,border-color,color,box-shadow]",
           "[transition-duration:var(--dur-fast,160ms)]",
-          "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+          "[transition-timing-function:var(--ease-out)]",
           "hover:bg-[var(--muted)] hover:text-[var(--foreground)]",
           "outline-none focus-visible:border-[color-mix(in_oklab,var(--ring)_60%,var(--foreground))] focus-visible:[box-shadow:0_0_0_1px_color-mix(in_oklab,var(--ring)_30%,transparent)]",
           compact ? "w-9 justify-center" : "w-full gap-2.5 px-3 text-sm",

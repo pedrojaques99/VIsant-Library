@@ -635,7 +635,7 @@ function ReelCard({
         // `--dur-slow`: a troca do card ativo acontece sozinha com a deriva, e
         // a 200ms ela piscava a cada passagem. Mais lenta, ela respira.
         "transition-transform [transition-duration:var(--dur-slow,300ms)]",
-        "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+        "[transition-timing-function:var(--ease-out)]",
         "scale-[0.965] data-[ativo]:scale-100",
         "motion-reduce:scale-100 motion-reduce:transition-none",
         /*
@@ -742,7 +742,7 @@ function ControleReel({
         // ali o contraste não pode depender do tema da página.
         "bg-black/55 text-white backdrop-blur-[2px]",
         "transition-transform [transition-duration:var(--dur-press,120ms)]",
-        "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+        "[transition-timing-function:var(--ease-out)]",
         "hover:bg-black/70 active:scale-95 motion-reduce:active:scale-100",
         "outline-none focus-visible:[box-shadow:var(--focus)]",
       )}

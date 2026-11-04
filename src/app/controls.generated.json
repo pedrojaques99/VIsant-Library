@@ -1520,6 +1520,12 @@
           "resumo": "Render the batch action bar in normal flow (full-width, wraps and pushes the"
         },
         {
+          "prop": "canEdit",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Libera a edição inline das colunas com `meta.editable` (precisa de"
+        },
+        {
           "prop": "compact",
           "tipo": "chave",
           "padrao": true,
@@ -1547,7 +1553,8 @@
           "prop": "hideToolbarSearch",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Hide the built-in toolbar search box. Use when the parent already provides"
+          "resumo": "Hide the built-in toolbar search box. Use when the parent already provides",
+          "secundario": true
         },
         {
           "prop": "isLoading",

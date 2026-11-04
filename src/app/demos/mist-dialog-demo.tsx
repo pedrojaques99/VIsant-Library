@@ -43,6 +43,7 @@ export default function MistDialogDemo({ props }: DemoProps) {
           <Media papel="cena" indice={3} ratio="4/5" />
         </span>
         <span className="flex flex-col gap-2">
+          {/* EXCEPTION to noise-scan/same-info-twice: o título do gatilho repete no dialog de propósito, é o mesmo produto saindo da névoa, e os dois nunca aparecem juntos em primeiro plano */}
           <span className="text-[1.15rem] font-medium leading-tight tracking-[-0.02em]">Sai da névoa, volta pra ela.</span>
           <span className="inline-flex items-center gap-1.5 font-mono text-apoio uppercase tracking-[0.08em] text-muted-foreground transition-colors group-hover:text-foreground">
             ver produto
@@ -76,7 +77,7 @@ export default function MistDialogDemo({ props }: DemoProps) {
               </button>
             </div>
             <p className="text-muted-foreground">
-              Esc fecha pelo navegador. Clique fora fecha também — mas arrastar uma
+              Esc fecha pelo navegador. Clique fora fecha também, mas arrastar uma
               seleção daqui pra fora, não.
             </p>
           </div>

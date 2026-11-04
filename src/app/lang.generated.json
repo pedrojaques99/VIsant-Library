@@ -26,6 +26,7 @@
   "sticky-filterbar": "react",
   "store-status": "react",
   "measure-picker": "react",
+  "motion": "vanilla",
   "motion-layer": "vanilla",
   "kanban": "react",
   "data-table": "react",

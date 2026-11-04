@@ -1,3 +1,6 @@
+
+// O texto de confirmação pede leitura: passa do token base de propósito.
+const TROCA_S = 0.24;
 "use client";
 
 // Adaptado de Confirm morph — https://uiarc.dev/components/confirm-morph — Copyright (c) 2026 Elia Kuratli, licença MIT (texto integral em ATTRIBUTIONS.md do @visant/ui).
@@ -16,6 +19,7 @@ import {
 } from "motion/react";
 import { CircleAlert, CircleCheck, LoaderCircle } from "lucide-react";
 
+import { DUR, EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -83,7 +87,6 @@ export interface ConfirmMorphProps {
 }
 
 const ARMA_MS = 280;
-const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 const CRESCE: Transition = { type: "spring", visualDuration: 0.3, bounce: 0.18 };
 const ENCOLHE: Transition = { type: "spring", visualDuration: 0.28, bounce: 0 };
 
@@ -91,16 +94,16 @@ const ENCOLHE: Transition = { type: "spring", visualDuration: 0.28, bounce: 0 };
 const rostoV: Variants = {
   escondido: { opacity: 1 },
   visivel: { opacity: 1, transition: { staggerChildren: 0.04, delayChildren: 0.05 } },
-  saindo: { opacity: 0, filter: "blur(2px)", transition: { duration: 0.12 } },
+  saindo: { opacity: 0, filter: "blur(2px)", transition: { duration: DUR.press } },
 };
 const parteV: Variants = {
   escondido: { opacity: 0, filter: "blur(4px)" },
-  visivel: { opacity: 1, filter: "blur(0px)", transition: { duration: 0.24, ease: EASE_OUT } },
+  visivel: { opacity: 1, filter: "blur(0px)", transition: { duration: TROCA_S, ease: EASE_OUT } },
 };
 const rostoReduzido: Variants = {
   escondido: { opacity: 0 },
-  visivel: { opacity: 1, transition: { duration: 0.14 } },
-  saindo: { opacity: 0, transition: { duration: 0.1 } },
+  visivel: { opacity: 1, transition: { duration: DUR.fast } },
+  saindo: { opacity: 0, transition: { duration: DUR.press } },
 };
 const parteReduzida: Variants = { escondido: { opacity: 1 }, visivel: { opacity: 1 } };
 

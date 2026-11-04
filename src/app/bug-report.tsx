@@ -199,7 +199,7 @@ export function BugButton({
                 onClick={() => setSeveridade(s.value)}
                 aria-pressed={severidade === s.value}
                 className={cn(
-                  "rounded-control text-casa-base transition-colors [transition-duration:var(--dur-fast)]",
+                  "rounded-control text-casa-base transition-colors [transition-duration:var(--dur-fast)] pointer-coarse:min-h-11",
                   severidade === s.value ? "text-casa-fg" : "text-casa-fg-2 hover:text-casa-fg",
                 )}
               >

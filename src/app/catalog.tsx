@@ -596,7 +596,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "conteudo",
     description:
-      "Tabela densa: ordenação, seleção, edição inline e menu de contexto. No seu projeto ela pede Next, porque lê sessão e URL (next-auth + next/navigation).",
+      "Tabela densa: ordenação, seleção, edição inline e menu de contexto, em qualquer app React. Sessão e URL ficam com você: canEdit libera a edição e onSortingChange avisa a ordenação. Quem já instalou precisa passar essas props.",
     tags: ["tabela", "fila", "tanstack"],
     demo: DataTableDemo,
     preview: { w: 640, h: 400 },
@@ -630,7 +630,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "controles",
     description:
-      "O canto da conta nos três estados. Enquanto a sessão não responde ele não escreve “Entrar” — e não muda de tamanho quando ela chega.",
+      "O canto da conta nos três estados. Enquanto a sessão não responde ele não escreve “Entrar”, e não muda de tamanho quando ela chega.",
     tags: ["conta", "sessão", "menu"],
     demo: AuthButtonDemo,
     knobs: "AuthButton",
@@ -645,7 +645,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "controles",
     description:
-      "Editar o perfil com foto, nome e e-mail verificado. Quando não dá pra salvar, o motivo aparece no campo — não num toast.",
+      "Editar o perfil com foto, nome e e-mail verificado. Quando não dá pra salvar, o motivo aparece no campo, não num toast.",
     tags: ["conta", "formulário", "validação"],
     demo: ProfileFormDemo,
     knobs: "ProfileForm",
@@ -794,7 +794,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "controles",
     description:
-      "Trilho horizontal com snap: anda por arrasto, Shift + roda, setas e teclado; as setas somem nas pontas.",
+      "Trilho horizontal com snap: anda por arrasto, Shift + roda, setas e teclado. As setas somem nas pontas.",
     tags: ["carrossel", "snap"],
     demo: RailDemo,
     knobs: "Rail",
@@ -818,7 +818,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "controles",
     description:
-      "Pastilha de filtro com contagem; a faceta sem resultado apaga em vez de mostrar zero. Com onRemove vira o chip do filtro já aplicado, sem aria-pressed.",
+      "Pastilha de filtro com contagem. A faceta sem resultado apaga em vez de mostrar zero. Com onRemove vira o chip do filtro já aplicado, sem aria-pressed.",
     tags: ["filtro", "loja"],
     demo: ChipDemo,
     preview: { w: 460, h: 160 },
@@ -998,6 +998,15 @@ export const CATALOG: CatalogItem[] = [
     // aparece depois de receber. Medida na página, ela fecha em 432 — declarar
     // menos fazia o palco crescer depois de montar e empurrar a grade.
     preview: { w: 420, h: 300 },
+  },
+  {
+    name: "motion",
+    title: "Motion Tokens",
+    type: "lib",
+    family: "fundacao",
+    description:
+      "Curvas e durações da casa em JS, espelho de --ease-* e --dur-*: Motion, GSAP e Web Animations API importam daqui em vez de escrever o número na peça.",
+    tags: ["tokens", "motion", "easing", "duração"],
   },
   {
     name: "motion-layer",
@@ -1262,7 +1271,7 @@ export const CATALOG: CatalogItem[] = [
     type: "hook",
     family: "fundacao",
     description:
-      "Atrasa um valor até ele parar de mudar. Só borda de saída, e o valor inicial não é atrasado.",
+      "Atrasa um valor até ele parar de mudar. Só borda de saída, e o valor inicial passa sem atraso.",
     tags: ["hook", "busca", "debounce"],
   },
   {
@@ -1474,7 +1483,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "efeitos",
     description:
-      "A superfície que sabe onde o cursor está: luz sob o ponteiro, borda acesa do lado da luz e inclinação de 5 graus. Quatro números por quadro no JS, o desenho inteiro no CSS; nasce inclinado e aceso (rest).",
+      "A superfície que sabe onde o cursor está: luz sob o ponteiro, borda acesa do lado da luz e inclinação de 5 graus. Quatro números por quadro no JS, o desenho inteiro no CSS. Nasce inclinado e aceso (rest).",
     tags: ["hover", "card", "ponteiro", "tilt", "luz", "spotlight", "magnético"],
     demo: GleamDemo,
     knobs: "Gleam",
@@ -1497,7 +1506,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "conteudo",
     description:
-      "A dobra alternada foto ↔ texto: a moldura revela a imagem, o texto entra deslizando da borda externa e o lado inverte a cada dobra sem ninguém escrever nada.",
+      "A dobra alternada de foto e texto: a moldura revela a imagem, o texto entra deslizando da borda externa e o lado inverte a cada dobra sem ninguém escrever nada.",
     tags: ["dobra", "seção", "foto", "texto", "alternado", "scroll", "gsap"],
     demo: PhotoSplitDemo,
     knobs: "PhotoSplitStack",
@@ -1567,7 +1576,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "conteudo",
     description:
-      "Capas num carrossel circular em WebGL: o card da frente cresce no hover, o botão central abre o item e o canvas só nasce perto da dobra. Aposentado da listagem — bom em vitrine de poucas peças.",
+      "Capas num carrossel circular em WebGL: o card da frente cresce no hover, o botão central abre o item e o canvas só nasce perto da dobra. Aposentado da listagem. Bom em vitrine de poucas peças.",
     tags: ["carrossel", "3d", "webgl", "portfólio", "capa", "vitrine"],
     demo: Carousel3DDemo,
     knobs: "Carousel3D",
@@ -1598,7 +1607,7 @@ export const CATALOG: CatalogItem[] = [
   },
   {
     name: "mist-swap", title: "Mist Swap", type: "ui", family: "conteudo",
-    description: "Troca de slides em névoa: o que sai se desfaz no desfoque enquanto o próximo assenta no mesmo lugar, só gira em tela e para sob movimento reduzido; preenche o pai, que precisa ter tamanho.",
+    description: "Troca de slides em névoa: o que sai se desfaz no desfoque enquanto o próximo assenta no mesmo lugar, só gira em tela e para sob movimento reduzido. Preenche o pai, que precisa ter tamanho.",
     tags: ["foto", "slideshow", "crossfade", "blur", "névoa", "troca", "atmosfera"],
     demo: MistSwapDemo,
     preview: { w: 690, h: 440 },
@@ -1612,7 +1621,7 @@ export const CATALOG: CatalogItem[] = [
   },
   {
     name: "mist-dialog", title: "Mist Dialog", type: "ui", family: "transicoes",
-    description: "Modal em <dialog> nativo que entra e sai em névoa só com CSS (@starting-style + allow-discrete), controlado, fecha no Esc e no clique fora, com ganchos onOpen/onClose para pausar o scroll suave; quatro entradas por variant: mist, rise, zoom e wipe.",
+    description: "Modal em <dialog> nativo que entra e sai em névoa só com CSS (@starting-style + allow-discrete), controlado, fecha no Esc e no clique fora, com ganchos onOpen/onClose para pausar o scroll suave. Quatro entradas por variant: mist, rise, zoom e wipe.",
     tags: ["modal", "dialog", "névoa", "blur", "vitrine", "starting-style", "overlay"],
     demo: MistDialogDemo,
     preview: { w: 690, h: 240 },
@@ -1691,7 +1700,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "conteudo",
     description:
-      "Estante em vez de vitrine: os itens soltos, sem moldura, e o rótulo só no hover — porque o objeto já tem silhueta e a moldura passa a competir com ela.",
+      "Estante em vez de vitrine: os itens soltos, sem moldura, e o rótulo só no hover, porque o objeto já tem silhueta e a moldura passa a competir com ela.",
     tags: ["estante", "prateleira", "catálogo", "grade", "hover"],
     demo: BookShelfDemo,
     knobs: "BookShelf",
@@ -1732,7 +1741,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "feedback",
     description:
-      "O estado vazio canônico: arte por slot, frase do que vai aparecer ali e no máximo uma ação; com ou sem caixa.",
+      "O estado vazio canônico: arte por slot, frase do que vai aparecer ali e no máximo uma ação. Com ou sem caixa.",
     tags: ["vazio", "empty", "onboarding", "primeiro uso"],
     demo: EmptyStateDemo,
     knobs: "EmptyArt",
@@ -1760,7 +1769,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "feedback",
     description:
-      "Esqueleto medido do conteúdo real, sem escrever as medidas à mão. Experimental: usa o Skullet 0.0.x.",
+      "Esqueleto medido do próprio conteúdo, sem escrever as medidas à mão. Experimental: usa o Skullet 0.0.x.",
     tags: ["skeleton", "carregando", "espera", "experimental"],
     demo: SkeletonMedidoDemo,
     preview: { w: 480, h: 420 },
@@ -1842,7 +1851,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "conteudo",
     description:
-      "Pilha de cards em que o de cima vai pro fundo quando você arrasta e solta, como baralho de verdade.",
+      "Pilha de cards em que o de cima vai pro fundo quando você arrasta e solta, como num baralho.",
     tags: ["pilha","arrastar","gesto","depoimentos","cards"],
     demo: CardStackColheitaDemo,
     knobs: "CardStack",
@@ -2221,7 +2230,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "controles",
     description:
-      "Campo de assinatura com tinta que engrossa e afina como caneta de verdade, com desfazer e limpar.",
+      "Campo de assinatura com tinta que engrossa e afina como caneta, com desfazer e limpar.",
     tags: ["assinatura","formulario","contrato","aceite","desenho"],
     demo: SignaturePadColheitaDemo,
     knobs: "SignaturePad",
@@ -2400,7 +2409,7 @@ export const CATALOG: CatalogItem[] = [
     type: "lib",
     family: "anatomia",
     description:
-      "Fig 2.6 do curso IA para Designers: o agente lê só as etiquetas das skills e abre a receita que casa com o pedido; a pasta references/ só sobe quando a receita pede.",
+      "Fig 2.6 do curso IA para Designers: o agente lê só as etiquetas das skills e abre a receita que casa com o pedido. A pasta references/ só sobe quando a receita pede.",
     tags: ["didática", "aula", "skill", "receita", "claude"],
     demo: AnatomiaFicharioDemo,
     preview: { w: 1080, h: 710 },
@@ -2433,7 +2442,7 @@ export const CATALOG: CatalogItem[] = [
     type: "lib",
     family: "anatomia",
     description:
-      "Fig B.7 do curso IA para Designers: cada mensagem fica na conversa e o agente relê tudo a cada volta; um print resolve em uma volta o que o parágrafo leva três.",
+      "Fig B.7 do curso IA para Designers: cada mensagem fica na conversa e o agente relê tudo a cada volta. Um print resolve em uma volta o que o parágrafo leva três.",
     tags: ["didática", "aula", "tokens", "contexto"],
     demo: AnatomiaTokensDemo,
     preview: { w: 1080, h: 710 },
@@ -2444,7 +2453,7 @@ export const CATALOG: CatalogItem[] = [
     type: "lib",
     family: "anatomia",
     description:
-      "Fig B.8 do curso IA para Designers: o agente resolve o pedido novo e gasta uso; o que se repete vira script, que roda sem IA e para quando não entende.",
+      "Fig B.8 do curso IA para Designers: o agente resolve o pedido novo e gasta uso. O que se repete vira script, que roda sem IA e para quando não entende.",
     tags: ["didática", "aula", "script", "automação"],
     demo: AnatomiaScriptDemo,
     preview: { w: 1080, h: 680 },
@@ -2775,7 +2784,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "efeitos",
     description:
-      "Grade de mostradores de relógio cujos ponteiros apontam para o cursor; o curto chega atrasado, como hora.",
+      "Grade de mostradores de relógio cujos ponteiros apontam para o cursor. O curto chega atrasado, como hora.",
     tags: ["textura","webgl","fundo","ponteiro","relogio","grade"],
     demo: TexturaWatchColheitaDemo,
     knobs: "TexturaWatch",

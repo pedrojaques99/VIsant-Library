@@ -14,6 +14,7 @@ import {
   useVelocity,
 } from "motion/react";
 
+import { DUR } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -160,7 +161,7 @@ function Rolo({ char, ordem, entrando, subindo, duration, stagger, spins, reduzi
       return;
     }
     pos.jump(rolo.de);
-    const giro = animate(pos, ultima, { duration: ultima === 0 ? 0.2 : rolo.tempo, ease: [...POUSO] });
+    const giro = animate(pos, ultima, { duration: ultima === 0 ? DUR.base : rolo.tempo, ease: [...POUSO] });
     if (rolo.cresce) larg.jump(0);
     if (larg.get() === "auto") {
       larg.jump(medida);

@@ -306,7 +306,7 @@ function Portrait({ item, shell, fill }: { item: PortraitItem; shell: string; fi
           "[&_img]:size-full [&_img]:object-cover [&_video]:size-full [&_video]:object-cover",
           temControle && [
             "[&_img]:transition-transform [&_img]:[transition-duration:var(--dur-slow)]",
-            "[&_img]:ease-[var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+            "[&_img]:ease-[var(--ease-out)]",
             "group-hover:[&_img]:scale-[1.04] motion-reduce:group-hover:[&_img]:scale-100",
           ],
         )}
@@ -330,7 +330,7 @@ function Portrait({ item, shell, fill }: { item: PortraitItem; shell: string; fi
             "absolute right-3 top-3 grid size-11 place-items-center rounded-[var(--r-pill,9999px)]",
             "bg-[var(--background)] text-[var(--foreground)] [box-shadow:var(--e-raised)]",
             "transition-transform [transition-duration:var(--dur-press,120ms)]",
-            "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+            "[transition-timing-function:var(--ease-out)]",
             // Só o afundar do clique. O crescer no hover saiu: o botão já
             // ENTRA no hover, e duas coisas acontecendo no mesmo gesto viram
             // ruído em vez de resposta.

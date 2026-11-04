@@ -214,7 +214,7 @@ export function KitRoom({
             type="button"
             aria-pressed={mostrarPecas}
             onClick={() => setMostrarPecas((v) => !v)}
-            title="Ou passe o mouse sobre a tela de exemplo"
+            title="A tela de exemplo também mostra as peças no hover"
             className={cn(
               "alvo-toque inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-control px-3.5 text-casa-base outline-none",
               "transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] focus-visible:[box-shadow:var(--focus)]",

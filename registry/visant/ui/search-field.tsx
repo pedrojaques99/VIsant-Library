@@ -120,7 +120,7 @@ export function SearchField({
             "outline-none focus-visible:border-[color-mix(in_oklab,var(--ring)_60%,var(--foreground))] focus-visible:[box-shadow:0_0_0_1px_color-mix(in_oklab,var(--ring)_30%,transparent)]",
             "transition-[border-color,box-shadow]",
             "[transition-duration:var(--dur-fast,160ms)]",
-            "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+            "[transition-timing-function:var(--ease-out)]",
             // O × nativo do type=search duplicaria o nosso, e não é estilizável.
             "[&::-webkit-search-cancel-button]:appearance-none",
           )}
@@ -139,7 +139,7 @@ export function SearchField({
               "outline-none focus-visible:[box-shadow:0_0_0_1px_color-mix(in_oklab,var(--ring)_60%,var(--foreground))]",
               // Aparece sem saltar: o × nasce com a primeira tecla, bem debaixo do olho.
               "transition-[color,background-color,opacity] [transition-duration:var(--dur-fast,160ms)]",
-              "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))] starting:opacity-0",
+              "[transition-timing-function:var(--ease-out)] starting:opacity-0",
             )}
           >
             <svg

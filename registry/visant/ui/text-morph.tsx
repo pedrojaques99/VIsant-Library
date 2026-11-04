@@ -5,6 +5,7 @@
 import * as React from "react";
 import { AnimatePresence, animate, motion, useReducedMotion, type AnimationPlaybackControls } from "motion/react";
 
+import { DUR, EASE_OUT, INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -43,8 +44,8 @@ export interface TextMorphProps extends Omit<React.HTMLAttributes<HTMLElement>, 
   as?: "span" | "div" | "p" | "strong" | "h1" | "h2" | "h3";
 }
 
-const ENTRA = [0.16, 1, 0.3, 1] as const;
-const SAI = [0.22, 1, 0.36, 1] as const;
+const ENTRA = EASE_OUT;
+const SAI = EASE_OUT;
 const MOLA = { type: "spring", visualDuration: 0.42, bounce: 0.16 } as const;
 // As letras que saem começam a clarear antes da primeira nova ocupar o lugar.
 const PASSAGEM = 0.05;
@@ -125,13 +126,13 @@ export function TextMorph({ children, as: Tag = "span", className, ...props }: T
                   animate={{ opacity: 1, scale: 1, y: "0em", filter: "blur(0px)" }}
                   exit={
                     reduzir
-                      ? { opacity: 0, transition: { duration: 0 } }
-                      : { opacity: 0, scale: 0.86, y: "-0.1em", filter: "blur(4px)", transition: { duration: 0.18, ease: SAI } }
+                      ? { opacity: 0, transition: INSTANT }
+                      : { opacity: 0, scale: 0.86, y: "-0.1em", filter: "blur(4px)", transition: { duration: DUR.fast, ease: SAI } }
                   }
                   transition={
                     reduzir
-                      ? { duration: 0 }
-                      : { layout: MOLA, default: { duration: 0.28, ease: ENTRA, delay: PASSAGEM + Math.min(ordem, 8) * 0.032 } }
+                      ? INSTANT
+                      : { layout: MOLA, default: { duration: DUR.slow, ease: ENTRA, delay: PASSAGEM + Math.min(ordem, 8) * 0.032 } }
                   }
                 >
                   {char === " " ? " " : char}

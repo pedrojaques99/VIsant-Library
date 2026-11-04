@@ -5,6 +5,7 @@
 import * as React from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 
+import { DUR, EASE_OUT, INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -378,13 +379,13 @@ export function ActivityHeatmap({
         className="pointer-events-none absolute left-0 top-0 z-10 size-0"
         initial={false}
         animate={{ x: dica?.x ?? 0, y: dica?.y ?? 0 }}
-        transition={deslizar ? { type: "spring", visualDuration: 0.26, bounce: 0.12 } : { duration: 0 }}
+        transition={deslizar ? { type: "spring", visualDuration: 0.26, bounce: 0.12 } : INSTANT}
       >
         <motion.div
           className="absolute bottom-2 left-0 grid whitespace-nowrap rounded-[var(--r-control)] bg-foreground px-3 py-1.5 text-background [box-shadow:var(--e-raised)]"
           initial={false}
           animate={aberta && dica ? { opacity: 1, scale: 1 } : { opacity: 0, scale: reduzir ? 1 : 0.96 }}
-          transition={{ duration: aberta ? 0.16 : 0.12, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: aberta ? DUR.fast : DUR.press, ease: EASE_OUT }}
           style={{ originX: 0.5, originY: 1, x: "-50%" }}
         >
           {dica && (

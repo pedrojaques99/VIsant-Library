@@ -71,7 +71,7 @@ export function Avaliacao({ item }: { item: string }) {
               aria-checked={nota === n}
               aria-label={`${n} de 5`}
               onClick={() => setNota(n)}
-              className="casa-icone alvo-toque size-7 focus-visible:[box-shadow:var(--focus)]"
+              className="casa-icone alvo-toque size-7 pointer-coarse:size-11 focus-visible:[box-shadow:var(--focus)]"
             >
               <Star className={cn("h-4 w-4", n <= nota ? "fill-current text-casa-fg" : "text-casa-fg-3")} />
             </button>
@@ -87,7 +87,7 @@ export function Avaliacao({ item }: { item: string }) {
         className="w-full resize-none rounded-control bg-casa-tile px-3 py-2 text-casa-base text-casa-fg outline-none placeholder:text-casa-fg-3 focus-visible:[box-shadow:var(--focus)]"
       />
 
-      <label className="flex cursor-pointer items-center gap-2 text-casa-sm text-casa-fg-2">
+      <label className="flex cursor-pointer items-center gap-2 text-casa-sm text-casa-fg-2 pointer-coarse:min-h-11">
         <input
           type="checkbox"
           checked={excluir}

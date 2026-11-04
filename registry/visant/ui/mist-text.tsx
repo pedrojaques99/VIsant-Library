@@ -10,6 +10,7 @@ import {
   type MotionValue,
 } from "framer-motion";
 
+import { EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -68,9 +69,7 @@ import { cn } from "@/lib/utils";
  * Sem cor própria: as fatias herdam `currentColor` do elemento.
  */
 
-// Tokens de motion locais: o consumidor não tem `@/lib/motion`. Espelham
-// `--ease-out` e a duração de cena (texto entrando na leitura).
-const EASE_OUT = [0.23, 1, 0.32, 1] as const;
+// Duração de cena, texto entrando na leitura: acima do teto de UI de propósito.
 const DUR_REVEAL = 0.9;
 // Cascata curta, com teto: frase de quarenta palavras não pode virar fila.
 const STAGGER = { word: 0.035, letter: 0.03, cap: 0.6 } as const;

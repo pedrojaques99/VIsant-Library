@@ -1,6 +1,6 @@
 {
   "$schema": "https://visant-ui.vercel.app/schema/brands.json",
-  "generatedAt": "2026-10-28T21:21:21.560Z",
+  "generatedAt": "2026-11-04T00:17:53.873Z",
   "source": "https://api.visantlabs.com/api/brand-guidelines",
   "engine": "@visant/brand-tokens",
   "count": 4,
@@ -72,7 +72,78 @@
       "themeUrl": "/r/theme-visant.json",
       "version": 27,
       "completeness": 80,
-      "updatedAt": "2026-10-28T20:20:34.690Z"
+      "updatedAt": "2026-11-04T00:12:57.504Z",
+      "livro": {
+        "fonte": "publica",
+        "descricao": "Visant é um estúdio de branding. Constrói marcas estratégicas para empreendedores visionários, com metodologia própria, identidade visual e narrativa de marca.",
+        "tom": [
+          "profissional",
+          "autoral",
+          "visionário",
+          "estratégico"
+        ],
+        "essencia": "Uma marca de verdade vai muito além do símbolo. É posicionamento, manifesto, identidade visual e naming. É onde marcas visionárias nascem.",
+        "valores": [
+          {
+            "nome": "Estratégia",
+            "texto": "A marca começa pelo posicionamento e pelo manifesto, antes de qualquer forma visual."
+          },
+          {
+            "nome": "Profundidade",
+            "texto": "Como um iceberg, o logo é só a ponta. O valor está na fundação invisível."
+          },
+          {
+            "nome": "Visão",
+            "texto": "Feita para empreendedores visionários que enxergam a marca como ativo de longo prazo."
+          },
+          {
+            "nome": "Eficiência",
+            "texto": "Metodologia estruturada que entrega identidade completa e pronta para uso."
+          }
+        ],
+        "valoresTitulo": "Pilares",
+        "mensagem": {
+          "produto": "Estúdio de branding que constrói marcas estratégicas de ponta a ponta, do posicionamento à identidade visual, com metodologia própria e entrega estruturada.",
+          "diferencial": "Tratamos branding como processo estrutural, e o logo é só uma parte dele. A metodologia é autoral e a entrega é completa e rápida.",
+          "vinculo": "Dar a empreendedores visionários a sensação de que sua marca foi construída com profundidade, intenção e clareza estratégica."
+        },
+        "voz": "Profissional e estratégico. Comunica que branding é um processo estrutural e profundo, e a estética é só uma parte dele. Tom autoral, direto e visionário.",
+        "faz": [
+          "Partir do posicionamento e do manifesto antes da forma",
+          "Entender em profundidade a missão da marca e seu público",
+          "Conduzir pesquisa de mercado e direção criativa",
+          "Entregar arquivos de identidade completos e prontos para uso"
+        ],
+        "naoFaz": [
+          "Tratar o logo como se fosse a marca inteira",
+          "Negligenciar a fundação estratégica da identidade",
+          "Reduzir branding a estética ou tendência"
+        ],
+        "logos": [
+          {
+            "url": "https://pub-0acbd500af3b4beaa8b93b07f6490d58.r2.dev/brands/691e123b304058681621b711/69b4709a694d7c824cbc8060/logo-02a1a3d2-b6c9-4aac-9b72-f4f153c139b4.png",
+            "variant": "primary",
+            "tinta": "clara"
+          },
+          {
+            "url": "https://pub-0acbd500af3b4beaa8b93b07f6490d58.r2.dev/brands/691e123b304058681621b711/69b4709a694d7c824cbc8060/logo-d86f3f0f-322f-4e5f-8a47-009ef0cdde78.png",
+            "variant": "primary",
+            "tinta": "clara"
+          },
+          {
+            "url": "https://pub-0acbd500af3b4beaa8b93b07f6490d58.r2.dev/brands/691e123b304058681621b711/69b4709a694d7c824cbc8060/logo-cb895995-b22d-40a6-bde3-e3bc5540022f.png",
+            "variant": "primary",
+            "tinta": "opaco",
+            "fundo": "#fafafa"
+          },
+          {
+            "url": "https://pub-0acbd500af3b4beaa8b93b07f6490d58.r2.dev/brands/691e123b304058681621b711/69b4709a694d7c824cbc8060/logo-8792d04e-6449-4665-856d-9f377c62a0d2.png",
+            "variant": "primary",
+            "tinta": "opaco",
+            "fundo": "#0d0d0d"
+          }
+        ]
+      }
     },
     {
       "id": "demo-norte-verde",
@@ -154,7 +225,44 @@
       "themeUrl": "/r/theme-norte-verde.json",
       "version": 1,
       "completeness": 100,
-      "updatedAt": null
+      "updatedAt": null,
+      "ficticia": true,
+      "livro": {
+        "fonte": "ficticia",
+        "essencia": "Medir o talhão antes de decidir a safra.",
+        "descricao": "A Norte Verde mede solo, água e clima talhão por talhão e diz ao produtor o que fazer nesta semana.",
+        "tom": [
+          "direto",
+          "técnico",
+          "de campo"
+        ],
+        "voz": "Fala como agrônomo na porteira: o número primeiro, o termo técnico só quando ajuda.",
+        "faz": [
+          "Dá o número e a unidade: 12 mm até quinta",
+          "Diz o que fazer hoje em cada talhão",
+          "Mostra a data de cada medição"
+        ],
+        "naoFaz": [
+          "Promete revolução no campo",
+          "Usa sigla sem explicar",
+          "Fala do futuro do agro em vez da safra"
+        ],
+        "valoresTitulo": "Valores",
+        "valores": [
+          {
+            "nome": "Medida",
+            "texto": "Toda recomendação sai de dado do talhão, com a data da coleta ao lado."
+          },
+          {
+            "nome": "Solo",
+            "texto": "Solo bem cuidado rende nesta safra e na próxima."
+          },
+          {
+            "nome": "Presença",
+            "texto": "Agrônomo pisa na fazenda antes da primeira recomendação."
+          }
+        ]
+      }
     },
     {
       "id": "demo-grao-editora",
@@ -236,7 +344,44 @@
       "themeUrl": "/r/theme-grao-editora.json",
       "version": 1,
       "completeness": 100,
-      "updatedAt": null
+      "updatedAt": null,
+      "ficticia": true,
+      "livro": {
+        "fonte": "ficticia",
+        "essencia": "Fazer livro que dá vontade de guardar.",
+        "descricao": "A Grão Editora publica ensaio e ficção em tiragem curta, com papel encorpado, miolo costurado e capa dura.",
+        "tom": [
+          "culto",
+          "caloroso",
+          "sem pressa"
+        ],
+        "voz": "Escreve como quem indica um livro pra um amigo: conta a cena, cita a página e deixa a pessoa decidir.",
+        "faz": [
+          "Cita um trecho em vez de elogiar o autor",
+          "Diz o papel, a gramatura e a tiragem",
+          "Deixa a frase longa quando ela merece"
+        ],
+        "naoFaz": [
+          "Chama livro de conteúdo",
+          "Escreve imperdível na quarta capa",
+          "Vende com caixa alta"
+        ],
+        "valoresTitulo": "Valores",
+        "valores": [
+          {
+            "nome": "Peso",
+            "texto": "Papel, costura e capa escolhidos pra durar décadas na estante."
+          },
+          {
+            "nome": "Leitura",
+            "texto": "O editor lê cada original até o fim antes de responder ao autor."
+          },
+          {
+            "nome": "Tiragem",
+            "texto": "Cada título sai em número pequeno, e o número vem impresso no colofão."
+          }
+        ]
+      }
     },
     {
       "id": "demo-vega-noturno",
@@ -318,7 +463,44 @@
       "themeUrl": "/r/theme-vega-noturno.json",
       "version": 1,
       "completeness": 100,
-      "updatedAt": null
+      "updatedAt": null,
+      "ficticia": true,
+      "livro": {
+        "fonte": "ficticia",
+        "essencia": "Fazer companhia pra quem tá acordado às três da manhã.",
+        "descricao": "A Vega Noturno é um selo de música eletrônica lenta, com sessões feitas pra tocar entre a meia-noite e o amanhecer.",
+        "tom": [
+          "baixo",
+          "íntimo",
+          "noturno"
+        ],
+        "voz": "Fala baixo, em frase curta, como locutor de rádio de madrugada.",
+        "faz": [
+          "Diz a hora e o lugar em que cada faixa foi gravada",
+          "Usa frase curta e deixa espaço entre elas",
+          "Escreve pra uma pessoa, de fone, no escuro"
+        ],
+        "naoFaz": [
+          "Usa ponto de exclamação",
+          "Chama alguém pra pista",
+          "Promete foco ou produtividade"
+        ],
+        "valoresTitulo": "Valores",
+        "valores": [
+          {
+            "nome": "Silêncio",
+            "texto": "Cada faixa deixa espaço: pouco elemento, muito ar."
+          },
+          {
+            "nome": "Companhia",
+            "texto": "A curadoria pensa em quem ouve sozinho, tarde da noite."
+          },
+          {
+            "nome": "Constância",
+            "texto": "Sessão nova toda sexta, à meia-noite."
+          }
+        ]
+      }
     }
   ]
 }

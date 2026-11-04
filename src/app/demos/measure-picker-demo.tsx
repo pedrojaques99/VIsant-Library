@@ -83,7 +83,7 @@ export default function MeasurePickerDemo({ props }: DemoProps) {
                   Modelo {t.tier} {t.codigo}
                 </span>
                 <span className="font-mono text-micro uppercase tracking-[0.14em] text-muted-foreground">
-                  {t.flex} · corte na medida
+                  {t.flex}, corte na medida
                 </span>
               </div>
               <span className="ml-auto shrink-0 font-mono text-destaque tabular-nums">

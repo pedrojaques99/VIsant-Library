@@ -63,6 +63,7 @@ function Temporizador({ ms }: { ms: number }) {
     return () => cancelAnimationFrame(id);
   }, []);
 
+  /* EXCEPTION to noise-scan/hand-drawn-icon: anel de progresso calculado pelo raio e pelo dashoffset, nenhuma lib de ícone entrega esse estado */
   return (
     <svg viewBox="0 0 20 20" className="h-3.5 w-3.5 -rotate-90" aria-hidden fill="none">
       <circle cx="10" cy="10" r={R} stroke="currentColor" strokeWidth="1.5" opacity="0.2" />

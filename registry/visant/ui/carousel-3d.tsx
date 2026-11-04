@@ -240,6 +240,7 @@ const Card3D = React.memo(function Card3D({
           position={[0, 0, 0.01]}
           center
           className={cn(
+            // motion-lint-disable-next-line slow-ui-duration  peça arquivada: legenda de card 3D que entra junto com o giro lento da cena
             "pointer-events-none transition-colors duration-700 ease-out",
             hovered ? "opacity-100 scale-100" : "opacity-0 scale-105",
           )}
@@ -247,6 +248,7 @@ const Card3D = React.memo(function Card3D({
           <div
             style={{ width: cardWidth * 65 }}
             className={cn(
+              // motion-lint-disable-next-line slow-ui-duration  peça arquivada: legenda de card 3D que entra junto com o giro lento da cena
               "flex flex-col items-center gap-5 px-4 text-center transition-transform duration-700 will-change-transform",
               hovered ? "translate-y-0" : "translate-y-4",
             )}
@@ -273,6 +275,7 @@ const Card3D = React.memo(function Card3D({
                 onSelect?.(item.id);
               }}
               className={cn(
+                // motion-lint-disable-next-line slow-ui-duration  peça arquivada: legenda de card 3D que entra junto com o giro lento da cena
                 "pointer-events-auto flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white/25 px-5 py-2 transition-opacity duration-500 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70",
                 hovered ? "opacity-100 delay-150" : "opacity-0",
               )}

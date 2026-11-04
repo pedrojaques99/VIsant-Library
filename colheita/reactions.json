@@ -30,7 +30,8 @@
       "@radix-ui/react-popover"
     ],
     "registryDependencies": [
-      "utils"
+      "utils",
+      "@visant/motion"
     ],
     "files": [
       {

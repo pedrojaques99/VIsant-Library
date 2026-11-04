@@ -208,13 +208,13 @@ export function BotaoDeBusca({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       aria-label="Buscar"
-      className="alvo-toque flex h-8 items-center gap-2 rounded-control px-2 text-casa-fg-2 transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:text-casa-fg md:w-40 md:bg-casa-tile lg:w-56 md:px-3 md:hover:bg-casa-tile-2"
+      className="alvo-toque flex h-8 items-center gap-2 rounded-control px-2 text-casa-fg-2 pointer-coarse:h-11 pointer-coarse:min-w-11 pointer-coarse:justify-center transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:text-casa-fg md:w-40 md:bg-casa-tile lg:w-56 md:px-3 md:hover:bg-casa-tile-2"
     >
       <Search className="h-4 w-4 shrink-0" />
       {/* O campo largo é a afordância de busca no desktop. No celular fica o
           ícone, que cabe ao lado da marca sem estourar a linha. */}
       <span className="hidden text-casa-base md:inline">Buscar</span>
-      <kbd className="ml-auto hidden text-casa-sm text-casa-fg-3 md:inline">
+      <kbd className="ml-auto hidden text-casa-sm text-casa-fg-3 md:inline pointer-coarse:!hidden">
         {mac ? "⌘" : "Ctrl "}K
       </kbd>
     </button>

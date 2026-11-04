@@ -294,7 +294,7 @@ export function Timeline({
                   "absolute -left-8 top-[0.95rem] block size-[7px] rounded-full",
                   "transition-[background-color,box-shadow]",
                   "[transition-duration:var(--dur-base,200ms)]",
-                  "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+                  "[transition-timing-function:var(--ease-out)]",
                 )}
                 style={{
                   background: aceso
@@ -319,7 +319,7 @@ export function Timeline({
                   "relative min-w-0 rounded-[var(--r-surface,0.875rem)] border px-3.5 py-2.5",
                   "transition-[background-color,border-color]",
                   "[transition-duration:var(--dur-base,200ms)]",
-                  "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+                  "[transition-timing-function:var(--ease-out)]",
                   estado === ESTADO.agora ? "border-border bg-muted/40" : "border-transparent",
                 )}
               >

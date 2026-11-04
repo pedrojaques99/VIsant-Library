@@ -12,6 +12,7 @@ import {
 } from "motion/react";
 
 import { playSfx } from "@/lib/sfx-bus";
+import { DUR, EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -236,7 +237,7 @@ const DockIcone = React.forwardRef<HTMLButtonElement, DockIconeProps>(function D
             initial={{ opacity: 0, scale: 0.92 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.96 }}
-            transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: DUR.press, ease: EASE_OUT }}
           >
             {item.label}
           </motion.span>

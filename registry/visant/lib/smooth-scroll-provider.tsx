@@ -5,6 +5,9 @@ import Lenis from "lenis";
 import "lenis/dist/lenis.css";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+// Janela de inércia do scroll suave: é a sensação da página inteira, não transição de UI.
+const INERCIA_S = 1.1;
 // O visant-board publicava a instância num store Zustand próprio. Aqui isso é
 // um callback opcional: o consumidor guarda onde quiser, e o componente não
 // arrasta uma dependência de estado que só existia naquele app.
@@ -48,7 +51,7 @@ export function SmoothScrollProvider({
         gsap.registerPlugin(ScrollTrigger);
 
         const lenis = new Lenis({
-            duration: 1.1,
+            duration: INERCIA_S,
             // expo-out: fast start, soft landing — the AWWWARDS "butter" feel.
             easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
             smoothWheel: true,

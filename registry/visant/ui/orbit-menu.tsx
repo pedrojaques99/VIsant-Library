@@ -4,6 +4,7 @@ import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion, type Transition } from "motion/react";
 import { Check, MoreHorizontal, X } from "lucide-react";
 
+import { DUR } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -248,7 +249,7 @@ export function OrbitMenu({
             className="pointer-events-none absolute left-1/2 top-1/2 z-10"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.12 } }}
+            exit={{ opacity: 0, transition: { duration: DUR.press } }}
           >
             {actions.map((acao, i) => {
               const rad = (angulos[i] * Math.PI) / 180;
@@ -280,7 +281,7 @@ export function OrbitMenu({
                   initial={reduzir ? { x, y, scale: 1, opacity: 0 } : { x: 0, y: 0, scale: 0.4, opacity: 0 }}
                   animate={{ x, y, scale: ativo ? 1.18 : 1, opacity: 1 }}
                   exit={reduzir ? { opacity: 0 } : { x: 0, y: 0, scale: 0.4, opacity: 0 }}
-                  transition={reduzir ? { duration: 0.12 } : { ...mola, delay: aberto ? i * 0.025 : 0 }}
+                  transition={reduzir ? { duration: DUR.press } : { ...mola, delay: aberto ? i * 0.025 : 0 }}
                 >
                   {acao.icon}
                 </motion.button>
@@ -299,8 +300,8 @@ export function OrbitMenu({
             style={{ bottom: BOTAO + 4 }}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, transition: { duration: 0.12 } }}
-            transition={{ duration: 0.16 }}
+            exit={{ opacity: 0, transition: { duration: DUR.press } }}
+            transition={{ duration: DUR.fast }}
           >
             {feito && <Check aria-hidden="true" className="-ml-0.5 mr-1 inline size-3.5 align-[-2px]" />}
             {texto}
@@ -336,7 +337,7 @@ export function OrbitMenu({
             initial={reduzir ? { opacity: 0 } : { opacity: 0, rotate: -45, scale: 0.6 }}
             animate={{ opacity: 1, rotate: 0, scale: 1 }}
             exit={reduzir ? { opacity: 0 } : { opacity: 0, rotate: 45, scale: 0.6 }}
-            transition={{ duration: 0.12 }}
+            transition={{ duration: DUR.press }}
           >
             {feito ? (
               <Check aria-hidden="true" className="size-5" />

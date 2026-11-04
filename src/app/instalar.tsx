@@ -72,7 +72,7 @@ export function Instalar({ name, className }: { name: string; className?: string
    */
   return (
     <section className={cn("space-y-2", className)}>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 pointer-coarse:gap-1.5">
         {modo === "cli"
           ? GERENCIADORES.map((g) => (
               <button
@@ -81,7 +81,7 @@ export function Instalar({ name, className }: { name: string; className?: string
                 onClick={() => setGerenciador(g)}
                 aria-pressed={gerenciador === g}
                 className={cn(
-                  "rounded-control text-casa-sm transition-colors [transition-duration:var(--dur-fast)]",
+                  "rounded-control text-casa-sm transition-colors [transition-duration:var(--dur-fast)] pointer-coarse:min-h-11 pointer-coarse:min-w-11 pointer-coarse:text-left",
                   gerenciador === g ? "text-casa-fg" : "text-casa-fg-3 hover:text-casa-fg",
                 )}
               >
@@ -92,7 +92,7 @@ export function Instalar({ name, className }: { name: string; className?: string
         <button
           type="button"
           onClick={() => setModo(modo === "cli" ? "manual" : "cli")}
-          className="ml-auto rounded-control text-casa-sm text-casa-fg-3 transition-colors [transition-duration:var(--dur-fast)] hover:text-casa-fg"
+          className="ml-auto rounded-control text-casa-sm text-casa-fg-3 transition-colors [transition-duration:var(--dur-fast)] hover:text-casa-fg pointer-coarse:min-h-11 pointer-coarse:min-w-11 pointer-coarse:text-right"
         >
           {modo === "cli" ? "Manual" : "Pela CLI"}
         </button>

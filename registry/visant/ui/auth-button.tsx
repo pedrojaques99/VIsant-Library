@@ -360,7 +360,7 @@ export function AuthButton({
             "text-[length:var(--text-corpo,0.8125rem)] font-medium text-foreground",
             // A marca entra em BORDA e sombra, nunca no texto: o ciano da casa
             // dá 1,29:1 sobre branco e some no site do cliente.
-            "transition-[border-color,box-shadow,transform] [transition-duration:var(--dur-fast,160ms)] ease-[var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+            "transition-[border-color,box-shadow,transform] [transition-duration:var(--dur-fast,160ms)] ease-[var(--ease-out)]",
             "hover:border-[var(--brand,var(--foreground))] hover:[box-shadow:var(--e-raised)] active:scale-[0.985]",
             "focus-visible:outline-none focus-visible:[box-shadow:var(--focus,0_0_0_2px_var(--ring))]",
           )}
@@ -388,7 +388,7 @@ export function AuthButton({
           className={cn(
             "flex h-[var(--ab-h)] min-w-[var(--ab-h)] max-w-[13rem] items-center gap-2 rounded-[var(--r-pill,9999px)]",
             "border border-transparent bg-transparent pl-0 pr-0 sm:border-border sm:bg-card sm:pl-1 sm:pr-2.5",
-            "transition-[border-color,box-shadow] [transition-duration:var(--dur-fast,160ms)] ease-[var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+            "transition-[border-color,box-shadow] [transition-duration:var(--dur-fast,160ms)] ease-[var(--ease-out)]",
             "hover:border-[var(--brand,var(--border))] hover:[box-shadow:var(--e-raised)]",
             "focus-visible:outline-none focus-visible:[box-shadow:var(--focus,0_0_0_2px_var(--ring))]",
           )}

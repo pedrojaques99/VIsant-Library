@@ -5,6 +5,7 @@ import { flushSync } from "react-dom";
 import { animate, useMotionValue, useReducedMotion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import { EASE_DRAWER } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -114,7 +115,9 @@ const SOMBRA_BAIXO: [number, string][] = [
 const MOLA = { type: "spring" as const, stiffness: 240, damping: 30, mass: 0.7 };
 
 /** A virada inteira: longa porque é o gesto da peça, não um controle respondendo. */
-const VIRADA = { duration: 0.62, ease: [0.32, 0.72, 0, 1] as const };
+// Virar página é gesto de objeto: dura o que a folha leva para cair, acima do teto de UI.
+const VIRADA_S = 0.62;
+const VIRADA = { duration: VIRADA_S, ease: EASE_DRAWER };
 /** Quanto o canto sobe no meio da virada, em fração da altura da folha. */
 const ARCO = 0.26;
 

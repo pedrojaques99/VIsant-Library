@@ -17,15 +17,12 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "next-auth/react": ["./src/app/shims/next-auth-react.ts"],
-      "next/navigation": ["./src/app/shims/next-navigation.ts"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src", "registry", "lab"],
   // Uma exclusão, com motivo escrito. Exclusão sem motivo é erro escondido, não
-  // configuração. O `data-table` saiu daqui: ele importa Next, e na vitrine esses
-  // dois imports apontam pros substitutos de `src/app/shims` (ver `paths` acima).
+  // configuração.
   "exclude": [
     // Sobra do export do Figma Make (commit "Add files from Figma Make"):
     //    `src/imports/*` e os wrappers soltos em `src/app/components/` que os

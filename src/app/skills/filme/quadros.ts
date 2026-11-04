@@ -12,8 +12,12 @@
  * cena nunca aparece vazia enquanto o vídeo baixa, e é ele que fica se o vídeo não abrir.
  */
 
+import { redeLenta } from "@/lib/rede";
+
 export type Trilha = {
   el: HTMLElement;
+  /** Só o quadro parado, que pesa pouco: chega antes de a cena abrir. */
+  preparar(): void;
   carregar(): void;
   soltar(): void;
   irPara(q: number): void;
@@ -23,7 +27,6 @@ export function trilhaVideo(src: string, espera: string, reserva: string, fps: n
   const caixa = document.createElement("div");
   caixa.className = "filme-trilha";
   const quadro = document.createElement("img");
-  quadro.src = espera;
   quadro.alt = "";
   quadro.decoding = "async";
   caixa.append(quadro);
@@ -32,7 +35,12 @@ export function trilhaVideo(src: string, espera: string, reserva: string, fps: n
   video.playsInline = true;
   video.setAttribute("playsinline", "");
   video.preload = "auto";
+  /* Só aparece depois de pintar o quadro pedido: antes disso a cena é o quadro de espera, nunca o preto. */
+  video.style.visibility = "hidden";
   caixa.append(video);
+
+  /* Economia de dados, rede lenta ou formato que este navegador nem tenta abrir: fica no quadro do resultado. */
+  const semVideo = () => redeLenta() || !video.canPlayType("video/mp4");
 
   let iniciado = false;
   let quer = 0;
@@ -50,12 +58,14 @@ export function trilhaVideo(src: string, espera: string, reserva: string, fps: n
 
   video.addEventListener("seeked", () => {
     buscando = false;
+    video.style.visibility = "visible";
     buscar();
   });
   video.addEventListener("loadedmetadata", buscar);
   video.addEventListener(
     "loadeddata",
     () => {
+      if (!buscando) video.style.visibility = "visible";
       /* Safari no iPhone só pinta a busca depois de o vídeo ter tocado uma vez. */
       if (matchMedia("(pointer: coarse)").matches) {
         void video
@@ -67,6 +77,8 @@ export function trilhaVideo(src: string, espera: string, reserva: string, fps: n
     { once: true },
   );
   video.addEventListener("error", () => {
+    /* Devolver o vídeo também dispara `error` no Safari: não é falha, e o capítulo volta a tocar. */
+    if (!iniciado) return;
     if (!tentouDireto) {
       tentouDireto = true;
       video.src = src;
@@ -78,8 +90,11 @@ export function trilhaVideo(src: string, espera: string, reserva: string, fps: n
 
   return {
     el: caixa,
+    preparar() {
+      if (!quadro.getAttribute("src")) quadro.src = semVideo() ? reserva : espera;
+    },
     carregar() {
-      if (iniciado) return;
+      if (iniciado || !video.isConnected || semVideo()) return;
       iniciado = true;
       void fetch(src)
         .then((r) => {
@@ -101,6 +116,8 @@ export function trilhaVideo(src: string, espera: string, reserva: string, fps: n
       if (!iniciado) return;
       iniciado = false;
       buscando = false;
+      tentouDireto = false;
+      video.style.visibility = "hidden";
       video.removeAttribute("src");
       video.load();
       if (url) URL.revokeObjectURL(url);

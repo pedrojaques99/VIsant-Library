@@ -20,7 +20,7 @@ export default function TempoBarDemo() {
     if (!el) return;
     const on = (e: Event) => {
       const k = (e as CustomEvent<{ bar: number; beatInBar: number; step: number }>).detail;
-      setBeat(`compasso ${k.bar + 1} · tempo ${k.beatInBar + 1} · passo ${k.step}`);
+      setBeat(`compasso ${k.bar + 1}, tempo ${k.beatInBar + 1}, passo ${k.step}`);
     };
     el.addEventListener("beat", on);
     return () => el.removeEventListener("beat", on);

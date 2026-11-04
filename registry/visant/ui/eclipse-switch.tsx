@@ -5,6 +5,7 @@
 import * as React from "react";
 import { motion, useReducedMotion, type Transition } from "motion/react";
 
+import { INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -53,7 +54,7 @@ export interface EclipseSwitchProps
 
 // Mola que assenta sem quicar: o eclipse é um deslize, não um salto.
 const mola: Transition = { type: "spring", visualDuration: 0.3, bounce: 0.12 };
-const parado: Transition = { duration: 0 };
+const parado: Transition = INSTANT;
 const RAIOS = [0, 45, 90, 135, 180, 225, 270, 315];
 
 export function EclipseSwitch({

@@ -29,7 +29,8 @@
     ],
     "registryDependencies": [
       "utils",
-      "@visant/sfx-bus"
+      "@visant/sfx-bus",
+      "@visant/motion"
     ],
     "files": [
       {

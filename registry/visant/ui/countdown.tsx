@@ -14,6 +14,7 @@ import {
   type MotionValue,
 } from "motion/react";
 
+import { DUR, INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -195,7 +196,7 @@ function Roda({ digito, base, atraso, reduzir }: { digito: number; base: number;
       // motion-lint-disable-next-line layout-property-animation  dígito entra e os vizinhos precisam abrir espaço
       animate={{ width: "auto", opacity: 1 }}
       exit={{ width: 0, opacity: 0 }}
-      transition={reduzir ? { duration: 0 } : MOLA_FORMA}
+      transition={reduzir ? INSTANT : MOLA_FORMA}
     >
       <span className="invisible">0</span>
       {Array.from({ length: base }, (_, v) => (
@@ -324,12 +325,12 @@ export function Countdown({
         initial: { opacity: 0 },
         animate: { opacity: 1 },
         exit: { opacity: 0 },
-        transition: { duration: 0.16 },
+        transition: { duration: DUR.fast },
       }
     : {
         initial: { opacity: 0, scale: 0.92, filter: "blur(4px)" },
         animate: { opacity: 1, scale: 1, filter: "blur(0px)" },
-        exit: { opacity: 0, scale: 0.92, filter: "blur(4px)", transition: { duration: 0.16 } },
+        exit: { opacity: 0, scale: 0.92, filter: "blur(4px)", transition: { duration: DUR.fast } },
         transition: MOLA_FORMA,
       };
 

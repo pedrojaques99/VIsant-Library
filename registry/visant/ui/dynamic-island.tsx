@@ -3,6 +3,7 @@
 import * as React from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion } from "motion/react";
 
+import { DUR, EASE_OUT, INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -41,6 +42,9 @@ import { cn } from "@/lib/utils";
  * `prefers-reduced-motion`: a ilha vai direto para o tamanho final e o miolo
  * troca sem viagem.
  */
+
+/** O conteúdo que sai vai seco, sem disputar a atenção com a ilha mudando de forma. */
+const SAIDA_SECA = [0.4, 0, 1, 1] as const;
 
 export interface DynamicIslandProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
@@ -86,7 +90,7 @@ export function DynamicIsland({
   );
 
   const mola = reduzir
-    ? { duration: 0 }
+    ? INSTANT
     : { type: "spring" as const, visualDuration: 0.28, bounce: Math.min(0.6, Math.max(0, bounce)) };
   const molaRef = React.useRef(mola);
   molaRef.current = mola;
@@ -162,10 +166,10 @@ export function DynamicIsland({
           animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
           exit={
             reduzir
-              ? { opacity: 0, transition: { duration: 0 } }
-              : { opacity: 0, scale: 0.96, filter: "blur(4px)", transition: { duration: 0.1, ease: [0.4, 0, 1, 1] } }
+              ? { opacity: 0, transition: INSTANT }
+              : { opacity: 0, scale: 0.96, filter: "blur(4px)", transition: { duration: DUR.press, ease: SAIDA_SECA } }
           }
-          transition={reduzir ? { duration: 0 } : { duration: 0.16, delay: 0.09, ease: [0.22, 1, 0.36, 1] }}
+          transition={reduzir ? INSTANT : { duration: DUR.fast, delay: 0.09, ease: EASE_OUT }}
         >
           {/*
             A medida mora num `div` de dentro, não no `motion.div`: em

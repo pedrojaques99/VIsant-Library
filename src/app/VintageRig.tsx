@@ -390,7 +390,7 @@ export default function VintageRig() {
       {/* A tampa do rack: a etiqueta do estúdio e a tecla que abre a paleta. */}
       <div className="flex items-center gap-3 px-1 pb-1">
         <span className="font-vintage-mono text-micro uppercase tracking-[0.24em] text-[var(--vintage-text-dim)]">
-          estúdio b · rack 2
+          estúdio b, rack 2
         </span>
         <Pecas nomes={["vintage-command-palette"]} canto="base-fim" className="ml-auto">
           <button
@@ -465,7 +465,8 @@ export default function VintageRig() {
           </Pecas>
 
           <Pecas nomes={["vintage-large-knob"]} className="max-w-full">
-            <div title="Arraste pra cima e pra baixo; com shift, o ajuste fica fino.">
+            {/* EXCEPTION to noise-scan/usage-instruction: o gesto vertical e o shift do knob não têm affordance na tela, o title é o único lugar que os ensina */}
+            <div title="Arraste pra cima e pra baixo. Com shift, o ajuste fica fino.">
               <Trilho>
                 <VintageLargeKnob label="DRIVE" value={drive} onChange={setDrive} />
               </Trilho>
@@ -522,7 +523,7 @@ export default function VintageRig() {
 
             <Pecas nomes={["vintage-xy-pad"]}>
               <div className="flex flex-col gap-4">
-                <Etiqueta>filtro · cauda</Etiqueta>
+                <Etiqueta>filtro e cauda</Etiqueta>
                 <VintageXYPad
                   size={176}
                   labelX="FILTRO"

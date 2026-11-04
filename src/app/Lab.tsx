@@ -114,7 +114,7 @@ function Card({ meta, Experiment }: { meta: LabMeta; Experiment: LabModule["defa
           rel="noreferrer"
           className="mt-2 font-casa-mono text-casa-sm text-casa-fg-3 underline-offset-4 focus-visible:underline"
         >
-          inspirado em {meta.source.title} · {meta.source.studio}
+          inspirado em {meta.source.title}, {meta.source.studio}
         </a>
       ) : null}
     </div>

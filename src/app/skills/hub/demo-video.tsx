@@ -1,15 +1,17 @@
 "use client";
 
 /**
- * As três skills de vídeo. Nada aqui é vídeo de verdade: são desenhos fiéis ao
- * que cada ferramenta faz, com o parâmetro real na mão de quem mexe.
+ * As três skills de vídeo. Nada aqui é vídeo de verdade: são desenhos fiéis ao que
+ * cada ferramenta faz. Ao nascer, a coisa acontecendo. Parâmetro e código na folha.
  */
 
 import * as React from "react";
 import { SimSlider } from "../../../../registry/visant/ui/sim-slider";
 import { SegmentedControl } from "../../../../registry/visant/ui/segmented-control";
-import { StatusTicker } from "../../../../registry/visant/ui/status-ticker";
-import { Acao, ANIMA_COR, cx, Terminal, useMenosMovimento, useSequencia } from "./base";
+import { Acao, cx, Dobra, Terminal, useAoEntrar, useMenosMovimento, useSequencia } from "./base";
+import paginaA from "./posters/landing-d.webp";
+import paginaB from "./posters/mata-d.webp";
+import paginaC from "./posters/pauta-d.webp";
 
 /* ---- visant-video-editor ---- */
 
@@ -47,12 +49,13 @@ function cortes(margem: number) {
 
 const segundos = (s: number) => `${s.toFixed(1).replace(".", ",")} s`;
 
-export function DemoEditor({ cabeca }: { cabeca: React.ReactNode }) {
+export function DemoEditor() {
   const [margem, setMargem] = React.useState(0.25);
   const [cortado, setCortado] = React.useState(false);
   const [p, setP] = React.useState(0);
   const raf = React.useRef(0);
   const pAtual = React.useRef(0);
+  const seq = useSequencia();
   const menos = useMenosMovimento();
 
   const lista = React.useMemo(() => cortes(margem), [margem]);
@@ -69,7 +72,7 @@ export function DemoEditor({ cabeca }: { cabeca: React.ReactNode }) {
     const inicio = performance.now();
     const de = pAtual.current;
     const passo = (agora: number) => {
-      const u = Math.min(1, (agora - inicio) / 700);
+      const u = Math.min(1, (agora - inicio) / 900);
       const e = 1 - (1 - u) ** 3;
       pAtual.current = de + (alvo - de) * e;
       setP(pAtual.current);
@@ -78,6 +81,8 @@ export function DemoEditor({ cabeca }: { cabeca: React.ReactNode }) {
     raf.current = requestAnimationFrame(passo);
     return () => cancelAnimationFrame(raf.current);
   }, [cortado, menos]);
+
+  const palco = useAoEntrar<HTMLDivElement>(() => seq.depois(1100, () => setCortado(true)));
 
   /* O tempo do bruto vira posição na linha, comprimindo o que foi cortado. */
   const duracao = TOTAL - fora * p;
@@ -90,7 +95,6 @@ export function DemoEditor({ cabeca }: { cabeca: React.ReactNode }) {
     return ((t - antes * p) / duracao) * 100;
   };
   const noCorte = (t: number) => lista.some((c) => t > c.de && t < c.ate);
-
   const traco = (dentro: boolean) =>
     onda
       .filter((b) => noCorte(b.t) === dentro)
@@ -102,67 +106,63 @@ export function DemoEditor({ cabeca }: { cabeca: React.ReactNode }) {
       .join("");
 
   return (
-    <div className="min-w-0" data-demo="editor">
-      <div className="grid min-w-0 items-end gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-12">
-        {cabeca}
-      <div className="min-w-0">
-        {/* Na casa o trilho e o cartão têm o mesmo tom: sem isto o resto do curso some. */}
-        <SimSlider
-          style={{ "--muted": "var(--casa-tile-2)", "--secondary": "var(--casa-tile-2)" } as React.CSSProperties}
-          label="Respiro em volta da fala"
-          min={0}
-          max={0.5}
-          step={0.05}
-          defaultValue={0.25}
-          format={(v) => `${v.toFixed(2).replace(".", ",")} s`}
-          onValueChange={setMargem}
-          outputs={[
-            { label: "Duração final", value: (v) => segundos(TOTAL - cortes(v).reduce((s, c) => s + c.ate - c.de, 0)), primary: true },
-            { label: "Como soa", value: (v) => (v < 0.2 ? "robótico" : v <= 0.3 ? "natural" : "folgado") },
-          ]}
-          assumption="Take de exemplo, desenhado aqui. A faixa de 0,2 a 0,3 s é a do manual. Medido no repo: take de 7 s com 3 s de silêncio e --margin 0.2s vira 4,43 s."
-        />
-      </div>
-      </div>
-      <div className="mt-6 rounded-tile bg-casa-bg p-4 sm:p-6">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 font-casa-mono text-casa-sm text-casa-fg-2">
-          <span>aula-03.mov</span>
-          <span data-duracao className="tabular-nums text-casa-fg">{segundos(duracao)}</span>
+    <Dobra
+      nome="visant-video-editor"
+      faixa
+      como={
+        <>
+          <p>Decupa o bruto, tira o silêncio sem comer palavra, nivela o áudio e marca os capítulos. A lista de cortes passa por você antes de qualquer render.</p>
+          <SimSlider
+            className="mt-3 [&]:p-3"
+            style={{ "--muted": "var(--casa-tile)", "--secondary": "var(--casa-tile)", "--card": "transparent", "--border": "transparent" } as React.CSSProperties}
+            label="Respiro em volta da fala"
+            min={0}
+            max={0.5}
+            step={0.05}
+            defaultValue={margem}
+            format={(v) => `${v.toFixed(2).replace(".", ",")} s`}
+            onValueChange={setMargem}
+            outputs={[{ label: "Soa", value: (v) => (v < 0.2 ? "robótico" : v <= 0.3 ? "natural" : "folgado") }]}
+            assumption="Take de exemplo, desenhado aqui. Medido no repo: 7 s com 3 s de silêncio e --margin 0.2s vira 4,43 s."
+          />
+          <Terminal>auto-editor take.mp4 --margin {margem.toFixed(2)}s -o take-clean.mp4</Terminal>
+        </>
+      }
+    >
+      <div ref={palco} className="flex min-w-0 flex-col gap-3" data-demo="editor">
+        <div className="rounded-tile bg-casa-bg p-4 lg:p-8">
+          <svg viewBox="0 0 1000 100" preserveAspectRatio="none" className="h-44 w-full lg:h-72" aria-hidden="true">
+            <path d={traco(false)} stroke="var(--casa-fg)" className="[stroke-width:1.25px] lg:[stroke-width:2.5px]" vectorEffect="non-scaling-stroke" fill="none" />
+            <path d={traco(true)} stroke="var(--destructive)" opacity={1 - p} className="[stroke-width:1.25px] lg:[stroke-width:2.5px]" vectorEffect="non-scaling-stroke" fill="none" />
+          </svg>
+          <div className="relative mt-2 h-2 overflow-hidden lg:h-11" aria-hidden="true">
+            {FALAS.map((f) => {
+              const de = posicao(f.de);
+              const ate = posicao(f.ate);
+              return (
+                <span key={f.de} style={{ left: `${de}%`, width: `${ate - de}%` }} className="absolute inset-y-0 overflow-hidden whitespace-nowrap rounded-[4px] bg-casa-tile-2 text-casa-sm text-casa-fg-2 lg:p-1.5">
+                  <span className="hidden lg:inline">{f.texto}</span>
+                </span>
+              );
+            })}
+          </div>
         </div>
-        <svg viewBox="0 0 1000 100" preserveAspectRatio="none" className="mt-3 h-24 w-full sm:h-44" aria-hidden="true">
-          <path d={traco(false)} stroke="var(--casa-fg)" className="[stroke-width:1.25px] sm:[stroke-width:2.5px]" vectorEffect="non-scaling-stroke" fill="none" />
-          <path d={traco(true)} stroke="var(--destructive)" opacity={1 - p} className="[stroke-width:1.25px] sm:[stroke-width:2.5px]" vectorEffect="non-scaling-stroke" fill="none" />
-        </svg>
-        <div className="relative mt-2 h-2 overflow-hidden sm:h-14" aria-hidden="true">
-          {FALAS.map((f) => {
-            const de = posicao(f.de);
-            const ate = posicao(f.ate);
-            return (
-              <span
-                key={f.de}
-                style={{ left: `${de}%`, width: `${ate - de}%` }}
-                className="absolute inset-y-0 overflow-hidden rounded-[4px] bg-casa-tile-2 text-casa-sm leading-4 text-casa-fg-2 sm:p-1.5"
-              >
-                <span className="hidden sm:inline">{f.texto}</span>
-              </span>
-            );
-          })}
-        </div>
-        <ul className="sr-only">
-          {FALAS.map((f) => (
-            <li key={f.de}>{f.texto}</li>
-          ))}
-        </ul>
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-          <Acao onClick={() => setCortado((v) => !v)} data-acao="editor">
-            {cortado ? "Voltar ao bruto" : "Cortar o silêncio"}
+        <div className="flex min-h-11 items-center justify-between gap-3">
+          <p data-duracao className="text-[2rem] font-medium leading-none tabular-nums" aria-live="off">
+            {segundos(duracao)}
+          </p>
+          <Acao
+            onClick={() => {
+              seq.limpar();
+              setCortado((v) => !v);
+            }}
+            data-acao="editor"
+          >
+            {cortado ? "Bruto" : "Cortar"}
           </Acao>
-          <code className="min-w-0 max-w-full overflow-x-auto whitespace-nowrap font-casa-mono text-casa-sm text-casa-fg-2">
-            auto-editor take.mp4 --margin {margem.toFixed(2)}s -o take-clean.mp4
-          </code>
         </div>
       </div>
-    </div>
+    </Dobra>
   );
 }
 
@@ -171,6 +171,7 @@ export function DemoEditor({ cabeca }: { cabeca: React.ReactNode }) {
 const CENAS = {
   abertura: {
     rotulo: "Abertura",
+    arquivo: "01-abertura",
     codigo: `{
   name: "01-abertura",
   path: "/",
@@ -183,6 +184,7 @@ const CENAS = {
   },
   rolagem: {
     rotulo: "Rolagem",
+    arquivo: "02-rolagem",
     codigo: `{
   name: "02-rolagem",
   path: "/",
@@ -193,12 +195,12 @@ const CENAS = {
   },
   produto: {
     rotulo: "Produto",
+    arquivo: "03-produto",
     codigo: `{
   name: "03-produto",
   path: "/",
   async prepare(page, { scrollTo, wait }) {
     await scrollTo(page, "#produto", 800)
-    await wait(500)
   },
   async act(page, { wait }) {
     await wait(3000)
@@ -211,41 +213,14 @@ type CenaId = keyof typeof CENAS;
 /* Duração da rolagem filmada: movimento longo e deliberado de propósito. */
 const FILMAGEM_MS = 3000;
 
-/** O site gravado. Mede em `cqw`, então cabe igual no palco e na miniatura. */
+/** O site gravado: três telas empilhadas, rolando dentro da janela. */
 function MiniSite({ deslocamento, entrou }: { deslocamento: number; entrou: boolean }) {
   return (
-    <div className="[container-type:inline-size] absolute inset-0 overflow-hidden bg-casa-bg">
-      <div
-        style={{
-          transform: `translateY(${-deslocamento}%)`,
-          transition: `transform ${FILMAGEM_MS}ms var(--ease-in-out)`,
-        }}
-        className="p-[5cqw]"
-      >
-        <div
-          style={{
-            opacity: entrou ? 1 : 0,
-            transition: `opacity 1000ms var(--ease-out)`,
-          }}
-        >
-          <p className="text-[6.5cqw] font-medium leading-[1.05] text-casa-fg">Cardume</p>
-          <p className="mt-[1.5cqw] max-w-[60cqw] text-[2.4cqw] leading-[1.35] text-casa-fg-2">
-            Marca, site e mockup no mesmo lugar.
-          </p>
-          <span className="mt-[2.5cqw] inline-block rounded-[1cqw] bg-casa-cta px-[2.5cqw] py-[1.2cqw] text-[2.2cqw] text-casa-cta-fg">
-            Começar
-          </span>
-        </div>
-        <div className="mt-[6cqw] grid h-[30cqw] grid-cols-3 gap-[1.5cqw]">
-          <span className="col-span-2 rounded-[1.5cqw] bg-casa-tile-2" />
-          <span className="rounded-[1.5cqw] bg-casa-tile" />
-        </div>
-        <div className="mt-[6cqw] grid grid-cols-4 gap-[1.5cqw]">
-          {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-            <span key={i} className="h-[14cqw] rounded-[1cqw] bg-casa-tile" />
-          ))}
-        </div>
-        <p className="mt-[6cqw] text-[4cqw] font-medium text-casa-fg">Pronto pra publicar</p>
+    <div className="absolute inset-0 overflow-hidden bg-casa-bg">
+      <div style={{ transform: `translateY(${-deslocamento}%)`, transition: `transform ${FILMAGEM_MS}ms var(--ease-in-out)`, opacity: entrou ? 1 : 0 }}>
+        {[paginaA, paginaB, paginaC].map((src) => (
+          <img key={src} src={src} alt="" className="block w-full" />
+        ))}
       </div>
     </div>
   );
@@ -254,10 +229,10 @@ function MiniSite({ deslocamento, entrou }: { deslocamento: number; entrou: bool
 const POSE: Record<CenaId, { inicio: number; fim: number }> = {
   abertura: { inicio: 0, fim: 0 },
   rolagem: { inicio: 0, fim: 62 },
-  produto: { inicio: 26, fim: 26 },
+  produto: { inicio: 33, fim: 33 },
 };
 
-export function DemoReels({ cabeca }: { cabeca: React.ReactNode }) {
+export function DemoReels() {
   const [cena, setCena] = React.useState<CenaId>("rolagem");
   const [gravando, setGravando] = React.useState(false);
   const [desloca, setDesloca] = React.useState(0);
@@ -266,16 +241,17 @@ export function DemoReels({ cabeca }: { cabeca: React.ReactNode }) {
   const seq = useSequencia();
   const menos = useMenosMovimento();
 
-  const gravar = () => {
+  const gravar = (c: CenaId) => {
     seq.limpar();
-    const pose = POSE[cena];
+    const pose = POSE[c];
+    const guardar = () => setClipes((l) => [...l.filter((x) => x !== c), c]);
     if (menos) {
       setDesloca(pose.fim);
-      setClipes((c) => [...c.filter((x) => x !== cena), cena]);
+      guardar();
       return;
     }
     setDesloca(pose.inicio);
-    setEntrou(cena !== "abertura");
+    setEntrou(c !== "abertura");
     setGravando(true);
     seq.depois(120, () => {
       setDesloca(pose.fim);
@@ -283,82 +259,61 @@ export function DemoReels({ cabeca }: { cabeca: React.ReactNode }) {
     });
     seq.depois(FILMAGEM_MS + 200, () => {
       setGravando(false);
-      setClipes((c) => [...c.filter((x) => x !== cena), cena]);
+      guardar();
     });
   };
-
-  const trocar = (c: CenaId) => {
-    seq.limpar();
-    setGravando(false);
-    setCena(c);
-    setDesloca(POSE[c].inicio);
-    setEntrou(true);
-  };
+  const palco = useAoEntrar<HTMLDivElement>(() => gravar("rolagem"));
 
   return (
-    <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-12" data-demo="reels">
-      <div className="min-w-0 lg:order-2">
-        {cabeca}
-        <Terminal className="mt-5">{CENAS[cena].codigo}</Terminal>
-        <div className="mt-4 min-h-16 min-w-0 font-casa-mono text-casa-sm" aria-live="polite">
-          {gravando ? (
-            <StatusTicker
-              steps={["puppeteer-core abre", "CDP grava a cena", "ffmpeg fecha o MP4"]}
-              rotateEverySec={1}
-              loop={false}
-              showTimer={false}
-              variant="etapas"
-            />
-          ) : clipes.length === 0 ? (
-            <p className="py-1 text-casa-fg-2">Os MP4 entram aqui.</p>
-          ) : null}
-          {!gravando ? (
-            <ul>
-              {clipes.map((c) => (
-                <li key={c} data-clipe={c} className="flex items-center gap-3 border-b border-casa-line py-2">
-                  <span className="relative block aspect-video w-20 shrink-0 overflow-hidden rounded-[6px]">
-                    <MiniSite deslocamento={POSE[c].fim} entrou />
-                  </span>
-                  <span className="min-w-0 text-casa-fg-2">
-                    <span className="text-casa-fg">{CENAS[c].codigo.match(/name: "([^"]+)"/)?.[1]}.mp4</span>
-                    <br />
-                    x264, 1080p
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
+    <Dobra
+      nome="site-reels"
+      como={
+        <>
+          <p>Você escreve as cenas em código, o Chrome grava e sai um MP4 1080p pronto pro deck. Sem gravador de tela.</p>
+          <Terminal>{CENAS[cena].codigo}</Terminal>
+        </>
+      }
+    >
+      <div ref={palco} className="flex min-w-0 flex-col gap-3 lg:mx-auto lg:w-full lg:max-w-2xl" data-demo="reels">
+        <div className="relative aspect-video overflow-hidden rounded-tile bg-casa-tile-2">
+          <div className="absolute left-3 top-2 z-10 flex h-5 items-center gap-2" data-rec={gravando}>
+            <span className={cx("size-2 rounded-[2px]", gravando ? "bg-[color:var(--destructive)]" : "bg-casa-fg-3")} aria-hidden="true" />
+            {gravando ? <span className="font-casa-mono text-casa-sm text-casa-fg-2">REC</span> : null}
+          </div>
+          <div className="absolute inset-x-1.5 bottom-1.5 top-8 overflow-hidden rounded-[14px]">
+            <MiniSite deslocamento={desloca} entrou={entrou} />
+          </div>
+        </div>
+        <ul className="flex min-h-[4.5rem] gap-2" aria-live="polite">
+          {clipes.map((c) => (
+            <li key={c} data-clipe={c} className="w-24 min-w-0 lg:w-40">
+              <span className="relative block aspect-video overflow-hidden rounded-[8px]">
+                <MiniSite deslocamento={POSE[c].fim} entrou />
+              </span>
+              <span className="mt-1 block truncate font-casa-mono text-casa-sm text-casa-fg-2">{CENAS[c].arquivo}.mp4</span>
+            </li>
+          ))}
+        </ul>
+        <div className="flex min-w-0 items-center justify-between gap-3">
+          <SegmentedControl
+            aria-label="Escolher a cena"
+            value={cena}
+            onChange={(c) => {
+              seq.limpar();
+              setGravando(false);
+              setCena(c);
+              setDesloca(POSE[c].inicio);
+              setEntrou(true);
+            }}
+            options={(Object.keys(CENAS) as CenaId[]).map((c) => ({ value: c, label: CENAS[c].rotulo }))}
+            className="min-w-0 max-w-xs flex-1 [&_button]:min-h-11"
+          />
+          <Acao onClick={() => gravar(cena)} disabled={gravando} data-acao="reels">
+            Gravar
+          </Acao>
         </div>
       </div>
-      <div className="min-w-0 lg:order-1">
-      <div className="relative aspect-video overflow-hidden rounded-tile bg-casa-tile-2">
-        <div className="absolute inset-x-0 top-0 flex h-8 items-center gap-2 px-3">
-          <span className={cx("size-2 rounded-[2px]", gravando ? "bg-[color:var(--destructive)]" : "bg-casa-fg-3")} />
-          <span className="truncate font-casa-mono text-casa-sm text-casa-fg-2" data-rec>
-            {gravando ? "gravando 1920×1080, 30 fps" : "localhost:3100"}
-          </span>
-        </div>
-        <div className="absolute inset-x-1.5 bottom-1.5 top-8 overflow-hidden rounded-[14px]">
-          <MiniSite deslocamento={desloca} entrou={entrou} />
-        </div>
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Acao onClick={gravar} disabled={gravando} data-acao="reels">
-          {gravando ? "Gravando" : "Gravar a cena"}
-        </Acao>
-        <SegmentedControl
-          aria-label="Escolher a cena"
-          value={cena}
-          onChange={trocar}
-          options={(Object.keys(CENAS) as CenaId[]).map((c) => ({ value: c, label: CENAS[c].rotulo }))}
-          size="sm"
-          className="w-full max-w-xs"
-        />
-      </div>
-
-      </div>
-    </div>
+    </Dobra>
   );
 }
 
@@ -376,87 +331,75 @@ const PLANO = [
 /** O que o corte a corte faz: segundos com 4 casas, e o Premiere arredonda pra baixo. */
 const pelaMcp = (f: number) => Math.floor(Number((f / FPS).toFixed(4)) * FPS);
 
-export function DemoPremiere({ cabeca }: { cabeca: React.ReactNode }) {
-  const [montado, setMontado] = React.useState(true);
+export function DemoPremiere() {
+  const [montado, setMontado] = React.useState(0);
+  const seq = useSequencia();
+  const menos = useMenosMovimento();
   const duracoes = PLANO.map((c) => (c.still ? c.still * FPS : (c.src_out_f ?? 0) - (c.src_in_f ?? 0)));
   const total = duracoes.reduce((a, b) => a + b, 0);
   let cursor = 0;
   const blocos = PLANO.map((c, i) => {
     const de = cursor;
     cursor += duracoes[i];
-    return { ...c, de, dur: duracoes[i] };
+    return { ...c, de, dur: duracoes[i], i };
   });
-  const erradas = blocos.filter((b) => b.src_in_f != null && pelaMcp(b.src_in_f) !== b.src_in_f);
+  const errada = blocos.find((b) => b.src_in_f != null && pelaMcp(b.src_in_f) !== b.src_in_f);
 
-  return (
-    <div className="grid min-w-0 gap-6 lg:grid-cols-2 lg:gap-12" data-demo="premiere">
-      <div className="min-w-0">
-      {cabeca}
-      <Terminal className="mt-5">
-        {`"cuts": [\n`}
-        {PLANO.map((c) =>
-          c.still
-            ? `  { "type": "still", "file": "${c.file}", "duration_s": ${c.still} },\n`
-            : `  { "file": "${c.file}", "src_in_f": ${c.src_in_f}, "src_out_f": ${c.src_out_f} },\n`,
-        )}
-        {`]`}
-      </Terminal>
-      </div>
-      <div className="min-w-0 lg:pt-2">
-      <div className="space-y-4">
-        <div>
-          <p className="mb-1.5 text-casa-sm text-casa-fg-2">Pelo XML</p>
-          <div className="relative h-9 overflow-hidden rounded-[6px] bg-casa-tile-2">
-            {montado
-              ? blocos.map((b) => (
-                  <span
-                    key={b.id}
-                    style={{ left: `${(b.de / total) * 100}%`, width: `${(b.dur / total) * 100}%` }}
-                    className="absolute inset-y-1 rounded-[3px] border-x border-casa-tile-2 bg-casa-fg-2"
-                  />
-                ))
-              : null}
-          </div>
-        </div>
-        <div>
-          <p className="mb-1.5 text-casa-sm text-casa-fg-2">Corte a corte pelo MCP</p>
-          <div className="relative h-9 overflow-hidden rounded-[6px] bg-casa-tile-2">
-            {montado
-              ? blocos.map((b) => (
-                  <span
-                    key={b.id}
-                    style={{
-                      left: `${(b.de / total) * 100}%`,
-                      width: b.still ? "100%" : `${(b.dur / total) * 100}%`,
-                    }}
-                    className={cx(
-                      "absolute inset-y-1 rounded-[3px] border-x border-casa-tile-2",
-                      b.still ? "z-10 bg-[color:var(--destructive)]" : "bg-casa-fg-3",
-                    )}
-                  >
-                    {b.still ? (
-                      <span className="block px-2 text-casa-sm leading-7 text-casa-bg">PNG virou 12 h</span>
-                    ) : null}
-                  </span>
-                ))
-              : null}
-          </div>
-        </div>
-      </div>
+  const montar = () => {
+    seq.limpar();
+    if (menos) return setMontado(PLANO.length);
+    setMontado(0);
+    PLANO.forEach((_, i) => seq.depois(300 + i * 450, () => setMontado(i + 1)));
+  };
+  const palco = useAoEntrar<HTMLDivElement>(montar);
 
-      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <Acao onClick={() => setMontado((v) => !v)} data-acao="premiere">
-          {montado ? "Limpar a linha" : "Montar pelos dois"}
-        </Acao>
-      </div>
-      <ul className={cx("mt-4 font-casa-mono text-casa-sm", ANIMA_COR, montado ? "text-casa-fg-2" : "text-transparent")} aria-hidden={!montado}>
-        {erradas.map((b) => (
-          <li key={b.id} data-erro-frame>
-            frame {b.src_in_f} virou {pelaMcp(b.src_in_f ?? 0)}
-          </li>
+  const Trilha = ({ nome, mcp }: { nome: string; mcp?: boolean }) => (
+    <div className="flex items-center gap-3">
+      <span className="w-8 shrink-0 font-casa-mono text-casa-sm text-casa-fg-2">{nome}</span>
+      <div className="relative h-20 min-w-0 flex-1 overflow-hidden rounded-[8px] bg-casa-tile-2 lg:h-32">
+        {/* Pelo MCP o still vira 12 h: vai até o fim da régua, e o que vem depois dele nem aparece. */}
+        {blocos.filter((b) => b.i < montado && (!mcp || b.i <= blocos.findIndex((c) => c.still))).map((b) => (
+          <span
+            key={b.id}
+            style={{ left: `${(b.de / total) * 100}%`, width: `${mcp && b.still ? 100 - (b.de / total) * 100 : (b.dur / total) * 100}%` }}
+            className={cx(
+              "absolute inset-y-1.5 rounded-[4px] border-x border-casa-tile-2",
+              mcp && b.still ? "z-10 bg-[color:var(--destructive)]" : mcp ? "bg-casa-fg-3" : "bg-casa-fg-2",
+            )}
+          >
+            {mcp && b.still ? <span className="block whitespace-nowrap p-2 text-casa-base font-medium text-casa-bg">12 h</span> : null}
+          </span>
         ))}
-      </ul>
       </div>
     </div>
+  );
+
+  return (
+    <Dobra
+      nome="visant-premiere-editor"
+      como={
+        <>
+          <p>Transforma um JSON de cortes num XML que o Premiere importa no frame exato. Corte a corte pelo MCP, o Premiere arredonda pra baixo e um PNG vira 12 horas.</p>
+          <Terminal>
+            {`"cuts": [\n`}
+            {PLANO.map((c) => (c.still ? `  { "type": "still", "file": "${c.file}", "duration_s": ${c.still} },\n` : `  { "file": "${c.file}", "src_in_f": ${c.src_in_f}, "src_out_f": ${c.src_out_f} },\n`))}
+            {`]`}
+          </Terminal>
+        </>
+      }
+    >
+      <div ref={palco} className="flex min-w-0 flex-col gap-4 lg:mx-auto lg:w-full lg:max-w-4xl" data-demo="premiere">
+        <Trilha nome="XML" />
+        <Trilha nome="MCP" mcp />
+        <div className="flex min-h-11 items-center justify-between gap-3">
+          <p className="font-casa-mono text-casa-base text-casa-fg-2" data-erro-frame>
+            {errada && montado > 0 ? `${errada.src_in_f} vira ${pelaMcp(errada.src_in_f ?? 0)}` : ""}
+          </p>
+          <Acao onClick={montar} data-acao="premiere">
+            De novo
+          </Acao>
+        </div>
+      </div>
+    </Dobra>
   );
 }

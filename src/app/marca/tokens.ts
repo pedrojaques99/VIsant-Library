@@ -8,6 +8,49 @@
 import type { BrandPaletteEntry, BrandSummary, BrandThemeItem } from "@/lib/brand-theme";
 import { resolveCssColor, type RGB } from "@/lib/css-color";
 
+// --- o livro: o que a marca diz de si ------------------------------------------
+
+/** Vem de `brands.json`: página pública da guideline, ou ficção de `demo-brands.mjs`. */
+export interface LivroDaMarca {
+  fonte: "publica" | "ficticia";
+  essencia?: string;
+  descricao?: string;
+  tom?: string[];
+  voz?: string;
+  faz?: string[];
+  naoFaz?: string[];
+  valoresTitulo?: string;
+  valores?: { nome: string; texto: string }[];
+  mensagem?: { produto?: string; diferencial?: string; vinculo?: string };
+  /** `fundo` só em arquivo opaco: a cor do canto dele, medida no sync. */
+  logos?: { url: string; variant: string | null; tinta: "clara" | "escura" | "opaco" | null; fundo?: string }[];
+}
+
+/** O tipo do registry não conhece o livro; o dado publicado, sim. */
+export function livroDa(marca: BrandSummary | null): LivroDaMarca | null {
+  return (marca as (BrandSummary & { livro?: LivroDaMarca | null }) | null)?.livro ?? null;
+}
+
+const tomDe = (hex: string) => razao(hex, "#000000") ?? 0;
+
+/**
+ * O fundo da paleta em que o logo aparece: tinta clara pede a cor mais escura,
+ * tinta escura pede a mais clara. Arquivo opaco já traz o próprio fundo (`null`).
+ */
+export function fundoDoLogo(tinta: "clara" | "escura" | "opaco" | null, paleta: BrandPaletteEntry[]) {
+  if (tinta === "opaco" || !paleta.length) return null;
+  if (!tinta) return paleta.find((c) => c.role === "background") ?? paleta[0];
+  const ordem = [...paleta].sort((a, b) => tomDe(a.hex) - tomDe(b.hex));
+  return tinta === "clara" ? ordem[0] : ordem[ordem.length - 1];
+}
+
+/** O rótulo de um item do mapa `mensagem`, na ordem em que aparece. */
+export const ROTULOS_DA_MENSAGEM = [
+  ["produto", "Produto"],
+  ["diferencial", "Diferencial"],
+  ["vinculo", "Vínculo"],
+] as const;
+
 // --- contraste ----------------------------------------------------------------
 
 function luminancia(c: RGB) {
@@ -183,7 +226,29 @@ export function indiceDaBusca(
     valor: vivos[t.nome] ?? "",
     texto: dobrar(`--${t.nome} ${vivos[t.nome] ?? ""} ${t.busca} ${t.capitulo} token`),
   }));
-  return [...paleta, ...cores, ...resto];
+  const livro = livroDa(marca);
+  const doLivro = (alvo: string, nome: string, valor: string | undefined, chaves: string): Resultado[] =>
+    valor ? [{ alvo, nome, detalhe: "Essência", valor, texto: dobrar(`${nome} ${valor} ${chaves} essencia`) }] : [];
+  const ditos: Resultado[] = !livro
+    ? []
+    : [
+        ...doLivro("livro:essencia", "Essência", livro.essencia, "manifesto"),
+        ...doLivro("livro:descricao", "Descrição", livro.descricao, "o que e sobre"),
+        ...doLivro("livro:tom", "Tom", livro.tom?.join(", "), "tom de voz personalidade"),
+        ...doLivro("livro:voz", "Voz", livro.voz, "tom como fala"),
+        ...(livro.valores ?? []).flatMap((v, i) =>
+          doLivro(`livro:valor-${i}`, v.nome, v.texto, `${livro.valoresTitulo ?? "valores"} valor pilar`),
+        ),
+        ...(livro.faz ?? []).flatMap((t, i) => doLivro(`livro:faz-${i}`, "Faz", t, "voz fazer usar")),
+        ...(livro.naoFaz ?? []).flatMap((t, i) => doLivro(`livro:nao-faz-${i}`, "Não faz", t, "voz evitar nao usar")),
+        ...ROTULOS_DA_MENSAGEM.flatMap(([k, rotulo]) =>
+          doLivro(`livro:mensagem-${k}`, rotulo, livro.mensagem?.[k], "mensagem central"),
+        ),
+        ...(livro.logos ?? []).flatMap((l, i) =>
+          doLivro(`livro:logo-${i}`, `Logo ${i + 1}`, l.url, "logo logotipo marca simbolo arquivo png"),
+        ),
+      ];
+  return [...paleta, ...cores, ...resto, ...ditos];
 }
 
 /** Quem começa com o termo vem antes de quem só contém. */
@@ -242,3 +307,6 @@ export function exportarTailwind(item: BrandThemeItem) {
   ];
   return `@theme inline {\n${linhas.join("\n")}\n}\n\n${exportarCss(item)}`;
 }
+
+/** O par de cor como CSS, do jeito que vai para a área de transferência. */
+export const cssDoPar = (fundo: string, cor: string) => `background: ${fundo};\ncolor: ${cor};`;

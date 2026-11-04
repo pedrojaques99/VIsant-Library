@@ -64,7 +64,7 @@ export function ShowcaseCard({
           "[&_img]:size-full [&_img]:object-cover [&_video]:size-full [&_video]:object-cover",
           "[&_img]:transition-transform [&_video]:transition-transform",
           "[&_img]:[transition-duration:var(--dur-slow)] [&_video]:[transition-duration:var(--dur-slow)]",
-          "[&_img]:ease-[var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+          "[&_img]:ease-[var(--ease-out)]",
           "group-hover:[&_img]:scale-[1.03] group-hover:[&_video]:scale-[1.03]",
           // Quem prefere menos movimento não paga o zoom.
           "motion-reduce:group-hover:[&_img]:scale-100 motion-reduce:group-hover:[&_video]:scale-100",
@@ -84,7 +84,7 @@ export function ShowcaseCard({
               "absolute right-3 top-3 grid size-9 place-items-center rounded-[var(--r-pill,9999px)]",
               "bg-[var(--brand)] text-[var(--brand-foreground)]",
               "transition-transform [transition-duration:var(--dur-fast,180ms)]",
-              "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+              "[transition-timing-function:var(--ease-out)]",
               // Teclado recebe o mesmo aceno que o mouse — o selo é a única
               // pista de que o card leva a algum lugar.
               "group-hover:-translate-y-0.5 group-hover:translate-x-0.5",

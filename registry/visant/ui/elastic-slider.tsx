@@ -8,6 +8,7 @@ import * as React from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 
 import { playSfx } from "@/lib/sfx-bus";
+import { INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -336,7 +337,7 @@ export function ElasticSlider({
                   onKeyDown={aoTeclar}
                   initial={false}
                   animate={{ scale: arrastando && !reduzido ? 1.2 : 1 }}
-                  transition={reduzido ? { duration: 0 } : MOLA_POLEGAR}
+                  transition={reduzido ? INSTANT : MOLA_POLEGAR}
                   className={cn(
                     "pointer-events-auto absolute right-0 top-1/2 size-6 translate-x-1/2 -translate-y-1/2",
                     "rounded-[var(--r-pill)] border border-border bg-background [box-shadow:var(--e-raised)]",

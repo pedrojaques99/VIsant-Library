@@ -11,6 +11,7 @@ import * as React from "react";
 import { useReducedMotion } from "motion/react";
 import { ArrowUpRight, Check, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { redeLenta } from "@/lib/rede";
 import { Aba, Icone } from "../../casa-ui";
 import { SegmentedControl } from "../../../../registry/visant/ui/segmented-control";
 import { CartaoReu, COMANDO_FINAL, SAIDA_ABERTA, SaidaGravada } from "./banca";
@@ -257,12 +258,13 @@ const FILMES: { id: string; nome: string }[] = [
 
 export function TelaInteira() {
   const [id, setId] = React.useState(FILMES[0].id);
-  const reduzir = useReducedMotion();
+  /* Sem movimento ou sem rede: o vídeo não desce sozinho, fica o pôster e o play é de quem quiser. */
+  const parado = useReducedMotion() || redeLenta();
   const ref = React.useRef<HTMLVideoElement>(null);
 
   React.useEffect(() => {
     const v = ref.current;
-    if (!v || reduzir) return;
+    if (!v || parado) return;
     const io = new IntersectionObserver(
       ([e]) => {
         if (e.isIntersecting) void v.play().catch(() => undefined);
@@ -272,7 +274,7 @@ export function TelaInteira() {
     );
     io.observe(v);
     return () => io.disconnect();
-  }, [id, reduzir]);
+  }, [id, parado]);
 
   return (
     <section className="shell py-16 lg:py-28">
@@ -296,8 +298,8 @@ export function TelaInteira() {
           muted
           loop
           playsInline
-          preload="metadata"
-          controls={Boolean(reduzir)}
+          preload="none"
+          controls={Boolean(parado)}
           poster={`/media/skills/${id}.webp`}
           aria-label={`Filme: ${FILMES.find((f) => f.id === id)?.nome} antes e depois da skill`}
           className="aspect-square w-full max-w-[720px] rounded-tile bg-casa-tile lg:justify-self-end"

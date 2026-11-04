@@ -127,6 +127,7 @@ export default function MarqueeDemo() {
 
   /* A marca no meio da faixa doidona: um asterisco desenhado, não uma fonte —
      glifo de fonte muda de peso a cada família e a faixa perde o ritmo. */
+  /* EXCEPTION to noise-scan/hand-drawn-icon: é a marca gráfica preenchida da faixa, não um glifo de interface, e o Asterisk da lucide é traço e mudaria o desenho */
   const marca = (
     <svg viewBox="0 0 24 24" className="h-3 w-3 shrink-0" aria-hidden fill="currentColor">
       <path d="M12 1.5 13.9 9l6.6-3.8-3.8 6.6 7.3 1.9-7.3 1.9 3.8 6.6L13.9 18 12 25.5 10.1 18l-6.6 3.8 3.8-6.6L0 13.3l7.3-1.9L3.5 4.8 10.1 9z" />

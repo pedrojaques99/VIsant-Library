@@ -10,6 +10,26 @@
  * no `tsc` com treze erros de tipo num arquivo que ele nunca abriu — foi assim
  * que o teste de instalação limpa acusou. Migrar pra v9 é trabalho de verdade;
  * o pino é o que impede o estrago enquanto isso não acontece.
+ *
+ * ── Sessão e URL são de quem usa ───────────────────────────────────────────
+ *
+ * A tabela não conhece framework nem autenticação. Quem instalou uma versão
+ * anterior, que lia a sessão e escrevia `?sort=` sozinha, precisa passar as props.
+ * Sem elas a edição fica desligada e a ordenação vive só no estado da tabela.
+ *
+ * A receita em Next, com `useSession`, `useRouter` e `useSearchParams`:
+ *
+ *   const [id, dir] = (params.get('sort') ?? '').split('.');
+ *   <DataTable
+ *     canEdit={session?.user?.role === 'admin'}
+ *     initialSorting={id ? [{ id, desc: dir === 'desc' }] : undefined}
+ *     onSortingChange={([s]) => {
+ *       const q = new URLSearchParams(params.toString());
+ *       if (s) q.set('sort', `${s.id}.${s.desc ? 'desc' : 'asc'}`);
+ *       else q.delete('sort');
+ *       router.replace(`?${q}`, { scroll: false });
+ *     }}
+ *   />
  */
 
 import * as React from 'react';
@@ -27,8 +47,6 @@ import {
   type SortingState,
   useReactTable,
 } from '@tanstack/react-table';
-import { useSession } from 'next-auth/react';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { InlineEdit } from './inline-edit';
 import { Input } from '@/components/ui/input';
 import {
@@ -107,10 +125,15 @@ export interface DataTableProps<TData, TValue> {
    * já reordenou por outra coluna).
    */
   disableSorting?: boolean;
-  /**
-   * Ordenação com que a tabela nasce. A da URL (`?sort=`), quando existe, vence.
-   */
+  /** Ordenação com que a tabela nasce. */
   initialSorting?: SortingState;
+  /** Avisa cada mudança de ordenação, para gravar na URL ou no servidor. */
+  onSortingChange?: (sorting: SortingState) => void;
+  /**
+   * Libera a edição inline das colunas com `meta.editable` (precisa de
+   * `onCellUpdate`). Desligada por padrão: a permissão é decisão de quem usa.
+   */
+  canEdit?: boolean;
   /**
    * Title for the table toolbar (optional)
    */
@@ -159,48 +182,28 @@ export function DataTable<TData, TValue>({
   initialColumnPinning,
   disableSorting = false,
   initialSorting = [],
+  onSortingChange,
+  canEdit = false,
   title,
   pageSize = 20,
   hidePagination = false,
   hideToolbarSearch = false,
   batchBarInFlow = false,
 }: DataTableProps<TData, TValue>) {
-  const { data: session } = useSession();
-  const isAdmin = (session?.user as any)?.role === 'admin';
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  // Initialize sorting from URL
-  const [sorting, setSorting] = React.useState<SortingState>(() => {
-    const sortParam = searchParams.get('sort');
-    if (sortParam) {
-      const [id = '', desc] = sortParam.split('.');
-      if (id) return [{ id, desc: desc === 'desc' }];
-    }
-    return initialSorting;
-  });
+  const [sorting, setSorting] = React.useState<SortingState>(initialSorting);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(initialColumnVisibility);
   const [columnPinning, setColumnPinning] = React.useState<ColumnPinningState>(initialColumnPinning ?? {});
 
   // Simplified Width State: Default to "Fit" (true) on Desktop, always false on Mobile
   const isMobile = useMediaQuery('(max-width: 768px)');
 
-  // Sync sorting to URL
+  // Só avisa quando muda: o estado com que a tabela nasceu já é de quem passou.
+  const ordenacaoAvisada = React.useRef(sorting);
   React.useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    const sort = sorting[0];
-    if (sort) {
-      params.set('sort', `${sort.id}.${sort.desc ? 'desc' : 'asc'}`);
-    } else {
-      params.delete('sort');
-    }
-
-    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
-    router.replace(newUrl, { scroll: false });
-  }, [sorting, pathname, router, searchParams]);
-
+    if (ordenacaoAvisada.current === sorting) return;
+    ordenacaoAvisada.current = sorting;
+    onSortingChange?.(sorting);
+  }, [sorting, onSortingChange]);
 
   const [globalFilter, setGlobalFilter] = React.useState('');
   const [editingCell, setEditingCell] = React.useState<{ rowId: string; colId: string } | null>(null);
@@ -654,7 +657,7 @@ export function DataTable<TData, TValue>({
                       role={onRowClick ? 'button' : undefined}
                     >
                       {row.getVisibleCells().map((cell) => {
-                        const isEditable = isAdmin && !!onCellUpdate && (cell.column.columnDef.meta as any)?.editable;
+                        const isEditable = canEdit && !!onCellUpdate && (cell.column.columnDef.meta as any)?.editable;
                         const isEditing = editingCell?.rowId === row.id && editingCell.colId === cell.id;
 
                         return (

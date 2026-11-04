@@ -31,7 +31,7 @@ const PASSOS = [
     id: "brief",
     label: "Briefing",
     title: "A marca entra pelo vault, não por anexo.",
-    body: "Cor, tipografia e regra de logo saem da guideline compilada — o site nasce com a marca já resolvida.",
+    body: "Cor, tipografia e regra de logo saem da guideline compilada, e o site nasce com a marca já resolvida.",
   },
   {
     id: "tokens",

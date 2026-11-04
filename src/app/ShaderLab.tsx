@@ -8,6 +8,8 @@
  * eles. Com um palco só, o filtro aberto é sempre a imagem escolhida.
  *
  * No desktop só o painel rola: o canvas fica à vista enquanto se percorre a lista.
+ * No celular é a página que rola, e o palco gruda embaixo da barra de abas junto com
+ * o nome e o comando: tocar num filtro lá embaixo mostra o efeito sem subir a tela.
  * Trocar a imagem é a ação secundária, então fica recolhida atrás de um botão.
  *
  * As miniaturas vêm prontas (`npm run build:shader-thumbs`), uma por filtro e
@@ -30,6 +32,14 @@ import {
 import { installCommand } from "./registry-meta";
 import { cn } from "@/lib/utils";
 
+/*
+ * A altura do palco no celular, nome e comando de fora. Em tela muito baixa
+ * (paisagem) nada gruda: palco grudado ali não deixaria sobrar lista.
+ */
+const PALCO_NO_CELULAR = "h-[max(12rem,32svh)] lg:h-full";
+const GRUDA_NO_CELULAR =
+  "[@media(max-width:1023px)_and_(min-height:560px)]:sticky [@media(max-width:1023px)_and_(min-height:560px)]:top-[calc(var(--shell-header-h)+var(--barra-h))]";
+
 const FOCO = "outline-none focus-visible:[box-shadow:var(--focus)]";
 
 function SeletorDeImagem() {
@@ -50,7 +60,7 @@ function SeletorDeImagem() {
             img.src === atual.src ? "opacity-100 [box-shadow:0_0_0_2px_var(--casa-fg)]" : "opacity-60",
           )}
         >
-          <img src={img.src} alt="" draggable={false} className="size-full object-cover" />
+          <img src={img.src} alt="" draggable={false} onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} className="size-full object-cover" />
         </button>
       ))}
       <button
@@ -92,17 +102,18 @@ export function ShaderLab({ itens, onFocus }: { itens: CatalogItem[]; onFocus: (
   return (
     <div
       data-shader-lab
-      className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 lg:-mb-24 lg:h-[calc(100dvh-17rem)] lg:min-h-[26rem] lg:grid-cols-[minmax(0,1fr)_20rem]"
+      /* `block` no celular: num item de grid o `sticky` só anda dentro da própria linha. */
+      className="mt-2 block lg:mt-4 lg:-mb-24 lg:grid lg:h-[calc(100dvh-17rem)] lg:min-h-[26rem] lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-4"
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
         e.preventDefault();
         enviarImagem(e.dataTransfer.files[0]);
       }}
     >
-      <div className="relative min-h-[22rem] min-w-0 lg:min-h-0">
+      <div className={cn("z-20 min-w-0 bg-casa-bg pb-2 lg:relative lg:pb-0", GRUDA_NO_CELULAR)}>
+        <div className={cn("relative", PALCO_NO_CELULAR)}>
         <div
-          className="palco grid size-full min-h-[22rem] grid-cols-[minmax(0,1fr)] place-items-center overflow-hidden rounded-tile p-6 lg:min-h-0"
-          style={{ "--shader-w": "min(100%, calc(100dvh - 20rem))" } as React.CSSProperties}
+          className="palco grid size-full grid-cols-[minmax(0,1fr)] place-items-center overflow-hidden rounded-tile p-3 lg:p-6 [--shader-w:min(100%,calc(max(12rem,32svh)-1.5rem))] lg:[--shader-w:min(100%,calc(100dvh-20rem))]"
         >
           <SemSeletorDeImagem>
             <React.Suspense fallback={null}>
@@ -128,6 +139,24 @@ export function ShaderLab({ itens, onFocus }: { itens: CatalogItem[]; onFocus: (
               <SeletorDeImagem />
             </div>
           ) : null}
+        </div>
+        </div>
+
+        {/* O nome e o comando do filtro aberto, à mão enquanto a lista rola. */}
+        <div className="casa flex items-center justify-between gap-2 pt-1 lg:hidden">
+          <button
+            type="button"
+            onClick={() => onFocus(item.name)}
+            className={cn(FOCO, "flex min-h-11 min-w-0 cursor-pointer items-center gap-1 rounded-control text-casa-base font-medium text-casa-fg")}
+          >
+            <span className="truncate">{item.title}</span>
+            <ArrowUpRight className="size-3.5 shrink-0" aria-hidden />
+          </button>
+          <CopyCommand
+            variant="chip"
+            text={installCommand(item.name)}
+            className="size-11 bg-casa-cta text-casa-cta-fg hover:bg-casa-cta hover:text-casa-cta-fg"
+          />
         </div>
       </div>
 
@@ -155,6 +184,7 @@ export function ShaderLab({ itens, onFocus }: { itens: CatalogItem[]; onFocus: (
                 alt=""
                 loading="lazy"
                 draggable={false}
+                onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
                 className="size-12 shrink-0 rounded-control object-cover"
               />
               <span className={cn("min-w-0 truncate text-casa-sm", f.name === item.name ? "text-casa-fg" : "text-casa-fg-2")}>
@@ -164,7 +194,7 @@ export function ShaderLab({ itens, onFocus }: { itens: CatalogItem[]; onFocus: (
           ))}
         </div>
 
-        <div className="flex shrink-0 flex-col gap-2 border-t border-casa-line pt-3">
+        <div className="hidden shrink-0 flex-col gap-2 border-t border-casa-line pt-3 lg:flex">
           <button
             type="button"
             onClick={() => onFocus(item.name)}

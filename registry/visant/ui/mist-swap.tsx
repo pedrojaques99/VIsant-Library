@@ -3,6 +3,7 @@
 import * as React from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
 
+import { EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -42,9 +43,7 @@ import { cn } from "@/lib/utils";
  * foto certa durante o cruzamento, e não com o fundo.
  */
 
-// Tokens locais: o consumidor não tem `@/lib/motion`. `--ease-out` e a
-// duração de deriva de cena (névoa saindo de uma foto).
-const EASE_OUT = [0.23, 1, 0.32, 1] as const;
+// Duração de deriva de cena, névoa saindo de uma foto: acima do teto de UI de propósito.
 const DUR_DRIFT = 1.4;
 
 export interface MistSwapProps {

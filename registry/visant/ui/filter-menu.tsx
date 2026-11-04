@@ -126,7 +126,7 @@ export function FilterMenu({
           "text-sm font-medium text-[var(--foreground)]",
           "transition-[background-color,border-color,box-shadow]",
           "[transition-duration:var(--dur-fast,160ms)]",
-          "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+          "[transition-timing-function:var(--ease-out)]",
           "hover:bg-[var(--muted)]",
           "outline-none focus-visible:border-[color-mix(in_oklab,var(--ring)_60%,var(--foreground))] focus-visible:[box-shadow:0_0_0_1px_color-mix(in_oklab,var(--ring)_30%,transparent)]",
           className,
@@ -171,7 +171,7 @@ export function FilterMenu({
             "origin-[var(--radix-dropdown-menu-content-transform-origin)]",
             "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
             "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
-            "[animation-duration:var(--dur-fast,160ms)] [animation-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+            "[animation-duration:var(--dur-fast,160ms)] [animation-timing-function:var(--ease-out)]",
           )}
         >
           {usable.length === 0 ? (

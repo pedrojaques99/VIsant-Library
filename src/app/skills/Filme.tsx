@@ -30,6 +30,23 @@ import "./filme/filme.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
+/* O filme é dirigido pela rolagem: o `duration` do GSAP aqui é trecho da linha do
+   tempo, medido em vh rolados. Não são segundos, então os tokens de DUR não se aplicam. */
+const VH = {
+  fio: 1,
+  letra: 0.5,
+  rotulo: 3,
+  frase: 6,
+  legenda: 8,
+  regra: 10,
+  longo: 14,
+  saida: 22,
+  letras: 24,
+  palavra: 30,
+  lajeH: 38,
+  lajeV: 40,
+} as const;
+
 const estiloTema = (t: Tema) => ({ "--t-bg": t.bg, "--t-fg": t.fg, "--t-fg2": t.fg2 }) as React.CSSProperties;
 
 /** Quanto a rolagem anda por quadro de vídeo, em vh. */
@@ -50,12 +67,14 @@ function Letras({ texto }: { texto: string }) {
   );
 }
 
-function ImagemPar({ par }: { par: Par }) {
+/** `adiada`: a cena fica fora de quadro na abertura, e `loading="lazy"` não ajuda porque o palco cobre a tela. */
+function ImagemPar({ par, adiada }: { par: Par; adiada?: boolean }) {
+  const fonte = (nome: string) => (adiada ? { "data-src": midia(nome) } : { src: midia(nome) });
   return (
     <div className="filme-imagem par">
-      <img src={midia(`${par.id}-antes.webp`)} alt={`${par.nome} Antes das skills.`} decoding="async" />
+      <img {...fonte(`${par.id}-antes.webp`)} alt={`${par.nome} Antes das skills.`} decoding="async" />
       <div className="filme-depois">
-        <img src={midia(`${par.id}-depois.webp`)} alt={`${par.nome} Depois das skills.`} decoding="async" />
+        <img {...fonte(`${par.id}-depois.webp`)} alt={`${par.nome} Depois das skills.`} decoding="async" />
       </div>
       <div className="filme-linha" data-linha />
     </div>
@@ -189,13 +208,13 @@ function FilmeRolado({ vertical }: { vertical: boolean }) {
           recorte(depois, [0, 100, 0, 0], [0, 0, 0, 0], dur, "power1.inOut", t);
           /* A linha só existe enquanto divide: parada em x=0 ela era um fio branco na borda. */
           tl.fromTo(linha, { left: "0%", autoAlpha: 0 }, { left: "100%", duration: dur, ease: "power1.inOut" }, t);
-          tl.to(linha, { autoAlpha: 1, duration: 1 }, t);
-          tl.to(linha, { autoAlpha: 0, duration: 1 }, t + dur - 1);
+          tl.to(linha, { autoAlpha: 1, duration: VH.fio }, t);
+          tl.to(linha, { autoAlpha: 0, duration: VH.fio }, t + dur - 1);
         }
         tl.set(dps, { autoAlpha: 0 }, 0);
         /* Um rótulo sai antes de o outro entrar: nunca dois na mesma linha. */
-        tl.to(antes, { autoAlpha: 0, duration: 3 }, t + dur * 0.46);
-        tl.to(dps, { autoAlpha: 1, duration: 3 }, t + dur * 0.5);
+        tl.to(antes, { autoAlpha: 0, duration: VH.rotulo }, t + dur * 0.46);
+        tl.to(dps, { autoAlpha: 1, duration: VH.rotulo }, t + dur * 0.5);
       };
 
       let t = 0;
@@ -206,21 +225,21 @@ function FilmeRolado({ vertical }: { vertical: boolean }) {
         const c = cenas[n]!;
         inicio.abertura = 0;
         tl.set(c, { visibility: "visible" }, 0);
-        tl.to(c.querySelectorAll("[data-sai]"), { autoAlpha: 0, y: 24, duration: 22, stagger: 2 }, 6);
-        tl.to(c.querySelector(".filme-etiqueta"), { autoAlpha: 0, duration: 14 }, 6);
+        tl.to(c.querySelectorAll("[data-sai]"), { autoAlpha: 0, y: 24, duration: VH.saida, stagger: 2 }, 6);
+        tl.to(c.querySelector(".filme-etiqueta"), { autoAlpha: 0, duration: VH.longo }, 6);
         /* No desktop a tela vem do canto e cresce até encher; no celular a laje só desce. */
         if (vertical) {
-          tl.to(c.querySelector(".filme-laje"), { yPercent: 100, duration: 40, ease: "power2.inOut" }, 12);
+          tl.to(c.querySelector(".filme-laje"), { yPercent: 100, duration: VH.lajeV, ease: "power2.inOut" }, 12);
         } else {
-          tl.to(c.querySelector(".filme-laje"), { xPercent: -100, duration: 38, ease: "power2.inOut" }, 10);
+          tl.to(c.querySelector(".filme-laje"), { xPercent: -100, duration: VH.lajeH, ease: "power2.inOut" }, 10);
           tl.fromTo(
             c.querySelector(".filme-imagem"),
             { scale: 0.56, x: "23%" },
-            { scale: 1, x: "0%", duration: 38, ease: "power2.inOut" },
+            { scale: 1, x: "0%", duration: VH.lajeH, ease: "power2.inOut" },
             10,
           );
         }
-        tl.fromTo(c.querySelector(".filme-legenda"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 8 }, 44);
+        tl.fromTo(c.querySelector(".filme-legenda"), { autoAlpha: 0 }, { autoAlpha: 1, duration: VH.legenda }, 44);
         dividir(c, 50, 80);
         t = 150;
         faixas.push({ i: n, ate: t, tema: ABERTURA.tema });
@@ -238,12 +257,12 @@ function FilmeRolado({ vertical }: { vertical: boolean }) {
         tl.fromTo(
           palavra.querySelectorAll("[data-c]"),
           { yPercent: 112 },
-          { yPercent: 0, duration: 24, ease: "expo.out", stagger: 2 },
+          { yPercent: 0, duration: VH.letras, ease: "expo.out", stagger: 2 },
           t + 8,
         );
         const escala = fonteBarra / parseFloat(getComputedStyle(palavra).fontSize);
         recorte(imagem, [100, 0, 0, 0], [0, 0, 0, 0], 30, "expo.inOut", t + 44);
-        tl.to(palavra, { scale: escala, duration: 30, ease: "expo.inOut" }, t + 44);
+        tl.to(palavra, { scale: escala, duration: VH.palavra, ease: "expo.inOut" }, t + 44);
 
         const lado = vertical ? "v-" : "h-";
         const trilha = trilhaVideo(
@@ -264,8 +283,8 @@ function FilmeRolado({ vertical }: { vertical: boolean }) {
           if (j === 0) return;
           const em = t + 66 + (dur * j) / frases.length;
           tl.set(f, { autoAlpha: 0 }, 0);
-          tl.to(frases[j - 1]!, { autoAlpha: 0, duration: 6 }, em);
-          tl.to(f, { autoAlpha: 1, duration: 6 }, em + 4);
+          tl.to(frases[j - 1]!, { autoAlpha: 0, duration: VH.frase }, em);
+          tl.to(f, { autoAlpha: 1, duration: VH.frase }, em + 4);
         });
         t += 78 + dur;
         faixas.push({ i: n, ate: t, tema: cap.tema });
@@ -280,7 +299,7 @@ function FilmeRolado({ vertical }: { vertical: boolean }) {
         tl.fromTo(
           c.querySelectorAll(".filme-palavra [data-c]"),
           { yPercent: 112 },
-          { yPercent: 0, duration: 24, ease: "expo.out", stagger: 3 },
+          { yPercent: 0, duration: VH.letras, ease: "expo.out", stagger: 3 },
           t + 8,
         );
         const curva = c.querySelector<SVGPathElement>("[data-curva]")!;
@@ -306,8 +325,8 @@ function FilmeRolado({ vertical }: { vertical: boolean }) {
         const regras = c.querySelectorAll<HTMLElement>("[data-regra]");
         regras.forEach((f, j) => {
           const em = t + 40 + (d * j) / regras.length;
-          tl.fromTo(f, { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 10, ease: "expo.out" }, em);
-          if (j < regras.length - 1) tl.to(f, { autoAlpha: 0, duration: 6 }, em + d / regras.length - 6);
+          tl.fromTo(f, { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: VH.regra, ease: "expo.out" }, em);
+          if (j < regras.length - 1) tl.to(f, { autoAlpha: 0, duration: VH.frase }, em + d / regras.length - 6);
         });
         t += 212;
         faixas.push({ i: n, ate: t, tema: ABERTURA.tema });
@@ -333,16 +352,16 @@ function FilmeRolado({ vertical }: { vertical: boolean }) {
         tl.fromTo(
           c.querySelectorAll(".filme-palavra [data-c]"),
           { yPercent: 112 },
-          { yPercent: 0, duration: 24, ease: "expo.out", stagger: 2 },
+          { yPercent: 0, duration: VH.letras, ease: "expo.out", stagger: 2 },
           t + 8,
         );
         const letras = c.querySelectorAll(".filme-comando [data-c]");
-        tl.fromTo(letras, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, stagger: 1 }, t + 30);
+        tl.fromTo(letras, { autoAlpha: 0 }, { autoAlpha: 1, duration: VH.letra, stagger: 1 }, t + 30);
         const fimTipo = t + 30 + letras.length;
         tl.fromTo(
           c.querySelector(".filme-acoes"),
           { autoAlpha: 0, y: 16 },
-          { autoAlpha: 1, y: 0, duration: 14, ease: "expo.out" },
+          { autoAlpha: 1, y: 0, duration: VH.longo, ease: "expo.out" },
           fimTipo,
         );
         t = fimTipo + 30;
@@ -364,18 +383,32 @@ function FilmeRolado({ vertical }: { vertical: boolean }) {
         return { de: inicio[m.id]!, ate: prox ? inicio[prox.id]! : t };
       });
       let atual = -1;
+      let jaAndou = false;
       const aplicar = () => {
         const agora = tl.time();
         segmentos.forEach((s, i) => {
           cheios[i]!.style.transform = `scaleX(${Math.max(0, Math.min(1, (agora - s.de) / (s.ate - s.de)))})`;
         });
         const f = faixas.find((x) => agora < x.ate) ?? faixas[faixas.length - 1]!;
-        if (f.i === atual) return;
+        const andou = agora > 0 && !jaAndou;
+        if (f.i === atual && !andou) return;
+        jaAndou = agora > 0;
         atual = f.i;
         palco.style.setProperty("--tempo-fg", f.tema.fg);
+        cenas.forEach((cena, i) => {
+          if (Math.abs(i - atual) > 1) return;
+          cena.querySelectorAll<HTMLImageElement>("img[data-src]").forEach((img) => {
+            img.src = img.dataset.src!;
+            img.removeAttribute("data-src");
+          });
+        });
         for (const [i, tr] of trilhas) {
           const d = Math.abs(i - atual);
-          if (d <= 1) tr.carregar();
+          if (d <= 1) {
+            tr.preparar();
+            /* Na abertura ninguém rolou: o vídeo do capítulo seguinte só desce quando o filme anda. */
+            if (agora > 0) tr.carregar();
+          }
           /* Só o celular devolve o vídeo: voltar a rolagem no desktop não pode recarregar nada. */
           else if (vertical && d > 2) tr.soltar();
         }
@@ -414,6 +447,7 @@ function FilmeRolado({ vertical }: { vertical: boolean }) {
     <div ref={raiz} className="filme casa dark" data-vertical={vertical}>
       <div className="filme-trilho">
         <div className="filme-palco">
+          <div className="filme-cenas">
           <section className="filme-cena" style={estiloTema(ABERTURA.tema)}>
             <ImagemPar par={ABERTURA} />
             <p className="filme-etiqueta">{ETIQUETA}</p>
@@ -485,7 +519,7 @@ function FilmeRolado({ vertical }: { vertical: boolean }) {
 
           {PARES.map((p) => (
             <section className="filme-cena" key={p.id} style={estiloTema(p.tema)}>
-              <ImagemPar par={p} />
+              <ImagemPar par={p} adiada />
               <div className="filme-rotulo" data-antes>
                 Antes
               </div>
@@ -522,12 +556,14 @@ function FilmeRolado({ vertical }: { vertical: boolean }) {
               <span className="filme-mono">Claude Code</span>
             </div>
           </section>
+          </div>
 
           <nav className="filme-tempo" aria-label="Capítulos do filme">
             {marcas.map((m) => (
               <button
                 type="button"
                 className="filme-marca"
+                data-marca={m.id}
                 key={m.id}
                 title={m.nome}
                 aria-label={m.nome}

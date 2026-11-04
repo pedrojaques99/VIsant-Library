@@ -3,6 +3,7 @@
 import * as React from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 
+import { DUR, EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -38,10 +39,6 @@ import { cn } from "@/lib/utils";
  *    ficaria parado na borda por onde o mouse saiu.
  */
 
-// Tokens locais (o consumidor não tem `@/lib/motion`).
-const EASE_OUT = [0.23, 1, 0.32, 1] as const;
-const DUR_BASE = 0.2;
-const DUR_SLOW = 0.3;
 // Mola sem overshoot: segue, não quica. Um cursor que passa do ponto parece bêbado.
 const SPRING_FOLLOW = { stiffness: 160, damping: 22, mass: 0.6 } as const;
 
@@ -110,17 +107,17 @@ export function DotCursor({
       style={{ x: sx, y: sy, color: ink }}
       initial={false}
       animate={{ opacity: ativo ? 1 : 0 }}
-      transition={{ duration: DUR_BASE, ease: EASE_OUT }}
+      transition={{ duration: DUR.base, ease: EASE_OUT }}
     >
       {/* translate num wrapper: o scale do framer sobrescreveria o transform do Tailwind */}
       <div className="-translate-x-1/2 -translate-y-1/2">
         <motion.div
           data-over={sobre ? "" : undefined}
-          className="rounded-full border border-current bg-current transition-[background-color] [transition-duration:var(--dur-slow,300ms)] [transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))] data-[over]:bg-transparent"
+          className="rounded-full border border-current bg-current transition-[background-color] [transition-duration:var(--dur-slow,300ms)] [transition-timing-function:var(--ease-out)] data-[over]:bg-transparent"
           style={{ width: ANEL, height: ANEL }}
           initial={false}
           animate={{ scale: sobre ? 1 : PONTO / ANEL }}
-          transition={{ duration: DUR_SLOW, ease: EASE_OUT }}
+          transition={{ duration: DUR.slow, ease: EASE_OUT }}
         />
       </div>
     </motion.div>

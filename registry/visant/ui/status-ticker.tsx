@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { EASE_VARREDURA_CSS } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { GlitchChars } from "@/components/ui/glitch-chars";
 
@@ -34,6 +35,9 @@ import { GlitchChars } from "@/components/ui/glitch-chars";
  * As quatro leem o mesmo relógio e a mesma lista de `steps`; trocar de variante
  * não reinicia o cronômetro de quem já está esperando.
  */
+
+// Uma volta do indicador em laço, não transição de UI.
+const VARREDURA_MS = 1600;
 export type StatusTickerVariant = "linha" | "barra" | "etapas" | "pulso";
 
 export function StatusTicker({
@@ -279,7 +283,7 @@ function Varredura() {
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
     const a = el.animate(
       [{ transform: "translateX(-100%)" }, { transform: "translateX(300%)" }],
-      { duration: 1600, iterations: Infinity, easing: "cubic-bezier(0.45, 0, 0.25, 1)" },
+      { duration: VARREDURA_MS, iterations: Infinity, easing: EASE_VARREDURA_CSS },
     );
     return () => a.cancel();
   }, []);

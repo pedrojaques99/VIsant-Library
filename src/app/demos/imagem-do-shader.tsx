@@ -22,11 +22,11 @@ export interface ImagemDoShader {
   alt: string;
 }
 
-export const IMAGEM_PADRAO = "/media/efeito-padrao.webp";
+export const IMAGEM_PADRAO = "/media/efeito-mao.webp";
 
 export const PADROES: readonly ImagemDoShader[] = [
-  { nome: "tv", chave: "tv", src: IMAGEM_PADRAO, alt: "TV de tubo numa prateleira" },
-  { nome: "mão", chave: "mao", src: "/media/efeito-mao.webp", alt: "Mão metálica sobre fundo ciano" },
+  { nome: "mão", chave: "mao", src: IMAGEM_PADRAO, alt: "Mão metálica sobre fundo ciano" },
+  { nome: "tv", chave: "tv", src: "/media/efeito-padrao.webp", alt: "TV de tubo numa prateleira" },
   { nome: "forma", chave: "forma", src: "/media/efeito-forma.webp", alt: "Forma abstrata em tons quentes" },
   { nome: "gradiente", chave: "gradiente", src: "/media/efeito-gradiente.webp", alt: "Gradiente suave" },
 ];

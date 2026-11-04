@@ -5,7 +5,10 @@
  */
 
 .filme {
-  --barra: 104px;
+  /* A altura da linha do tempo decide o resto: palavra e legenda moram logo acima dela. */
+  --seguro: env(safe-area-inset-bottom, 0px);
+  --tempo: calc(26px + var(--seguro));
+  --barra: calc(78px + var(--tempo));
   --g: clamp(16px, 2.4vw, 32px);
   --palavra: clamp(84px, 21vw, 340px);
   --palavra-barra: 40px;
@@ -25,6 +28,12 @@
   height: 100svh;
   overflow: hidden;
   background: var(--casa-bg);
+}
+
+/* As cenas numa camada só delas: a linha do tempo é controle do palco, não peça da cena. */
+.filme-cenas {
+  position: relative;
+  height: 100%;
 }
 
 .filme-cena {
@@ -67,7 +76,7 @@
 .filme-palavra {
   position: absolute;
   left: var(--g);
-  bottom: 34px;
+  bottom: calc(var(--tempo) + 8px);
   margin: 0;
   font-size: var(--palavra);
   font-weight: 600;
@@ -78,10 +87,12 @@
 }
 .filme-palavra .c {
   display: inline-block;
-  overflow: clip;
-  overflow-clip-margin: 0.04em;
-  padding-bottom: 0.14em;
-  margin-bottom: -0.14em;
+  /* Recorta só na vertical, que é por onde a letra sobe. `overflow-clip-margin` o Safari
+     não tem: lá o recorte comia a borda de cada letra, que passa da caixa pelo tracking. */
+  overflow-x: visible;
+  overflow-y: clip;
+  padding-block: 0.04em 0.18em;
+  margin-block: -0.04em -0.18em;
 }
 .filme-palavra .c > span {
   display: inline-block;
@@ -90,7 +101,7 @@
 .filme-legenda {
   position: absolute;
   right: var(--g);
-  bottom: 34px;
+  bottom: calc(var(--tempo) + 8px);
   display: grid;
   justify-items: end;
   gap: 2px;
@@ -122,10 +133,10 @@
   right: 0;
   bottom: 0;
   z-index: 5;
-  height: 26px;
+  height: var(--tempo);
   display: flex;
   gap: 2px;
-  padding: 0 var(--g);
+  padding: 0 var(--g) var(--seguro);
   color: var(--tempo-fg, var(--casa-fg));
   transition: color var(--dur-fast) var(--ease-out);
 }
@@ -138,6 +149,9 @@
   border: 0;
   color: inherit;
   cursor: pointer;
+  /* Arrastar a partir da linha continua rolando o filme. */
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
 }
 .filme-marca::before {
   content: "";
@@ -162,6 +176,31 @@
 .filme-marca:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: -2px;
+}
+/*
+ * Dedo: 44px de altura e de largura. Com marcas proporcionais, "Instalar" dava 20x24.
+ * Largura igual de borda a borda; sem a Abertura, que é só rolar para cima, sete marcas
+ * passam de 44px até num aparelho de 320px.
+ */
+@media (pointer: coarse) {
+  .filme {
+    --tempo: calc(44px + var(--seguro));
+  }
+  .filme-tempo {
+    gap: 0;
+    padding: 0 env(safe-area-inset-right, 0px) var(--seguro) env(safe-area-inset-left, 0px);
+  }
+  .filme-marca[data-marca="abertura"] {
+    display: none;
+  }
+  .filme-marca {
+    flex-grow: 1 !important;
+  }
+  .filme-marca::before,
+  .filme-marca > i {
+    left: 1px;
+    right: 1px;
+  }
 }
 
 /* A abertura. */
@@ -248,7 +287,7 @@
 .filme-rotulo {
   position: absolute;
   left: var(--g);
-  bottom: 34px;
+  bottom: calc(var(--tempo) + 8px);
   font-size: var(--palavra-barra);
   font-weight: 600;
   letter-spacing: -0.03em;
@@ -363,13 +402,13 @@
 
 /* Celular: segundo desenho. A tela dividida empilha, a palavra fica sobre a barra. */
 .filme[data-vertical="true"] {
-  --barra: 156px;
+  --barra: calc(138px + var(--tempo));
   --palavra-barra: 34px;
   --palavra: clamp(72px, 23vw, 140px);
 }
 .filme[data-vertical="true"] .filme-palavra,
 .filme[data-vertical="true"] .filme-rotulo {
-  bottom: 106px;
+  bottom: calc(88px + var(--tempo));
 }
 .filme[data-vertical="true"] .filme-frase {
   max-width: none;
@@ -377,7 +416,7 @@
 .filme[data-vertical="true"] .filme-legenda {
   left: var(--g);
   right: var(--g);
-  bottom: 28px;
+  bottom: calc(2px + var(--tempo));
   gap: 0;
   justify-items: start;
   text-align: left;
@@ -398,7 +437,7 @@
   height: 58%;
   justify-content: flex-end;
   gap: 14px;
-  padding-bottom: 44px;
+  padding-bottom: calc(18px + var(--tempo));
 }
 .filme[data-vertical="true"] .filme-etiqueta {
   left: var(--g);
@@ -414,6 +453,11 @@
 .filme[data-vertical="true"] .par > img {
   object-fit: contain;
   height: 50%;
+}
+/* A etiqueta da abertura mora em cima da tela: em celular baixo, ela caía sobre a imagem. */
+.filme[data-vertical="true"] .filme-cena:has(> .filme-etiqueta) .par > img {
+  top: 56px;
+  height: calc(50% - 56px);
 }
 .filme[data-vertical="true"] .par .filme-depois > img {
   top: 50%;

@@ -106,7 +106,7 @@
 .kanban-card {
   transition-property: transform, outline-color, background-color;
   transition-duration: var(--dur-base, 200ms);
-  transition-timing-function: var(--ease-in-out, cubic-bezier(0.77, 0, 0.175, 1));
+  transition-timing-function: var(--ease-in-out);
 
   /*
    * O contorno do slot existe SEMPRE, transparente — e é isso que faz a entrada
@@ -157,7 +157,7 @@
 .kanban-card > * {
   transition-property: opacity;
   transition-duration: var(--dur-fast, 160ms);
-  transition-timing-function: var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+  transition-timing-function: var(--ease-out);
 }
 
 .kanban-card.is-drop-slot > *,
@@ -201,7 +201,7 @@
      transform computado DESTE nó pra calcular o pouso, então escala ou
      deslocamento nossos entrariam na conta e errariam o alvo. */
   animation: kanban-overlay-erguer var(--dur-fast, 160ms)
-    var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both;
+    var(--ease-out) both;
 }
 
 @keyframes kanban-overlay-erguer {

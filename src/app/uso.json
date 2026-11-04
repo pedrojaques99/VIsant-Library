@@ -116,8 +116,8 @@
     "evite": "Lista densa pra ordenar e editar: data-table; triagem rápida no celular, swipe-actions"
   },
   "data-table": {
-    "quando": "Tabela densa de admin ou dashboard com ordenação, seleção e edição inline, em app Next",
-    "evite": "Fluxo por etapas visível: kanban; fora de Next ainda depende de next-auth, adapte antes de usar"
+    "quando": "Tabela densa de admin ou dashboard com ordenação, seleção e edição inline",
+    "evite": "Fluxo por etapas visível: kanban; lista curta sem ordenar nem editar, table"
   },
   "segmented-control": {
     "quando": "Alternar entre 2 a 5 opções que cabem na tela, como lista ou grade, ou o período de um gráfico",

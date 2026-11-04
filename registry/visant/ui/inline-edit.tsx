@@ -151,7 +151,7 @@ export function InlineEdit({
                             // Escopo explícito em vez de `transition-all`: a caixa
                             // também anima largura quando o valor muda, e deixar a
                             // largura entrar na transição faz o vizinho tremer.
-                            'transition-[background-color,color] [transition-duration:var(--dur-fast,160ms)] [transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]',
+                            'transition-[background-color,color] [transition-duration:var(--dur-fast,160ms)] [transition-timing-function:var(--ease-out)]',
                             'hover:bg-muted/60 focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]',
                             status === 'error' && 'text-destructive',
                             triggerClassName
@@ -177,7 +177,7 @@ export function InlineEdit({
                                 <Pencil
                                     className={cn(
                                         'h-3 w-3 opacity-40',
-                                        'transition-opacity [transition-duration:var(--dur-fast,160ms)] [transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]',
+                                        'transition-opacity [transition-duration:var(--dur-fast,160ms)] [transition-timing-function:var(--ease-out)]',
                                         'group-hover/ie:opacity-90 group-focus-visible/ie:opacity-90'
                                     )}
                                 />
@@ -191,7 +191,7 @@ export function InlineEdit({
                         // Mesma altura da leitura: `h-[var(--ie-h)]`, não "o que o
                         // input pedir". É o que impede a linha de crescer no clique.
                         'flex h-[var(--ie-h)] items-center gap-1 rounded-[var(--r-control,0.5rem)]',
-                        'transition-[box-shadow] [transition-duration:var(--dur-fast,160ms)] [transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]',
+                        'transition-[box-shadow] [transition-duration:var(--dur-fast,160ms)] [transition-timing-function:var(--ease-out)]',
                         feedbackRing
                     )}
                     onClick={(e) => e.stopPropagation()}

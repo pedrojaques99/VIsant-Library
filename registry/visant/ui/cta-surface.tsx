@@ -173,7 +173,7 @@ export function CtaAction({
         // layout junto e engasga.
         "transition-[transform,box-shadow,background-color,border-color,color]",
         "[transition-duration:var(--dur-fast,160ms)]",
-        "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+        "[transition-timing-function:var(--ease-out)]",
         "focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]",
         // O toque responde antes da cor: `--dur-press` é mais curto que o hover
         // de propósito, porque afundar tem de parecer instantâneo.

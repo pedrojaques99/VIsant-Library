@@ -24,6 +24,7 @@ import { CopyCommand } from "./copy-command";
 /**
  * O traço de um logo do `simple-icons`, na cor do texto. Local e não Iconify:
  * logo que depende de rede vira bolinha vazia quando a API falha.
+ * EXCEPTION to noise-scan/hand-drawn-icon: o traço vem do pacote simple-icons por dado, ninguém desenhou nada aqui.
  */
 export function LogoAgente({ icone, className = "size-3.5" }: { icone: SimpleIcon; className?: string }) {
   return (
@@ -75,7 +76,7 @@ const AGENTES: {
     logo: siClaude,
     nome: "Claude Code",
     acao: { copiar: "claude mcp add shadcn -- npx shadcn@latest mcp" },
-    depois: "No terminal do projeto. Reinicie o Claude Code; o /mcp mostra conectado.",
+    depois: "No terminal do projeto. Reinicie o Claude Code. O /mcp mostra conectado.",
     registry: true,
   },
   {
@@ -107,7 +108,7 @@ const AGENTES: {
     logo: Globe,
     nome: "Apps web",
     acao: { copiar: `${SITE}/mcp` },
-    depois: "No Claude.ai ou ChatGPT: Configurações → Conectores → conector personalizado, com esta URL.",
+    depois: "No Claude.ai ou ChatGPT: em Configurações, abra Conectores e adicione um conector personalizado com esta URL.",
     registry: false,
   },
   {

@@ -79,6 +79,7 @@ function Cena({ qual, props }: { qual: (typeof VARIANTES)[number]; props: DemoPr
       );
     case "soltar arquivo":
       return (
+        // EXCEPTION to noise-scan/usage-instruction: esta frase é o próprio estado de zona de soltar que a demo mostra
         <EmptyState
           framed={false}
           className="w-[360px] max-w-full rounded-[var(--r-surface,0.875rem)] border border-dashed border-border bg-card px-4 py-6"

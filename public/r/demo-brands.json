@@ -54,20 +54,20 @@
         "shadow": "132 30% 12%"
       },
       "dark": {
-        "background": "oklch(0.2371 0.0058 121.89)",
-        "foreground": "oklch(0.9878 0.0013 106.42)",
-        "card": "oklch(0.2856 0.0077 128.76)",
-        "card-foreground": "oklch(0.9878 0.0013 106.42)",
-        "popover": "oklch(0.2856 0.0077 128.76)",
-        "popover-foreground": "oklch(0.9878 0.0013 106.42)",
-        "muted": "oklch(0.3373 0.0074 128.71)",
-        "muted-foreground": "oklch(0.6269 0.0077 124.52)",
-        "secondary": "oklch(0.3373 0.0074 128.71)",
-        "secondary-foreground": "oklch(0.9878 0.0013 106.42)",
-        "accent": "oklch(0.3373 0.0074 128.71)",
-        "accent-foreground": "oklch(0.9878 0.0013 106.42)",
-        "border": "oklch(0.4133 0.007 128.65)",
-        "input": "oklch(0.4569 0.0083 124.61)",
+        "background": "oklch(0.2359 0.0116 156.22)",
+        "foreground": "oklch(0.9871 0.0017 145.56)",
+        "card": "oklch(0.2841 0.0146 149.33)",
+        "card-foreground": "oklch(0.9871 0.0017 145.56)",
+        "popover": "oklch(0.2841 0.0146 149.33)",
+        "popover-foreground": "oklch(0.9871 0.0017 145.56)",
+        "muted": "oklch(0.3389 0.015 153.1)",
+        "muted-foreground": "oklch(0.625 0.0129 153.52)",
+        "secondary": "oklch(0.3389 0.015 153.1)",
+        "secondary-foreground": "oklch(0.9871 0.0017 145.56)",
+        "accent": "oklch(0.3389 0.015 153.1)",
+        "accent-foreground": "oklch(0.9871 0.0017 145.56)",
+        "border": "oklch(0.411 0.0143 153.27)",
+        "input": "oklch(0.4561 0.0119 154.8)",
         "brand": "oklch(0.87 0.15 120.89)",
         "brand-foreground": "oklch(0.1448 0 0)",
         "accent-ink": "oklch(0.6228 0.0885 120)",
@@ -79,7 +79,44 @@
     "themeUrl": "/r/theme-norte-verde.json",
     "version": 1,
     "completeness": 100,
-    "updatedAt": null
+    "updatedAt": null,
+    "ficticia": true,
+    "livro": {
+      "fonte": "ficticia",
+      "essencia": "Medir o talhão antes de decidir a safra.",
+      "descricao": "A Norte Verde mede solo, água e clima talhão por talhão e diz ao produtor o que fazer nesta semana.",
+      "tom": [
+        "direto",
+        "técnico",
+        "de campo"
+      ],
+      "voz": "Fala como agrônomo na porteira: o número primeiro, o termo técnico só quando ajuda.",
+      "faz": [
+        "Dá o número e a unidade: 12 mm até quinta",
+        "Diz o que fazer hoje em cada talhão",
+        "Mostra a data de cada medição"
+      ],
+      "naoFaz": [
+        "Promete revolução no campo",
+        "Usa sigla sem explicar",
+        "Fala do futuro do agro em vez da safra"
+      ],
+      "valoresTitulo": "Valores",
+      "valores": [
+        {
+          "nome": "Medida",
+          "texto": "Toda recomendação sai de dado do talhão, com a data da coleta ao lado."
+        },
+        {
+          "nome": "Solo",
+          "texto": "Solo bem cuidado rende nesta safra e na próxima."
+        },
+        {
+          "nome": "Presença",
+          "texto": "Agrônomo pisa na fazenda antes da primeira recomendação."
+        }
+      ]
+    }
   },
   {
     "id": "demo-grao-editora",
@@ -136,20 +173,20 @@
         "shadow": "81 30% 12%"
       },
       "dark": {
-        "background": "oklch(0.2375 0.0127 78.01)",
-        "foreground": "oklch(0.9875 0.0026 106.45)",
-        "card": "oklch(0.2877 0.0158 79.56)",
-        "card-foreground": "oklch(0.9875 0.0026 106.45)",
-        "popover": "oklch(0.2877 0.0158 79.56)",
-        "popover-foreground": "oklch(0.9875 0.0026 106.45)",
-        "muted": "oklch(0.3396 0.0138 76.4)",
-        "muted-foreground": "oklch(0.6284 0.0145 82.39)",
-        "secondary": "oklch(0.3396 0.0138 76.4)",
-        "secondary-foreground": "oklch(0.9875 0.0026 106.45)",
-        "accent": "oklch(0.3396 0.0138 76.4)",
-        "accent-foreground": "oklch(0.9875 0.0026 106.45)",
-        "border": "oklch(0.4124 0.0153 75.18)",
-        "input": "oklch(0.459 0.0142 79.72)",
+        "background": "oklch(0.2393 0.0108 60.93)",
+        "foreground": "oklch(0.9896 0.0021 17.19)",
+        "card": "oklch(0.2873 0.0127 51.67)",
+        "card-foreground": "oklch(0.9896 0.0021 17.19)",
+        "popover": "oklch(0.2873 0.0127 51.67)",
+        "popover-foreground": "oklch(0.9896 0.0021 17.19)",
+        "muted": "oklch(0.3424 0.0131 57.83)",
+        "muted-foreground": "oklch(0.6298 0.0132 51.21)",
+        "secondary": "oklch(0.3424 0.0131 57.83)",
+        "secondary-foreground": "oklch(0.9896 0.0021 17.19)",
+        "accent": "oklch(0.3424 0.0131 57.83)",
+        "accent-foreground": "oklch(0.9896 0.0021 17.19)",
+        "border": "oklch(0.4144 0.0125 57.94)",
+        "input": "oklch(0.4592 0.0132 54.26)",
         "brand": "oklch(0.7507 0.1295 79.85)",
         "brand-foreground": "oklch(0.1448 0 0)",
         "accent-ink": "oklch(0.6305 0.099 79.53)",
@@ -161,7 +198,44 @@
     "themeUrl": "/r/theme-grao-editora.json",
     "version": 1,
     "completeness": 100,
-    "updatedAt": null
+    "updatedAt": null,
+    "ficticia": true,
+    "livro": {
+      "fonte": "ficticia",
+      "essencia": "Fazer livro que dá vontade de guardar.",
+      "descricao": "A Grão Editora publica ensaio e ficção em tiragem curta, com papel encorpado, miolo costurado e capa dura.",
+      "tom": [
+        "culto",
+        "caloroso",
+        "sem pressa"
+      ],
+      "voz": "Escreve como quem indica um livro pra um amigo: conta a cena, cita a página e deixa a pessoa decidir.",
+      "faz": [
+        "Cita um trecho em vez de elogiar o autor",
+        "Diz o papel, a gramatura e a tiragem",
+        "Deixa a frase longa quando ela merece"
+      ],
+      "naoFaz": [
+        "Chama livro de conteúdo",
+        "Escreve imperdível na quarta capa",
+        "Vende com caixa alta"
+      ],
+      "valoresTitulo": "Valores",
+      "valores": [
+        {
+          "nome": "Peso",
+          "texto": "Papel, costura e capa escolhidos pra durar décadas na estante."
+        },
+        {
+          "nome": "Leitura",
+          "texto": "O editor lê cada original até o fim antes de responder ao autor."
+        },
+        {
+          "nome": "Tiragem",
+          "texto": "Cada título sai em número pequeno, e o número vem impresso no colofão."
+        }
+      ]
+    }
   },
   {
     "id": "demo-vega-noturno",
@@ -197,25 +271,25 @@
     },
     "preview": {
       "light": {
-        "background": "oklch(0.283 0.0091 285.81)",
-        "foreground": "oklch(1 0 0)",
-        "card": "oklch(0.2996 0.0107 285.73)",
-        "card-foreground": "oklch(1 0 0)",
-        "popover": "oklch(0.2996 0.0107 285.73)",
-        "popover-foreground": "oklch(1 0 0)",
-        "muted": "oklch(0.323 0.0088 285.9)",
-        "muted-foreground": "oklch(0.663 0.0032 264.54)",
-        "secondary": "oklch(0.323 0.0088 285.9)",
-        "secondary-foreground": "oklch(1 0 0)",
-        "accent": "oklch(0.323 0.0088 285.9)",
-        "accent-foreground": "oklch(1 0 0)",
-        "border": "oklch(0.3657 0.0085 285.97)",
-        "input": "oklch(0.3889 0.01 285.92)",
+        "background": "oklch(0.9627 0.0173 289.61)",
+        "foreground": "oklch(0.2322 0.0192 289.4)",
+        "card": "oklch(0.943 0.0202 292.14)",
+        "card-foreground": "oklch(0.2322 0.0192 289.4)",
+        "popover": "oklch(0.943 0.0202 292.14)",
+        "popover-foreground": "oklch(0.2322 0.0192 289.4)",
+        "muted": "oklch(0.9154 0.019 292.59)",
+        "muted-foreground": "oklch(0.5306 0.0203 292.76)",
+        "secondary": "oklch(0.9154 0.019 292.59)",
+        "secondary-foreground": "oklch(0.2322 0.0192 289.4)",
+        "accent": "oklch(0.9154 0.019 292.59)",
+        "accent-foreground": "oklch(0.2322 0.0192 289.4)",
+        "border": "oklch(0.8634 0.0193 292.56)",
+        "input": "oklch(0.8324 0.0194 292.54)",
         "brand": "oklch(0.8259 0.1499 175.31)",
         "brand-foreground": "oklch(0.1448 0 0)",
-        "accent-ink": "oklch(0.6597 0.0821 246.98)",
+        "accent-ink": "oklch(0.5547 0.2357 283.84)",
         "ring": "oklch(0.8259 0.1499 175.31)",
-        "shadow": "285 30% 12%"
+        "shadow": "292 30% 12%"
       },
       "dark": {
         "background": "oklch(0.2408 0.0115 278.01)",
@@ -243,6 +317,43 @@
     "themeUrl": "/r/theme-vega-noturno.json",
     "version": 1,
     "completeness": 100,
-    "updatedAt": null
+    "updatedAt": null,
+    "ficticia": true,
+    "livro": {
+      "fonte": "ficticia",
+      "essencia": "Fazer companhia pra quem tá acordado às três da manhã.",
+      "descricao": "A Vega Noturno é um selo de música eletrônica lenta, com sessões feitas pra tocar entre a meia-noite e o amanhecer.",
+      "tom": [
+        "baixo",
+        "íntimo",
+        "noturno"
+      ],
+      "voz": "Fala baixo, em frase curta, como locutor de rádio de madrugada.",
+      "faz": [
+        "Diz a hora e o lugar em que cada faixa foi gravada",
+        "Usa frase curta e deixa espaço entre elas",
+        "Escreve pra uma pessoa, de fone, no escuro"
+      ],
+      "naoFaz": [
+        "Usa ponto de exclamação",
+        "Chama alguém pra pista",
+        "Promete foco ou produtividade"
+      ],
+      "valoresTitulo": "Valores",
+      "valores": [
+        {
+          "nome": "Silêncio",
+          "texto": "Cada faixa deixa espaço: pouco elemento, muito ar."
+        },
+        {
+          "nome": "Companhia",
+          "texto": "A curadoria pensa em quem ouve sozinho, tarde da noite."
+        },
+        {
+          "nome": "Constância",
+          "texto": "Sessão nova toda sexta, à meia-noite."
+        }
+      ]
+    }
   }
 ]

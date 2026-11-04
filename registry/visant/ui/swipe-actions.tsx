@@ -18,6 +18,7 @@ import {
 } from "motion/react";
 import { MoreHorizontal } from "lucide-react";
 
+import { DUR } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -440,8 +441,8 @@ export function SwipeActionsRow({
     ...trailing.map((acao, i) => ({ acao, lado: "trailing" as const, i })),
   ];
   const recolher = reduzido
-    ? { opacity: 0, transition: { duration: 0.15 } }
-    : { height: 0, opacity: 0, transition: { height: { ...MOLA_LISA, delay: 0.12 }, opacity: { duration: 0.1, delay: 0.34 } } };
+    ? { opacity: 0, transition: { duration: DUR.fast } }
+    : { height: 0, opacity: 0, transition: { height: { ...MOLA_LISA, delay: 0.12 }, opacity: { duration: DUR.press, delay: 0.34 } } };
 
   return (
     <motion.li
@@ -451,7 +452,7 @@ export function SwipeActionsRow({
       // motion-lint-disable-next-line layout-property-animation  a linha entra e a lista abaixo precisa descer junto
       animate={{ height: "auto", opacity: 1 }}
       exit={recolher}
-      transition={reduzido ? { duration: 0.15 } : { height: MOLA_LISA, opacity: { duration: 0.2 } }}
+      transition={reduzido ? { duration: DUR.fast } : { height: MOLA_LISA, opacity: { duration: DUR.base } }}
     >
       {(["leading", "trailing"] as const).map((l) =>
         acoes(l).map((acao, i) => {

@@ -496,7 +496,7 @@ export function ProfileForm({
               "flex h-9 items-center gap-1.5 rounded-[var(--r-pill,9999px)] px-4",
               "bg-[var(--brand,var(--foreground))] text-[var(--brand-foreground,var(--background))]",
               "text-[length:var(--text-corpo,0.8125rem)] font-medium",
-              "transition-[opacity,box-shadow,transform] [transition-duration:var(--dur-fast,160ms)] ease-[var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+              "transition-[opacity,box-shadow,transform] [transition-duration:var(--dur-fast,160ms)] ease-[var(--ease-out)]",
               "hover:[box-shadow:var(--e-raised)] active:scale-[0.985] disabled:opacity-40",
               "focus-visible:outline-none focus-visible:[box-shadow:var(--focus,0_0_0_2px_var(--ring))]",
             )}

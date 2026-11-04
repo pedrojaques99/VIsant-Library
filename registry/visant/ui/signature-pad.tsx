@@ -6,6 +6,7 @@ import * as React from "react";
 import { AnimatePresence, animate, motion, useReducedMotion } from "motion/react";
 import { Eraser, Redo2, Undo2, X } from "lucide-react";
 
+import { DUR, EASE_OUT, INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -268,9 +269,9 @@ interface Historico {
 }
 
 // Rodo e trocas respondem a clique: dentro dos 300 ms da casa.
-const RODO = 0.3;
+const RODO = DUR.slow;
 const EM_MEIO = [0.65, 0, 0.35, 1] as const;
-const SAIDA = [0.16, 1, 0.3, 1] as const;
+const SAIDA = EASE_OUT;
 const MOLA_FORMA = { type: "spring", visualDuration: 0.3, bounce: 0.14 } as const;
 
 const nada = () => () => {};
@@ -470,7 +471,7 @@ export function SignaturePad({
                 className="absolute left-1/2 top-[72%] -translate-x-1/2 -translate-y-[calc(100%+8px)] whitespace-nowrap text-destaque text-muted-foreground"
                 initial={dicaSome}
                 animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                exit={{ ...dicaSome, transition: { duration: 0.16, ease: SAIDA } }}
+                exit={{ ...dicaSome, transition: { duration: DUR.fast, ease: SAIDA } }}
                 transition={{ duration: reduzir ? 0.12 : 0.24, ease: SAIDA }}
               >
                 {hint}
@@ -494,7 +495,7 @@ export function SignaturePad({
                   initial={hist.fresh === s.id ? false : { opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0, transition: { duration: rodando ? 0 : 0.2, ease: SAIDA } }}
-                  transition={{ duration: 0.2, ease: SAIDA }}
+                  transition={{ duration: DUR.base, ease: SAIDA }}
                 />
               ))}
             </AnimatePresence>
@@ -589,7 +590,7 @@ function Espessura({
             <motion.span
               layoutId={grupo}
               className="absolute inset-0 rounded-[inherit] border border-border bg-muted"
-              transition={reduzir ? { duration: 0 } : MOLA_FORMA}
+              transition={reduzir ? INSTANT : MOLA_FORMA}
             />
           )}
           <span

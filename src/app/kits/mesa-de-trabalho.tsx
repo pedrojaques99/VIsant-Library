@@ -545,7 +545,7 @@ function Detalhe({
         <div className="mt-2 rounded-[var(--r-control,0.5rem)] bg-[color-mix(in_oklab,var(--foreground)_4%,transparent)] p-3">
           <p className="text-apoio">
             <span className="font-medium">{TIME[1].name}</span>
-            <span className="text-muted-foreground"> · há 40 min</span>
+            <span className="text-muted-foreground">, há 40 min</span>
           </p>
           <p className="mt-1 text-apoio leading-relaxed text-foreground">
             Subi a versão com o resumo do pedido fixo no topo. Se aprovarem, fecho hoje.
@@ -564,7 +564,7 @@ function Detalhe({
         <ul className="mt-3 space-y-1.5">
           {ATIVIDADE.map((a) => (
             <li key={a.oque} className="text-micro text-muted-foreground">
-              <span className="text-foreground">{a.quem}</span> {a.oque} · {a.quando}
+              <span className="text-foreground">{a.quem}</span> {a.oque}, {a.quando}
             </li>
           ))}
         </ul>
@@ -599,7 +599,7 @@ function App() {
   const [filtro, setFiltro] = React.useState<Filtro>("todas");
   const [aberta, setAberta] = React.useState<string | null>(null);
   const [nav, setNav] = React.useState("ciclo");
-  const [ciclo, setCiclo] = React.useState("Ciclo 33 · lançamento do site");
+  const [ciclo, setCiclo] = React.useState("Ciclo 33: lançamento do site");
   const [editandoCiclo, setEditandoCiclo] = React.useState(false);
   const [rascunho, setRascunho] = React.useState(ciclo);
 
@@ -759,7 +759,7 @@ function App() {
               </InlineEdit>
             </Pecas>
             <span className="hidden text-micro tabular-nums text-muted-foreground lg:inline">
-              {prontas} de {itens.length} prontas · termina em 6 dias
+              {prontas} de {itens.length} prontas, termina em 6 dias
             </span>
             <span className="ml-auto flex items-center gap-2">
               <Pecas nomes={["expanding-search"]} canto="base-fim">

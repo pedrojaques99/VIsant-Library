@@ -3,6 +3,7 @@
 import * as React from "react";
 import { motion, useReducedMotion } from "motion/react";
 
+import { INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -146,7 +147,7 @@ export function MagneticSelect({
   }, [base, r, escala, folga, d]);
 
   const mola = reduzir
-    ? { duration: 0 }
+    ? INSTANT
     : {
         type: "spring" as const,
         stiffness: 420,

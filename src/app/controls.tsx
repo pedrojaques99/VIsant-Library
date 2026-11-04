@@ -157,7 +157,7 @@ function Chave({
       onClick={() => onChange(!valor)}
       className={cn(
         // casa-lint/pilula: interruptor é trilho; a forma redonda é o que diz que ele desliza
-        "relative h-5 w-9 shrink-0 rounded-full transition-colors",
+        "alvo-toque relative h-5 w-9 shrink-0 rounded-full transition-colors",
         "[transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
         valor ? "bg-casa-fg" : "bg-casa-tile-2",
       )}
@@ -202,12 +202,12 @@ function Numero({
       step={step}
       onValueChange={([v]) => onChange(v)}
       aria-label={controle.prop}
-      className="group/barra relative flex h-10 w-full cursor-ew-resize touch-none select-none items-center overflow-hidden rounded-control bg-casa-tile-2"
+      className="group/barra relative flex h-10 w-full cursor-ew-resize touch-pan-y select-none pointer-coarse:h-11 items-center overflow-hidden rounded-control bg-casa-tile-2"
     >
       <SliderPrimitive.Track className="absolute inset-0">
         <SliderPrimitive.Range className="absolute inset-y-0 bg-[color-mix(in_oklch,var(--casa-fg)_14%,transparent)]" />
       </SliderPrimitive.Track>
-      <SliderPrimitive.Thumb className="block h-10 w-0.5 bg-casa-fg-3 outline-none transition-colors [transition-duration:var(--dur-fast)] group-hover/barra:bg-casa-fg-2 focus-visible:bg-casa-fg" />
+      <SliderPrimitive.Thumb className="block h-10 w-0.5 pointer-coarse:h-11 bg-casa-fg-3 outline-none transition-colors [transition-duration:var(--dur-fast)] group-hover/barra:bg-casa-fg-2 focus-visible:bg-casa-fg" />
       <span className="pointer-events-none absolute inset-x-3 flex items-center justify-between gap-3">
         <Rotulo controle={controle} mexido={mexido} />
         <span className="shrink-0 text-casa-base tabular-nums text-casa-fg">
@@ -240,7 +240,7 @@ function Escolha({
         options={valores.map((v) => ({ value: v, label: v }))}
         size="sm"
         aria-label={controle.prop}
-        className="min-w-0"
+        className="min-w-0 pointer-coarse:[&_button]:min-w-11"
       />
     );
   }
@@ -250,7 +250,7 @@ function Escolha({
       value={valor}
       onChange={(e) => onChange(e.target.value)}
       aria-label={controle.prop}
-      className="h-8 min-w-0 max-w-[60%] rounded-control bg-casa-tile-2 px-2.5 text-casa-sm text-casa-fg"
+      className="h-8 min-w-0 max-w-[60%] rounded-control bg-casa-tile-2 px-2.5 text-casa-sm text-casa-fg pointer-coarse:h-11"
     >
       {valores.map((v) => (
         <option key={v} value={v}>
@@ -277,7 +277,7 @@ function Texto({
       onChange={(e) => onChange(e.target.value)}
       onFocus={(e) => e.target.select()}
       aria-label={controle.prop}
-      className="h-8 w-28 min-w-0 shrink-0 rounded-control bg-casa-tile-2 px-2.5 text-casa-sm text-casa-fg"
+      className="h-8 w-28 min-w-0 shrink-0 rounded-control bg-casa-tile-2 px-2.5 text-casa-sm text-casa-fg pointer-coarse:h-11 pointer-coarse:w-44"
     />
   );
 }
@@ -384,7 +384,7 @@ export function Customize({
               onClick={() => aplicar(p.props)}
               aria-pressed={presetAtivo?.nome === p.nome}
               className={cn(
-                "rounded-control text-casa-base transition-colors",
+                "rounded-control text-casa-base transition-colors pointer-coarse:min-h-11 pointer-coarse:min-w-11",
                 "[transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
                 presetAtivo?.nome === p.nome ? "text-casa-fg" : "text-casa-fg-2 hover:text-casa-fg",
               )}
@@ -418,7 +418,7 @@ export function Customize({
         <button
           type="button"
           onClick={() => setAbertoExtra((v) => !v)}
-          className="self-start rounded-control py-1 text-casa-sm text-casa-fg-2 transition-colors [transition-duration:var(--dur-fast)] hover:text-casa-fg"
+          className="self-start rounded-control py-1 text-casa-sm text-casa-fg-2 transition-colors [transition-duration:var(--dur-fast)] hover:text-casa-fg pointer-coarse:min-h-11"
         >
           {abertoExtra ? "Menos controles" : `Mais ${extras.length} controles`}
         </button>

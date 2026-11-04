@@ -11,6 +11,7 @@ import {
   useTransform,
 } from "motion/react";
 
+import { DUR } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { onThemeChange, resolveCssColor } from "@/lib/css-color";
 
@@ -428,7 +429,7 @@ export function EyeTracker({
     let timer = 0;
     const agendar = () => {
       timer = window.setTimeout(() => {
-        animate(palpebra, [1, 0.1, 1], { duration: 0.16, times: [0, 0.4, 1], ease: "easeInOut" });
+        animate(palpebra, [1, 0.1, 1], { duration: DUR.fast, times: [0, 0.4, 1], ease: "easeInOut" });
         agendar();
       }, 2500 + Math.random() * 3000);
     };
@@ -470,9 +471,9 @@ export function EyeTracker({
   React.useEffect(() => {
     if (!falando) return;
     if (reduzido) return;
-    animate(palpebra, 0.45, { duration: 0.18, ease: "easeOut" });
+    animate(palpebra, 0.45, { duration: DUR.fast, ease: "easeOut" });
     return () => {
-      animate(palpebra, 1, { duration: 0.18, ease: "easeOut" });
+      animate(palpebra, 1, { duration: DUR.fast, ease: "easeOut" });
     };
   }, [falando, reduzido, palpebra]);
 
@@ -579,8 +580,8 @@ export function EyeTracker({
             className="pointer-events-none absolute left-[78%] top-[72%] whitespace-nowrap rounded-[var(--r-pill)] bg-[var(--brand)] px-3 py-1 text-xs font-medium text-[var(--brand-foreground)] [box-shadow:var(--e-raised)]"
             initial={reduzido ? { opacity: 0 } : { opacity: 0, scale: 0.6, y: -4 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, transition: { duration: 0.16 } }}
-            transition={reduzido ? { duration: 0.16 } : { type: "spring", visualDuration: 0.25, bounce: 0.3 }}
+            exit={{ opacity: 0, transition: { duration: DUR.fast } }}
+            transition={reduzido ? { duration: DUR.fast } : { type: "spring", visualDuration: 0.25, bounce: 0.3 }}
             style={{ transformOrigin: "0% 0%" }}
           >
             {escrito || " "}

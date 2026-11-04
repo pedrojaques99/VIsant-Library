@@ -1,76 +1,80 @@
 "use client";
 
 /**
- * visant-design (a porta) e visant-frontend (o teste do corte).
- * As rotas e as etapas são as da tabela do SKILL.md de cada uma.
+ * visant-design (a porta) e visant-frontend (o teste do corte). Rotas e etapas da
+ * tabela do SKILL.md de cada uma. Ao nascer, só a fala e o destino, e só a tela.
  */
 
 import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { ArrowDown } from "lucide-react";
 import { PROVA_MONTADA, SELO_MONTADO } from "./amostras";
-import { Acao, ANIMA_COR, cx, DUR, EASE_OUT, Opcao, useMenosMovimento, useSequencia } from "./base";
+import { Acao, cx, Dobra, DUR, EASE_OUT, useAoEntrar, useMenosMovimento, useNaTela, useSequencia } from "./base";
 
 const ROTAS = [
-  {
-    fala: "tá com cara de IA, limpa o slop",
-    trilha: "Limpar",
-    etapas: ["Roda o check.mjs na tela", "Conserta cada achado na causa", "Lê as imagens e tira o que detector não vê", "Roda de novo até sair limpo"],
-  },
-  {
-    fala: "melhora o design dessa tela",
-    trilha: "Ponta a ponta",
-    etapas: ["Vê a tela antes do código", "Nomeia o trabalho da tela", "Diagnostica pela imagem", "Corta antes de somar", "Constrói com o que o produto já tem", "Olha o resultado, até três rodadas", "Relata o que não checou"],
-  },
-  {
-    fala: "audita essa tela",
-    trilha: "visant-killer",
-    etapas: ["Auditoria: não muda nada"],
-  },
-  {
-    fala: "deixa essa animação mais suave",
-    trilha: "visant-motion",
-    etapas: ["Um assunto só: carrega o manual de motion"],
-  },
-  {
-    fala: "faz um gráfico pra esse painel",
-    trilha: "visant-refine",
-    etapas: ["Um assunto só: carrega o manual de dado e controle"],
-  },
+  { fala: "tá com cara de IA, limpa o slop", trilha: "Limpar", etapas: ["Roda o check.mjs na tela", "Conserta cada achado na causa", "Lê as imagens e tira o que detector não vê", "Roda de novo até sair limpo"] },
+  { fala: "melhora o design dessa tela", trilha: "Ponta a ponta", etapas: ["Vê a tela antes do código", "Nomeia o trabalho da tela", "Diagnostica pela imagem", "Corta antes de somar", "Constrói com o que o produto já tem", "Olha o resultado, até três rodadas", "Relata o que não checou"] },
+  { fala: "audita essa tela", trilha: "visant-killer", etapas: ["Audita e não muda nada"] },
+  { fala: "deixa essa animação mais suave", trilha: "visant-motion", etapas: ["Carrega o manual de motion"] },
+  { fala: "faz um gráfico pra esse painel", trilha: "visant-refine", etapas: ["Carrega o manual de dado e controle"] },
 ];
 
 export function DemoDesign() {
-  const [i, setI] = React.useState(1);
+  const [i, setI] = React.useState(0);
+  const [mao, setMao] = React.useState(false);
+  const [palco, naTela] = useNaTela<HTMLButtonElement>();
+  const menos = useMenosMovimento();
   const rota = ROTAS[i];
+
+  React.useEffect(() => {
+    if (!naTela || mao || menos) return;
+    const id = setInterval(() => setI((n) => (n + 1) % ROTAS.length), 2400);
+    return () => clearInterval(id);
+  }, [naTela, mao, menos]);
+
   return (
-    <div className="grid min-w-0 gap-6 md:grid-cols-2" data-demo="design">
-      <ul>
-        {ROTAS.map((r, n) => (
-          <li key={r.fala}>
-            <Opcao ativa={n === i} onClick={() => setI(n)} className="w-full" data-rota={n}>
-              {r.fala}
-            </Opcao>
-          </li>
-        ))}
-      </ul>
-      <div className="min-w-0 border-t border-casa-line pt-4 md:border-l md:border-t-0 md:pl-6 md:pt-2" aria-live="polite">
-        <p className="font-casa-mono text-casa-sm text-casa-fg" data-trilha>
-          {rota.trilha}
-        </p>
-        <ol className="mt-2 text-casa-base text-casa-fg-2">
-          {rota.etapas.map((e, n) => (
-            <motion.li
-              key={`${i}-${e}`}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: DUR.base, ease: EASE_OUT, delay: Math.min(n * 0.04, 0.24) }}
-              className="py-0.5"
-            >
-              {e}
-            </motion.li>
-          ))}
-        </ol>
-      </div>
-    </div>
+    <Dobra
+      nome="visant-design"
+      como={
+        <>
+          <p>Comece por aqui. Fala do seu jeito e ela escolhe o caminho. Neste pedido, o caminho é:</p>
+          <ol className="mt-2 list-inside list-decimal text-casa-fg-2">
+            {rota.etapas.map((e) => (
+              <li key={e}>{e}</li>
+            ))}
+          </ol>
+        </>
+      }
+    >
+      <button
+        ref={palco}
+        type="button"
+        data-demo="design"
+        aria-label={`Pedido: ${rota.fala}. Caminho: ${rota.trilha}. Tocar para o próximo.`}
+        onClick={() => {
+          setMao(true);
+          setI((n) => (n + 1) % ROTAS.length);
+        }}
+        className="flex min-h-[20rem] w-full flex-col justify-center gap-5 rounded-tile bg-casa-tile p-6 text-left outline-none focus-visible:[box-shadow:var(--focus)] lg:min-h-[26rem] lg:items-center lg:p-12 lg:text-center"
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={i}
+            initial={menos ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={menos ? undefined : { opacity: 0 }}
+            transition={{ duration: DUR.base, ease: EASE_OUT }}
+            className="flex flex-col gap-5 lg:items-center"
+          >
+            <span className="text-[clamp(2rem,5vw,4rem)] font-medium leading-[1.12] tracking-[-0.02em]">{rota.fala}</span>
+            <ArrowDown className="size-5 text-casa-fg-3" aria-hidden="true" />
+            <span className="w-fit rounded-control bg-casa-tile-2 px-3 py-2 font-casa-mono text-casa-sm" data-trilha>
+              {rota.trilha}
+            </span>
+          </motion.span>
+        </AnimatePresence>
+      </button>
+    </Dobra>
   );
 }
 
@@ -79,15 +83,14 @@ export function DemoDesign() {
 const ELEMENTOS = [
   { id: "selo", nome: "Selo de novidade", variavel: null },
   { id: "titulo", nome: "Título com a tarefa", variavel: "cadastro" },
-  { id: "tela", nome: "Tela do produto", variavel: "ativação" },
   { id: "cta", nome: "Uma ação primária", variavel: "cadastro" },
   { id: "saiba", nome: "Segundo botão igual", variavel: null },
   { id: "prova", nome: "Número sem fonte", variavel: null },
+  { id: "tela", nome: "Tela do produto", variavel: "ativação" },
 ] as const;
-
 type Elem = (typeof ELEMENTOS)[number]["id"];
 
-export function DemoFrontend({ cabeca }: { cabeca: React.ReactNode }) {
+export function DemoFrontend() {
   const [cortados, setCortados] = React.useState<Set<Elem>>(new Set());
   const [olhando, setOlhando] = React.useState<Elem | null>(null);
   const seq = useSequencia();
@@ -96,118 +99,115 @@ export function DemoFrontend({ cabeca }: { cabeca: React.ReactNode }) {
 
   const rodar = () => {
     seq.limpar();
-    if (fim) {
-      setCortados(new Set());
-      setOlhando(null);
-      return;
-    }
     setCortados(new Set());
-    if (menos) {
-      setCortados(new Set(ELEMENTOS.filter((e) => !e.variavel).map((e) => e.id)));
-      return;
-    }
+    if (menos) return setCortados(new Set(ELEMENTOS.filter((e) => !e.variavel).map((e) => e.id)));
     ELEMENTOS.forEach((e, i) => {
-      seq.depois(i * 500, () => setOlhando(e.id));
-      if (!e.variavel) seq.depois(i * 500 + 300, () => setCortados((s) => new Set(s).add(e.id)));
+      seq.depois(500 + i * 650, () => setOlhando(e.id));
+      if (!e.variavel) seq.depois(500 + i * 650 + 450, () => setCortados((s) => new Set(s).add(e.id)));
     });
-    seq.depois(ELEMENTOS.length * 500, () => setOlhando(null));
+    seq.depois(500 + ELEMENTOS.length * 650, () => setOlhando(null));
+  };
+  const palco = useAoEntrar<HTMLDivElement>(rodar);
+
+  /* Tocar no elemento pergunta a variável. Sem variável, ele sai. */
+  const tocar = (id: Elem) => {
+    seq.limpar();
+    setOlhando(id);
+    const e = ELEMENTOS.find((x) => x.id === id);
+    if (e && !e.variavel) setCortados((s) => new Set(s).add(id));
   };
 
-  const vivo = (id: Elem) => !cortados.has(id);
-  const realce = (id: Elem) => olhando === id && "[box-shadow:0_0_0_2px_var(--casa-fg)]";
   const saida = { duration: DUR.base, ease: EASE_OUT };
+  const vivo = (id: Elem) => !cortados.has(id);
+  const realce = (id: Elem) => cx("relative rounded-[6px] text-left outline-none focus-visible:[box-shadow:var(--focus)]", olhando === id && "[box-shadow:0_0_0_2px_var(--casa-fg)]");
+  const Etiqueta = ({ id }: { id: Elem }) => {
+    if (olhando !== id) return null;
+    const v = ELEMENTOS.find((x) => x.id === id)?.variavel;
+    return (
+      <span data-etiqueta={id} className="absolute -top-2 right-0 z-10 rounded-[4px] bg-casa-fg px-1.5 font-casa-mono text-casa-sm text-casa-bg">
+        {v ?? "nenhuma"}
+      </span>
+    );
+  };
 
   return (
-    <div className="grid min-w-0 gap-6 lg:grid-cols-2 lg:gap-12" data-demo="frontend">
-      <div className="flex min-w-0 flex-col rounded-tile bg-casa-tile p-5 sm:p-8 order-2">
-        <motion.div layout={!menos} transition={saida} className="flex min-h-0 flex-1 flex-col">
+    <Dobra
+      nome="visant-frontend"
+      como={
+        <>
+          <p>Todo elemento precisa dizer que número do negócio ele mexe. Se não souber dizer, sai da tela. Toca num elemento pra perguntar.</p>
+          <table className="mt-2 w-full text-casa-sm">
+            <tbody>
+              {ELEMENTOS.map((e) => (
+                <tr key={e.id} className="border-t border-casa-line">
+                  <td className={cx("py-1.5 pr-2", cortados.has(e.id) && "text-casa-fg-3 line-through")}>{e.nome}</td>
+                  <td className="py-1.5 font-casa-mono">{e.variavel ?? "nenhuma"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      }
+    >
+      <div ref={palco} className="flex min-w-0 flex-col gap-3 lg:mx-auto lg:w-full lg:max-w-3xl" data-demo="frontend">
+        <motion.div layout={!menos} transition={saida} className="flex min-h-[19rem] flex-col rounded-tile bg-casa-tile p-4 lg:min-h-[21rem] lg:p-10">
           <AnimatePresence initial={false} mode="popLayout">
             {vivo("selo") ? (
-              <motion.span
-                key="selo"
-                layout={!menos}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={saida}
-                className={cx("mb-3 inline-block self-start rounded-[6px] bg-casa-tile-2 px-2 py-1 text-casa-sm", realce("selo"))}
-              >
+              <motion.button key="selo" type="button" layout={!menos} exit={{ opacity: 0, scale: 0.95 }} transition={saida} onClick={() => tocar("selo")} data-elem="selo" className={cx("mb-3 min-h-11 self-start bg-casa-tile-2 px-3 text-casa-sm", realce("selo"))}>
                 {SELO_MONTADO}
-              </motion.span>
+                <Etiqueta id="selo" />
+              </motion.button>
             ) : null}
           </AnimatePresence>
-          <motion.p layout={!menos} transition={saida} className={cx("rounded-[4px] text-[clamp(1.75rem,3.2vw,3rem)] font-medium leading-[1.12] tracking-[-0.02em]", realce("titulo"))}>
+          <motion.button type="button" layout={!menos} transition={saida} onClick={() => tocar("titulo")} data-elem="titulo" className={cx("text-[clamp(1.75rem,4vw,3rem)] font-medium leading-[1.12] tracking-[-0.02em]", realce("titulo"))}>
             Marque revisão sem trocar dez e-mails
-          </motion.p>
+            <Etiqueta id="titulo" />
+          </motion.button>
           <motion.div layout={!menos} transition={saida} className="mt-4 flex flex-wrap items-center gap-2">
-            <span className={cx("inline-flex h-9 items-center rounded-control bg-casa-cta px-3.5 text-casa-base text-casa-cta-fg", realce("cta"))}>
-              Criar minha agenda
-            </span>
+            <button type="button" onClick={() => tocar("cta")} data-elem="cta" className={cx("h-11 bg-casa-cta px-3.5 text-casa-base text-casa-cta-fg", realce("cta"))}>
+              Criar agenda
+              <Etiqueta id="cta" />
+            </button>
             <AnimatePresence initial={false} mode="popLayout">
               {vivo("saiba") ? (
-                <motion.span
-                  key="saiba"
-                  layout={!menos}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={saida}
-                  className={cx("inline-flex h-9 items-center rounded-control bg-casa-cta px-3.5 text-casa-base text-casa-cta-fg", realce("saiba"))}
-                >
+                <motion.button key="saiba" type="button" layout={!menos} exit={{ opacity: 0, scale: 0.95 }} transition={saida} onClick={() => tocar("saiba")} data-elem="saiba" className={cx("h-11 bg-casa-cta px-3.5 text-casa-base text-casa-cta-fg", realce("saiba"))}>
                   Saiba mais
-                </motion.span>
+                  <Etiqueta id="saiba" />
+                </motion.button>
               ) : null}
             </AnimatePresence>
             <AnimatePresence initial={false} mode="popLayout">
               {vivo("prova") ? (
-                <motion.span
-                  key="prova"
-                  layout={!menos}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={saida}
-                  className={cx("rounded-[4px] px-1 text-casa-sm text-casa-fg-2", realce("prova"))}
-                >
+                <motion.button key="prova" type="button" layout={!menos} exit={{ opacity: 0, scale: 0.95 }} transition={saida} onClick={() => tocar("prova")} data-elem="prova" className={cx("min-h-11 px-2 text-casa-sm text-casa-fg-2", realce("prova"))}>
                   {PROVA_MONTADA}
-                </motion.span>
+                  <Etiqueta id="prova" />
+                </motion.button>
               ) : null}
             </AnimatePresence>
           </motion.div>
-          <motion.div
+          <motion.button
+            type="button"
             layout={!menos}
             transition={saida}
-            className={cx("mt-6 grid min-h-32 flex-1 grid-cols-7 gap-1 rounded-control bg-casa-tile-2 p-2", realce("tela"))}
-            aria-hidden="true"
+            onClick={() => tocar("tela")}
+            data-elem="tela"
+            aria-label="Tela do produto"
+            className={cx("mt-4 grid min-h-16 flex-1 grid-cols-7 gap-1 bg-casa-tile-2 p-2", realce("tela"))}
           >
             {Array.from({ length: 7 }, (_, d) => (
               <span key={d} className="rounded-[4px] bg-casa-bg">
                 {d % 3 === 1 ? <span className="mx-1 mt-3 block h-3 rounded-[3px] bg-casa-fg-3" /> : null}
               </span>
             ))}
-          </motion.div>
+            <Etiqueta id="tela" />
+          </motion.button>
         </motion.div>
+        <div className="flex justify-end">
+          <Acao onClick={rodar} data-acao="frontend">
+            {fim ? "De novo" : "Cortar"}
+          </Acao>
+        </div>
       </div>
-
-      <div className="min-w-0 order-1">
-      {cabeca}
-      <table className="mt-6 w-full border-collapse text-casa-base">
-        <caption className="sr-only">Cada elemento e a variável de negócio que ele move</caption>
-        <thead>
-          <tr className="text-left text-casa-sm text-casa-fg-3">
-            <th scope="col" className="pb-2 font-normal">Elemento</th>
-            <th scope="col" className="pb-2 font-normal">Variável que move</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ELEMENTOS.map((e) => (
-            <tr key={e.id} data-elem={e.id} className={cx("border-t border-casa-line", ANIMA_COR, cortados.has(e.id) && "text-casa-fg-3")}>
-              <td className={cx("py-2 pr-3", cortados.has(e.id) && "line-through")}>{e.nome}</td>
-              <td className="py-2 font-casa-mono text-casa-sm">{e.variavel ?? (cortados.has(e.id) ? "nenhuma: saiu" : "nenhuma")}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="mt-4">
-        <Acao onClick={rodar} data-acao="frontend">
-          {fim ? "Devolver os três" : "Rodar o teste do corte"}
-        </Acao>
-      </div>
-      </div>
-    </div>
+    </Dobra>
   );
 }

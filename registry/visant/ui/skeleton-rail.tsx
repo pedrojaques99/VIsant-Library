@@ -80,6 +80,10 @@ import { cn } from "@/lib/utils";
  * deixa a linha visivelmente curta e denuncia que aquilo não é o conteúdo.
  */
 
+// Ciclo de espera em laço, não transição: mais curto que isto vira pisca-pisca.
+const CICLO_ONDA_MS = 1400;
+const CICLO_BRILHO_MS = 1500;
+
 /* ── o movimento da espera ─────────────────────────────────────────────── */
 
 /**
@@ -132,7 +136,7 @@ function Bloco({
       if (!el?.animate) return;
       // Defasagem maior que a do pulse: é ela que faz a respiração descer.
       const a = el.animate([{ opacity: 1 }, { opacity: 0.35, offset: 0.5 }, { opacity: 1 }], {
-        duration: 1400,
+        duration: CICLO_ONDA_MS,
         delay: delay * 2,
         iterations: Infinity,
         easing: "ease-in-out",
@@ -143,7 +147,7 @@ function Bloco({
       const el = faixa.current;
       if (!el?.animate) return;
       const a = el.animate([{ transform: "translateX(-100%)" }, { transform: "translateX(100%)" }], {
-        duration: 1500,
+        duration: CICLO_BRILHO_MS,
         delay,
         iterations: Infinity,
         easing: "ease-in-out",

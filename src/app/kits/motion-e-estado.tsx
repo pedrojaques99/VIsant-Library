@@ -80,10 +80,10 @@ function Referencia() {
     >
       <div
         className="grid size-full place-items-center rounded-[var(--r-control,0.5rem)] border border-dashed border-border text-muted-foreground"
-        title="Arraste uma imagem de referência"
+        title="Imagem de referência"
       >
         <ImagePlus className="h-4 w-4" aria-hidden="true" />
-        <span className="sr-only">Arraste uma imagem de referência</span>
+        <span className="sr-only">Imagem de referência</span>
       </div>
       <DropOverlay visible={sobre} message="Solte aqui" />
     </div>
@@ -162,6 +162,7 @@ function Grade({ fase, ativo, ciclo }: { fase: Fase; ativo: boolean; ciclo: numb
               radius="var(--r-control, 0.5rem)"
               motion={ativo ? "shimmer" : "none"}
               label={i === 0 ? "Gerando as imagens" : false}
+              // EXCEPTION to noise-scan/stagger-by-index: defasa o brilho do shimmer entre os tiles, nenhum item entra em escada
               delay={i * 120}
             />
           ))}

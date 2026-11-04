@@ -6,6 +6,7 @@ import * as React from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, type Transition } from "motion/react";
 import { ChevronDown } from "lucide-react";
 
+import { DUR, EASE_OUT, INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -51,9 +52,9 @@ export interface ExpandableCardProps
 
 // A mola "lisa" da casa: assenta sem passar do ponto, então nada quica no fechar.
 const mola: Transition = { type: "spring", visualDuration: 0.3, bounce: 0 };
-const parado: Transition = { duration: 0 };
+const parado: Transition = INSTANT;
 const conteudo = (aberto: boolean): Transition =>
-  aberto ? { duration: 0.2, ease: [0.23, 1, 0.32, 1], delay: 0.12 } : { duration: 0.1, ease: [0.23, 1, 0.32, 1] };
+  aberto ? { duration: DUR.base, ease: EASE_OUT, delay: 0.12 } : { duration: DUR.press, ease: EASE_OUT };
 
 function Rolante({ texto, reduce }: { texto: string; reduce: boolean }) {
   return (
@@ -66,8 +67,8 @@ function Rolante({ texto, reduce }: { texto: string; reduce: boolean }) {
               key={`${i}:${palavra}`}
               className="inline-block whitespace-pre"
               initial={reduce ? false : { opacity: 0, y: "0.35em" }}
-              animate={{ opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.23, 1, 0.32, 1] } }}
-              exit={reduce ? undefined : { opacity: 0, y: "-0.3em", transition: { duration: 0.16 } }}
+              animate={{ opacity: 1, y: 0, transition: { duration: DUR.base, ease: EASE_OUT } }}
+              exit={reduce ? undefined : { opacity: 0, y: "-0.3em", transition: { duration: DUR.fast } }}
             >
               {palavra}
             </motion.span>

@@ -12,6 +12,7 @@ import {
 } from "motion/react";
 import { Pause, Play, X } from "lucide-react";
 
+import { DUR, EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -186,7 +187,7 @@ export function VoiceNote({
               initial={reduzido ? { opacity: 0 } : { opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={reduzido ? { opacity: 0 } : { opacity: 0, scale: 0.5 }}
-              transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+              transition={{ duration: DUR.fast, ease: EASE_OUT }}
             >
               {tocando ? (
                 <Pause className="size-4" fill="currentColor" strokeWidth={0} />

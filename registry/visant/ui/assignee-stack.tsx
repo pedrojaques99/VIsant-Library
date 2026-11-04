@@ -209,7 +209,7 @@ export function AssigneeStack({
               // A abertura: cada círculo anda o suficiente para desfazer a
               // sobreposição, e quem está mais à ESQUERDA anda mais — ver a
               // nota sobre a direção.
-              "transition-transform [transition-duration:var(--dur-base,200ms)] ease-[var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+              "transition-transform [transition-duration:var(--dur-base,200ms)] ease-[var(--ease-out)]",
               "group-hover/pilha:translate-x-[var(--abre)] group-focus-within/pilha:translate-x-[var(--abre)]",
               // Quem está sob o cursor sobe na pilha para o rosto não ficar
               // cortado pelo vizinho.
@@ -247,7 +247,7 @@ export function AssigneeStack({
               s.box,
               s.text,
               "relative z-10 flex shrink-0 items-center justify-center rounded-full bg-muted font-semibold text-muted-foreground ring-2 ring-card",
-              "transition-[transform,color,background-color] [transition-duration:var(--dur-base,200ms)] ease-[var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+              "transition-[transform,color,background-color] [transition-duration:var(--dur-base,200ms)] ease-[var(--ease-out)]",
               "group-hover/pilha:translate-x-[var(--abre)] group-focus-within/pilha:translate-x-[var(--abre)]",
               "hover:bg-muted hover:text-foreground focus-visible:text-foreground",
             )}
@@ -272,7 +272,7 @@ export function AssigneeStack({
         aria-hidden="true"
         className={cn(
           "pointer-events-none absolute right-0 top-full z-30 mt-1 max-w-[14rem] truncate whitespace-nowrap rounded-[var(--r-control,0.5rem)] border border-border bg-card px-1.5 py-0.5 text-[11px] leading-tight text-foreground",
-          "transition-opacity [transition-duration:var(--dur-fast,160ms)] ease-[var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+          "transition-opacity [transition-duration:var(--dur-fast,160ms)] ease-[var(--ease-out)]",
           shown ? "opacity-100" : "opacity-0",
         )}
       >

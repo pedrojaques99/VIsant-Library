@@ -113,7 +113,7 @@ export function StepCards({
               // Sem `active` a fileira é a de sempre: nem transição, nem recuo.
               marcado && [
                 "transition-opacity [transition-duration:var(--dur-base,240ms)]",
-                "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+                "[transition-timing-function:var(--ease-out)]",
                 "motion-reduce:transition-none",
                 // O ponteiro devolve o passo recuado: recuo é hierarquia, não
                 // porta trancada.
@@ -142,7 +142,7 @@ export function StepCards({
                 <span
                   className={cn(
                     "absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 origin-left bg-[var(--brand,var(--foreground))]",
-                    "transition-transform [transition-duration:var(--dur-slow,300ms)] [transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+                    "transition-transform [transition-duration:var(--dur-slow,300ms)] [transition-timing-function:var(--ease-out)]",
                     "motion-reduce:transition-none",
                     ativo ? "scale-x-100" : "scale-x-0",
                   )}

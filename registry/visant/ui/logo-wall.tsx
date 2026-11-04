@@ -201,7 +201,7 @@ function Logo({
         // Só o que muda, nunca `transition-all`: filtro e opacidade arrastariam
         // layout junto se a lista fosse ampla demais.
         "transition-[filter,opacity,color] [transition-duration:var(--dur-fast,140ms)]",
-        "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+        "[transition-timing-function:var(--ease-out)]",
         "motion-reduce:transition-none",
         finish === "grayscale" && [
           "grayscale opacity-55",

@@ -14,6 +14,7 @@ import {
   useTransform,
 } from "motion/react";
 
+import { DUR, EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -212,7 +213,7 @@ export function Gauge({
                   initial={reduzir ? { opacity: 0 } : { opacity: 0, y: "0.4em" }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={reduzir ? { opacity: 0 } : { opacity: 0, y: "-0.4em" }}
-                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: DUR.base, ease: EASE_OUT }}
                 >
                   {(cheio || reduzir) && faixa && (
                     <>

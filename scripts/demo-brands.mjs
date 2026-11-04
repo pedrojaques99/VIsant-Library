@@ -49,6 +49,25 @@ const DEMOS = [
     ],
     currentVersion: 1,
     extraction: { completeness: 100 },
+    livro: {
+      essencia: "Medir o talhão antes de decidir a safra.",
+      descricao:
+        "A Norte Verde mede solo, água e clima talhão por talhão e diz ao produtor o que fazer nesta semana.",
+      tom: ["direto", "técnico", "de campo"],
+      voz: "Fala como agrônomo na porteira: o número primeiro, o termo técnico só quando ajuda.",
+      faz: [
+        "Dá o número e a unidade: 12 mm até quinta",
+        "Diz o que fazer hoje em cada talhão",
+        "Mostra a data de cada medição",
+      ],
+      naoFaz: ["Promete revolução no campo", "Usa sigla sem explicar", "Fala do futuro do agro em vez da safra"],
+      valoresTitulo: "Valores",
+      valores: [
+        { nome: "Medida", texto: "Toda recomendação sai de dado do talhão, com a data da coleta ao lado." },
+        { nome: "Solo", texto: "Solo bem cuidado rende nesta safra e na próxima." },
+        { nome: "Presença", texto: "Agrônomo pisa na fazenda antes da primeira recomendação." },
+      ],
+    },
   },
   {
     id: "demo-grao-editora",
@@ -66,6 +85,25 @@ const DEMOS = [
     ],
     currentVersion: 1,
     extraction: { completeness: 100 },
+    livro: {
+      essencia: "Fazer livro que dá vontade de guardar.",
+      descricao:
+        "A Grão Editora publica ensaio e ficção em tiragem curta, com papel encorpado, miolo costurado e capa dura.",
+      tom: ["culto", "caloroso", "sem pressa"],
+      voz: "Escreve como quem indica um livro pra um amigo: conta a cena, cita a página e deixa a pessoa decidir.",
+      faz: [
+        "Cita um trecho em vez de elogiar o autor",
+        "Diz o papel, a gramatura e a tiragem",
+        "Deixa a frase longa quando ela merece",
+      ],
+      naoFaz: ["Chama livro de conteúdo", "Escreve imperdível na quarta capa", "Vende com caixa alta"],
+      valoresTitulo: "Valores",
+      valores: [
+        { nome: "Peso", texto: "Papel, costura e capa escolhidos pra durar décadas na estante." },
+        { nome: "Leitura", texto: "O editor lê cada original até o fim antes de responder ao autor." },
+        { nome: "Tiragem", texto: "Cada título sai em número pequeno, e o número vem impresso no colofão." },
+      ],
+    },
   },
   {
     id: "demo-vega-noturno",
@@ -83,6 +121,25 @@ const DEMOS = [
     ],
     currentVersion: 1,
     extraction: { completeness: 100 },
+    livro: {
+      essencia: "Fazer companhia pra quem tá acordado às três da manhã.",
+      descricao:
+        "A Vega Noturno é um selo de música eletrônica lenta, com sessões feitas pra tocar entre a meia-noite e o amanhecer.",
+      tom: ["baixo", "íntimo", "noturno"],
+      voz: "Fala baixo, em frase curta, como locutor de rádio de madrugada.",
+      faz: [
+        "Diz a hora e o lugar em que cada faixa foi gravada",
+        "Usa frase curta e deixa espaço entre elas",
+        "Escreve pra uma pessoa, de fone, no escuro",
+      ],
+      naoFaz: ["Usa ponto de exclamação", "Chama alguém pra pista", "Promete foco ou produtividade"],
+      valoresTitulo: "Valores",
+      valores: [
+        { nome: "Silêncio", texto: "Cada faixa deixa espaço: pouco elemento, muito ar." },
+        { nome: "Companhia", texto: "A curadoria pensa em quem ouve sozinho, tarde da noite." },
+        { nome: "Constância", texto: "Sessão nova toda sexta, à meia-noite." },
+      ],
+    },
   },
 ];
 
@@ -114,6 +171,9 @@ for (const brand of DEMOS) {
     version: brand.currentVersion,
     completeness: brand.extraction.completeness,
     updatedAt: null,
+    // Ficção assumida: a página lê este selo e avisa em uma linha.
+    ficticia: true,
+    livro: { fonte: "ficticia", ...brand.livro },
   });
   console.log(`  ${brand.name} → ${item.name}.json`);
 }

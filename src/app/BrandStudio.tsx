@@ -16,7 +16,7 @@
  */
 
 import * as React from "react";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, X } from "lucide-react";
 import {
   fetchBrandTheme,
   useBrandTheme,
@@ -31,11 +31,13 @@ import { ProfileForm, type ProfileValue } from "../../registry/visant/ui/profile
 import { SearchField } from "../../registry/visant/ui/search-field";
 import { SegmentedControl } from "../../registry/visant/ui/segmented-control";
 import { fold } from "./catalog";
+import { ehToque } from "./casa-ui";
 import { Codigo } from "./codigo";
 import { CopyCommand, useCopy } from "./copy-command";
 import { Trocador, useUmPorVez } from "./demos/um-por-vez";
 import {
   NOMES_VIVOS,
+  ROTULOS_DA_MENSAGEM,
   TOKENS_DE_COR,
   alvoDaPaleta,
   buscar,
@@ -43,15 +45,17 @@ import {
   exportarJson,
   exportarTailwind,
   formatarRazao,
+  fundoDoLogo,
   grau,
   indiceDaBusca,
+  livroDa,
   nomeDa,
   papelDa,
   paresDaPaleta,
   razao,
+  type LivroDaMarca,
   type Modo,
-  type Resultado,
-} from "./marca/tokens";
+  type Resultado, cssDoPar } from "./marca/tokens";
 import { DEFAULT_BRAND, REGISTRY_URL, installCommand } from "./registry-meta";
 
 // --- o sistema, como dado -----------------------------------------------------
@@ -66,6 +70,7 @@ const GLIFOS = "Aa Ãã Çç Éé Õõ 0123456789 R$ % & @ ?!";
 
 const CAPITULOS = [
   { id: "identidade", titulo: "Identidade" },
+  { id: "essencia", titulo: "Essência" },
   { id: "cor", titulo: "Cor" },
   { id: "tipografia", titulo: "Tipografia" },
   { id: "forma", titulo: "Forma" },
@@ -158,7 +163,7 @@ function irAoToken(alvo: string) {
         { boxShadow: anel, offset: 0.8 },
         { boxShadow: "inset 0 0 0 0 transparent", offset: 1 },
       ],
-      { duration: 2200, easing: "ease-out" },
+      { duration: DESTAQUE_MS, easing: "ease-out" },
     );
   }
 }
@@ -283,7 +288,7 @@ function FaixaDaPaleta({
 /** A célula é a prova: o "Aa" na cor real. Clicar leva o par como CSS. */
 function ParDeTexto({ fundo, cor, nome, razao: r }: { fundo: string; cor: string; nome: string; razao: number }) {
   const g = grau(r);
-  const { done, copy } = useCopy(`background: ${fundo}; color: ${cor};`);
+  const { done, copy } = useCopy(cssDoPar(fundo, cor));
   return (
     <button
       type="button"
@@ -439,7 +444,7 @@ function Tipografia({
           value={texto}
           onChange={(e) => setDigitado(e.target.value)}
           aria-label="Texto de teste da face de títulos"
-          className="block w-full min-w-0 resize-none overflow-hidden break-normal bg-transparent leading-[1.05] tracking-[-0.03em] outline-none [field-sizing:content]"
+          className="block w-full min-w-0 resize-none overflow-visible break-normal bg-transparent pb-[0.12em] leading-[1.3] tracking-[-0.03em] outline-none [field-sizing:content]"
           style={{ fontFamily: "var(--font-display, inherit)", fontSize: `min(${tamanho.atual}, 8.5vw)` }}
         />
         <p className="mt-6 max-w-[62ch] leading-relaxed" style={{ fontFamily: "var(--font-sans, inherit)" }}>
@@ -607,6 +612,175 @@ function PainelDoModo({
   );
 }
 
+/** Um rótulo pequeno no palco, sempre na cor de apoio da marca. */
+function Rotulo({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-casa-sm font-medium" style={{ color: "var(--muted-foreground)" }}>
+      {children}
+    </p>
+  );
+}
+
+function ListaDeVoz({
+  titulo,
+  itens,
+  prefixo,
+  Icone,
+}: {
+  titulo: string;
+  itens: string[];
+  prefixo: string;
+  Icone: typeof Check;
+}) {
+  return (
+    <div>
+      <Rotulo>{titulo}</Rotulo>
+      <ul className="mt-3 space-y-2.5">
+        {itens.map((t, i) => (
+          <li key={t} data-token={`livro:${prefixo}-${i}`} className="flex items-start gap-2.5 leading-snug">
+            <Icone className="mt-0.5 size-4 shrink-0" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+            <span>{t}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** O que a marca diz de si. Campo sem dado não desenha nada: nem título, nem buraco. */
+function Essencia({ marca, livro }: { marca: BrandSummary; livro: LivroDaMarca }) {
+  const tom = livro.tom?.join(", ");
+  const mensagem = ROTULOS_DA_MENSAGEM.filter(([k]) => livro.mensagem?.[k]);
+  const temVoz = livro.voz || livro.faz?.length || livro.naoFaz?.length;
+  return (
+    <>
+      {livro.fonte === "ficticia" ? (
+        <p className="casa mb-3 text-casa-sm text-casa-fg-2">
+          Marca fictícia, criada pra demonstrar o sistema. Essência, voz e valores foram inventados.
+        </p>
+      ) : null}
+
+      {livro.essencia || livro.descricao || tom ? (
+        <Palco className="px-6 py-10 sm:px-12 sm:py-16">
+          {livro.essencia ? (
+            <p
+              data-token="livro:essencia"
+              data-ancora="essencia-frase"
+              className="max-w-[34ch] text-[clamp(1.625rem,1.2rem+2vw,2.75rem)] leading-[1.1] tracking-[-0.02em]"
+              style={{ fontFamily: "var(--font-display, inherit)" }}
+            >
+              {livro.essencia}
+            </p>
+          ) : null}
+          {livro.descricao ? (
+            <p data-token="livro:descricao" className="mt-6 max-w-[62ch] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+              {livro.descricao}
+            </p>
+          ) : null}
+          {tom ? (
+            <div data-token="livro:tom" className="mt-8">
+              <Rotulo>Tom</Rotulo>
+              <p className="mt-1">{tom.charAt(0).toUpperCase() + tom.slice(1)}</p>
+            </div>
+          ) : null}
+        </Palco>
+      ) : null}
+
+      {livro.valores?.length ? (
+        <>
+          <Subtitulo ancora="valores">{livro.valoresTitulo ?? "Valores"}</Subtitulo>
+          <Palco
+            className={cn(
+              "grid gap-x-8 gap-y-8 px-6 py-8 sm:grid-cols-2 sm:px-12 sm:py-10",
+              livro.valores.length === 3 ? "xl:grid-cols-3" : "xl:grid-cols-4",
+            )}
+          >
+            {livro.valores.map((v, i) => (
+              <div key={v.nome} data-token={`livro:valor-${i}`}>
+                <h4 className="text-xl tracking-[-0.01em]" style={{ fontFamily: "var(--font-display, inherit)" }}>
+                  {v.nome}
+                </h4>
+                <p className="mt-2 leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+                  {v.texto}
+                </p>
+              </div>
+            ))}
+          </Palco>
+        </>
+      ) : null}
+
+      {temVoz ? (
+        <>
+          <Subtitulo ancora="voz">Voz</Subtitulo>
+          <Palco className="px-6 py-8 sm:px-12 sm:py-10">
+            {livro.voz ? (
+              <p data-token="livro:voz" className="max-w-[62ch] text-lg leading-relaxed">
+                {livro.voz}
+              </p>
+            ) : null}
+            <div className={cn("grid gap-8 md:grid-cols-2", livro.voz && "mt-8")}>
+              {livro.faz?.length ? <ListaDeVoz titulo="Faz" itens={livro.faz} prefixo="faz" Icone={Check} /> : null}
+              {livro.naoFaz?.length ? <ListaDeVoz titulo="Não faz" itens={livro.naoFaz} prefixo="nao-faz" Icone={X} /> : null}
+            </div>
+          </Palco>
+        </>
+      ) : null}
+
+      {mensagem.length ? (
+        <>
+          <Subtitulo ancora="mensagem">Mensagem central</Subtitulo>
+          <Palco className="grid gap-8 px-6 py-8 sm:px-12 sm:py-10 md:grid-cols-3">
+            {mensagem.map(([k, rotulo]) => (
+              <div key={k} data-token={`livro:mensagem-${k}`}>
+                <Rotulo>{rotulo}</Rotulo>
+                <p className="mt-2 leading-relaxed">{livro.mensagem?.[k]}</p>
+              </div>
+            ))}
+          </Palco>
+        </>
+      ) : null}
+
+      {livro.logos?.length ? (
+        <>
+          <Subtitulo ancora="logos">Logos</Subtitulo>
+          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+            {livro.logos.map((l, i) => {
+              const fundo = fundoDoLogo(l.tinta, marca.palette);
+              return (
+                <div key={l.url} data-token={`livro:logo-${i}`} className="overflow-hidden rounded-tile bg-casa-tile">
+                  {/* A cor da placa sai da tinta medida no sync: o logo nunca some no fundo. */}
+                  <div
+                    className="palco grid h-36 place-items-center overflow-hidden"
+                    style={{ background: fundo?.hex ?? l.fundo }}
+                  >
+                    <img
+                      src={l.url}
+                      alt={`Logo ${marca.name}, versão ${i + 1}`}
+                      loading="lazy"
+                      className={fundo ? "max-h-16 max-w-[70%] object-contain" : "max-h-36 w-full object-contain"}
+                    />
+                  </div>
+                  <div className="casa flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 py-3 text-casa-sm">
+                    <span className="min-w-0 truncate text-casa-fg-2">{fundo ? `Sobre ${nomeDa(fundo)}` : "Fundo próprio"}</span>
+                    <a
+                      href={l.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="alvo-toque rounded-control text-casa-fg underline-offset-2 outline-none hover:underline focus-visible:[box-shadow:var(--focus)]"
+                    >
+                      Abrir PNG
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      ) : null}
+    </>
+  );
+}
+
 type Formato = "css" | "json" | "tailwind";
 
 const FORMATOS: { value: Formato; label: string }[] = [
@@ -665,10 +839,12 @@ function Exportar({ marca, item }: { marca: BrandSummary | null; item: BrandThem
 // --- navegação -------------------------------------------------------------------
 
 function Indice({
+  capitulos,
   capitulo,
   className,
   rolavel,
 }: {
+  capitulos: readonly { id: CapituloId; titulo: string }[];
   capitulo: CapituloId;
   className?: string;
   rolavel?: boolean;
@@ -683,13 +859,13 @@ function Indice({
   }, [capitulo, rolavel]);
   return (
     <nav ref={ref} aria-label="Capítulos" className={className}>
-      {CAPITULOS.map((c) => (
+      {capitulos.map((c) => (
         <a
           key={c.id}
           href={`#${c.id}`}
           aria-current={capitulo === c.id ? "location" : undefined}
           className={cn(
-            "alvo-toque shrink-0 rounded-control px-2 py-1.5 text-casa-sm outline-none transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:text-casa-fg focus-visible:[box-shadow:var(--focus)]",
+            "alvo-toque shrink-0 rounded-control px-2 py-1.5 text-casa-sm outline-none pointer-coarse:py-3.5 transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:text-casa-fg focus-visible:[box-shadow:var(--focus)]",
             capitulo === c.id ? "bg-casa-tile text-casa-fg" : "text-casa-fg-2",
           )}
         >
@@ -752,7 +928,7 @@ function BuscaNaMarca({ indice, marca }: { indice: Resultado[]; marca?: string }
   };
 
   return (
-    <div className="relative">
+    <div className="relative pointer-coarse:[&_input]:min-h-11">
       <SearchField
         id="busca-na-marca"
         value={busca}
@@ -761,7 +937,7 @@ function BuscaNaMarca({ indice, marca }: { indice: Resultado[]; marca?: string }
           setAberto(true);
         }}
         delay={0}
-        placeholder="Buscar, tecla /"
+        placeholder={ehToque() ? "Buscar" : "Buscar, tecla /"}
         aria-label="Buscar na marca: nome, papel, valor ou token"
         role="combobox"
         aria-expanded={mostrar}
@@ -837,6 +1013,9 @@ function BuscaNaMarca({ indice, marca }: { indice: Resultado[]; marca?: string }
 
 // --- o livro -------------------------------------------------------------------
 
+/** Quanto dura o anel que aponta o resultado da busca: longo para o olho achar depois da rolagem. */
+const DESTAQUE_MS = 2200;
+
 export function BrandStudioBody() {
   const { active, brand, brands, setBrand, status } = useBrandTheme();
   const shown = active ?? brand;
@@ -847,6 +1026,9 @@ export function BrandStudioBody() {
 
   const indice = React.useMemo(() => indiceDaBusca(shown, tokens, fold), [shown, tokens]);
   const pares = React.useMemo(() => paresDaPaleta(shown?.palette ?? []), [shown]);
+  const livro = livroDa(shown);
+  const temLivro = Boolean(livro);
+  const capitulos = React.useMemo(() => CAPITULOS.filter((c) => c.id !== "essencia" || temLivro), [temLivro]);
 
   /* O índice acompanha a leitura: marca o capítulo na faixa alta da tela. */
   React.useEffect(() => {
@@ -860,7 +1042,8 @@ export function BrandStudioBody() {
     );
     document.querySelectorAll("[data-capitulo]").forEach((el) => io.observe(el));
     return () => io.disconnect();
-  }, []);
+    // Essência entra depois do primeiro desenho, quando o índice de marcas chega.
+  }, [temLivro]);
 
   const trocar = React.useCallback(
     (proxima: string) => {
@@ -895,7 +1078,7 @@ export function BrandStudioBody() {
     return () => window.removeEventListener("keydown", aoTeclar);
   }, [passoDaMarca]);
 
-  /* O cabeçalho do app quebra em duas linhas no celular: a faixa gruda na altura real. */
+  /* A faixa gruda na altura real do cabeçalho do app. */
   const [alturaDoTopo, setAlturaDoTopo] = React.useState(56);
   React.useEffect(() => {
     const topo = document.querySelector("header");
@@ -914,10 +1097,10 @@ export function BrandStudioBody() {
         className="casa sticky z-30 -mx-4 mb-4 flex items-center gap-2 bg-casa-bg px-4 py-1.5 sm:-mx-6 sm:px-6 lg:hidden"
         style={{ top: alturaDoTopo }}
       >
-        <div className="shrink-0 [&_button:nth-child(2)]:max-w-28 [&_button:nth-child(2)]:truncate">
+        <div className="shrink-0 pointer-coarse:[&_button]:min-h-11 pointer-coarse:[&_button]:min-w-11 [&_button:nth-child(2)]:max-w-28 [&_button:nth-child(2)]:truncate">
           <Trocador nome={shown?.name ?? "Marca"} onPasso={passoDaMarca} rotulo="marca" />
         </div>
-        <Indice capitulo={atual} rolavel className="relative flex min-w-0 flex-1 gap-1 overflow-x-auto [scrollbar-width:none]" />
+        <Indice capitulos={capitulos} capitulo={atual} rolavel className="relative flex min-w-0 flex-1 gap-1 overflow-x-auto [scrollbar-width:none]" />
       </div>
 
       <aside className="casa mb-8 lg:sticky lg:top-20 lg:mb-0 lg:self-start">
@@ -925,7 +1108,7 @@ export function BrandStudioBody() {
         <div className="mt-6 hidden lg:block" title="Teclas [ e ] trocam de marca e mantêm a posição de leitura">
           <SeletorDeMarcas marcas={brands} atual={slug} onTrocar={trocar} />
         </div>
-        <Indice capitulo={atual} className="mt-6 hidden flex-col gap-1 lg:flex" />
+        <Indice capitulos={capitulos} capitulo={atual} className="mt-6 hidden flex-col gap-1 lg:flex" />
       </aside>
 
       <div className="min-w-0">
@@ -966,6 +1149,12 @@ export function BrandStudioBody() {
             <CopyCommand variant="cta" text={installCommand(`theme-${shown?.slug ?? DEFAULT_BRAND}`)} />
           </div>
         </section>
+
+        {shown && livro ? (
+          <Capitulo id="essencia" titulo="Essência">
+            <Essencia marca={shown} livro={livro} />
+          </Capitulo>
+        ) : null}
 
         <Capitulo id="cor" titulo="Cor">
           {pares.length ? (

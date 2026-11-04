@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { EASE_OUT_CSS, EASE_SAIDA_CSS } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -88,8 +89,6 @@ export type MistDialogVariant = "mist" | "rise" | "zoom" | "wipe";
 
 const ENTRADA_MS = 380;
 const SAIDA_MS = 240;
-const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
-const EASE_IN = "cubic-bezier(0.55, 0, 1, 0.45)";
 
 /** O quadro de fora de cada variante; o de dentro é sempre o natural. */
 const FORA: Record<Exclude<MistDialogVariant, "mist">, Keyframe> = {
@@ -165,7 +164,7 @@ export function MistDialog({
     const dentro = r ? DENTRO_REDUZIDO : DENTRO[v];
     const a = d.animate(sentido === "entra" ? [fora, dentro] : [dentro, fora], {
       duration: sentido === "entra" ? ENTRADA_MS : SAIDA_MS,
-      easing: sentido === "entra" ? EASE_OUT : EASE_IN,
+      easing: sentido === "entra" ? EASE_OUT_CSS : EASE_SAIDA_CSS,
       // A saída segura o quadro final até o navegador tirar o modal de cena;
       // sem isso ele piscaria no estado aberto entre o fim da animação e o fim
       // do `display` segurado.

@@ -1,5 +1,12 @@
 import { test, expect, type Page } from "@playwright/test";
 
+/*
+ * Estes testes medem velocidade por relógio de parede. Com os outros workers
+ * disputando a CPU, a amostra oscila: uma rodada reprovou por 55,35 contra 55,69.
+ * Uma nova tentativa separa isso de defeito, porque a peça quebrada falha nas duas.
+ */
+test.describe.configure({ retries: 1 });
+
 /**
  * O marquee é a única peça do catálogo cujo defeito é INVISÍVEL numa captura:
  * uma faixa parada e uma faixa andando desenham o mesmo pixel no primeiro frame.

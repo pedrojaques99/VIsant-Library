@@ -18,6 +18,7 @@ import {
 } from "motion/react";
 import { Check, SmilePlus, X, type LucideIcon } from "lucide-react";
 
+import { DUR, EASE_OUT, INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -82,9 +83,8 @@ export interface ReactionsProps {
 const MOLA_TOQUE = { type: "spring", visualDuration: 0.26, bounce: 0.12 } as const;
 const MOLA_FORMA = { type: "spring", visualDuration: 0.3, bounce: 0.14 } as const;
 const MOLA_LISA = { type: "spring", visualDuration: 0.3, bounce: 0 } as const;
-// O parente em JS do `--ease-out`.
-const SAIDA = [0.16, 1, 0.3, 1] as const;
-const RAPIDO = 0.16;
+const SAIDA = EASE_OUT;
+const RAPIDO = DUR.fast;
 
 const nada = () => () => {};
 /** Movimento reduzido só conta depois de hidratar: servidor e cliente desenham igual. */
@@ -165,7 +165,7 @@ const digitoVai: Variants = {
 const digitoParado: Variants = {
   enter: { opacity: 1 },
   center: { opacity: 1 },
-  exit: { opacity: 0, transition: { duration: 0 } },
+  exit: { opacity: 0, transition: INSTANT },
 };
 const digitoTransicao = {
   y: MOLA_TOQUE,
@@ -196,7 +196,7 @@ function Contagem({ value, reduzir }: { value: number; reduzir: boolean }) {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={reduzir ? { duration: 0 } : digitoTransicao}
+              transition={reduzir ? INSTANT : digitoTransicao}
             >
               {d}
             </motion.span>
@@ -239,7 +239,7 @@ function IconeChute({ icon: Icone, pulso, reduzir }: { icon: LucideIcon; pulso: 
 
 const repouso: TargetAndTransition = { opacity: 1, scale: 1, y: 0, filter: borrar(0) };
 const soOpacidade: TargetAndTransition = { opacity: 0 };
-const someSeco: TargetAndTransition = { opacity: 0, transition: { duration: 0.12 } };
+const someSeco: TargetAndTransition = { opacity: 0, transition: { duration: DUR.press } };
 const pilulaEntra: TargetAndTransition = { opacity: 0, scale: 0.5, filter: borrar(4) };
 const pilulaSai: TargetAndTransition = {
   opacity: 0,
@@ -529,7 +529,7 @@ export function Reactions({
                   animate={repouso}
                   exit={reduzir ? someSeco : pilulaSai}
                   whileTap={{ scale: reduzir ? 1 : 0.97, transition: { duration: RAPIDO, ease: SAIDA } }}
-                  transition={reduzir ? { duration: RAPIDO, layout: { duration: 0 } } : pilulaTransicao}
+                  transition={reduzir ? { duration: RAPIDO, layout: INSTANT } : pilulaTransicao}
                 >
                   <IconeChute icon={opcao.icon} pulso={pulsos[r.id] ?? 0} reduzir={reduzir} />
                   <Contagem value={r.count} reduzir={reduzir} />
@@ -547,7 +547,7 @@ export function Reactions({
               <motion.button
                 ref={gatilho}
                 layout="position"
-                transition={reduzir ? { layout: { duration: 0 } } : { layout: MOLA_FORMA }}
+                transition={reduzir ? { layout: INSTANT } : { layout: MOLA_FORMA }}
                 type="button"
                 aria-label="Adicionar reação"
                 className={cn(

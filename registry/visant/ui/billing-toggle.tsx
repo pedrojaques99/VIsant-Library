@@ -7,6 +7,7 @@
 import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion, type Variants } from "motion/react";
 
+import { DUR, EASE_OUT, INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -65,20 +66,23 @@ const OPCOES: BillingToggleOption[] = [
 /** Criticamente amortecida: o polegar desliza e pousa sem quicar. */
 const DESLIZE = { type: "spring" as const, visualDuration: 0.28, bounce: 0 };
 
+/** O rótulo que sai vai seco, sem disputar a atenção com o que entra. */
+const SAIDA_SECA = [0.4, 0, 1, 1] as const;
+
 const troca: Variants = {
   antes: { opacity: 0, y: "0.5em" },
-  agora: { opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] } },
-  depois: { opacity: 0, y: "-0.5em", transition: { duration: 0.12, ease: [0.4, 0, 1, 1] } },
+  agora: { opacity: 1, y: 0, transition: { duration: DUR.base, ease: EASE_OUT } },
+  depois: { opacity: 0, y: "-0.5em", transition: { duration: DUR.press, ease: SAIDA_SECA } },
 };
 const quieto: Variants = {
   antes: { opacity: 0 },
-  agora: { opacity: 1, transition: { duration: 0.12 } },
-  depois: { opacity: 0, transition: { duration: 0 } },
+  agora: { opacity: 1, transition: { duration: DUR.press } },
+  depois: { opacity: 0, transition: INSTANT },
 };
 
 /** O selo dá um pulinho quando a opção dele é escolhida. Rótulo de variante só dispara na troca. */
 const pulo: Variants = {
-  on: { scale: [1, 1.08, 1], transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] } },
+  on: { scale: [1, 1.08, 1], transition: { duration: DUR.slow, ease: EASE_OUT } },
   off: { scale: 1 },
 };
 
@@ -113,7 +117,7 @@ function TrocaFixa({ texto, reduzido }: { texto: string; reduzido: boolean }) {
       className="relative inline-grid overflow-hidden [&>*]:[grid-area:1/1]"
       initial={false}
       animate={largura === null ? undefined : { width: largura }}
-      transition={reduzido ? { duration: 0 } : DESLIZE}
+      transition={reduzido ? INSTANT : DESLIZE}
     >
       <span ref={medidor} aria-hidden="true" className="invisible absolute left-0 top-0 whitespace-nowrap">
         {texto}
@@ -189,7 +193,7 @@ export function BillingToggle({
           className="absolute inset-y-1 left-0 rounded-[var(--r-pill)] bg-background [box-shadow:var(--e-raised)]"
           initial={false}
           animate={{ x: polegar.x, width: polegar.w }}
-          transition={reduzido ? { duration: 0 } : DESLIZE}
+          transition={reduzido ? INSTANT : DESLIZE}
         />
       )}
       {options.map((o, i) => {
@@ -280,7 +284,7 @@ export function BillingPrice({ amount, currency = "R$", period, was, locale = "p
               initial="antes"
               animate="agora"
               exit="depois"
-              transition={reduzido ? { duration: 0.12 } : { type: "spring", visualDuration: 0.3, bounce: 0.15 }}
+              transition={reduzido ? { duration: DUR.press } : { type: "spring", visualDuration: 0.3, bounce: 0.15 }}
             >
               {fmt(amount)}
             </motion.span>

@@ -8,6 +8,7 @@ import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Search, X } from "lucide-react";
 
+import { DUR, INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -173,7 +174,7 @@ export function ExpandingSearch({
   };
 
   const fim = anchor === "end";
-  const transicao = reduzido ? { duration: 0 } : MOLA;
+  const transicao = reduzido ? INSTANT : MOLA;
   const mostraLista = aberto && (lista.length > 0 || vazio);
 
   return (
@@ -270,8 +271,8 @@ export function ExpandingSearch({
               key="painel"
               initial={reduzido ? { opacity: 0 } : { opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, transition: { duration: 0.1 } }}
-              transition={reduzido ? { duration: 0.12 } : { type: "spring", visualDuration: 0.22, bounce: 0 }}
+              exit={{ opacity: 0, transition: { duration: DUR.press } }}
+              transition={reduzido ? { duration: DUR.press } : { type: "spring", visualDuration: 0.22, bounce: 0 }}
               className="absolute inset-x-0 top-full z-20 mt-2 max-h-72 overflow-y-auto overscroll-contain rounded-[var(--r-surface)] border border-border bg-card p-1 [box-shadow:var(--e-overlay)]"
             >
               {!digitado && suggestions.length > 0 && (

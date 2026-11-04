@@ -20,14 +20,19 @@
  *   que vai adaptar a peça em vez de usá-la.
  * - **comando** — o `add`, no gerenciador escolhido na ficha.
  *
+ * No toque o menu vira folha inferior: colado no botão, ele cobria a ficha e os
+ * itens ficavam fora do alcance do polegar.
+ *
  * A fonte é buscada do registry na hora do clique, não no carregamento da
  * página: é meia dúzia de KB por item que 95% das visitas não pedem.
  */
 
 import * as React from "react";
+import * as Dialog from "@radix-ui/react-dialog";
 import * as Menu from "@radix-ui/react-dropdown-menu";
 import { Check, ChevronDown, Code2, FileCode, Sparkles, Terminal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ehToque } from "./casa-ui";
 import { depKeysOf } from "./deps";
 import { REGISTRY_URL, installCommand, registryItemUrl } from "./registry-meta";
 import { snippetDeUso, valorAtual, type Controle, type ValorDeKnob } from "./controls";
@@ -94,7 +99,7 @@ function montarPrompt(
     linhas.push("```");
     linhas.push("");
     linhas.push(
-      "Essa é a configuração que está na tela agora; o que não aparece está no padrão do componente.",
+      "Essa é a configuração que está na tela agora. O que não aparece está no padrão do componente.",
     );
   }
 
@@ -134,6 +139,20 @@ const ITENS = [
 
 type Chave = (typeof ITENS)[number]["chave"];
 
+/* O segundo botão da ficha: tom de superfície, nunca o destaque — esse é do comando de instalar. */
+const GATILHO = cn(
+  "alvo-toque flex h-10 w-full items-center justify-center gap-2 rounded-control bg-casa-tile-2 px-3 text-casa-base text-casa-fg pointer-coarse:h-11",
+  "transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
+  "hover:bg-[color-mix(in_oklch,var(--casa-tile-2),var(--casa-fg)_6%)] data-[state=open]:bg-[color-mix(in_oklch,var(--casa-tile-2),var(--casa-fg)_6%)]",
+);
+const ROTULO = (
+  <>
+    <Sparkles className="h-4 w-4 text-casa-fg-2" />
+    Copiar pra IA
+    <ChevronDown className="h-3.5 w-3.5 text-casa-fg-3" />
+  </>
+);
+
 export function CopiarPraIA({
   item,
   controles,
@@ -145,7 +164,15 @@ export function CopiarPraIA({
 }) {
   const [feito, setFeito] = React.useState<Chave | null>(null);
   const timer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  React.useEffect(() => () => clearTimeout(timer.current), []);
+  const [folha, setFolha] = React.useState(false);
+  const fechar = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  React.useEffect(
+    () => () => {
+      clearTimeout(timer.current);
+      clearTimeout(fechar.current);
+    },
+    [],
+  );
 
   const copiar = React.useCallback(async (chave: Chave, texto: () => string | Promise<string>) => {
     try {
@@ -168,21 +195,53 @@ export function CopiarPraIA({
     return () => installCommand(item.name);
   };
 
+  if (ehToque()) {
+    return (
+      <Dialog.Root
+        open={folha}
+        onOpenChange={(v) => {
+          clearTimeout(fechar.current);
+          setFolha(v);
+        }}
+      >
+        <Dialog.Trigger className={GATILHO}>{ROTULO}</Dialog.Trigger>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 z-[70] bg-[oklch(0_0_0/0.55)] data-[state=open]:animate-in data-[state=open]:fade-in-0" />
+          <Dialog.Content
+            aria-describedby={undefined}
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            className="casa fixed inset-x-0 bottom-0 z-[70] rounded-t-tile bg-casa-tile-2 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] outline-none [box-shadow:var(--casa-shadow)] data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom [animation-duration:var(--dur-slow)]"
+          >
+            <Dialog.Title className="px-3 pb-1 pt-2 text-casa-sm font-normal text-casa-fg-3">Copiar pra IA</Dialog.Title>
+            {ITENS.map(({ chave, label, icon: Icon }) => (
+              <button
+                key={chave}
+                type="button"
+                onClick={() => {
+                  void copiar(chave, acao(chave)).then(() => {
+                    clearTimeout(fechar.current);
+                    fechar.current = setTimeout(() => setFolha(false), 700);
+                  });
+                }}
+                className="flex min-h-12 w-full cursor-pointer items-center gap-3 rounded-control px-3 text-left text-casa-base text-casa-fg outline-none active:bg-casa-tile"
+              >
+                {feito === chave ? (
+                  <Check className="h-4 w-4 shrink-0 text-casa-fg" />
+                ) : (
+                  <Icon className="h-4 w-4 shrink-0 text-casa-fg-2" />
+                )}
+                {feito === chave ? "Copiado" : label}
+              </button>
+            ))}
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+    );
+  }
+
   return (
     <Menu.Root>
-      {/* O segundo botão da ficha: tom de superfície, nunca o destaque — esse é
-          do comando de instalar, logo abaixo. */}
-      <Menu.Trigger
-        className={cn(
-          "alvo-toque flex h-10 w-full items-center justify-center gap-2 rounded-control bg-casa-tile-2 px-3 text-casa-base text-casa-fg",
-          "transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
-          "hover:bg-[color-mix(in_oklch,var(--casa-tile-2),var(--casa-fg)_6%)] data-[state=open]:bg-[color-mix(in_oklch,var(--casa-tile-2),var(--casa-fg)_6%)]",
-        )}
-      >
-        <Sparkles className="h-4 w-4 text-casa-fg-2" />
-        Copiar pra IA
-        <ChevronDown className="h-3.5 w-3.5 text-casa-fg-3" />
-      </Menu.Trigger>
+      <Menu.Trigger className={GATILHO}>{ROTULO}</Menu.Trigger>
 
       <Menu.Portal>
         <Menu.Content

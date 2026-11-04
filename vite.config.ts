@@ -35,10 +35,6 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       '@/lib': path.resolve(__dirname, './src/lib'),
       '@/hooks': path.resolve(__dirname, './src/hooks'),
-      // O `data-table` importa estes dois e a vitrine não é Next. A demo dele roda a
-      // peça de verdade com os substitutos; ver o cabeçalho de cada um.
-      'next-auth/react': path.resolve(__dirname, './src/app/shims/next-auth-react.ts'),
-      'next/navigation': path.resolve(__dirname, './src/app/shims/next-navigation.ts'),
     },
   },
 

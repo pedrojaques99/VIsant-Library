@@ -211,7 +211,7 @@ export function SideNav({
           // `all` arrasta cor, sombra e transform de cada um deles junto.
           // motion-lint-disable-next-line layout-property-animation  a barra precisa empurrar o conteúdo da página ao recolher
           "transition-[width] [transition-duration:var(--dur-base,220ms)]",
-          "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+          "[transition-timing-function:var(--ease-out)]",
           "motion-reduce:transition-none",
           className,
         )}
@@ -311,7 +311,7 @@ export const SideNavToggle = React.forwardRef<
           // meio da transição de largura, porque o SVG remonta.
           className={cn(
             "origin-center transition-transform [transition-duration:var(--dur-base,220ms)]",
-            "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+            "[transition-timing-function:var(--ease-out)]",
             "motion-reduce:transition-none",
             !collapsed && "-scale-x-100",
           )}

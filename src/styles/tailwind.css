@@ -156,14 +156,18 @@
   .alvo-toque {
     position: relative;
   }
-  .alvo-toque::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: max(100%, 44px);
-    height: max(100%, 44px);
-    transform: translate(-50%, -50%);
+  /* Só em ponteiro grosso: com mouse a mira é fina, e o pseudo de 44px só inflava o
+     `scrollHeight` do botão e invadia o vizinho no hover. */
+  @media (pointer: coarse) {
+    .alvo-toque::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: max(100%, 44px);
+      height: max(100%, 44px);
+      transform: translate(-50%, -50%);
+    }
   }
 
   /*

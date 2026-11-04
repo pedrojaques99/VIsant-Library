@@ -1728,6 +1728,73 @@
       ]
     }
   ],
+  "motion": [
+    {
+      "nome": "EASE_OUT",
+      "descricao": "Entrada, saída e resposta a gesto: o padrão.",
+      "props": []
+    },
+    {
+      "nome": "EASE_IN_OUT",
+      "descricao": "O que se move ou se transforma na tela, sem entrar nem sair.",
+      "props": []
+    },
+    {
+      "nome": "EASE_DRAWER",
+      "descricao": "Gaveta e folha, no gesto do iOS.",
+      "props": []
+    },
+    {
+      "nome": "DUR",
+      "descricao": "Em segundos, a unidade do Motion e do GSAP.",
+      "props": []
+    },
+    {
+      "nome": "press",
+      "descricao": "Retorno de clique.",
+      "props": []
+    },
+    {
+      "nome": "fast",
+      "descricao": "Dica, popover pequeno, hover.",
+      "props": []
+    },
+    {
+      "nome": "base",
+      "descricao": "Dropdown, select, card, item de lista.",
+      "props": []
+    },
+    {
+      "nome": "slow",
+      "descricao": "Modal, gaveta, superfície maior.",
+      "props": []
+    },
+    {
+      "nome": "INSTANT",
+      "descricao": "Sem animação: o ramo de `prefers-reduced-motion` e a troca que não pode ter meio.",
+      "props": []
+    },
+    {
+      "nome": "EASE_SAIDA_CSS",
+      "descricao": "Sai acelerando: a peça vai embora e ninguém precisa acompanhar o fim. Também o recuo do martelo do `working-glyph`.",
+      "props": []
+    },
+    {
+      "nome": "EASE_MOLA_CSS",
+      "descricao": "Passa cerca de 6% do alvo e volta: a mola do `segmented-control`, sem mola de JS.",
+      "props": []
+    },
+    {
+      "nome": "EASE_VARREDURA_CSS",
+      "descricao": "Varredura de indicador: anda decidida no meio e não para seco nas pontas.",
+      "props": []
+    },
+    {
+      "nome": "EASE_ASSENTA_CSS",
+      "descricao": "O rebote assentando depois da batida do martelo do `working-glyph`.",
+      "props": []
+    }
+  ],
   "motion-layer": [
     {
       "nome": "enterItems",
@@ -2090,6 +2157,13 @@
           "descricao": "Render the batch action bar in normal flow (full-width, wraps and pushes the\ntable down) instead of the default absolute overlay. Only safe when the\ntoolbar search is hidden; otherwise the bar collides with the search box.\nDefault false (absolute overlay)."
         },
         {
+          "nome": "canEdit",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": "Libera a edição inline das colunas com `meta.editable` (precisa de\n`onCellUpdate`). Desligada por padrão: a permissão é decisão de quem usa."
+        },
+        {
           "nome": "className",
           "tipo": "string",
           "obrigatoria": false,
@@ -2171,7 +2245,7 @@
           "tipo": "SortingState",
           "obrigatoria": false,
           "padrao": "[]",
-          "descricao": "Ordenação com que a tabela nasce. A da URL (`?sort=`), quando existe, vence."
+          "descricao": "Ordenação com que a tabela nasce."
         },
         {
           "nome": "isLoading",
@@ -2207,6 +2281,13 @@
           "obrigatoria": false,
           "padrao": null,
           "descricao": null
+        },
+        {
+          "nome": "onSortingChange",
+          "tipo": "(sorting: SortingState) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Avisa cada mudança de ordenação, para gravar na URL ou no servidor."
         },
         {
           "nome": "pageSize",
@@ -2940,7 +3021,7 @@
   "paper-shuttle": [
     {
       "nome": "PaperShuttle",
-      "descricao": "Papéis voando de uma pasta para outra — o loader de transferência.\n\nExiste para uma classe específica de espera: quando o sistema está MOVENDO\nalgo (importar, extrair, converter, sincronizar). Um spinner nesse caso não\nconta nada; a metáfora da pasta conta a operação inteira sem uma palavra, e o\nusuário entende que fechar a aba interrompe algo.\n\nTrês papéis com delay escalonado (0 / .35 / .7 de um loop de 1.2s) dão fluxo\ncontínuo com uma única animação declarada. Mais que três vira confete.\n\nA parábola (`y` sobe e volta) importa: linha reta lê como barra de progresso\ndisfarçada; o arco lê como objeto atravessando espaço.\n\nSem cor própria: a pasta usa `currentColor` (default: `--muted-foreground`,\nneutra; passe `className=\"text-...\"` pra tingir) e o papel os\ntokens de superfície, então o loader troca de marca junto com o tema.\n\n`prefers-reduced-motion`: papéis parados no meio do trajeto, texto e barra\n(que são informação real) intactos.",
+      "descricao": null,
       "props": [
         {
           "nome": "className",

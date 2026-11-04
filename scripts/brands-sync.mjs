@@ -20,6 +20,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { inflateSync } from "node:zlib";
 import { buildBrandThemeItem } from "./brand-theme-item.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -198,6 +199,134 @@ function pickLogo(g) {
   return l ? { url: l.url, thumbnailUrl: l.thumbnailUrl ?? l.url, variant: l.variant ?? null } : null;
 }
 
+/**
+ * A tinta de um logo PNG, para a página escolher o fundo certo da paleta.
+ *
+ * O bucket não manda CORS, então o browser não consegue ler os pixels: a conta é
+ * feita aqui. Só PNG de 8 bits sem entrelace, que é o que o vault tem; qualquer
+ * outra coisa devolve `null` e a página usa o fundo da paleta.
+ */
+async function tintaDoLogo(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const png = Buffer.from(await res.arrayBuffer());
+    if (png.toString("latin1", 1, 4) !== "PNG") return null;
+    const partes = [];
+    let largura, altura, tipo, profundidade, entrelace;
+    for (let p = 8; p < png.length; ) {
+      const n = png.readUInt32BE(p);
+      const nome = png.toString("latin1", p + 4, p + 8);
+      if (nome === "IHDR") {
+        largura = png.readUInt32BE(p + 8);
+        altura = png.readUInt32BE(p + 12);
+        profundidade = png[p + 16];
+        tipo = png[p + 17];
+        entrelace = png[p + 20];
+      } else if (nome === "IDAT") partes.push(png.subarray(p + 8, p + 8 + n));
+      p += 12 + n;
+    }
+    const canais = { 2: 3, 6: 4 }[tipo];
+    if (!canais || profundidade !== 8 || entrelace) return null;
+    const dados = inflateSync(Buffer.concat(partes));
+    const passo = largura * canais;
+    let anterior = Buffer.alloc(passo);
+    let opacos = 0;
+    let soma = 0;
+    let canto = null;
+    for (let y = 0; y < altura; y++) {
+      const ini = y * (passo + 1);
+      const filtro = dados[ini];
+      const linha = Buffer.from(dados.subarray(ini + 1, ini + 1 + passo));
+      for (let i = 0; i < passo; i++) {
+        const a = i >= canais ? linha[i - canais] : 0;
+        const b = anterior[i];
+        const c = i >= canais ? anterior[i - canais] : 0;
+        const paeth = () => {
+          const d = a + b - c;
+          const [da, db, dc] = [Math.abs(d - a), Math.abs(d - b), Math.abs(d - c)];
+          return da <= db && da <= dc ? a : db <= dc ? b : c;
+        };
+        const soma8 = [0, a, b, (a + b) >> 1, paeth][filtro];
+        linha[i] = (linha[i] + (typeof soma8 === "function" ? soma8() : soma8)) & 255;
+      }
+      if (y === altura >> 1) canto = `#${linha.subarray(0, 3).toString("hex")}`; // a borda no meio: quina pode ter vinheta
+      for (let x = 0; x < passo; x += canais) {
+        if (canais === 4 && linha[x + 3] < 128) continue;
+        opacos++;
+        soma += 0.2126 * linha[x] + 0.7152 * linha[x + 1] + 0.0722 * linha[x + 2];
+      }
+      anterior = linha;
+    }
+    if (!opacos) return null;
+    // Sem transparência o arquivo traz o próprio fundo: a placa repete a cor do canto.
+    if (opacos / (largura * altura) > 0.95) return { tinta: "opaco", fundo: canto };
+    return { tinta: soma / opacos > 128 ? "clara" : "escura" };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * O livro da marca: só o que a página pública dela já mostra a qualquer visitante.
+ *
+ * O pedido sai SEM a chave, de propósito: é a mesma resposta que o anônimo recebe,
+ * e a lista autenticada traz campos que não são para sair. Cada campo daqui é
+ * escolhido por nome, então campo novo na API não vaza sozinho, e cada um só entra
+ * se a seção dele estiver ativa em `activeSections` (o mapa é o do editor do
+ * visantlabs-os: `identity`, `tags`, `strategy`, `editorial`, `logos`).
+ */
+async function livroPublico(g) {
+  if (g.isPublic !== true || !g.publicSlug) return null;
+  const res = await fetch(`${BASE}/api/brand-guidelines/public/${encodeURIComponent(g.publicSlug)}`, {
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) {
+    console.warn(`  livro de ${g.identity?.name}: HTTP ${res.status}, publicando sem ele`);
+    return null;
+  }
+  const p = (await res.json())?.guideline;
+  if (p?.isPublic !== true) return null;
+
+  const ativa = new Set(p.activeSections ?? []);
+  const texto = (v) => (typeof v === "string" && v.trim() ? v.trim() : undefined);
+  const lista = (v) => {
+    const l = (Array.isArray(v) ? v : []).map(texto).filter(Boolean);
+    return l.length ? l : undefined;
+  };
+
+  const livro = { fonte: "publica" };
+  if (ativa.has("identity")) livro.descricao = texto(p.identity?.description);
+  if (ativa.has("tags")) livro.tom = lista(p.tags?.tone);
+  if (ativa.has("strategy")) {
+    livro.essencia = texto(p.strategy?.manifesto);
+    const valores = (p.strategy?.pillars ?? [])
+      .map((v) => ({ nome: texto(v?.value), texto: texto(v?.description) }))
+      .filter((v) => v.nome && v.texto);
+    if (valores.length) {
+      livro.valores = valores;
+      livro.valoresTitulo = "Pilares";
+    }
+    const m = p.strategy?.coreMessage;
+    const mensagem = { produto: texto(m?.product), diferencial: texto(m?.differential), vinculo: texto(m?.emotionalBond) };
+    if (Object.values(mensagem).some(Boolean)) livro.mensagem = mensagem;
+  }
+  if (ativa.has("editorial")) {
+    livro.voz = texto(p.guidelines?.voice);
+    livro.faz = lista(p.guidelines?.dos);
+    livro.naoFaz = lista(p.guidelines?.donts);
+  }
+  if (ativa.has("logos")) {
+    const logos = [];
+    for (const l of p.logos ?? []) {
+      const url = texto(l?.url);
+      if (url) logos.push({ url, variant: texto(l?.variant) ?? null, tinta: null, ...(await tintaDoLogo(url)) });
+    }
+    if (logos.length) livro.logos = logos;
+  }
+  return livro;
+}
+
 // --- main --------------------------------------------------------------------
 const argv = process.argv.slice(2);
 const dry = argv.includes("--dry");
@@ -260,6 +389,8 @@ for (const g of raw) {
       version: g.currentVersion ?? null,
       completeness: g.extraction?.completeness ?? null,
       updatedAt: g.updatedAt ?? null,
+      // Só marca publicável busca livro: marca de cliente não ganha nem o pedido.
+      ...(PUBLICAVEIS.has(itemSlug) ? { livro: await livroPublico(g) } : {}),
     });
   } catch (err) {
     skipped.push({ name, reason: err.message.replace("@visant/brand-tokens: ", ""), detail: err.detail });

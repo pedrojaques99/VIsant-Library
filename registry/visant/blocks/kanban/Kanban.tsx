@@ -18,6 +18,7 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useSelectionContainer, boxesIntersect, type Box } from "@air/react-drag-to-select";
+import { EASE_OUT_CSS } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { KanbanColumn } from "./KanbanColumn";
 import type { KanbanItem, KanbanProps } from "./types";
@@ -85,7 +86,7 @@ function readDropAnimation() {
 
   return {
     duration: reduzido ? 0 : Number.isFinite(ms) ? ms : 200,
-    easing: token("--ease-out", "cubic-bezier(0.23, 1, 0.32, 1)"),
+    easing: token("--ease-out", EASE_OUT_CSS),
     sideEffects: defaultDropAnimationSideEffects({
       className: { active: "is-landing" },
     }),

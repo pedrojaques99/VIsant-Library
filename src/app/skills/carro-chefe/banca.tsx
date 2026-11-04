@@ -11,6 +11,7 @@
 import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowDown, RotateCcw, Wrench } from "lucide-react";
+import { DUR, EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { Aba, Icone } from "../../casa-ui";
 import { TextMorph } from "../../../../registry/visant/ui/text-morph";
@@ -34,10 +35,6 @@ export const COMANDO_FINAL = GRAVADO.comandoFinal;
 const RE_ACHADO = /^\s+src\/Pricing\.tsx:(\d+)\s+(\S+)/;
 /** O intervalo do terminal imprimindo: rápido o bastante pra caber no olhar da dobra. */
 const PASSO_MS = 150;
-/* O espelho em JS de --dur-fast, --dur-base e --ease-out: este repo não tem módulo de motion pra importar. */
-const DUR_FAST = 0.16;
-const DUR_BASE = 0.2;
-const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 
 const useHidratado = () => {
   const [ok, setOk] = React.useState(false);
@@ -156,7 +153,7 @@ function TextoDaLinha({ texto }: { texto: string }) {
     <span
       className={cn(
         "block min-h-5",
-        regua ? "overflow-hidden whitespace-nowrap" : "whitespace-pre-wrap [overflow-wrap:anywhere]",
+        regua ? "truncate" : "whitespace-pre-wrap [overflow-wrap:anywhere]",
         recuo && "pl-[2ch] lg:pl-[12ch]",
         tomDaLinha(texto),
       )}
@@ -347,8 +344,8 @@ export function Banca({ aoLiberar }: { aoLiberar: () => void }) {
                   <motion.div
                     key={l.chave}
                     layout={reduzir ? false : "position"}
-                    transition={{ duration: DUR_BASE, ease: EASE_OUT }}
-                    exit={{ opacity: 0, transition: { duration: DUR_FAST } }}
+                    transition={{ duration: DUR.base, ease: EASE_OUT }}
+                    exit={{ opacity: 0, transition: { duration: DUR.fast } }}
                     style={{ opacity: impressa ? 1 : 0 }}
                   >
                     {regra && ALVOS[regra] ? (

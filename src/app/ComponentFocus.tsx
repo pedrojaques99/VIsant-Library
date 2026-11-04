@@ -18,6 +18,12 @@
  * coluna de 340px da casa com nome, uma frase, os controles e as duas ações —
  * o destaque único é o comando de instalar.
  *
+ * No celular a ordem é outra, porque quem abre decide em uma dobra: nome, palco
+ * e comando sem rolar; controles, frase e pacotes depois. O palco tem altura de
+ * tela (e a peça cabe nele inteira), e com controles ele gruda sob o cabeçalho:
+ * mexer no slider sem ver o que ele muda é mexer no escuro. A ordem é só CSS: o
+ * painel vira `display: contents` e cada parte ganha o seu `order`.
+ *
  * O que se perde: `Esc` deixa de ser "fechar" e vira "voltar pra categoria" —
  * mesmo destino, outro nome. As setas continuam percorrendo, só que agora
  * trocando de rota, o que dá histórico de navegador de graça.
@@ -47,7 +53,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FitStage, useElementWidth } from "./stage";
+import { FitStage, PalcoFixo, useElementWidth } from "./stage";
 import { MSG_ALTURA, MSG_PROPS } from "./Solo";
 import {
   Customize,
@@ -91,6 +97,81 @@ type Aba = (typeof ABAS)[number]["value"];
 
 /** Altura mínima do palco em foco: abaixo disso a peça encosta nas bordas. */
 const MIN_STAGE_H = 340;
+
+/* Sem coluna ao lado, a ficha é uma pilha: é aqui que o palco fica compacto. */
+const SEM_COLUNA = "(max-width: 1023px)";
+const assinarColuna = (avisar: () => void) => {
+  const mq = window.matchMedia(SEM_COLUNA);
+  mq.addEventListener("change", avisar);
+  return () => mq.removeEventListener("change", avisar);
+};
+const useSemColuna = () =>
+  React.useSyncExternalStore(assinarColuna, () => window.matchMedia(SEM_COLUNA).matches, () => false);
+
+/**
+ * O palco da pilha: a caixa tem altura de tela e a peça cabe nela inteira.
+ *
+ * A altura declarada no catálogo é a do desktop, e o kanban que empilha no celular
+ * ocupa menos que ela. Então a escala sai do que a peça desenhou, medido nos
+ * primeiros instantes e depois fechado: acompanhar para sempre faria o palco
+ * pulsar a cada frase de um ticker.
+ */
+function PalcoDaPilha({ w, h, children }: { w: number; h: number; children: React.ReactNode }) {
+  const caixa = React.useRef<HTMLDivElement>(null);
+  const [tela, setTela] = React.useState({ w: 0, h: 0 });
+  const [peca, setPeca] = React.useState({ w, h });
+
+  React.useEffect(() => {
+    const el = caixa.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setTela({ w: el.clientWidth, h: el.clientHeight }));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  React.useEffect(() => {
+    const miolo = caixa.current?.querySelector("[data-palco] > div");
+    if (!miolo) return;
+    const medir = () => {
+      let altura = 0;
+      let largura = w;
+      for (const filho of Array.from(miolo.children) as HTMLElement[]) {
+        altura = Math.max(altura, filho.offsetHeight);
+        largura = Math.max(largura, filho.scrollWidth);
+      }
+      if (altura) setPeca({ w: largura, h: altura });
+    };
+    const ro = new ResizeObserver(medir);
+    let fim: ReturnType<typeof setTimeout> | undefined;
+    const armar = () => {
+      ro.disconnect();
+      for (const filho of Array.from(miolo.children)) ro.observe(filho);
+      medir();
+      fim ??= miolo.children.length ? setTimeout(soltar, 900) : undefined;
+    };
+    const mo = new MutationObserver(armar);
+    const soltar = () => {
+      ro.disconnect();
+      mo.disconnect();
+    };
+    mo.observe(miolo, { childList: true });
+    armar();
+    return () => {
+      clearTimeout(fim);
+      soltar();
+    };
+  }, [w]);
+
+  return (
+    <div ref={caixa} className="h-full w-full">
+      {tela.h ? (
+        <PalcoFixo w={peca.w} h={peca.h} ratio={tela.w / tela.h}>
+          {children}
+        </PalcoFixo>
+      ) : null}
+    </div>
+  );
+}
 
 /**
  * A peça rodando num viewport de verdade.
@@ -243,7 +324,7 @@ function IconeDoPalco({
       aria-label={rotulo}
       title={rotulo}
       className={cn(
-        "alvo-toque grid h-8 w-8 place-items-center rounded-[8px] transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
+        "alvo-toque grid h-8 w-8 place-items-center rounded-[8px] pointer-coarse:size-11 transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
         ativo ? "bg-casa-tile-2 text-casa-fg" : "text-casa-fg-3 hover:text-casa-fg",
       )}
     >
@@ -309,6 +390,8 @@ export function ComponentFocus({
   const util = Math.max(available - (available < 640 ? 40 : 64), 0);
   const frameW = preset.px || Math.max(util, 320);
   const frameH = Math.max(natural.h, MIN_STAGE_H);
+  const semColuna = useSemColuna();
+  const compacto = semColuna && !preset.px && aba === "demo";
 
   return (
     <article
@@ -320,7 +403,7 @@ export function ComponentFocus({
        * `min-width: auto`, e o palco de 1370px empurraria a ficha inteira pra
        * fora da tela.
        */
-      className="shell flex min-w-0 flex-col gap-3 py-4 lg:flex-row lg:items-start"
+      className="shell flex min-w-0 flex-col gap-3 pb-8 pt-1 lg:flex-row lg:items-start lg:py-4"
     >
       {/*
        * O palco: um ladrilho grande, no fundo da MARCA (`.palco`) quando mostra a
@@ -333,13 +416,18 @@ export function ComponentFocus({
       <section
         ref={stageRef}
         className={cn(
-          "relative isolate min-w-0 flex-1 overflow-hidden rounded-tile [contain:paint]",
+          "relative isolate min-w-0 overflow-hidden [contain:paint] lg:flex-1 lg:rounded-tile",
+          /* Na pilha o palco sangra até as bordas: grudado, canto redondo deixaria o conteúdo vazar por trás. */
+          "max-lg:order-2 max-lg:-mx-[var(--shell-pad)]",
           aba === "demo" && Demo ? "palco" : "casa bg-casa-tile",
+          compacto && controles
+            ? "z-20 [@media(max-width:1023px)_and_(min-height:560px)]:sticky [@media(max-width:1023px)_and_(min-height:560px)]:top-[var(--shell-header-h)]"
+            : null,
         )}
         style={aba === "demo" && Demo ? stageSurfaceOf(item) : undefined}
       >
-        <div className="casa pointer-events-none absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2">
-          <div className="pointer-events-auto flex gap-0.5 rounded-[12px] bg-casa-bg p-1">
+        <div className="casa pointer-events-none absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2 pointer-coarse:inset-x-1.5 pointer-coarse:top-1.5">
+          <div className="pointer-events-auto flex gap-0.5 rounded-[12px] bg-casa-bg p-1 pointer-coarse:p-0.5">
             {ABAS.filter((a) => a.value !== "demo" || Demo).map(({ value, rotulo, icon: Icone }) => (
               <IconeDoPalco key={value} ativo={aba === value} onClick={() => setAba(value)} rotulo={rotulo}>
                 <Icone className="h-4 w-4" />
@@ -365,7 +453,7 @@ export function ComponentFocus({
         </div>
 
         {aba === "codigo" ? (
-          <div className="pt-12">
+          <div className="pt-12 pointer-coarse:pt-14 pointer-coarse:[&_button:not(.casa-icone)]:min-h-11">
             <CodigoDoItem
               name={item.name}
               antes={
@@ -382,12 +470,22 @@ export function ComponentFocus({
         ) : null}
 
         {aba === "props" ? (
-          <div className="overflow-auto pt-12">
+          <div className="overflow-auto pt-12 pointer-coarse:pt-14">
             <TabelaDeProps name={item.name} />
           </div>
         ) : null}
 
-        {aba === "demo" && Demo ? (
+        {aba === "demo" && Demo && compacto ? (
+          <div className={cn("px-3 pb-2 pt-14", controles ? "h-[max(14rem,38svh)]" : "h-[max(15rem,44svh)]")}>
+            <PalcoDaPilha w={frameW} h={natural.h}>
+              <ErrorBoundary fallback={null}>
+                <React.Suspense fallback={null}>
+                  <Demo props={knobs.props} />
+                </React.Suspense>
+              </ErrorBoundary>
+            </PalcoDaPilha>
+          </div>
+        ) : aba === "demo" && Demo ? (
           <div
             /*
              * O palco cresce com a peça, com piso — não com a tela. Esticar até
@@ -431,8 +529,8 @@ export function ComponentFocus({
        * os controles, e as duas ações no pé — o destaque único é o comando de
        * instalar. Gruda no topo enquanto o palco rola.
        */}
-      <aside className="casa flex w-full shrink-0 flex-col gap-5 rounded-tile bg-casa-tile p-5 lg:sticky lg:top-[calc(var(--shell-header-h)+1rem)] lg:min-h-[min(72vh,640px)] lg:w-[340px]">
-        <header className="flex items-start gap-2">
+      <aside className="casa flex w-full shrink-0 flex-col gap-5 rounded-tile bg-casa-tile p-5 max-lg:contents lg:sticky lg:top-[calc(var(--shell-header-h)+1rem)] lg:min-h-[min(72vh,640px)] lg:w-[340px]">
+        <header className="flex items-start gap-2 max-lg:order-1 max-lg:items-center">
           <h1 id="ficha-titulo" className="min-w-0 flex-1 pt-1 text-casa-lg font-medium">
             {item.title}
           </h1>
@@ -468,18 +566,29 @@ export function ComponentFocus({
           </div>
         </header>
 
-        <p className="-mt-3 text-casa-base text-casa-fg-2">{item.description}</p>
+        <p className="text-casa-base text-casa-fg-2 max-lg:order-6 lg:-mt-3">{item.description}</p>
 
         {controles && aba === "demo" ? (
-          <Customize controles={controles.controles} presets={controles.presets} {...knobs} />
+          <Customize
+            className="max-lg:order-5"
+            controles={controles.controles}
+            presets={controles.presets}
+            {...knobs}
+          />
         ) : null}
 
-        <div className="mt-auto space-y-3">
+        <div className="max-lg:contents lg:mt-auto lg:space-y-3">
           {/* Curadoria do dono (só em dev): nota, comentário, arquivar ou excluir. */}
-          <Avaliacao item={item.name} />
-          <DepResumo name={item.name} />
-          <CopiarPraIA item={item} controles={controles?.controles ?? []} props={knobs.props} />
-          <Instalar name={item.name} />
+          <div className="empty:hidden max-lg:order-8">
+            <Avaliacao item={item.name} />
+          </div>
+          <div className="empty:hidden max-lg:order-7 pointer-coarse:[&_a]:inline-flex pointer-coarse:[&_a]:min-h-11 pointer-coarse:[&_a]:items-center">
+            <DepResumo name={item.name} />
+          </div>
+          <div className="max-lg:order-4">
+            <CopiarPraIA item={item} controles={controles?.controles ?? []} props={knobs.props} />
+          </div>
+          <Instalar name={item.name} className="max-lg:order-3" />
         </div>
       </aside>
     </article>

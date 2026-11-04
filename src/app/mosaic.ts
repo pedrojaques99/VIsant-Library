@@ -165,73 +165,79 @@ const ehEscuro = (cor: string) => {
   return (r * 299 + g * 587 + b * 114) / 1000 < 128;
 };
 
-export function useFundoEscuro() {
+/*
+ * Sonda, e não `getComputedStyle(document.body)`.
+ *
+ * O `<body>` deste app não pinta nada — quem carrega `bg-background` é um
+ * filho —, então ler a cor do body devolvia transparente e a conta caía
+ * sempre em "claro". E ler a custom property crua também não serve: ela vem
+ * em `oklch(...)`, que ninguém quer parsear à mão. Um nó com
+ * `background: var(--background)` faz o próprio navegador resolver o token
+ * em `rgb()`, que é a única leitura que não pode divergir do que está na
+ * tela. Mesma técnica que o `spring-dots` já usa para sondar cor.
+ *
+ * Uma sonda e um observador para a página inteira. Cada miniatura tinha os dela:
+ * 125 nós e 125 observadores no catálogo, todos recalculando estilo para responder
+ * a mesma pergunta.
+ */
+let sonda: HTMLDivElement | null = null;
+let fundoEscuro = false;
+const ouvintes = new Set<() => void>();
+
+const lerFundo = () => {
+  if (!sonda) {
+    sonda = document.createElement("div");
+    sonda.style.cssText =
+      "position:fixed;left:-9999px;top:0;width:1px;height:1px;visibility:hidden;background:var(--background)";
+    (document.getElementById("root") ?? document.body).appendChild(sonda);
+  }
+  const r = ehEscuro(getComputedStyle(sonda).backgroundColor);
+  if (r === null || r === fundoEscuro) return;
+  fundoEscuro = r;
+  ouvintes.forEach((avisar) => avisar());
+};
+
+const assinarFundo = (avisar: () => void) => {
+  ouvintes.add(avisar);
+  if (ouvintes.size > 1) return () => void ouvintes.delete(avisar);
+  lerFundo();
   /*
-   * Decidido no PRIMEIRO render, não num efeito.
+   * Três gatilhos, porque a marca chega tarde e por caminhos diferentes.
    *
-   * Com o valor inicial fixo em `false`, toda visita desenhava as capas claras,
-   * o efeito rodava e trocava tudo para escuro — um piscar de imagem a cada
-   * carregamento, e a rede baixando os dois conjuntos. O inicializador do
-   * `useState` roda antes da pintura, então a primeira foto já é a certa.
+   * O tema do vault é aplicado DEPOIS do primeiro quadro (a paleta vem da
+   * rede), e nem sempre por um atributo do `<html>`: pode ser uma folha
+   * injetada, e folha nova não dispara `MutationObserver` de atributo. Sem os
+   * três, a capa nascia clara sobre uma marca escura e ficava assim até a
+   * pessoa navegar.
    */
-  const [escuro, setEscuro] = React.useState(() => {
-    if (typeof document === "undefined") return false;
-    const sonda = document.createElement("div");
-    sonda.style.cssText =
-      "position:fixed;left:-9999px;top:0;width:1px;height:1px;background:var(--background)";
-    (document.getElementById("root") ?? document.body).appendChild(sonda);
-    const r = ehEscuro(getComputedStyle(sonda).backgroundColor);
-    sonda.remove();
-    return r ?? false;
-  });
+  const mo = new MutationObserver(lerFundo);
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["style", "class"] });
+  mo.observe(document.head, { childList: true, subtree: true });
+  // A rede não avisa quando termina de repintar; três leituras espaçadas
+  // cobrem o vault que responde em 100ms e o que responde em 1s, e param.
+  const relogios = [120, 400, 1200].map((ms) => setTimeout(lerFundo, ms));
+  return () => {
+    ouvintes.delete(avisar);
+    if (ouvintes.size) return;
+    mo.disconnect();
+    relogios.forEach(clearTimeout);
+    sonda?.remove();
+    sonda = null;
+  };
+};
 
-  React.useEffect(() => {
-    /*
-     * Sonda, e não `getComputedStyle(document.body)`.
-     *
-     * O `<body>` deste app não pinta nada — quem carrega `bg-background` é um
-     * filho —, então ler a cor do body devolvia transparente e a conta caía
-     * sempre em "claro". E ler a custom property crua também não serve: ela vem
-     * em `oklch(...)`, que ninguém quer parsear à mão. Um nó fora da tela com
-     * `background: var(--background)` faz o próprio navegador resolver o token
-     * em `rgb()`, que é a única leitura que não pode divergir do que está na
-     * tela. Mesma técnica que o `spring-dots` já usa para sondar cor.
-     */
-    const sonda = document.createElement("div");
-    sonda.style.cssText =
-      "position:fixed;left:-9999px;top:0;width:1px;height:1px;background:var(--background)";
-    (document.getElementById("root") ?? document.body).appendChild(sonda);
+/*
+ * Decidido no PRIMEIRO render, não num efeito: com o valor inicial fixo em `false`,
+ * toda visita desenhava as capas claras e trocava tudo para escuro, um piscar de
+ * imagem a cada carregamento e a rede baixando os dois conjuntos.
+ */
+const leituraDoFundo = () => {
+  if (typeof document !== "undefined" && !sonda) lerFundo();
+  return fundoEscuro;
+};
 
-    const ler = () => {
-      const r = ehEscuro(getComputedStyle(sonda).backgroundColor);
-      if (r !== null) setEscuro(r);
-    };
-    ler();
-
-    /*
-     * Três gatilhos, porque a marca chega tarde e por caminhos diferentes.
-     *
-     * O tema do vault é aplicado DEPOIS do primeiro quadro (a paleta vem da
-     * rede), e nem sempre por um atributo do `<html>`: pode ser uma folha
-     * injetada, e folha nova não dispara `MutationObserver` de atributo. Sem os
-     * três, a capa nascia clara sobre uma marca escura e ficava assim até a
-     * pessoa navegar.
-     */
-    const mo = new MutationObserver(ler);
-    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["style", "class"] });
-    mo.observe(document.head, { childList: true, subtree: true });
-    // A rede não avisa quando termina de repintar; três leituras espaçadas
-    // cobrem o vault que responde em 100ms e o que responde em 1s, e param.
-    const relogios = [120, 400, 1200].map((ms) => setTimeout(ler, ms));
-
-    return () => {
-      mo.disconnect();
-      relogios.forEach(clearTimeout);
-      sonda.remove();
-    };
-  }, []);
-
-  return escuro;
+export function useFundoEscuro() {
+  return React.useSyncExternalStore(assinarFundo, leituraDoFundo, () => false);
 }
 
 /** Linhas de 8px que uma altura em px consome, contando a goteira. */

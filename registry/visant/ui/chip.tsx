@@ -133,7 +133,7 @@ export function Chip({
         "border-[var(--border)] text-[var(--foreground)]",
         "transition-[background-color,color,border-color,transform]",
         "[transition-duration:var(--dur-press,120ms)]",
-        "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+        "[transition-timing-function:var(--ease-out)]",
         "hover:border-[var(--foreground)]",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:[outline-color:var(--brand,var(--foreground))]",
         "active:scale-[0.97] motion-reduce:active:scale-100",
@@ -150,7 +150,7 @@ export function Chip({
           className={cn(
             "grid transition-[grid-template-columns,opacity]",
             "[transition-duration:var(--dur-fast,160ms)]",
-            "[transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+            "[transition-timing-function:var(--ease-out)]",
             "motion-reduce:transition-none",
             pressed ? "grid-cols-[1fr] opacity-100" : "grid-cols-[0fr] opacity-0",
           )}

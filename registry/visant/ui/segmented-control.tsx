@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import type { LucideIcon } from "lucide-react";
+import { EASE_MOLA_CSS } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 export interface SegmentedOption<T extends string> {
@@ -41,8 +42,6 @@ interface SegmentedControlProps<T extends string> {
   "aria-label"?: string;
 }
 
-/** Overshoot curto da mola em CSS: passa ~6% e volta, dentro de 280 ms. */
-const MOLA_CSS = "cubic-bezier(0.34,1.4,0.64,1)";
 /** No `stretch`, quanto a borda de trás espera a da frente sair, em ms. */
 const ATRASO_ESTICA = 70;
 
@@ -181,7 +180,7 @@ export function SegmentedControl<T extends string>({
             right: `calc(0.25rem + (100% - 0.5rem) * ${n - 1 - activeIndex} / ${n})`,
             transitionProperty: "left, right",
             transitionDuration: "var(--dur-base,200ms)",
-            transitionTimingFunction: "var(--ease-out,cubic-bezier(0.23,1,0.32,1))",
+            transitionTimingFunction: "var(--ease-out)",
             transitionDelay:
               direcao > 0
                 ? `${ATRASO_ESTICA}ms, 0ms`
@@ -197,12 +196,12 @@ export function SegmentedControl<T extends string>({
             "pointer-events-none absolute inset-y-1 left-1 -z-10 rounded-lg bg-background shadow-sm",
             animation === "spring"
               ? "transition-transform [transition-duration:280ms]"
-              : "transition-transform [transition-duration:var(--dur-base,200ms)] [transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+              : "transition-transform [transition-duration:var(--dur-base,200ms)] [transition-timing-function:var(--ease-out)]",
           )}
           style={{
             width: `calc((100% - 0.5rem) / ${n})`,
             transform: `translateX(${activeIndex * 100}%)`,
-            transitionTimingFunction: animation === "spring" ? MOLA_CSS : undefined,
+            transitionTimingFunction: animation === "spring" ? EASE_MOLA_CSS : undefined,
           }}
         />
       ) : null}
@@ -230,7 +229,7 @@ export function SegmentedControl<T extends string>({
             tabIndex={i === activeIndex ? 0 : -1}
             className={cn(
               "relative flex items-center justify-center gap-1.5 rounded-lg font-medium",
-              "transition-[color,opacity,transform] [transition-duration:var(--dur-fast,160ms)] [transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+              "transition-[color,opacity,transform] [transition-duration:var(--dur-fast,160ms)] [transition-timing-function:var(--ease-out)]",
               "active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50",
               size === "sm" ? "text-[11px]" : "text-xs",
               variant === "fill"
@@ -251,7 +250,7 @@ export function SegmentedControl<T extends string>({
                 aria-hidden="true"
                 className={cn(
                   "pointer-events-none absolute inset-0 -z-10 rounded-lg bg-background shadow-sm",
-                  "transition-[opacity,transform] [transition-duration:var(--dur-base,200ms)] [transition-timing-function:var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+                  "transition-[opacity,transform] [transition-duration:var(--dur-base,200ms)] [transition-timing-function:var(--ease-out)]",
                   active ? "scale-100 opacity-100" : "scale-[0.96] opacity-0",
                 )}
               />

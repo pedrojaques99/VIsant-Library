@@ -29,7 +29,8 @@
       "lucide-react"
     ],
     "registryDependencies": [
-      "utils"
+      "utils",
+      "@visant/motion"
     ],
     "files": [
       {

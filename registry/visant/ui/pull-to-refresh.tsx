@@ -49,6 +49,9 @@ import { playSfx } from "@/lib/sfx-bus";
  *    pessoa mexer nele: é a demonstração do gesto, no próprio componente.
  */
 
+// Aceno que ensina o gesto: é uma demonstração, precisa de tempo para ser lida.
+const ACENO_S = 0.9;
+
 export interface PullToRefreshProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "onAnimationStart" | "onDrag" | "onDragEnd" | "onDragStart" | "onAnimationEnd"> {
   /** Busca o dado novo. Enquanto a promessa não resolve, o anel gira. */
@@ -141,7 +144,7 @@ export function PullToRefresh({
       if (gesto.current || carregandoRef.current) return;
       anim.current?.stop();
       anim.current = animate(altura, [0, Math.round(threshold * 0.45), 0], {
-        duration: 0.9,
+        duration: ACENO_S,
         times: [0, 0.35, 1],
         ease: ["easeOut", "easeInOut"],
       });

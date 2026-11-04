@@ -23,7 +23,7 @@
  * robô de prévia lê antes de qualquer JavaScript existir.
  */
 
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
+import { mkdirSync, readFileSync, readdirSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -67,6 +67,88 @@ function escrever(caminhoRelativo, html) {
   writeFileSync(join(dir, "index.html"), html);
 }
 
+/*
+ * A primeira dobra no próprio HTML.
+ *
+ * Em Slow 4G (400 kbps) o JavaScript de entrada leva 5 s só para descer: esperar o React
+ * significava 9 a 14 s de tela vazia. O título sai aqui, com um CSS mínimo no próprio HTML, e
+ * o `App.tsx` reaproveita este `<main>` como espera da rota.
+ *
+ * A folha principal desce para o fim do `<body>`: ela só segura o que vem depois dela, então
+ * a dobra pinta sem esperá-la. O `<script>` vazio logo depois para o parser até a folha chegar,
+ * e o módulo do app só roda depois disso: sem ele o Safari subia o React sem estilo. O texto é conferido contra a fonte para
+ * não envelhecer em silêncio.
+ */
+const H1_CASA = "font-size:2rem;line-height:2.25rem;letter-spacing:-.02em";
+const H1_HUB = "font-size:clamp(2.75rem,6.5vw,5.5rem);line-height:1.08;letter-spacing:-.03em";
+const H1_KILLER = "font-size:clamp(2.25rem,4.4vw,3.5rem);line-height:1.05;letter-spacing:-.03em";
+/* O tema em camada própria, declarada antes das do Tailwind: quando a folha chega, ela manda. */
+const CSS_DOBRA = `<style>@layer dobra{html{background:oklch(.985 0 0);color:oklch(.17 0 0)}html.dark{background:oklch(.13 0 0);color:oklch(.97 0 0)}}.dobra-cab{height:88px}.dobra{box-sizing:border-box;max-width:90rem;margin:0 auto;padding:2.5rem 1rem 3rem;font-family:"Geist Variable",ui-sans-serif,system-ui,sans-serif}.dobra h1{margin:0;font-weight:500}.dobra p{margin:1.5rem 0 0;max-width:48ch;font-size:1rem;line-height:1.5rem;opacity:.72}@media(min-width:640px){.dobra-cab{height:56px}.dobra{padding:3.5rem 1.5rem 3rem}}</style>`;
+const DOBRAS = {
+  catalogo: {
+    fonte: "src/app/Gallery.tsx",
+    h1: "A library da Visant",
+    classe: H1_CASA,
+    sub: "Componentes e shaders pra React. Cada um veste a marca que você escolher.",
+  },
+  marca: {
+    h1: "Marca",
+    classe: H1_CASA,
+    sub: "Identidade, cor, tipografia, forma e movimento, com um comando para instalar.",
+    chunks: [/^BrandStudio-.*\.js$/],
+  },
+  skills: {
+    fonte: "src/app/skills/Hub.tsx",
+    h1: "Tire a cara de IA da sua interface.",
+    classe: H1_HUB,
+    sub: "Skills pro Claude Code: interface, copy, motion, vídeo e projeto grande.",
+    chunks: [/^Hub-.*\.js$/],
+  },
+  "skills/filme": {
+    fonte: "src/app/skills/Filme.tsx",
+    h1: "Tire a cara de IA da sua interface.",
+    classe: H1_HUB,
+    sub: "Skills grátis pro Claude Code. Role a página e veja esta tela ficar limpa.",
+    chunks: [/^Filme-.*\.js$/, /^skills\.generated-.*\.js$/],
+    imagens: ["/media/skills/filme/mata-antes.webp"],
+  },
+  "skills/killer": {
+    fonte: "src/app/skills/CarroChefe.tsx",
+    h1: "Tire a cara de IA da sua tela antes do PR.",
+    classe: H1_KILLER,
+    sub: "A visant-killer roda quatro detectores no seu código, abre a tela e discute com o próprio veredito.",
+    chunks: [/^CarroChefe-.*\.js$/],
+  },
+};
+
+const ASSETS = readdirSync(join(DIST, "assets"));
+
+function comDobra(html, slug) {
+  const d = DOBRAS[slug];
+  if (!d) return html;
+  /* Rodar duas vezes sobre o mesmo dist perderia a folha de estilo: a dobra exige o HTML cru do Vite. */
+  if (!html.includes('<div id="root"></div>')) {
+    console.error("dist/index.html já passou pelo prerender: rode `vite build` antes.");
+    process.exit(1);
+  }
+  if (d.fonte && !readFileSync(join(ROOT, d.fonte), "utf8").includes(d.h1)) {
+    console.error(`o título da primeira dobra de /${slug} não existe mais em ${d.fonte}: "${d.h1}"`);
+    process.exit(1);
+  }
+  const preloads = [
+    ...(d.chunks ?? []).flatMap((re) => ASSETS.filter((f) => re.test(f))).map((f) => `<link rel="modulepreload" crossorigin href="/assets/${f}">`),
+    ...(d.imagens ?? []).map((src) => `<link rel="preload" as="image" href="${src}" fetchpriority="low">`),
+  ];
+  /* O tema sai aqui também: esta dobra pinta antes de o `main.tsx` rodar. */
+  const tema = `<script>try{document.documentElement.classList.toggle("dark",localStorage.getItem("visant:ui:tema")!=="claro")}catch(e){document.documentElement.classList.add("dark")}</script>`;
+  const dobra = `<div class="dobra-cab"></div><main class="casa dobra"><h1 style="${d.classe}">${escapar(d.h1)}</h1><p>${escapar(d.sub)}</p></main>`;
+  const folha = html.match(/<link rel="stylesheet"[^>]*>/)?.[0] ?? "";
+  return html
+    .replace(folha, "")
+    .replace("</head>", `  ${tema}\n    ${CSS_DOBRA}\n    ${preloads.join("\n    ")}\n  </head>`)
+    .replace('<div id="root"></div>', `<div id="root">${dobra}</div>\n      ${folha}\n      <script>0</script>`);
+}
+
 // --- páginas -----------------------------------------------------------------
 
 /* A home é o catálogo. Os kits foram a porta de entrada por um tempo, e saíram
@@ -104,46 +186,46 @@ const HOME = {
 
 writeFileSync(
   join(DIST, "index.html"),
-  comMeta({ ...HOME, url: `${SITE}/`, imagem: `${SITE}/og/home.png` }),
+  comDobra(comMeta({ ...HOME, url: `${SITE}/`, imagem: `${SITE}/og/home.png` }), "catalogo"),
 );
 
 const SECOES = [
   {
     slug: "kits",
     noindex: true,
-    titulo: "Kits — @visant/ui",
+    titulo: "Kits / @visant/ui",
     descricao: "Cinco composições montadas com as peças do registry: mesa de trabalho, landing, motion, bancada vintage e marca viva.",
   },
   {
     slug: "catalogo",
-    titulo: "Catálogo — @visant/ui",
+    titulo: "Catálogo / @visant/ui",
     /* `/catalogo` deixou de ser a página com tudo dentro: virou o índice das
        categorias, e cada fatia tem endereço próprio em `/catalogo/<familia>`. */
     descricao: `As ${registry.items.length} peças do registry, divididas por categoria — cada fatia com demo viva e comando de instalação.`,
   },
   {
     slug: "skills",
-    titulo: "Skills — Visant",
+    titulo: "Skills / Visant",
     descricao: "As skills públicas da Visant para Claude Code: interface, motion, copy e vídeo, mostradas em uso.",
   },
   {
     slug: "skills/filme",
-    titulo: "Skills em filme — Visant",
+    titulo: "Skills em filme / Visant",
     descricao: "O que cada skill da Visant faz, em filme: telas fictícias, montadas para mostrar cada passada.",
   },
   {
     slug: "skills/killer",
-    titulo: "visant-killer e visant-design — Visant",
+    titulo: "visant-killer e visant-design / Visant",
     descricao: "A auditoria que reprova tela com cara de IA e a porta que leva a tela até o fim.",
   },
   {
     slug: "docs",
-    titulo: "Docs — @visant/ui",
+    titulo: "Docs / @visant/ui",
     descricao: "Libs, hooks, temas e regras do registry, sem interface própria.",
   },
   {
     slug: "marca",
-    titulo: "Marca — @visant/ui",
+    titulo: "Marca / @visant/ui",
     descricao: "O brand book da marca escolhida: cor, tipografia, forma e movimento, pesquisáveis e prontos pra copiar.",
   },
   /* `/rig` virou apelido de `/kit/rig-vintage`. A página continua existindo
@@ -152,14 +234,14 @@ const SECOES = [
   {
     slug: "rig",
     noindex: true,
-    titulo: "Rig vintage — @visant/ui",
+    titulo: "Rig vintage / @visant/ui",
     descricao: "A bancada de áudio: knobs, faders, VU, osciloscópio e paleta de comandos.",
   },
   /* `/lab` não está no cabeçalho, mas entra por endereço: sem HTML próprio ele
      dá 404 na Vercel, porque o rewrite pro index.html não cobre esta vitrine. */
   {
     slug: "lab",
-    titulo: "Lab — @visant/ui",
+    titulo: "Lab / @visant/ui",
     descricao: "Bancada de interações: uma nova por dia, e só fica a que presta.",
   },
   /* `/callback` é a volta do OAuth do Visant Labs (`visant-auth.tsx`). Mesmo
@@ -167,7 +249,7 @@ const SECOES = [
      ler o `?code=`, e o login nunca fecha. */
   {
     slug: "callback",
-    titulo: "Entrando — @visant/ui",
+    titulo: "Entrando / @visant/ui",
     descricao: "Conectando sua conta Visant Labs.",
   },
 ];
@@ -187,7 +269,7 @@ const KITS = [
 ].map(([, slug, title, tese]) => ({
   slug: `kit/${slug}`,
   noindex: true,
-  titulo: `${title} — @visant/ui`,
+  titulo: `${title} / @visant/ui`,
   descricao: tese.replace(/\\"/g, '"'),
 }));
 
@@ -216,7 +298,7 @@ const FAMILIAS = familias.map(({ key, label }) => {
     slug: `catalogo/${key}`,
     /* "— catálogo" não é enfeite: a família `marca` e a seção `/marca` (o Brand
        Studio) têm o mesmo rótulo, e sem isto os dois documentos sairiam com o
-       título "Marca — @visant/ui". Dois links diferentes com a mesma cara no
+       título "Marca / @visant/ui". Dois links diferentes com a mesma cara no
        chat e na busca é o defeito que o prerender existe para não ter. */
     titulo: `${label} — catálogo @visant/ui`,
     descricao: `${n} ${n === 1 ? "peça" : "peças"} da categoria ${label}, com demo viva e comando de instalação.`,
@@ -238,18 +320,20 @@ if (!familias.length || vazias.length) {
 /* A Vercel serve este arquivo, com status 404, em todo endereço sem página: o app sobe e mostra a tela dele. */
 writeFileSync(
   join(DIST, "404.html"),
-  comMeta({ titulo: "Página não encontrada — @visant/ui", descricao: HOME.descricao, url: `${SITE}/`, imagem: `${SITE}/og/home.png`, noindex: true }),
+  comMeta({ titulo: "Página não encontrada / @visant/ui", descricao: HOME.descricao, url: `${SITE}/`, imagem: `${SITE}/og/home.png`, noindex: true }),
 );
 
+const comDobraFinal = (slug, meta) => comDobra(comMeta(meta), slug);
+
 for (const s of [...SECOES, ...FAMILIAS, ...KITS]) {
-  escrever(s.slug, comMeta({ titulo: s.titulo, descricao: s.descricao, url: `${SITE}/${s.slug}`, imagem: `${SITE}/og/home.png`, noindex: s.noindex }));
+  escrever(s.slug, comDobraFinal(s.slug, { titulo: s.titulo, descricao: s.descricao, url: `${SITE}/${s.slug}`, imagem: `${SITE}/og/home.png`, noindex: s.noindex }));
 }
 
 for (const item of registry.items) {
   escrever(
     `c/${item.name}`,
     comMeta({
-      titulo: `${item.title ?? item.name} — @visant/ui`,
+      titulo: `${item.title ?? item.name} / @visant/ui`,
       descricao: item.description ?? HOME.descricao,
       url: `${SITE}/c/${item.name}`,
       imagem: `${SITE}/og/${item.name}.png`,

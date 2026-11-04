@@ -29,7 +29,8 @@
       "@radix-ui/react-dropdown-menu"
     ],
     "registryDependencies": [
-      "utils"
+      "utils",
+      "@visant/motion"
     ],
     "files": [
       {

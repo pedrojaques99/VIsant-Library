@@ -22,6 +22,7 @@ import * as React from "react";
 import { Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BrandThemeProvider } from "@/lib/brand-theme";
+import { redeLenta } from "@/lib/rede";
 import { Solo, fundoDoSolo, propsDaQuery } from "./Solo";
 import { Busca, BotaoDeBusca, useAtalhoDeBusca } from "./busca";
 import { BrandSelector } from "../../registry/visant/ui/brand-selector";
@@ -52,9 +53,20 @@ const BrandStudioBody = React.lazy(() =>
  */
 const carregarFicha = () => import("./ComponentFocus");
 const ComponentFocus = React.lazy(() => carregarFicha().then((m) => ({ default: m.ComponentFocus })));
-if (typeof window !== "undefined") {
+if (typeof window !== "undefined" && !redeLenta() && /^\/($|c\/|catalogo)/.test(window.location.pathname)) {
   const ocioso = window.requestIdleCallback ?? ((fn: () => void) => window.setTimeout(fn, 1500));
   window.addEventListener("load", () => ocioso(() => void carregarFicha()), { once: true });
+}
+
+/*
+ * A primeira dobra que o `prerender.mjs` escreveu no HTML, lida antes de o React limpar a
+ * raiz. É ela que segura a tela até o chunk da rota chegar: sem isto, o título que já estava
+ * pintado sumia na subida do app e voltava segundos depois. Sem prerender, a altura de uma tela.
+ */
+const dobraDoHtml = typeof document !== "undefined" ? (document.querySelector("#root > main")?.outerHTML ?? "") : "";
+
+function EsperaDaRota() {
+  return <div className="min-h-screen" aria-busy="true" dangerouslySetInnerHTML={{ __html: dobraDoHtml }} />;
 }
 /* O laboratório de interações (`/lab`): só quem abre a rota paga pelo chunk. */
 const Lab = React.lazy(() => import("./Lab").then((m) => ({ default: m.Lab })));
@@ -127,15 +139,15 @@ const SUBPAGINAS_DE_SKILLS = ["filme", "killer"];
 const ROTAS_CONHECIDAS = ["catalogo", "marca", "skills", "kits", "kit", "c", "rig", "lab", "docs", "callback"];
 
 const TITULO_DA_VIEW: Partial<Record<View, string>> = {
-  marca: "Marca — @visant/ui",
-  docs: "Docs — @visant/ui",
-  kits: "Kits — @visant/ui",
-  lab: "Lab — @visant/ui",
-  "404": "Página não encontrada — @visant/ui",
+  marca: "Marca / @visant/ui",
+  docs: "Docs / @visant/ui",
+  kits: "Kits / @visant/ui",
+  lab: "Lab / @visant/ui",
+  "404": "Página não encontrada / @visant/ui",
 };
 const TITULO_DA_SKILL: Record<string, string> = {
-  filme: "Skills em filme — Visant",
-  killer: "visant-killer e visant-design — Visant",
+  filme: "Skills em filme / Visant",
+  killer: "visant-killer e visant-design / Visant",
 };
 
 // --- rota --------------------------------------------------------------------
@@ -213,6 +225,8 @@ function formatPath({ view, focus, kit, familia }: Route): string {
 
 function useRoute() {
   const [route, setRoute] = React.useState<Route>(() => parsePath(window.location));
+  /* Onde a grade estava quando a ficha abriu: fechar a ficha devolve ao mesmo card. */
+  const yDaGrade = React.useRef<number | null>(null);
 
   // Link antigo com hash entra e sai limpo, sem entulhar o histórico.
   React.useEffect(() => {
@@ -234,6 +248,7 @@ function useRoute() {
 
   const navigate = React.useCallback((next: Route) => {
     const caminho = formatPath(next);
+    if (next.focus && !window.location.pathname.startsWith("/c/")) yDaGrade.current = window.scrollY;
     if (window.location.pathname !== caminho) {
       // Cada passo vira entrada no histórico — é o que faz o botão voltar
       // significar "voltar pra grade" de dentro da vista de foco.
@@ -241,6 +256,27 @@ function useRoute() {
     }
     setRoute(next);
   }, []);
+
+  /*
+   * Abrir um lugar novo começa no topo.
+   *
+   * O documento encurta quando a grade sai, e o navegador só prende a rolagem no
+   * novo fim: a ficha aberta do meio da grade nascia com o título já fora da tela.
+   * Trocar de fatia não entra aqui: quem cuida dela é a `Gallery`, que para na barra.
+   */
+  const antes = React.useRef(route);
+  React.useLayoutEffect(() => {
+    const anterior = antes.current;
+    antes.current = route;
+    if (route.focus) {
+      if (route.focus !== anterior.focus) window.scrollTo(0, 0);
+    } else if (anterior.focus) {
+      window.scrollTo(0, yDaGrade.current ?? 0);
+      yDaGrade.current = null;
+    } else if (route.view !== anterior.view || (route.view === "skills" && route.kit !== anterior.kit)) {
+      window.scrollTo(0, 0);
+    }
+  }, [route]);
 
   return [route, navigate] as const;
 }
@@ -279,9 +315,9 @@ function Shell() {
   React.useEffect(() => {
     const peca = route.focus ? CATALOG.find((i) => i.name === route.focus) : null;
     document.title = peca
-      ? `${peca.title} — @visant/ui`
+      ? `${peca.title} / @visant/ui`
       : route.view === "skills"
-        ? (TITULO_DA_SKILL[route.kit ?? ""] ?? "Skills — Visant")
+        ? (TITULO_DA_SKILL[route.kit ?? ""] ?? "Skills / Visant")
         : (TITULO_DA_VIEW[route.view] ?? "@visant/ui — a library da Visant");
   }, [route.focus, route.view, route.kit]);
   const [dark, setDark] = useDarkMode();
@@ -295,7 +331,10 @@ function Shell() {
   const setView = React.useCallback(
     // Clicar na aba "Catálogo" volta ao índice das categorias, nunca à última
     // fatia aberta: aba é começo de caminho, não retomada de estado.
-    (view: View) => navigate({ view, focus: null, kit: null, familia: null }),
+    (view: View) => {
+      navigate({ view, focus: null, kit: null, familia: null });
+      window.scrollTo(0, 0);
+    },
     [navigate],
   );
   /* Fechar o foco devolve à fatia de onde a peça foi aberta — se ela foi aberta
@@ -367,13 +406,17 @@ function Shell() {
        * Era o lugar de nove controles: densidade, dois segmentados, um seletor de
        * marca com cinco informações e uma tecla de atalho anunciada. Fundo sólido
        * e sem linha embaixo: o que separa o cabeçalho do resto é o próprio scroll.
+       *
+       * Só uma linha gruda, em toda largura. É a altura que `--shell-header-h`
+       * promete a quem gruda embaixo dele (a barra de filtro, a sala, o palco).
+       * No celular as seções ficam na linha de baixo, fora do que gruda.
        */}
       <header className="casa sticky top-0 z-40 bg-casa-bg">
-        <div className="shell flex h-[var(--shell-header-h)] items-center gap-6">
+        <div className="shell flex h-[var(--shell-header-h)] items-center gap-2 sm:gap-6">
           <button
             type="button"
             onClick={() => setView("catalogo")}
-            className="flex shrink-0 items-center gap-2 rounded-control text-casa-base font-medium"
+            className="alvo-toque flex shrink-0 items-center gap-2 rounded-control text-casa-base font-medium"
           >
             <span className="h-4 w-4 rounded-[5px] bg-casa-fg" aria-hidden />
             <span className="max-[359px]:sr-only">visant/ui</span>
@@ -386,7 +429,7 @@ function Shell() {
           */}
           <Secoes view={route.view} onView={setView} className="hidden sm:flex" />
 
-          <div className="ml-auto flex items-center gap-1.5">
+          <div className="ml-auto flex min-w-0 items-center gap-1.5 pointer-coarse:gap-0">
             <BotaoDeBusca onClick={abrirBusca} />
             {/* O liga e desliga do som, no tom dos outros ícones da casa. */}
             {/* O catálogo no agente de IA de quem chegou: MCP do shadcn + @visant. */}
@@ -410,11 +453,12 @@ function Shell() {
             <MinhasMarcas />
           </div>
         </div>
-        {/* No celular as seções descem para uma segunda linha em vez de sumirem. */}
-        <div className="shell pb-2 sm:hidden">
-          <Secoes view={route.view} onView={setView} />
-        </div>
       </header>
+
+      {/* No celular as seções descem para uma linha própria, que rola com a página. */}
+      <div className="casa shell sm:hidden">
+        <Secoes view={route.view} onView={setView} className="h-11" />
+      </div>
 
       {route.view === "kits" && (
         <KitRoom
@@ -460,9 +504,9 @@ function Shell() {
           />
         ))}
 
-      {/* A espera é a altura de uma tela, não um "carregando…": trocar de aba não
-          deve fazer a página encolher e voltar a crescer. */}
-      <React.Suspense fallback={<div className="min-h-screen" aria-busy="true" />}>
+      {/* A espera nunca é um "carregando…": trocar de aba não deve fazer a página encolher
+          e voltar a crescer, e a abertura segura o título que o HTML já pintou. */}
+      <React.Suspense fallback={<EsperaDaRota />}>
         {route.view === "marca" && <BrandStudioBody />}
         {route.view === "lab" && <Lab />}
         {route.view === "docs" && <Docs />}
@@ -504,6 +548,9 @@ const SOM_DA_CASA =
   "max-lg:!hidden size-8 rounded-control text-casa-fg-2 hover:border-transparent hover:bg-casa-tile hover:text-casa-fg data-[state=on]:text-casa-fg-2 focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]";
 
 const GATILHO_DE_MARCA = [
+  /* O nome da marca é o que menos cabe: no celular fica o ícone, e o nome segue para leitor de tela. */
+  "max-[479px]:[&>span:nth-child(2)]:sr-only max-[479px]:!pr-1 max-w-48 pointer-coarse:!h-11 pointer-coarse:min-w-11 pointer-coarse:justify-center",
+  // casa-lint/vidro: aqui o blur é DESLIGADO — a peça publicada traz o vidro de fábrica
   "h-8 gap-2 !rounded-control !border-0 !bg-transparent !py-0 !pl-1 !pr-2.5 !backdrop-blur-none",
   "hover:!bg-casa-tile hover:![box-shadow:none] active:!scale-100",
   "[&>span:first-child]:!h-5 [&>span:first-child]:!w-5 [&>span:first-child]:!rounded-[6px] [&>span:first-child]:!border-0",
@@ -533,7 +580,7 @@ function Secoes({
           onClick={() => onView(v.value)}
           aria-current={view === v.value ? "page" : undefined}
           className={cn(
-            "rounded-control text-casa-base transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] focus-visible:[box-shadow:var(--focus)]",
+            "alvo-toque rounded-control text-casa-base transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] focus-visible:[box-shadow:var(--focus)]",
             view === v.value ? "text-casa-fg" : "text-casa-fg-2 hover:text-casa-fg",
           )}
         >

@@ -127,7 +127,7 @@ export function Plate({
            deliberada à regra de não escalar no hover. O que a regra proíbe é o
            card inteiro inchar sob o cursor; aqui nada muda de tamanho na página,
            só o enquadramento da imagem dentro de uma caixa que não se mexe. */
-        "[&_img]:transition-transform [&_img]:[transition-duration:var(--dur-base,200ms)] [&_img]:ease-[var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+        "[&_img]:transition-transform [&_img]:[transition-duration:var(--dur-base,200ms)] [&_img]:ease-[var(--ease-out)]",
         zoomOnGroupHover && "[.group:hover_&_img]:scale-[1.045]",
         className,
       )}
@@ -164,7 +164,7 @@ export function Plate({
              compositor resolve sem relayout. */
           className={cn(
             "pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[22%] origin-bottom",
-            "transition-[transform,opacity] [transition-duration:var(--dur-base,200ms)] ease-[var(--ease-out,cubic-bezier(0.23,1,0.32,1))]",
+            "transition-[transform,opacity] [transition-duration:var(--dur-base,200ms)] ease-[var(--ease-out)]",
             "[.group:hover_&]:scale-x-[1.14] [.group:hover_&]:opacity-70",
             "motion-reduce:transition-none motion-reduce:[.group:hover_&]:scale-x-100 motion-reduce:[.group:hover_&]:opacity-100",
           )}

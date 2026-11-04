@@ -5,6 +5,10 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { cn } from "@/lib/utils";
 
+// Peso da esteira no gesto: inércia, não transição de UI.
+const INERCIA_S = 0.5;
+const EMPURRAO_S = 0.4;
+
 gsap.registerPlugin(ScrollTrigger);
 
 /**
@@ -223,7 +227,7 @@ export function Marquee({
           // cru gruda no dedo e treme junto com o delta do wheel. O `quickTo`
           // dá 0,5s de inércia — a esteira ganha peso e para de deslizar.
           const toTime = gsap.quickTo(tl, "totalTime", {
-            duration: 0.5,
+            duration: INERCIA_S,
             ease: "power3.out",
           });
 
@@ -305,7 +309,7 @@ export function Marquee({
         // empurrão morre em silêncio: a faixa continua andando, só que surda ao
         // scroll. Custou uma sessão de debug — fica registrado.
         const toScale = gsap.quickTo(tl, "timeScale", {
-          duration: 0.4,
+          duration: EMPURRAO_S,
           ease: "power2.out",
         });
 

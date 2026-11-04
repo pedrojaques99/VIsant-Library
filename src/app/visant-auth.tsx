@@ -92,7 +92,7 @@ export function VisantAuthProvider({ children }: { children: React.ReactNode }) 
       headers: { "content-type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ client_id: CLIENT_ID, ...corpo }),
     });
-    if (!res.ok) throw new Error(`token → HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`token: HTTP ${res.status}`);
     const json = (await res.json()) as { access_token: string; refresh_token?: string };
     token.current = json.access_token;
     // O refresh é o que faz um F5 não expulsar a pessoa. Fica separado do acesso.
@@ -126,7 +126,7 @@ export function VisantAuthProvider({ children }: { children: React.ReactNode }) 
     (async () => {
       try {
         if (code && verifier) {
-          if (!stateOk) throw new Error("state não confere — login descartado");
+          if (!stateOk) throw new Error("state não confere, login descartado");
           await trocar({
             grant_type: "authorization_code",
             code,
@@ -189,7 +189,7 @@ export function VisantAuthProvider({ children }: { children: React.ReactNode }) 
       const res = await fetch(`${API}/api/brand-guidelines?limit=100`, {
         headers: { Authorization: `Bearer ${token.current}`, Accept: "application/json" },
       });
-      if (!res.ok) throw new Error(`brand-guidelines → HTTP ${res.status}`);
+      if (!res.ok) throw new Error(`brand-guidelines: HTTP ${res.status}`);
       const json = await res.json();
       const lista = Array.isArray(json) ? json : (json.items ?? json.data ?? []);
       setMarcas(

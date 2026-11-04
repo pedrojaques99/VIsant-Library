@@ -130,30 +130,33 @@ const MAX_STAGGER_TOTAL = 0.4;
  * propriedade que o corte da linha atrapalharia (o desfoque vazaria pela
  * borda, o `clip-path` já é o próprio corte).
  */
+// Título entrando no scroll: marketing, acima do teto de UI de propósito.
+const LONGO = { mask: 0.9, blur: 0.75, curtain: 0.8, rise: 0.7 } as const;
+
 const RECEITAS: Record<
   LineRevealVariant,
   { de: gsap.TweenVars; para: gsap.TweenVars; mascara: boolean }
 > = {
   mask: {
     de: { yPercent: 108 },
-    para: { yPercent: 0, duration: 0.9, ease: "power3.out" },
+    para: { yPercent: 0, duration: LONGO.mask, ease: "power3.out" },
     mascara: true,
   },
   blur: {
     de: { autoAlpha: 0, y: 14, filter: "blur(10px)" },
-    para: { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.75, ease: "power2.out" },
+    para: { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: LONGO.blur, ease: "power2.out" },
     mascara: false,
   },
   curtain: {
     de: { clipPath: "inset(0 100% 0 0)" },
     // `inOut` porque a cortina TEM as duas pontas conhecidas e atravessa a
     // linha inteira — mesmo critério do `@visant/photo-compare`.
-    para: { clipPath: "inset(0 0% 0 0)", duration: 0.8, ease: "power2.inOut" },
+    para: { clipPath: "inset(0 0% 0 0)", duration: LONGO.curtain, ease: "power2.inOut" },
     mascara: false,
   },
   rise: {
     de: { autoAlpha: 0, y: 22 },
-    para: { autoAlpha: 1, y: 0, duration: 0.7, ease: "power3.out" },
+    para: { autoAlpha: 1, y: 0, duration: LONGO.rise, ease: "power3.out" },
     mascara: false,
   },
 };

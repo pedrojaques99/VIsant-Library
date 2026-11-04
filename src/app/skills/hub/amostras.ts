@@ -331,6 +331,16 @@ export const CODIGO_LIMPO = [
   "}",
 ];
 
+/** O mesmo cartão, desenhado: é o que a demo mostra. A cor é a do `text-purple-500` do README. */
+export const SLOP_CARTAO = {
+  rotulo: "01 / Pricing",
+  titulo: "Design that",
+  enfase: "converts",
+  lead: "Unlock your full potential — a revolutionary way to ship.",
+  preco: "$49 per month",
+  cor: "#a855f7",
+};
+
 export interface LinhaSaida {
   linha: string;
   alvo?: number;
@@ -366,20 +376,30 @@ export const SAIDA_ABERTA: LinhaSaida[] = [
   { passo: 4, linha: "but this is not an audit yet." },
 ];
 
-/* ---- motion ---- */
+/* ---- motion ----
+ * Slop de propósito: é o "errado" que as demos mostram e o texto do que o lint
+ * reprovaria. Cada linha leva a exceção, então o resto do arquivo segue vigiado. */
 
+// motion-lint-disable-next-line ease-in-on-ui  demonstração do erro, nada disto é animação do site
+// motion-lint-disable-next-line hardcoded-curve  demonstração do erro, nada disto é animação do site
 export const CURVA_ERRADA = { css: "cubic-bezier(0.42, 0, 1, 1)", p: [0.42, 0, 1, 1] as const, nome: "ease-in" };
 export const CURVA_CERTA = { css: "var(--ease-out)", p: [0.23, 1, 0.32, 1] as const, nome: "--ease-out" };
 
 /** Duração errada de propósito: é a demonstração do que o motion-lint reprova. */
 export const LENTO_MS = 700;
+// motion-lint-disable-next-line scale-zero  demonstração do erro, nada disto é animação do site
 export const ESCALA_ERRADA = "scale(0)";
 export const TRANSICAO_ERRADA = `all ${LENTO_MS}ms ${CURVA_ERRADA.css}`;
 
 export const CENAS_MOTION = {
   menu: {
     nome: "Menu",
+    // motion-lint-disable-next-line ease-in-on-ui  demonstração do erro, nada disto é animação do site
+    // motion-lint-disable-next-line scale-zero  demonstração do erro, nada disto é animação do site
+    // motion-lint-disable-next-line slow-ui-duration  demonstração do erro, nada disto é animação do site
+    // motion-lint-disable-next-line transition-all  demonstração do erro, nada disto é animação do site
     codigoErrado: 'className="transition-all duration-700 ease-in scale-0"',
+    // motion-lint-disable-next-line transition-all  demonstração do erro, nada disto é animação do site
     lint: ["HIGH  ease-in-on-ui", "HIGH  scale-zero", "HIGH  slow-ui-duration", "MEDIUM  transition-all"],
     codigoCerto: 'className="[transition-duration:var(--dur-base)] [transition-timing-function:var(--ease-out)] scale-95"',
     ms: 200,
@@ -387,7 +407,12 @@ export const CENAS_MOTION = {
   },
   modal: {
     nome: "Modal",
+    // motion-lint-disable-next-line ease-in-on-ui  demonstração do erro, nada disto é animação do site
+    // motion-lint-disable-next-line scale-zero  demonstração do erro, nada disto é animação do site
+    // motion-lint-disable-next-line slow-ui-duration  demonstração do erro, nada disto é animação do site
+    // motion-lint-disable-next-line transition-all  demonstração do erro, nada disto é animação do site
     codigoErrado: 'className="transition-all duration-700 ease-in scale-0"',
+    // motion-lint-disable-next-line transition-all  demonstração do erro, nada disto é animação do site
     lint: ["HIGH  ease-in-on-ui", "HIGH  scale-zero", "HIGH  slow-ui-duration", "MEDIUM  transition-all"],
     codigoCerto: 'className="[transition-duration:var(--dur-slow)] [transition-timing-function:var(--ease-out)] scale-95"',
     ms: 300,
@@ -395,7 +420,11 @@ export const CENAS_MOTION = {
   },
   botao: {
     nome: "Botão",
+    // motion-lint-disable-next-line ease-in-on-ui  demonstração do erro, nada disto é animação do site
+    // motion-lint-disable-next-line slow-ui-duration  demonstração do erro, nada disto é animação do site
+    // motion-lint-disable-next-line transition-all  demonstração do erro, nada disto é animação do site
     codigoErrado: 'className="transition-all duration-700 ease-in active:scale-90"',
+    // motion-lint-disable-next-line transition-all  demonstração do erro, nada disto é animação do site
     lint: ["HIGH  ease-in-on-ui", "HIGH  slow-ui-duration", "MEDIUM  transition-all"],
     codigoCerto: 'className="[transition-duration:var(--dur-press)] [transition-timing-function:var(--ease-out)] active:scale-[0.97]"',
     ms: 120,

@@ -4,6 +4,7 @@ import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion, type Transition } from "motion/react";
 import { ChevronLeft, Nfc } from "lucide-react";
 
+import { DUR, INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -230,7 +231,7 @@ export function WalletStack({
             style: { width: LARG, height: ALT, marginLeft: -LARG / 2, zIndex: total - prof, transformOrigin: "50% 0%" },
             initial: false as const,
             animate: { y, scale },
-            transition: reduzir ? { duration: 0 } : mola,
+            transition: reduzir ? INSTANT : mola,
           };
           return (
             <motion.button
@@ -259,8 +260,8 @@ export function WalletStack({
               style={{ top: ALT + 14, bottom: 40 }}
               initial={reduzir ? { opacity: 0 } : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, transition: { duration: 0.12 } }}
-              transition={reduzir ? { duration: 0.12 } : { ...mola, delay: 0.06 }}
+              exit={{ opacity: 0, transition: { duration: DUR.press } }}
+              transition={reduzir ? { duration: DUR.press } : { ...mola, delay: 0.06 }}
             >
               {renderDetail(atual)}
             </motion.div>

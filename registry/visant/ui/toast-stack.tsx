@@ -6,6 +6,7 @@ import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion, type Transition } from "motion/react";
 import { CircleCheck, CircleX, Info, LoaderCircle, TriangleAlert, X } from "lucide-react";
 
+import { DUR, EASE_OUT, INSTANT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -188,8 +189,8 @@ interface ItemProps {
 }
 
 const mola: Transition = { type: "spring", visualDuration: 0.3, bounce: 0.1 };
-const curto: Transition = { duration: 0.16, ease: [0.23, 1, 0.32, 1] };
-const parado: Transition = { duration: 0 };
+const curto: Transition = { duration: DUR.fast, ease: EASE_OUT };
+const parado: Transition = INSTANT;
 
 function ToastItem({ t, index, y, altura, aberto, visivel, pausado, reduce, store, onMedir }: ItemProps) {
   const conteudo = React.useRef<HTMLDivElement>(null);
@@ -238,7 +239,7 @@ function ToastItem({ t, index, y, altura, aberto, visivel, pausado, reduce, stor
         height: altura || "auto",
         opacity: visivel ? 1 : 0,
       }}
-      exit={reduce ? { opacity: 0, transition: curto } : { opacity: 0, scale: 0.96, transition: { duration: 0.16 } }}
+      exit={reduce ? { opacity: 0, transition: curto } : { opacity: 0, scale: 0.96, transition: { duration: DUR.fast } }}
       transition={reduce ? parado : mola}
       // `inert` como atributo cru: o React 18 não conhece a prop e só repassa string.
       {...({ inert: !visivel || (!aberto && !frente) ? "" : undefined } as object)}
