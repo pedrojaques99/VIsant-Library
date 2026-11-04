@@ -27,6 +27,21 @@ for (const { rota, titulo } of PAGINAS) {
   }
 }
 
+test("a abertura copia a mensagem pro agente num toque, sem pedir nada antes", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  for (const width of [360, 390, 1440]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto("/skills");
+    const pilula = page.locator("[data-copiar-agente]");
+    await expect(pilula).toBeInViewport({ ratio: 1 });
+    await pilula.click();
+    await expect(pilula).toHaveText("Agora cole no agente");
+    const colado = await page.evaluate(() => navigator.clipboard.readText());
+    expect(colado).toContain("npx skills add pedrojaques99/visant-skills-public --skill visant-killer");
+    expect(colado).toContain("llms.txt");
+  }
+});
+
 test("como usar: um passo por tela, do botão de /skills até o fim", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/skills");

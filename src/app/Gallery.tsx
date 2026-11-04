@@ -27,7 +27,7 @@
 
 import * as React from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { ArrowUpRight, Check, Copy, Grid2x2, Grid3x3, LayoutGrid, Play, SlidersHorizontal } from "lucide-react";
+import { ArrowUpRight, Grid2x2, Grid3x3, LayoutGrid, Play, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   CATALOG,
@@ -46,7 +46,7 @@ import {
   sangra,
 } from "./catalog";
 import { installCommand } from "./registry-meta";
-import { CopyCommand, useCopy } from "./copy-command";
+import { CopyCommand } from "./copy-command";
 import { DepLogo } from "./dep-badges";
 import { SEM_DEPS, allDeps, matchesDep } from "./deps";
 import { PalcoFixo, useInView, useLazyDemo } from "./stage";
@@ -55,14 +55,14 @@ import { GRID_GAP, useFundoEscuro } from "./mosaic";
 import { ehNovo } from "./novidades";
 import { WireframeToggle } from "./media";
 import { Aba, ehToque } from "./casa-ui";
-import { LogoAgente, abrirConectar } from "./conectar-sinal";
+import { abrirConectar } from "./conectar-sinal";
+import { PilulaAgente } from "./pilula-agente";
 import { Miniatura } from "./miniatura";
 import { nivelDoAparelho, pediuEconomia, pesoGpu, useVaga } from "./aparelho";
 import DESTAQUES from "../../curadoria/destaques.json";
 import { BugButton } from "./bug-report";
 import { arquivada, curadoriaAtiva, useNotas, type Notas } from "./curadoria";
 import LANG from "./lang.generated.json";
-import { siClaude, siCursor, siOpenai } from "simple-icons";
 import { useDobraAssentada } from "@/lib/rede";
 import { MarcasNaDobra } from "./marcas-na-dobra";
 
@@ -445,67 +445,9 @@ const Ladrilho = React.memo(function Ladrilho({
  * Copiar fica atrás do hover (e visível no toque, via `no-hover`): uma palavra
  * "add" repetida em cada uma das noventa linhas era textura, não ação.
  */
-/**
- * Os agentes que a pílula mostra, na ordem do empilhamento. O traço vem do
- * `simple-icons` local, não da Iconify: é a dobra, e logo que depende de rede
- * aparece como bolinha vazia quando a API falha.
- */
-const AGENTES = [siClaude, siOpenai, siCursor];
 
 /** O comando da primeira aba do "Conectar" (Claude Code), o caminho mais curto. */
 const COMANDO_AGENTE = "claude mcp add --transport http visant-ui https://ui.visantlabs.com/mcp";
-
-/**
- * A porta pro agente, na dobra: uma pílula com os logos empilhados.
- *
- * Dois gestos num corpo só: o texto abre o "Conectar" (as seis abas), e o ícone
- * do fim copia o comando do Claude Code direto, pra quem já sabe o que quer.
- * São dois botões irmãos, não um dentro do outro.
- */
-function PilulaAgente() {
-  const { done, copy } = useCopy(COMANDO_AGENTE);
-  const Icon = done ? Check : Copy;
-  const foco =
-    "focus-visible:outline-none focus-visible:[box-shadow:var(--focus)] transition-colors [transition-duration:var(--dur-fast)]";
-
-  return (
-    // casa-lint/pilula: a pílula é o pedido do dono (referência de onboarding de agente), não chip genérico
-    <div className="inline-flex w-fit shrink-0 items-center rounded-full border border-casa-line bg-casa-tile p-1 text-casa-fg">
-      <button
-        type="button"
-        onClick={abrirConectar}
-        // casa-lint/pilula: o alvo de foco acompanha a pílula
-        className={cn("flex items-center gap-2.5 rounded-full py-0.5 pl-0.5 pr-2 hover:text-casa-fg-2 pointer-coarse:min-h-11", foco)}
-      >
-        <span className="flex" aria-hidden>
-          {AGENTES.map((icone, i) => (
-            <span
-              key={icone.slug}
-              className={cn(
-                // casa-lint/pilula: o selo do agente é um círculo de verdade
-                "grid size-7 place-items-center rounded-full border border-casa-line bg-casa-bg text-casa-fg",
-                i > 0 && "-ml-2",
-              )}
-            >
-              <LogoAgente icone={icone} />
-            </span>
-          ))}
-        </span>
-        <span className="text-sm font-medium">Conecte seu agente</span>
-      </button>
-      <button
-        type="button"
-        onClick={copy}
-        aria-label={done ? "Comando copiado" : `Copiar: ${COMANDO_AGENTE}`}
-        title={COMANDO_AGENTE}
-        // casa-lint/pilula: o alvo de foco do ícone é um círculo, dentro da pílula
-        className={cn("grid size-7 place-items-center rounded-full text-casa-fg-2 hover:text-casa-fg pointer-coarse:size-11", foco)}
-      >
-        <Icon className="size-3.5" aria-hidden />
-      </button>
-    </div>
-  );
-}
 
 /**
  * O catálogo, em dois modos — e é a rota que decide qual.
@@ -743,7 +685,7 @@ export function Gallery({ onFocus, familia = null, onFamilia, estilo = null, onE
         )}
         {familia || estilo ? null : <MarcasNaDobra className="mt-2" />}
         </div>
-        {familia || estilo ? null : <PilulaAgente />}
+        {familia || estilo ? null : <PilulaAgente comando={COMANDO_AGENTE} rotulo="Conecte seu agente" onAbrir={abrirConectar} />}
       </section>
 
       {/* controles */}

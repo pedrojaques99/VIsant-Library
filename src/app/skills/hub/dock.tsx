@@ -13,19 +13,9 @@ import { Check, Copy, X } from "lucide-react";
 import { useCopy } from "../../copy-command";
 import { ANIMA_COR, cx, DUR, EASE_OUT, useMenosMovimento, useSequencia } from "./base";
 import { PedirEmail, useLiberado } from "./interesse";
+import { BASE_DO_COMANDO as BASE, COMANDO_COMPLETO, INDICE } from "./nucleo";
 
-export const INDICE = [
-  { id: "visant-killer", curto: "killer", grupo: "Interface" },
-  { id: "visant-design", curto: "design", grupo: "Interface" },
-  { id: "visant-frontend", curto: "frontend", grupo: "Interface" },
-  { id: "visant-copy", curto: "copy", grupo: "Interface" },
-  { id: "visant-motion", curto: "motion", grupo: "Interface" },
-  { id: "visant-refine", curto: "refine", grupo: "Interface" },
-];
-
-const BASE = "npx skills add pedrojaques99/visant-skills-public";
-/* Sempre com `--skill`: sem ele o comando instala também as de vídeo e projeto, que a página não mostra. */
-export const COMANDO_COMPLETO = `${BASE} --skill ${INDICE.map((s) => s.id).join(" ")}`;
+export { COMANDO_COMPLETO, INDICE };
 
 export function Dock({ onInstalar }: { onInstalar: () => void }) {
   const [ativo, setAtivo] = React.useState<string | null>(null);

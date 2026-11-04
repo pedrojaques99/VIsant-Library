@@ -6,6 +6,25 @@
 import * as React from "react";
 
 /** Altura da dobra: a tela menos o cabeçalho do App e o rodapé fixo. */
+export const INDICE = [
+  { id: "visant-killer", curto: "killer", grupo: "Interface" },
+  { id: "visant-design", curto: "design", grupo: "Interface" },
+  { id: "visant-frontend", curto: "frontend", grupo: "Interface" },
+  { id: "visant-copy", curto: "copy", grupo: "Interface" },
+  { id: "visant-motion", curto: "motion", grupo: "Interface" },
+  { id: "visant-refine", curto: "refine", grupo: "Interface" },
+];
+
+/* Sempre com `--skill`: sem ele o comando instala também as de vídeo e projeto, que a página não mostra. */
+export const BASE_DO_COMANDO = "npx skills add pedrojaques99/visant-skills-public";
+export const COMANDO_COMPLETO = `${BASE_DO_COMANDO} --skill ${INDICE.map((s) => s.id).join(" ")}`;
+
+/* O que a pessoa cola no agente. O llms.txt ensina a ligar o registry: nada disso precisa ficar na mensagem. */
+export const MENSAGEM_AGENTE = `Instale as skills da Visant neste projeto:
+${COMANDO_COMPLETO}
+
+Depois leia https://ui.visantlabs.com/llms.txt e use a library @visant/ui quando eu pedir um componente.`;
+
 export const ALTURA_DOBRA = "min-h-[calc(100svh-9.5rem)] lg:min-h-[calc(100svh-7.5rem)]";
 
 /** No celular a dobra tem a altura da demo. Só o desktop centra numa tela inteira. */

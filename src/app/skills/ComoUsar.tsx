@@ -12,14 +12,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight, Check, Copy } from "lucide-react";
 import { useCopy } from "../copy-command";
 import { Acao, cx, DUR, EASE_OUT, useMenosMovimento } from "./hub/base";
-import { COMANDO_COMPLETO } from "./hub/dock";
+import { MENSAGEM_AGENTE as MENSAGEM } from "./hub/nucleo";
 import { PedirEmail, PedirFeedback, SairDaLista, useLiberado } from "./hub/interesse";
-
-/* O llms.txt ensina o agente a ligar o registry: nada disso precisa ficar na mensagem. */
-const MENSAGEM = `Instale as skills da Visant neste projeto:
-${COMANDO_COMPLETO}
-
-Depois leia https://ui.visantlabs.com/llms.txt e use a library @visant/ui quando eu pedir um componente.`;
 
 type Passo = { titulo: string; texto: string; escrita: string; copiar?: boolean };
 
@@ -164,7 +158,7 @@ function Passos() {
                 <h1 ref={titulo} tabIndex={-1} className={classeDoTitulo}>
                   {passo.titulo}
                 </h1>
-                <p className="mt-3 text-casa-lg text-casa-fg-2 [text-wrap:pretty]">{passo.texto}</p>
+                <p className="mt-3 text-casa-lg text-casa-fg-2 [text-wrap:pretty]">{passo.copiar && liberado ? "Copie a mensagem e cole na conversa. Ele instala tudo sozinho." : passo.texto}</p>
                 {passo.copiar && !liberado ? (
                   <div className="mt-6">
                     <PedirEmail origem="como-usar" onLiberar={liberar} />
@@ -190,6 +184,12 @@ function Passos() {
                     <Icone className="size-4" aria-hidden="true" />
                     {done ? "Copiado" : "Copiar"}
                   </Acao>
+                ) : null}
+                {/* Quem já liberou também precisa achar a saída: o pedido de e-mail, onde ela morava, some. */}
+                {passo.copiar ? (
+                  <a href="/skills/como-usar?sair=1" className="mt-2 inline-flex min-h-6 items-center text-casa-sm text-casa-fg-2 underline underline-offset-2 outline-none focus-visible:[box-shadow:var(--focus)] pointer-coarse:min-h-11">
+                    Sair da lista
+                  </a>
                 ) : null}
                 </>
                 )}
