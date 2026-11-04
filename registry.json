@@ -1712,7 +1712,7 @@
       "name": "brand-selector",
       "type": "registry:ui",
       "title": "Brand Selector",
-      "description": "Seletor de marca com prévia ao percorrer: paleta, par tipográfico e completude do vault na linha. Aplica o tema da marca escolhida ao app inteiro.",
+      "description": "Escolha uma marca e o produto inteiro veste: cor, fonte e logo. Passar o mouse pela lista já mostra como fica.",
       "author": "Visant Labs <visantsupply@gmail.com>",
       "registryDependencies": [
         "utils",
@@ -5127,7 +5127,7 @@
       "name": "page-curl",
       "type": "registry:ui",
       "title": "Page Curl",
-      "description": "Uma revistinha que você folheia puxando o canto da página, com a dobra, o verso do papel e a próxima página aparecendo por baixo.",
+      "description": "Uma revistinha que você folheia puxando o canto: a capa abre, o livro fica com duas páginas e a folha vira com dobra, espessura e verso.",
       "dependencies": [
         "motion",
         "lucide-react"
@@ -5335,7 +5335,7 @@
       "name": "streamgraph",
       "type": "registry:ui",
       "title": "Streamgraph",
-      "description": "Gráfico de fluxo empilhado que mostra como a mistura de várias partes muda no tempo, com camadas que ligam e desligam.",
+      "description": "Gráfico de várias partes no tempo em sete estilos: fluxo, empilhado, 100%, cristas, linhas, barras e centrado, com camadas que ligam e desligam.",
       "dependencies": [
         "motion"
       ],

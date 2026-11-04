@@ -2,7 +2,7 @@
 
 <!-- Gerado por scripts/vite-curadoria.mjs a partir de notas.json. Não edite à mão. -->
 
-**1 na vitrine** · 6 arquivada(s) (nota ≤ 2) · 0 pra excluir
+**1 na vitrine** · 19 arquivada(s) (nota ≤ 2) · 0 pra excluir
 
 ## Na vitrine
 
@@ -14,11 +14,24 @@
 
 | peça | nota | comentário |
 |---|---|---|
+| `carousel-3d` | ★★☆☆☆ | aposentado: duplica o cover-flow (audit de categorias) |
 | `cover-art` | ★★☆☆☆ | mt slop, pode esconder |
 | `css-color` | ★★☆☆☆ | pode esconder |
+| `cta-surface` | ★★☆☆☆ | mt comum, esconder |
 | `dot-cursor` | ★★☆☆☆ | posicao do cursor super bugada, e ta com scroll horizontal e vertical, refaça o shell disso |
+| `logo-wall` | ★★☆☆☆ | mt comum, esconder |
+| `measure-bar` | ★★☆☆☆ | slop, remover |
+| `pinned-scene` | ★★☆☆☆ | mt comum, esconder |
 | `plate` | ★★☆☆☆ | inutil quase |
+| `quote-block` | ★★☆☆☆ | mt comum |
+| `section-intro` | ★★☆☆☆ | mt simples e obvio, pode esconder |
 | `sfx-toggle` | ★★☆☆☆ | deixar fora do cat�logo (segue no cabe�alho) |
+| `spine-card` | ★★☆☆☆ | slop |
+| `step-cards` | ★★☆☆☆ | mt comum, esconder |
+| `store-status` | ★★☆☆☆ | slop, remover |
+| `tempo-bar` | ★★☆☆☆ | slop |
+| `timeline` | ★★☆☆☆ | ainda mt slop, pode remover |
+| `turbulence-field` | ★★☆☆☆ | slop, esconder |
 | `vintage-command-palette` | ★☆☆☆☆ | mal apresentado, meio inutil; fica s� como a paleta do Rig vintage, fora da vitrine |
 
 ## Pra excluir de vez (`npm run curadoria -- --excluir`)

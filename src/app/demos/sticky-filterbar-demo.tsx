@@ -11,6 +11,10 @@
  * o conteúdo terminava seco no meio do palco da ficha e a grade mostrava uma fresta
  * de 2 a 3px da fileira seguinte na borda do cartão.
  *
+ * Num quadro próprio, centrado, e não sangrando até a borda do palco: a caixa é
+ * pequena pra barra não encolher no ladrilho pequeno, e no ladrilho maior o que
+ * sobra em volta é moldura, não a barra solta no canto.
+ *
  * `--header-h` em -1px neste invólucro e um `headerSelector` que não acha nada: sem
  * cabeçalho aqui, a peça não pode medir o da vitrine e reescrever a página. O -1px
  * é do palco: sob `scale` o topo da barra cai em fração de pixel, e uma linha da
@@ -51,39 +55,43 @@ export default function StickyFilterbarDemo({ props }: DemoProps) {
   }, []);
 
   return (
-    // O contêiner é quem rola. A barra descobre isso sozinha (ela procura o
-    // ancestral rolante), então o fio de progresso mede este percurso.
-    <div
-      ref={caixa}
-      style={{ ...SEM_CABECALHO, maskImage: DISSOLVE, WebkitMaskImage: DISSOLVE }}
-      className="h-full w-full overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-    >
-      <StickyFilterbar headerSelector="[data-demo-sem-cabecalho]" className="px-4" {...props}>
-        <FilterRow>
-          <Chip pressed={filtro === null} onClick={() => setFiltro(null)}>
-            Todos
-          </Chip>
-          <Chip pressed={filtro === "cena"} onClick={() => setFiltro("cena")}>
-            Cenas
-          </Chip>
-          <Chip pressed={filtro === "textura"} onClick={() => setFiltro("textura")}>
-            Texturas
-          </Chip>
-        </FilterRow>
-      </StickyFilterbar>
+    <div className="flex h-full w-full items-center justify-center p-3">
+      <div className="h-full w-full max-w-xl overflow-hidden rounded-[var(--r-surface,0.875rem)] border border-border bg-card">
+        {/* O contêiner é quem rola. A barra descobre isso sozinha (ela procura o
+            ancestral rolante), então o fio de progresso mede este percurso. */}
+        <div
+          ref={caixa}
+          style={{ ...SEM_CABECALHO, maskImage: DISSOLVE, WebkitMaskImage: DISSOLVE }}
+          className="h-full w-full overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          <StickyFilterbar headerSelector="[data-demo-sem-cabecalho]" className="px-3" {...props}>
+            <FilterRow>
+              <Chip pressed={filtro === null} onClick={() => setFiltro(null)}>
+                Todos
+              </Chip>
+              <Chip pressed={filtro === "cena"} onClick={() => setFiltro("cena")}>
+                Cenas
+              </Chip>
+              <Chip pressed={filtro === "textura"} onClick={() => setFiltro("textura")}>
+                Texturas
+              </Chip>
+            </FilterRow>
+          </StickyFilterbar>
 
-      {/* A chave é o filtro: a grade remonta e entra de novo, e a pessoa vê que a
-          lista respondeu. */}
-      <div key={String(filtro)} className="grid grid-cols-2 gap-3 p-4">
-        {lista.map((p) => (
-          <Media
-            key={`${p.papel}-${p.indice}`}
-            papel={p.papel}
-            indice={p.indice}
-            ratio="16/10"
-            className="w-full rounded-[var(--r-control,0.5rem)] animate-in fade-in-0 [animation-duration:var(--dur-base)] [animation-timing-function:var(--ease-out)]"
-          />
-        ))}
+          {/* A chave é o filtro: a grade remonta e entra de novo, e a pessoa vê que a
+              lista respondeu. */}
+          <div key={String(filtro)} className="grid grid-cols-2 gap-2 p-3">
+            {lista.map((p) => (
+              <Media
+                key={`${p.papel}-${p.indice}`}
+                papel={p.papel}
+                indice={p.indice}
+                ratio="16/10"
+                className="w-full rounded-[var(--r-control,0.5rem)] animate-in fade-in-0 [animation-duration:var(--dur-base)] [animation-timing-function:var(--ease-out)]"
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

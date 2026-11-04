@@ -32,7 +32,10 @@ import { cn } from "@/lib/utils";
  * 5. **Ponteiro sob escala.** A vitrine escala o palco; a posição vertical do
  *    ponteiro é dividida pela escala antes de procurar a camada, senão a dica
  *    aponta a camada errada no ladrilho.
- * 6. **Teclado é cidadão.** No gráfico, ←/→ andam no tempo, PageUp/PageDown
+ * 6. **Sete estilos, um pintor.** Fluxo, centrado, empilhado e 100% mudam a base
+ *    (`offset`); cristas dá uma linha de base a cada camada; `shape` troca o
+ *    desenho por linhas ou barras. Dado, dica, teclado e legenda são os mesmos.
+ * 7. **Teclado é cidadão.** No gráfico, ←/→ andam no tempo, PageUp/PageDown
  *    pulam um sexto, Home/End vão às pontas, ↑/↓ trocam de camada, Esc sai.
  *    A legenda liga e desliga camadas, e a camada desligada afina até sumir
  *    enquanto as outras fecham por cima.
@@ -71,8 +74,10 @@ export interface StreamgraphProps {
   unit?: string;
   /** Altura do gráfico em px. A largura segue o contêiner. */
   height?: number;
-  /** "wiggle" flui, "silhouette" centra a pilha, "zero" empilha de uma base reta. */
-  offset?: "wiggle" | "silhouette" | "zero";
+  /** "wiggle" flui, "silhouette" centra, "zero" empilha, "expand" mostra em 100%, "ridge" dá uma base a cada camada. */
+  offset?: "wiggle" | "silhouette" | "zero" | "expand" | "ridge";
+  /** "area" pinta as camadas, "line" desenha só a linha de cada uma, "bar" empilha em colunas. */
+  shape?: "area" | "line" | "bar";
   formatValue?: (value: number, series: StreamgraphSeries) => string;
   /** Camadas escondidas, controlado. */
   hiddenSeries?: string[];
@@ -107,16 +112,25 @@ const MARGEM = 10;
 const VAO = 14;
 // Degraus de neutro pras camadas sem cor própria, alternando claro e escuro.
 const DEGRAUS = [34, 18, 27, 12, 40, 22];
-const corDe = (s: StreamgraphSeries, i: number) =>
+// Linha é fina e pede mais contraste que área: os mesmos neutros, mais fortes, e a
+// marca puxada pro texto (no branco ela sozinha não aparece).
+const DEGRAUS_LINHA = [72, 46, 60, 36, 84, 52];
+const corDe = (s: StreamgraphSeries, i: number, linha = false) =>
   s.color ??
   (i === 0
-    ? "var(--brand)"
-    : `color-mix(in oklab, var(--foreground) ${DEGRAUS[(i - 1) % DEGRAUS.length]}%, var(--card))`);
+    ? linha
+      ? "color-mix(in oklab, var(--brand) 78%, var(--foreground))"
+      : "var(--brand)"
+    : `color-mix(in oklab, var(--foreground) ${(linha ? DEGRAUS_LINHA : DEGRAUS)[(i - 1) % DEGRAUS.length]}%, var(--card))`);
+
+/** Linha não empilha, e barra só faz sentido de base reta. */
+const baseDe = (offset: StreamgraphProps["offset"], shape: StreamgraphProps["shape"]) =>
+  shape === "line" || (shape === "bar" && offset !== "expand") ? "zero" : offset;
 
 /** A primeira camada no meio, as outras alternando acima e abaixo; base reta empilha em ordem. */
 function ordemDaPilha(n: number, modo: StreamgraphProps["offset"]) {
   const ordem = Array.from({ length: n }, (_, i) => i);
-  if (modo === "zero") return ordem;
+  if (modo === "zero" || modo === "expand" || modo === "ridge") return ordem;
   return ordem.reduce<number[]>((l, i) => (i === 0 ? [0] : i % 2 ? [...l, i] : [i, ...l]), []);
 }
 const agrupado = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
@@ -160,7 +174,7 @@ function reamostrar(cru: number[]): number[] {
 function base(camadas: number[][], modo: StreamgraphProps["offset"]): number[] {
   const g = new Array<number>(N).fill(0);
   const totais = g.map((_, j) => camadas.reduce((s, c) => s + c[j]!, 0));
-  if (modo === "zero" || !camadas.length) return g;
+  if (modo === "zero" || modo === "expand" || modo === "ridge" || !camadas.length) return g;
   if (modo === "silhouette") return totais.map((t) => -t / 2);
   for (let j = 1; j < N; j++) {
     let s1 = 0;
@@ -211,6 +225,7 @@ export function Streamgraph({
   unit = "",
   height = 260,
   offset = "wiggle",
+  shape = "area",
   formatValue,
   hiddenSeries,
   defaultHiddenSeries,
@@ -269,31 +284,51 @@ export function Streamgraph({
   const quadro = React.useRef<Quadro | null>(null);
   const lugares = React.useRef(new Map<string, number>());
   const cresce = useMotionValue(0);
-  const vivo = React.useRef({ series, offset });
+  const modoAtual = baseDe(offset, shape);
+  const vivo = React.useRef({ series, offset: modoAtual, shape, pontos: data.length });
   React.useLayoutEffect(() => {
-    vivo.current = { series, offset };
+    vivo.current = { series, offset: modoAtual, shape, pontos: data.length };
   });
 
   // O pintor (nota 4).
   const pintar = React.useCallback(() => {
     const w = largura.current;
     if (!w) return;
-    const { series: ordem, offset: modo } = vivo.current;
-    const camadas = ordem.map((s) => {
+    const { series: ordem, offset: modo, shape: forma, pontos } = vivo.current;
+    let camadas = ordem.map((s) => {
       const f = formas.current.get(s.key);
       const p = presenca.current.get(s.key)?.value ?? 1;
       return f ? f.map((v) => v * p) : new Array<number>(N).fill(0);
     });
+    if (modo === "expand") {
+      const somas = new Array<number>(N).fill(0).map((_, j) => camadas.reduce((t, c) => t + c[j]!, 0));
+      camadas = camadas.map((c) => c.map((v, j) => (somas[j]! ? v / somas[j]! : 0)));
+    }
     const pilha = ordemDaPilha(ordem.length, modo);
     const g = base(pilha.map((i) => camadas[i]!), modo);
     const lower: number[][] = new Array(ordem.length);
     const upper: number[][] = new Array(ordem.length);
     let corre = g.slice();
-    for (const i of pilha) {
-      const c = camadas[i]!;
-      lower[i] = corre;
-      corre = corre.map((v, j) => v + c[j]!);
-      upper[i] = corre;
+    if (forma === "line" || modo === "ridge") {
+      // Sem pilha: cada camada na sua base. As cristas sobem de baixo pra cima, e a
+      // camada desligada fecha o vão porque o degrau também é multiplicado pela presença.
+      const pico = Math.max(1e-9, ...camadas.flat());
+      let degrau = 0;
+      for (let i = ordem.length - 1; i >= 0; i--) {
+        const c = camadas[i]!;
+        const fundo = new Array<number>(N).fill(forma === "line" ? 0 : degrau);
+        lower[i] = fundo;
+        upper[i] = c.map((v, j) => fundo[j]! + v);
+        corre = corre.map((v, j) => Math.max(v, upper[i]![j]!));
+        degrau += pico * 0.42 * (presenca.current.get(ordem[i]!.key)?.value ?? 1);
+      }
+    } else {
+      for (const i of pilha) {
+        const c = camadas[i]!;
+        lower[i] = corre;
+        corre = corre.map((v, j) => v + c[j]!);
+        upper[i] = corre;
+      }
     }
     let lo = Infinity;
     let hi = -Infinity;
@@ -320,9 +355,24 @@ export function Streamgraph({
       const no = caminhos.current.get(serie.key);
       if (no) {
         let d = "";
-        for (let j = 0; j < N; j++) d += `${j ? "L" : "M"}${xs[j]!.toFixed(1)},${yEm(topo[j]!, j).toFixed(1)}`;
-        for (let j = N - 1; j >= 0; j--) d += `L${xs[j]!.toFixed(1)},${yEm(fundo[j]!, j).toFixed(1)}`;
-        no.setAttribute("d", `${d}Z`);
+        if (forma === "bar") {
+          const coluna = (w / Math.max(1, pontos)) * 0.72;
+          for (let k = 0; k < pontos; k++) {
+            const j = pontos > 1 ? Math.round((k / (pontos - 1)) * (N - 1)) : 0;
+            const cima = yEm(topo[j]!, j);
+            const baixo = yEm(fundo[j]!, j);
+            if (baixo - cima < 0.5) continue;
+            const esq = ((k + 0.5) / pontos) * w - coluna / 2;
+            d += `M${esq.toFixed(1)},${cima.toFixed(1)}H${(esq + coluna).toFixed(1)}V${baixo.toFixed(1)}H${esq.toFixed(1)}Z`;
+          }
+        } else {
+          for (let j = 0; j < N; j++) d += `${j ? "L" : "M"}${xs[j]!.toFixed(1)},${yEm(topo[j]!, j).toFixed(1)}`;
+          if (forma === "area") {
+            for (let j = N - 1; j >= 0; j--) d += `L${xs[j]!.toFixed(1)},${yEm(fundo[j]!, j).toFixed(1)}`;
+            d += "Z";
+          }
+        }
+        no.setAttribute("d", d);
       }
       // O rótulo senta onde a camada é mais grossa, e segura o lugar até outro
       // trecho ficar CLARAMENTE mais grosso: nada de rótulo pulando no morph.
@@ -358,6 +408,11 @@ export function Streamgraph({
     obs.observe(no);
     return () => obs.disconnect();
   }, [pintar]);
+
+  // Trocar de estilo pelo controle repinta sem esperar dado novo.
+  React.useLayoutEffect(() => {
+    pintar();
+  }, [modoAtual, shape, data.length, pintar]);
 
   // Dado novo mistura cada camada a partir da forma que está na tela.
   const morph = React.useRef<{ stop: () => void } | null>(null);
@@ -450,13 +505,13 @@ export function Streamgraph({
       estavaAtiva.current = false;
       return;
     }
-    const x = ult > 0 ? (indice / ult) * w : w / 2;
+    const x = shape === "bar" ? ((indice + 0.5) / data.length) * w : ult > 0 ? (indice / ult) * w : w / 2;
     let y = hover?.y ?? null;
     const q = quadro.current;
     if (y === null && q && ativa) {
       const i = series.findIndex((s) => s.key === ativa);
-      const j = Math.round((x / w) * (N - 1));
-      if (i >= 0) y = q.toY((q.upper[i]![j]! + q.lower[i]![j]!) / 2);
+      const j = ult > 0 ? Math.round((indice / ult) * (N - 1)) : 0;
+      if (i >= 0) y = q.toY(shape === "line" ? q.upper[i]![j]! : (q.upper[i]![j]! + q.lower[i]![j]!) / 2);
     }
     const tw = balao.offsetWidth;
     const th = balao.offsetHeight;
@@ -484,15 +539,23 @@ export function Streamgraph({
     const fracao = limitar((clientX - r.left) / r.width, 0, 1);
     const escala = r.height / (no.offsetHeight || r.height);
     const y = (clientY - r.top) / escala;
-    const at = ult > 0 ? Math.round(fracao * ult) : 0;
-    const j = Math.round(fracao * (N - 1));
+    const at =
+      shape === "bar" ? limitar(Math.floor(fracao * data.length), 0, ult) : ult > 0 ? Math.round(fracao * ult) : 0;
+    const j = shape === "bar" ? (ult > 0 ? Math.round((at / ult) * (N - 1)) : 0) : Math.round(fracao * (N - 1));
     let key: string | null = null;
+    let maisPerto = 14;
     if (q)
       series.forEach((s, i) => {
         if (escondidas.includes(s.key)) return;
         const topo = q.toY(q.upper[i]![j]!);
         const fundo = q.toY(q.lower[i]![j]!);
-        if (y >= topo - 1 && y <= fundo + 1) key = s.key;
+        if (shape === "line") {
+          // Linha é fina demais pra acertar: vale a mais próxima do ponteiro.
+          if (Math.abs(y - topo) < maisPerto) {
+            maisPerto = Math.abs(y - topo);
+            key = s.key;
+          }
+        } else if (y >= topo - 1 && y <= fundo + 1) key = s.key;
       });
     return { index: at, key, y };
   };
@@ -589,7 +652,7 @@ export function Streamgraph({
                     "size-2.5 flex-none rounded-[3px] [transition:scale_var(--dur-base)_var(--ease-out),opacity_var(--dur-fast)_var(--ease-out)]",
                     !ligada && "scale-60 opacity-35",
                   )}
-                  style={{ background: corDe(s, i) }}
+                  style={{ background: corDe(s, i, shape === "line") }}
                 />
                 <span className={cn("whitespace-nowrap", !ligada && "line-through opacity-70")}>{s.label}</span>
               </button>
@@ -603,7 +666,7 @@ export function Streamgraph({
           ref={plot}
           role="group"
           tabIndex={vazio ? -1 : 0}
-          aria-roledescription="gráfico de fluxo"
+          aria-roledescription="gráfico"
           aria-label={`${label}. Setas pros lados andam no tempo; pra cima e pra baixo trocam de camada.`}
           style={{ height }}
           onPointerMove={onPointerMove}
@@ -638,9 +701,11 @@ export function Streamgraph({
                     "[stroke-linejoin:round] [stroke-width:2] [stroke:var(--card)] [transition:opacity_var(--dur-fast)_var(--ease-out),fill_var(--dur-base)_var(--ease-out)]",
                     ativa !== null && !emFoco && "opacity-35",
                   )}
-                  style={{
-                    fill: emFoco ? corDe(s, i) : `color-mix(in oklab, ${corDe(s, i)} 82%, var(--card))`,
-                  }}
+                  style={
+                    shape === "line"
+                      ? { fill: "none", stroke: corDe(s, i, true) }
+                      : { fill: emFoco ? corDe(s, i) : `color-mix(in oklab, ${corDe(s, i)} 82%, var(--card))` }
+                  }
                 />
               );
             })}
@@ -656,6 +721,7 @@ export function Streamgraph({
               style={{ x: reduzir ? mira : miraMola }}
             />
             {directLabels &&
+              shape === "area" &&
               series.map((s) => (
                 <text
                   key={s.key}
@@ -686,7 +752,7 @@ export function Streamgraph({
             )}
           >
             <p className="m-0 mb-0.5 whitespace-nowrap text-apoio tabular-nums text-muted-foreground">{leitura?.label ?? ""}</p>
-            {ordemDaPilha(series.length, offset)
+            {ordemDaPilha(series.length, modoAtual)
               .reverse()
               .map((at) => series[at]!)
               .filter((s) => !escondidas.includes(s.key))
@@ -701,7 +767,7 @@ export function Streamgraph({
                       ativa !== null && !emFoco && "opacity-50",
                     )}
                   >
-                    <span className="h-[2.5px] w-2.5 flex-none rounded-sm" style={{ background: corDe(s, series.indexOf(s)) }} />
+                    <span className="h-[2.5px] w-2.5 flex-none rounded-sm" style={{ background: corDe(s, series.indexOf(s), shape === "line") }} />
                     <span className={cn("min-w-0 flex-1 truncate", emFoco ? "text-foreground" : "text-muted-foreground")}>
                       {s.label}
                     </span>
@@ -722,7 +788,7 @@ export function Streamgraph({
 
         <div className="relative min-w-0" aria-hidden="true">
           {marcas.map((at) => {
-            const fracao = ult > 0 ? at / ult : 0.5;
+            const fracao = shape === "bar" ? (at + 0.5) / data.length : ult > 0 ? at / ult : 0.5;
             const d = data[at]!;
             return (
               <span

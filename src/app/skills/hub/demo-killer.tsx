@@ -8,10 +8,10 @@
 
 import * as React from "react";
 import { Check, X } from "lucide-react";
-import { PhotoCompare } from "../../../../registry/visant/ui/photo-compare";
 import { SAIDA_ABERTA, SAIDA_FECHADA, SLOP_CARTAO } from "./amostras";
 import { Acao, ALTURA_LARGA, ANIMA_COR, ANIMA_OPACIDADE, cx, Dobra, LINK, Terminal, useAoEntrar, useMenosMovimento, useSequencia } from "./base";
-import { foto, miniatura } from "./fotos";
+import { Telas } from "./telas";
+import { TELAS } from "./telas-killer";
 
 /** O elemento do cartão e o que o portão diz dele (saída real, linha a linha). */
 const ACHADOS = {
@@ -155,61 +155,9 @@ export function DemoKiller() {
   );
 }
 
-const TELAS = [
-  { id: "mata", nome: "café" },
-  { id: "pauta", nome: "agenda" },
-  { id: "checkout", nome: "checkout" },
-  { id: "landing", nome: "landing" },
-  { id: "settings", nome: "configurações" },
-];
 
-const TAMANHOS = "(min-width: 1024px) 896px, 100vw";
 
 /** Arrasta a cortina. As miniaturas trocam a tela, sem palavra nenhuma. */
 export function TelasKiller() {
-  const [id, setId] = React.useState(TELAS[0].id);
-  const t = TELAS.find((x) => x.id === id) ?? TELAS[0];
-  return (
-    <section className="bg-casa-tile" data-demo="telas" aria-label="Antes e depois em cinco telas, com marcas inventadas">
-      <div className={cx("shell flex min-w-0 flex-col justify-center gap-3 py-6 lg:py-8", ALTURA_LARGA)}>
-        <div data-sobreposicao className="contents">
-        <div className="w-full min-w-0 lg:mx-auto lg:max-w-4xl">
-        <PhotoCompare
-          key={t.id}
-          ratio="880/580"
-          label={`Antes e depois da tela de ${t.nome}`}
-          beforeLabel={null}
-          afterLabel={null}
-          before={<img {...foto(`${t.id}-a`)} sizes={TAMANHOS} alt="" loading="lazy" decoding="async" />}
-          after={<img {...foto(`${t.id}-d`)} sizes={TAMANHOS} alt="" loading="lazy" decoding="async" />}
-          className="w-full overflow-hidden rounded-tile"
-        />
-        <p className="mt-1.5 flex justify-between px-1 text-casa-sm text-casa-fg-2">
-          <span>depois</span>
-          <span>antes</span>
-        </p>
-        </div>
-        </div>
-        <div className="flex justify-center gap-2" role="group" aria-label="Escolher a tela">
-          {TELAS.map((x) => (
-            <button
-              key={x.id}
-              type="button"
-              data-tela={x.id}
-              aria-pressed={x.id === id}
-              aria-label={x.nome}
-              onClick={() => setId(x.id)}
-              className={cx(
-                "h-11 w-14 overflow-hidden rounded-[8px] outline-none focus-visible:[box-shadow:var(--focus)]",
-                ANIMA_OPACIDADE,
-                x.id === id ? "opacity-100 [box-shadow:0_0_0_2px_var(--casa-fg)]" : "opacity-50",
-              )}
-            >
-              <img src={miniatura(`${x.id}-d`)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} className="size-full object-cover" />
-            </button>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+  return <Telas telas={TELAS} faixa skill="visant-killer" />;
 }

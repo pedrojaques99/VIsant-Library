@@ -186,6 +186,8 @@ export function FogTree({
   const fogEnd = fog?.end ?? 0.6;
   const dragRef = React.useRef(canDrag);
   dragRef.current = canDrag;
+  const liveRef = React.useRef({ fog: { start: fogStart, end: fogEnd }, trail, grain });
+  liveRef.current = { fog: { start: fogStart, end: fogEnd }, trail, grain };
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -209,9 +211,7 @@ export function FogTree({
               const scene = createFogTreeScene(canvas, {
                 preset,
                 seed,
-                fog: { start: fogStart, end: fogEnd },
-                trail,
-                grain,
+                ...liveRef.current,
                 draggable: dragRef.current,
                 reduce,
                 light: prefersLight(),
@@ -240,9 +240,15 @@ export function FogTree({
       sceneRef.current = null;
     };
     // `effective` fica de fora: trocar a fonte do progresso não regera a árvore,
-    // o efeito acima já reassina. O resto muda a geometria ou o pós — regera.
+    // o efeito acima já reassina. Só o que muda a geometria regera; névoa, rastro e
+    // grão chegam por método, senão cada tique de um slider refazia a árvore e o
+    // `forceContextLoss` do descarte deixava o canvas morto. Por isso o canvas tem `key`.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preset, seed, fogStart, fogEnd, trail, grain, reduce]);
+  }, [preset, seed, reduce]);
+
+  React.useEffect(() => sceneRef.current?.setFog({ start: fogStart, end: fogEnd }), [fogStart, fogEnd]);
+  React.useEffect(() => sceneRef.current?.setTrail(trail), [trail]);
+  React.useEffect(() => sceneRef.current?.setGrain(grain), [grain]);
 
   React.useEffect(() => {
     sceneRef.current?.setDraggable(canDrag);
@@ -253,6 +259,7 @@ export function FogTree({
   const stage = (
     <>
       <canvas
+        key={`${preset}|${seed}|${reduce}`}
         ref={canvasRef}
         aria-hidden
         className={cn(

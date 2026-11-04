@@ -133,11 +133,11 @@ const VIEWS: { value: View; label: string }[] = [
   { value: "catalogo", label: "Catálogo" },
   { value: "marca", label: "Marca" },
   { value: "skills", label: "Skills" },
+  { value: "docs", label: "Docs" },
 ];
 
 /* Kits saíram do cabeçalho em 2026-11-03: as salas seguem abrindo por link, sem
-   porta na navegação e com noindex no prerender. Docs também fica fora do cabeçalho:
-   a porta é discreta, no rodapé e em /skills. */
+   porta na navegação e com noindex no prerender. */
 const ROTAS_SEM_PORTA: View[] = ["kits", "docs"];
 const SUBPAGINAS_DE_SKILLS = ["filme", "killer"];
 /* `callback` é a volta do OAuth (`visant-auth.tsx`), que cai no catálogo. */
@@ -450,9 +450,12 @@ function Shell() {
       <span id="conteudo" tabIndex={-1} className="block outline-none" />
 
       {/* No celular as seções descem para uma linha própria, que rola com a página. */}
-      <div className="casa shell sm:hidden">
-        <Secoes view={route.view} onView={setView} className="h-11" />
-      </div>
+      {/* Na ficha, não: a peça vem antes da navegação, e o X e o logo já tiram de lá. */}
+      {route.focus ? null : (
+        <div className="casa shell sm:hidden">
+          <Secoes view={route.view} onView={setView} className="h-11" />
+        </div>
+      )}
 
       {route.view === "kits" && (
         <React.Suspense fallback={<EsperaDaRota />}>
@@ -461,15 +464,17 @@ function Shell() {
       )}
 
       {route.view === "catalogo" && (
-        <React.Suspense fallback={<EsperaDaRota />}>
-          <RotaCatalogo
-            focus={route.focus}
-            familia={route.familia}
-            onNavegar={(focus, familia) => navigate({ view: "catalogo", focus, kit: null, familia })}
-            onFocus={setFocus}
-            onFamilia={setFamilia}
-          />
-        </React.Suspense>
+        <main className="contents">
+          <React.Suspense fallback={<EsperaDaRota />}>
+            <RotaCatalogo
+              focus={route.focus}
+              familia={route.familia}
+              onNavegar={(focus, familia) => navigate({ view: "catalogo", focus, kit: null, familia })}
+              onFocus={setFocus}
+              onFamilia={setFamilia}
+            />
+          </React.Suspense>
+        </main>
       )}
 
       {/* A espera nunca é um "carregando…": trocar de aba não deve fazer a página encolher

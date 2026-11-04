@@ -90,6 +90,14 @@ export function DemoDesign() {
 
 /* ---- o teste do corte ---- */
 
+const SEMANA = [
+  { dia: "seg", eventos: [{ nome: "Daily", hora: "10:00" }] },
+  { dia: "ter", eventos: [{ nome: "Marca", hora: "10:30" }] },
+  { dia: "qua", eventos: [] },
+  { dia: "qui", eventos: [{ nome: "Aula", hora: "11:30" }, { nome: "Entrega", hora: "16:00" }] },
+  { dia: "sex", eventos: [{ nome: "Cliente", hora: "09:30" }] },
+];
+
 const ELEMENTOS = [
   { id: "selo", nome: "Selo de novidade", variavel: null },
   { id: "titulo", nome: "Título com a tarefa", variavel: "cadastro" },
@@ -202,11 +210,17 @@ export function DemoFrontend() {
             onClick={() => tocar("tela")}
             data-elem="tela"
             aria-label="Tela do produto"
-            className={cx("mt-4 grid min-h-16 flex-1 grid-cols-7 gap-1 bg-casa-tile-2 p-2", realce("tela"))}
+            className={cx("mt-4 grid min-h-40 flex-1 grid-cols-5 gap-px overflow-hidden bg-casa-line p-px", realce("tela"))}
           >
-            {Array.from({ length: 7 }, (_, d) => (
-              <span key={d} className="rounded-[4px] bg-casa-bg">
-                {d % 3 === 1 ? <span className="mx-1 mt-3 block h-3 rounded-[3px] bg-casa-fg-3" /> : null}
+            {SEMANA.map((d) => (
+              <span key={d.dia} className="flex min-w-0 flex-col gap-1 bg-casa-bg p-1.5 lg:p-2">
+                <span className="text-casa-sm text-casa-fg-2">{d.dia}</span>
+                {d.eventos.map((e) => (
+                  <span key={e.nome} className="min-w-0 rounded-[4px] bg-casa-tile-2 p-1 lg:p-1.5">
+                    <span className="block truncate text-casa-sm text-casa-fg">{e.nome}</span>
+                    <span className="block font-casa-mono text-casa-sm text-casa-fg-2">{e.hora}</span>
+                  </span>
+                ))}
               </span>
             ))}
             <Etiqueta id="tela" />

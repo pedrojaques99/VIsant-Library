@@ -18,7 +18,7 @@ export default function WorkingGlyphDemo({ props }: DemoProps) {
   const { atual, rodada, passo, repetir } = useUmPorVez(OFICIOS, _v);
 
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-6 p-6">
+    <div className="flex h-full w-full flex-col items-center justify-center gap-6 p-6 pb-11">
       <div className="grid size-24 place-items-center">
         {ativo ? <WorkingGlyph key={`${atual}-${rodada}`} variant={atual} size={56} framed={false} /> : null}
       </div>

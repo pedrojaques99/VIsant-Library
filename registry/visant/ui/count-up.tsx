@@ -124,7 +124,11 @@ export function CountUp({
     range.selectNodeContents(el);
     const tinta = range.getBoundingClientRect().width;
     range.detach?.();
-    el.style.minWidth = `${Math.ceil(tinta || el.getBoundingClientRect().width)}px`;
+    // O retângulo vem na escala da tela e o `minWidth` vale em px da peça: sem dividir,
+    // num palco escalado a trava saía maior que o número e empurrava os vizinhos.
+    const caixa = el.getBoundingClientRect().width;
+    const escala = caixa && el.offsetWidth ? caixa / el.offsetWidth : 1;
+    el.style.minWidth = `${Math.ceil((tinta || caixa) / escala)}px`;
     el.style.maxWidth = "100%";
 
     let raf = 0;

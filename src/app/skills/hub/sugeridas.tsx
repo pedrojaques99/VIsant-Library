@@ -35,13 +35,6 @@ const SUGERIDAS = [
     href: "https://impeccable.style",
     comando: "npx impeccable detect",
   },
-  {
-    nome: "agent-skills",
-    autor: "Vercel",
-    faz: "React, Next e transições de rota",
-    href: "https://github.com/vercel-labs/agent-skills",
-    comando: "npx skills add vercel-labs/agent-skills",
-  },
 ];
 
 function Sugerida({ nome, autor, faz, href, comando }: (typeof SUGERIDAS)[number]) {

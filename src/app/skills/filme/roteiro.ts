@@ -85,7 +85,7 @@ export const PARES: Par[] = [
 
 /* Os créditos: a função de cada skill, do README público. O nome e o comando vêm do JSON. */
 export const FUNCAO: Record<string, string> = {
-  "visant-design": "Porta de entrada",
+  "visant-design": "Limpa e redesenha a tela",
   "visant-frontend": "Decide o que fica na tela",
   "visant-copy": "Escreve e tira o tique",
   "visant-refine": "Gráfico, medidor e painel",

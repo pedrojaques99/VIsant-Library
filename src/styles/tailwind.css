@@ -223,3 +223,24 @@
     padding-inline: var(--shell-pad);
   }
 }
+
+/* O palco do kit vintage: painel escuro sobre o papel claro, e nada no escuro. Ver `stageSurfaceOf`. */
+:root {
+  --palco-vintage: radial-gradient(120% 100% at 50% 0%, var(--vintage-surface-2), var(--vintage-surface-1));
+}
+.dark {
+  --palco-vintage: none;
+}
+
+/* As marcas do modo Analisar em /skills. Vão sobre a foto do produto, nos dois temas. */
+:root {
+  --marca-antes: #ff5a7a;
+  --marca-depois: #52ddeb;
+  --marca-texto: #0a0a0a;
+}
+@keyframes marca-entra {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+}

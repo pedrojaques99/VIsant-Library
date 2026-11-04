@@ -57,6 +57,7 @@ export function ContextLossGuard() {
     return () => {
       setTimeout(() => {
         try {
+          // motion-lint-disable-next-line force-context-loss  o palco está desmontando, e o canvas sai junto
           renderer.forceContextLoss();
           renderer.dispose();
         } catch {

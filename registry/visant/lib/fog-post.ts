@@ -105,6 +105,10 @@ export interface FogPost {
   setColors(paper: RGB, ink: RGB): void;
   /** Tempo em segundos — só o grão lê. Congelado, o grão fica parado. */
   setTime(t: number): void;
+  /** Rastro ao vivo, sem refazer a cadeia. 0 desliga o passe; subir de novo liga. */
+  setTrail(damp: number): void;
+  /** Grão ao vivo. É só um uniform. */
+  setGrain(grain: number): void;
   render(): void;
   /**
    * Zera o rastro. Sem isto, voltar de uma aba escondida mostra por alguns
@@ -124,7 +128,7 @@ export function createFogPost(
   composer.addPass(new RenderPass(scene, camera));
 
   const damp = THREE.MathUtils.clamp(trail, 0, 0.98);
-  const rastro = damp > 0 ? new AfterimagePass(damp) : null;
+  let rastro = damp > 0 ? new AfterimagePass(damp) : null;
   if (rastro) composer.addPass(rastro);
 
   const final = new ShaderPass({
@@ -155,6 +159,23 @@ export function createFogPost(
     },
     setTime(t) {
       final.uniforms.uTime.value = t;
+    },
+    setTrail(v) {
+      const d = THREE.MathUtils.clamp(v, 0, 0.98);
+      if (!d) {
+        if (rastro) rastro.enabled = false;
+        return;
+      }
+      if (!rastro) {
+        rastro = new AfterimagePass(d);
+        composer.insertPass(rastro, 1);
+        return;
+      }
+      rastro.uniforms.damp.value = d;
+      rastro.enabled = true;
+    },
+    setGrain(v) {
+      final.uniforms.uGrain.value = v;
     },
     render() {
       composer.render();
@@ -290,6 +311,7 @@ export function densidadeDoCanvas(canvas: HTMLCanvasElement, light: boolean) {
 export function releaseRenderer(renderer: THREE.WebGLRenderer) {
   renderer.dispose();
   try {
+    // motion-lint-disable-next-line force-context-loss  só no descarte final: quem refaz a cena troca o canvas pela `key`
     renderer.forceContextLoss();
   } catch {
     /* contexto já perdido */

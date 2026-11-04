@@ -17,6 +17,12 @@
     "excluir": false,
     "data": "2026-10-20"
   },
+  "cta-surface": {
+    "nota": 2,
+    "comentario": "mt comum, esconder",
+    "excluir": false,
+    "data": "2026-11-03"
+  },
   "dot-cursor": {
     "nota": 2,
     "comentario": "posicao do cursor super bugada, e ta com scroll horizontal e vertical, refaça o shell disso",
@@ -29,45 +35,15 @@
     "excluir": false,
     "data": "2026-10-20"
   },
-  "plate": {
-    "nota": 2,
-    "comentario": "inutil quase",
-    "excluir": false,
-    "data": "2026-10-20"
-  },
-  "sfx-toggle": {
-    "nota": 2,
-    "comentario": "deixar fora do cat�logo (segue no cabe�alho)",
-    "excluir": false,
-    "data": "2026-10-20"
-  },
-  "vintage-command-palette": {
-    "nota": 1,
-    "comentario": "mal apresentado, meio inutil; fica s� como a paleta do Rig vintage, fora da vitrine",
-    "excluir": false,
-    "data": "2026-10-20"
-  },
   "logo-wall": {
     "nota": 2,
     "comentario": "mt comum, esconder",
     "excluir": false,
     "data": "2026-11-03"
   },
-  "cta-surface": {
+  "measure-bar": {
     "nota": 2,
-    "comentario": "mt comum, esconder",
-    "excluir": false,
-    "data": "2026-11-03"
-  },
-  "step-cards": {
-    "nota": 2,
-    "comentario": "mt comum, esconder",
-    "excluir": false,
-    "data": "2026-11-03"
-  },
-  "quote-block": {
-    "nota": 2,
-    "comentario": "mt comum",
+    "comentario": "slop, remover",
     "excluir": false,
     "data": "2026-11-03"
   },
@@ -77,19 +53,43 @@
     "excluir": false,
     "data": "2026-11-03"
   },
-  "turbulence-field": {
+  "plate": {
     "nota": 2,
-    "comentario": "slop, esconder",
+    "comentario": "inutil quase",
+    "excluir": false,
+    "data": "2026-10-20"
+  },
+  "quote-block": {
+    "nota": 2,
+    "comentario": "mt comum",
+    "excluir": false,
+    "data": "2026-11-03"
+  },
+  "section-intro": {
+    "nota": 2,
+    "comentario": "mt simples e obvio, pode esconder",
+    "excluir": false,
+    "data": "2026-11-04"
+  },
+  "sfx-toggle": {
+    "nota": 2,
+    "comentario": "deixar fora do cat�logo (segue no cabe�alho)",
+    "excluir": false,
+    "data": "2026-10-20"
+  },
+  "spine-card": {
+    "nota": 2,
+    "comentario": "slop",
+    "excluir": false,
+    "data": "2026-11-03"
+  },
+  "step-cards": {
+    "nota": 2,
+    "comentario": "mt comum, esconder",
     "excluir": false,
     "data": "2026-11-03"
   },
   "store-status": {
-    "nota": 2,
-    "comentario": "slop, remover",
-    "excluir": false,
-    "data": "2026-11-03"
-  },
-  "measure-bar": {
     "nota": 2,
     "comentario": "slop, remover",
     "excluir": false,
@@ -101,10 +101,22 @@
     "excluir": false,
     "data": "2026-11-03"
   },
-  "spine-card": {
+  "timeline": {
     "nota": 2,
-    "comentario": "slop",
+    "comentario": "ainda mt slop, pode remover",
+    "excluir": false,
+    "data": "2026-11-04"
+  },
+  "turbulence-field": {
+    "nota": 2,
+    "comentario": "slop, esconder",
     "excluir": false,
     "data": "2026-11-03"
+  },
+  "vintage-command-palette": {
+    "nota": 1,
+    "comentario": "mal apresentado, meio inutil; fica s� como a paleta do Rig vintage, fora da vitrine",
+    "excluir": false,
+    "data": "2026-10-20"
   }
 }

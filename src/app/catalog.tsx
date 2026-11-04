@@ -223,15 +223,16 @@ export const previewOf = (item: CatalogItem) => item.preview ?? DEFAULT_PREVIEW;
  * feche, sem o contraste que faz o LED acender. Aqui elas ganham a superfície
  * onde fazem sentido, a mesma da bancada.
  *
+ * Isso só vale no claro. No escuro o ladrilho já é o painel escuro que elas pedem, e
+ * um preto próprio destoava da grade e ignorava a marca escolhida: lá a variável é
+ * vazia (`--palco-vintage`, em tailwind.css), e fica o fundo do ladrilho.
+ *
  * O resto do registry é o contrário: lê o token da marca e tem de aparecer
  * exatamente sobre o fundo do projeto de quem instala. Esse é o palco neutro.
  */
 export const stageSurfaceOf = (item: CatalogItem) =>
   item.estilo?.includes("vintage")
-    ? {
-        background:
-          "radial-gradient(120% 100% at 50% 0%, var(--vintage-surface-2), var(--vintage-surface-1))",
-      }
+    ? { backgroundImage: "var(--palco-vintage)" }
     : undefined;
 
 /**
@@ -570,11 +571,11 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "controles",
     description:
-      "Seletor de marca com prévia ao percorrer: paleta, par tipográfico e completude do vault na linha. Aplica o tema da marca escolhida ao app inteiro.",
+      "Escolha uma marca e o produto inteiro veste: cor, fonte e logo. Passar o mouse pela lista já mostra como fica.",
     tags: ["marca", "tema", "cmdk", "vault"],
     demo: BrandSelectorDemo,
-    knobs: "BrandSelector",
-    preview: { w: 360, h: 140 },
+    // Sem knobs: `shortcut` é da vitrine (o cabeçalho já escuta ⌘B) e não há o que pilotar.
+    preview: { w: 440, h: 340 },
   },
   {
     name: "brand-theme",
@@ -639,7 +640,7 @@ export const CATALOG: CatalogItem[] = [
       "Editar onde se lê. Enter salva, Esc cancela, o valor só troca depois que a promessa resolve.",
     tags: ["edição", "formulário"],
     demo: InlineEditFileDemo,
-    preview: { w: 420, h: 220 },
+    preview: { w: 420, h: 280 },
   },
   {
     name: "auth-button",
@@ -687,7 +688,7 @@ export const CATALOG: CatalogItem[] = [
       "Número que se arrasta na horizontal, como nos editores gráficos. Teclado continua funcionando.",
     tags: ["número", "gesto"],
     demo: ScrubInputDemo,
-    preview: { w: 360, h: 240 },
+    preview: { w: 360, h: 300 },
   },
   {
     name: "fader",
@@ -731,7 +732,7 @@ export const CATALOG: CatalogItem[] = [
     tags: ["avatar", "equipe"],
     demo: AssigneeStackDemo,
     knobs: "AssigneeStack",
-    preview: { w: 620, h: 320 },
+    preview: { w: 340, h: 212 },
   },
   {
     name: "sticky-filterbar",
@@ -743,7 +744,7 @@ export const CATALOG: CatalogItem[] = [
     tags: ["filtro", "scroll"],
     demo: StickyFilterbarDemo,
     knobs: "StickyFilterbar",
-    preview: { w: 480, h: 300 },
+    preview: { w: 360, h: 225 },
   },
   {
     name: "measure-picker",
@@ -1380,7 +1381,7 @@ export const CATALOG: CatalogItem[] = [
       "Parede de prova social com tipos misturados: citação, número, retrato e depoimento em vídeo na mesma malha, em colunas ou em grade que ocupa a altura, com faixa de fechamento.",
     tags: ["depoimento", "prova social", "masonry"],
     demo: TestimonialWallDemo,
-    preview: { w: 900, h: 560 },
+    preview: { w: 900, h: 640 },
   },
 
   /* ══════════════════════════════════════════════════════════════════════
@@ -1442,6 +1443,7 @@ export const CATALOG: CatalogItem[] = [
   },
   {
     name: "count-up",
+    // palco-check: o botão de repetir mora no canto de propósito; os números é que ficam no centro
     title: "Count Up",
     type: "ui",
     family: "conteudo",
@@ -1450,7 +1452,7 @@ export const CATALOG: CatalogItem[] = [
     tags: ["número", "contagem", "prova", "estatística", "animar"],
     demo: CountUpDemo,
     knobs: "CountUp",
-    preview: { w: 560, h: 210 },
+    preview: { w: 360, h: 200 },
   },
   {
     name: "use-pointer-parallax",
@@ -2206,11 +2208,11 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "conteudo",
     description:
-      "Uma revistinha que você folheia puxando o canto da página, com a dobra, o verso do papel e a próxima página aparecendo por baixo.",
+      "Uma revistinha que você folheia puxando o canto: a capa abre, o livro fica com duas páginas e a folha vira com dobra, espessura e verso.",
     tags: ["revista","catálogo","página","dobra","arrastar","editorial"],
     demo: PageCurlColheitaDemo,
     knobs: "PageCurl",
-    preview: { w: 400, h: 470 },
+    preview: { w: 480, h: 470 },
   },
   {
     name: "pull-to-refresh",
@@ -2279,11 +2281,11 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "conteudo",
     description:
-      "Gráfico de fluxo empilhado que mostra como a mistura de várias partes muda no tempo, com camadas que ligam e desligam.",
+      "Gráfico de várias partes no tempo em sete estilos: fluxo, empilhado, 100%, cristas, linhas, barras e centrado, com camadas que ligam e desligam.",
     tags: ["grafico","dados","serie temporal","camadas","dashboard"],
     demo: StreamgraphColheitaDemo,
     knobs: "Streamgraph",
-    preview: { w: 580, h: 330 },
+    preview: { w: 580, h: 400 },
   },
   {
     name: "time-dial",

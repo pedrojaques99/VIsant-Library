@@ -22,6 +22,8 @@ Applying A instincts to a B screen is the most expensive Visant frontend mistake
 | src/app/skills/carro-chefe/secoes-abaixo.tsx | A | instalação de skill | landing |
 | src/app/skills/hub/fotos-da-abertura.tsx | A | instalação de skill | landing |
 | src/app/skills/hub/resto.tsx | A | instalação de skill | landing |
+| src/app/skills/hub/sugeridas.tsx | A | instalação de skill | skills de fora como sugestão, com o comando |
+| src/app/skills/hub/telas.tsx | A | instalação de skill | cenários reais e modo Analisar |
 | src/app/som-da-casa.tsx | B | nenhuma direta | som opcional da casca |
 | src/app/App.tsx | A | instalação da peça | casca do catálogo |
 | src/app/avaliacao.tsx | B | tarefa concluída | interno ou agente |

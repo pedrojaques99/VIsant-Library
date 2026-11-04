@@ -23,6 +23,10 @@
  *    árvore protagonista (a copa redonda) ao lado da trilha, para a câmera
  *    passar perto. Os marcos (`landmark`) vêm de fora: a cena não sabe o que é
  *    o produto de ninguém.
+ * 5. **Parâmetro não refaz cena.** O que custa é o `growTree` (sete árvores, 400ms
+ *    na thread principal) e o programa do pós. Replantar só troca `Group` que aponta
+ *    para o que já existe, e rastro e grão são uniforms: mexer num controle a 60
+ *    quadros por segundo não pode passar por `createGardenScene`.
  */
 
 import * as THREE from "three";
@@ -50,12 +54,16 @@ import { growTree, roundCrown } from "@/lib/fog-tree-scene";
  */
 export type GardenLandmark = (index: number) => THREE.Object3D | null | undefined;
 
-export interface GardenSceneOptions {
+/** O que muda o desenho do jardim sem gerar árvore nova (decisão 5). */
+export interface GardenPlanting {
   seed: number;
   /** Quantas posições de plantio ao longo da trilha. */
   density: number;
   /** Pontos 0..1 da trilha com clareira. */
   clearings: number[];
+}
+
+export interface GardenSceneOptions extends GardenPlanting {
   landmark?: GardenLandmark;
   trail: number;
   grain: number;
@@ -68,6 +76,9 @@ export interface GardenScene {
   /** Ponteiro em -1..1; desvia o olhar da câmera para os lados. */
   setPointer(x: number, y: number): void;
   setColors(paper: RGB, ink: RGB): void;
+  setPlanting(planting: GardenPlanting): void;
+  setTrail(trail: number): void;
+  setGrain(grain: number): void;
   setRunning(on: boolean): void;
   dispose(): void;
 }
@@ -150,18 +161,22 @@ export function createGardenScene(
     variantes.map((v) => [v, new THREE.Box3().setFromObject(v).getSize(new THREE.Vector3())]),
   );
 
+  // O jardim mora num grupo só: replantar é esvaziar o grupo e plantar de novo.
+  const jardim = new THREE.Group();
+  scene.add(jardim);
+
   const plantar = (base: Tree, pos: THREE.Vector3, escala: number, rot: number) => {
     const c = instance(base);
     c.position.copy(pos);
     c.scale.setScalar(escala);
     c.rotation.y = rot;
-    scene.add(c);
+    jardim.add(c);
     const tam = tamanho.get(base)!;
     const s = new THREE.Mesh(sombraGeo, sombraMat);
     s.rotation.x = -Math.PI / 2;
     s.position.set(pos.x, 0.05, pos.z);
     s.scale.set(tam.x * escala * 1.4, tam.z * escala * 1.1, 1);
-    scene.add(s);
+    jardim.add(s);
   };
 
   const tangente = new THREE.Vector3();
@@ -174,39 +189,54 @@ export function createGardenScene(
     return out.addScaledVector(lado, desvio);
   };
 
-  // Plantio (decisão 3): mais ralo perto das clareiras, arbusto perto da
-  // trilha e árvore mais longe, para a trilha ler como caminho aberto.
-  const r = rng(opts.seed);
-  const passos = Math.max(8, Math.round(opts.light ? opts.density * 0.6 : opts.density));
-  for (let k = 0; k < passos; k++) {
-    const u = 0.02 + (k / passos) * 0.97;
-    const perto = opts.clearings.some((c) => Math.abs(c - u) < 0.035);
-    if (perto && r() < 0.8) continue;
-    const sinal = r() < 0.5 ? -1 : 1;
-    const arbusto = r() < 0.3;
-    const dist = arbusto ? 18 + r() * 26 : 50 + r() * 110;
-    const base = arbusto
-      ? arbustos[(r() * arbustos.length) | 0]
-      : fundo[(r() * fundo.length) | 0];
-    const escala = arbusto ? 1.2 + r() * 1.2 : 0.75 + r() * 0.6;
-    plantar(base, aoLado(u, sinal * dist), escala, r() * Math.PI * 2);
-  }
+  // Um marco por índice de clareira, feito uma vez: a fábrica é de quem usa e
+  // pode ser cara. Clareira que some só esconde o marco dela.
+  const marcos = new Map<number, THREE.Object3D | null>();
 
-  // Protagonista em cada clareira, alternando o lado, um pouco à frente do
-  // ponto: a câmera olha adiante, então a árvore entra no quadro ANTES de a
-  // câmera chegar, e não de lado quando já passou.
-  const marcos: THREE.Object3D[] = [];
-  opts.clearings.forEach((u, i) => {
-    const flanco = i % 2 ? 1 : -1;
-    plantar(protagonista, aoLado(u + 0.012, flanco * 26), 1, i * 1.7);
-    const marco = opts.landmark?.(i);
-    if (marco) {
-      // do lado oposto à árvore, mais perto da trilha: os dois dividem o quadro
-      marco.position.copy(aoLado(u, -flanco * 15));
-      scene.add(marco);
-      marcos.push(marco);
+  const replantar = ({ seed, density, clearings }: GardenPlanting) => {
+    jardim.clear();
+
+    // Plantio (decisão 3): mais ralo perto das clareiras, arbusto perto da
+    // trilha e árvore mais longe, para a trilha ler como caminho aberto.
+    const r = rng(seed);
+    const passos = Math.max(8, Math.round(opts.light ? density * 0.6 : density));
+    for (let k = 0; k < passos; k++) {
+      const u = 0.02 + (k / passos) * 0.97;
+      const perto = clearings.some((c) => Math.abs(c - u) < 0.035);
+      if (perto && r() < 0.8) continue;
+      const sinal = r() < 0.5 ? -1 : 1;
+      const arbusto = r() < 0.3;
+      const dist = arbusto ? 18 + r() * 26 : 50 + r() * 110;
+      const base = arbusto
+        ? arbustos[(r() * arbustos.length) | 0]
+        : fundo[(r() * fundo.length) | 0];
+      const escala = arbusto ? 1.2 + r() * 1.2 : 0.75 + r() * 0.6;
+      plantar(base, aoLado(u, sinal * dist), escala, r() * Math.PI * 2);
     }
-  });
+
+    // Protagonista em cada clareira, alternando o lado, um pouco à frente do
+    // ponto: a câmera olha adiante, então a árvore entra no quadro ANTES de a
+    // câmera chegar, e não de lado quando já passou.
+    marcos.forEach((m) => {
+      if (m) m.visible = false;
+    });
+    clearings.forEach((u, i) => {
+      const flanco = i % 2 ? 1 : -1;
+      plantar(protagonista, aoLado(u + 0.012, flanco * 26), 1, i * 1.7);
+      if (!marcos.has(i)) {
+        const novo = opts.landmark?.(i) ?? null;
+        marcos.set(i, novo);
+        if (novo) scene.add(novo);
+      }
+      const marco = marcos.get(i);
+      if (marco) {
+        // do lado oposto à árvore, mais perto da trilha: os dois dividem o quadro
+        marco.position.copy(aoLado(u, -flanco * 15));
+        marco.visible = true;
+      }
+    });
+  };
+  replantar(opts);
 
   const post = createFogPost(renderer, scene, camera, {
     trail: opts.reduce ? 0 : opts.trail,
@@ -257,8 +287,8 @@ export function createGardenScene(
     if (!opts.reduce) {
       variantes.forEach((v) => v.update(t));
       marcos.forEach((m) => {
-        const spin = Number(m.userData.spin) || 0;
-        if (spin) m.rotation.y = t * spin;
+        const spin = Number(m?.userData.spin) || 0;
+        if (m && spin) m.rotation.y = t * spin;
       });
       post.setTime(t);
     }
@@ -301,6 +331,20 @@ export function createGardenScene(
       post.setColors(paper, ink);
       pedir();
     },
+    setPlanting(planting) {
+      replantar(planting);
+      pedir();
+    },
+    setTrail(v) {
+      // movimento reduzido fica sem rastro: é a mesma regra de quando a cena nasce
+      if (opts.reduce) return;
+      post.setTrail(v);
+      pedir();
+    },
+    setGrain(v) {
+      post.setGrain(v);
+      pedir();
+    },
     setRunning(on) {
       if (on === visivel) return;
       visivel = on;
@@ -319,7 +363,7 @@ export function createGardenScene(
       window.removeEventListener("resize", resize);
       // os clones só apontam para o que é das variantes (decisão 1)
       variantes.forEach(disposeTree);
-      marcos.forEach(disposeTree);
+      marcos.forEach((m) => m && disposeTree(m));
       chaoGeo.dispose();
       chaoMat.dispose();
       sombraGeo.dispose();

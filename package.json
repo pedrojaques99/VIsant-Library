@@ -30,6 +30,7 @@
     "check:deps": "node scripts/deps-check.mjs",
     "build:og": "node scripts/og-images.mjs",
     "build:shots": "node scripts/capture-registry.mjs",
+    "build:zoom": "node scripts/zoom-do-ladrilho.mjs",
     "build:shader-thumbs": "node scripts/shader-miniaturas.mjs",
     "build:media": "node scripts/media-bank.mjs",
     "build:logos": "node scripts/logos-leves.mjs",

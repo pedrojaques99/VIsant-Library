@@ -236,7 +236,7 @@ const SECOES = [
   {
     slug: "skills",
     titulo: "Skills / Visant",
-    descricao: "As skills públicas da Visant para Claude Code: interface, motion, copy e vídeo, mostradas em uso.",
+    descricao: "Seis skills da Visant para Claude Code: interface, motion e copy, mostradas em uso.",
   },
   {
     slug: "skills/filme",
@@ -363,7 +363,8 @@ for (const s of [...SECOES, ...FAMILIAS, ...KITS]) {
     titulo: s.titulo,
     descricao: s.descricao,
     url: `${SITE}/${s.slug}`,
-    imagem: `${SITE}/og/home.png`,
+    // /skills/filme e /skills/killer herdam a de /skills.
+    imagem: `${SITE}/og/${existsSync(join(ROOT, "public/og", `${s.slug.split("/")[0]}.png`)) ? s.slug.split("/")[0] : "home"}.png`,
     noindex: s.noindex,
     markdown: COM_MARKDOWN.has(s.slug) ? `/${s.slug}.md` : undefined,
   }));

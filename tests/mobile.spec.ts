@@ -182,7 +182,7 @@ test.describe("iPhone 13", () => {
     await abrir(page, "/");
     expect(await page.locator("body").innerText()).not.toMatch(FALA_DE_TECLADO);
     await page.locator('header button[aria-haspopup="dialog"]:visible').first().tap();
-    await expect(page.getByPlaceholder("Buscar marca, fonte ou cor…")).toBeVisible();
+    await expect(page.getByPlaceholder("Buscar marca…")).toBeVisible();
     await page.waitForTimeout(200);
     expect(await page.locator("body").innerText()).not.toMatch(FALA_DE_TECLADO);
   });

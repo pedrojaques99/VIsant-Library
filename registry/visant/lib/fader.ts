@@ -21,8 +21,14 @@
  * 6. **Sem cor própria.** Só tokens (`--foreground`, `--border`, `--ring`) com
  *    fallback em cor de sistema, então o tema da marca troca tudo.
  *
- * Eventos: `valuechange` a cada passo (inclusive arrastando) e `valuecommit`
- * ao soltar, ambos com `detail.value`.
+ * 7. **O arrasto se sente, como nos outros sliders.** A tampa cresce enquanto a
+ *    mão está nela, venha do trilho ou do nome, e a cada 1/40 do curso sai um
+ *    `valuedetent`. O som fica fora de propósito, pra peça seguir sem framework:
+ *    ligue o evento ao `playSfx("focus")` do `sfx-bus` ou ao som que quiser.
+ *
+ * Eventos: `valuechange` a cada passo (inclusive arrastando), `valuecommit` ao
+ * soltar e `valuedetent` por dente de curso durante o arrasto, todos com
+ * `detail.value`.
  */
 
 const CSS = `
@@ -34,7 +40,7 @@ const CSS = `
 :host([disabled]) { opacity: 0.4; pointer-events: none; }
 .f { display: grid; grid-template-columns: var(--fader-label-w, 64px) 1fr var(--fader-value-w, 28px); align-items: center; gap: 10px; }
 .l { cursor: ew-resize; user-select: none; -webkit-user-select: none; touch-action: pan-y; transition: color var(--fd-fast) ease; }
-.f:hover .l, .l.on { color: var(--fd-fg); }
+.f:hover .l, .f.on .l { color: var(--fd-fg); }
 output { font: 11px var(--font-mono, ui-monospace, monospace); font-variant-numeric: tabular-nums; text-align: right; color: var(--fd-fg); }
 input { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; margin: 0; cursor: ew-resize; touch-action: pan-y;
   background: repeating-linear-gradient(to right, var(--fd-line) 0 1px, transparent 1px 10%) 3px center / calc(100% - 6px) 7px no-repeat; }
@@ -45,10 +51,20 @@ input::-moz-range-progress { height: 2px; background: var(--fd-fg); }
 input::-webkit-slider-thumb { -webkit-appearance: none; width: 6px; height: 16px; margin-top: -7px; border-radius: 1.5px; background: var(--fd-fg);
   box-shadow: 0 0 0 3px var(--fd-bg); transition: transform var(--fd-press) var(--fd-ease); }
 input::-moz-range-thumb { width: 6px; height: 16px; border: 0; border-radius: 1.5px; background: var(--fd-fg); }
-input:active::-webkit-slider-thumb { transform: scaleY(1.2); }
+.f.on input::-webkit-slider-thumb { transform: scale(1.25); }
+.f.on input::-moz-range-thumb { transform: scale(1.25); }
+@media (pointer: coarse) {
+  input { height: 44px; }
+  .l { padding-block: 14px; }
+  input::-webkit-slider-thumb { width: 10px; height: 24px; margin-top: -11px; }
+  input::-moz-range-thumb { width: 10px; height: 24px; }
+}
 input:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--fd-bg), 0 0 0 4.5px var(--ring, Highlight); }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 `;
+
+// Os mesmos 40 dentes de curso do elastic, do slosh e do sim-slider.
+const DENTES = 40;
 
 let sheet: CSSStyleSheet | null = null;
 
@@ -64,6 +80,9 @@ export class VisantFader extends ElementoBase {
   #input!: HTMLInputElement;
   #out!: HTMLOutputElement;
   #label!: HTMLSpanElement;
+  #campo!: HTMLDivElement;
+  #arrastando = false;
+  #dente = 0;
 
   constructor() {
     super();
@@ -80,10 +99,22 @@ export class VisantFader extends ElementoBase {
     f.part.add("field");
     f.innerHTML = `<span class="l" part="label"></span><input type="range" part="range"><output part="value"></output>`;
     root.append(f);
+    this.#campo = f;
     this.#label = f.querySelector(".l")!;
     this.#input = f.querySelector("input")!;
     this.#out = f.querySelector("output")!;
 
+    this.#input.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      this.#pegar();
+      const largar = () => {
+        this.#largar();
+        window.removeEventListener("pointerup", largar);
+        window.removeEventListener("pointercancel", largar);
+      };
+      window.addEventListener("pointerup", largar);
+      window.addEventListener("pointercancel", largar);
+    });
     this.#input.addEventListener("input", () => this.#emit("valuechange"));
     this.#input.addEventListener("change", () => this.#emit("valuecommit"));
     const reset = () => {
@@ -133,9 +164,30 @@ export class VisantFader extends ElementoBase {
     this.#out.value = i.value + (this.getAttribute("unit") ?? "");
   }
 
-  #emit(type: "valuechange" | "valuecommit") {
-    this.#paint();
+  #emit(type: "valuechange" | "valuecommit" | "valuedetent") {
+    if (type !== "valuedetent") this.#paint();
     this.dispatchEvent(new CustomEvent(type, { detail: { value: this.value }, bubbles: true, composed: true }));
+    if (type !== "valuechange" || !this.#arrastando) return;
+    const d = this.#denteAtual();
+    if (d === this.#dente) return;
+    this.#dente = d;
+    this.#emit("valuedetent");
+  }
+
+  #denteAtual() {
+    const i = this.#input;
+    return Math.round(((Number(i.value) - Number(i.min)) / (Number(i.max) - Number(i.min) || 1)) * DENTES);
+  }
+
+  #pegar() {
+    this.#arrastando = true;
+    this.#dente = this.#denteAtual();
+    this.#campo.classList.add("on");
+  }
+
+  #largar() {
+    this.#arrastando = false;
+    this.#campo.classList.remove("on");
   }
 
   // drag the name sideways; one step per few px, Shift is finer
@@ -145,7 +197,7 @@ export class VisantFader extends ElementoBase {
       if (e.button !== 0 || this.hasAttribute("disabled")) return;
       e.preventDefault();
       l.setPointerCapture(e.pointerId);
-      l.classList.add("on");
+      this.#pegar();
       const i = this.#input;
       const x0 = e.clientX, v0 = this.value;
       const step = Number(i.step) || 1;
@@ -162,7 +214,7 @@ export class VisantFader extends ElementoBase {
       };
       const up = () => {
         l.removeEventListener("pointermove", move);
-        l.classList.remove("on");
+        this.#largar();
         if (last !== v0) this.#emit("valuecommit");
       };
       l.addEventListener("pointermove", move);

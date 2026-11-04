@@ -113,6 +113,8 @@ test.describe("catálogo — índice de categorias", () => {
   test("rolar monta a peça antes de ela entrar na tela, e desmonta a que ficou longe", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(INDICE);
+    // Espera a grade, não o relógio: com o servidor frio, 600ms rolava uma página sem cards.
+    await page.locator("article").first().waitFor();
     await page.waitForTimeout(600);
 
     const ultima = page.locator(PECA).last();

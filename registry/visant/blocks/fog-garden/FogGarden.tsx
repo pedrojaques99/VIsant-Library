@@ -35,6 +35,11 @@
  * 6. **O WebGL só desce perto da tela, e para fora dela.** Mesmo trato do
  *    `fog-tree`: `import()` a 400px da viewport, laço parado fora da tela e com
  *    a aba escondida, modo leve no toque e em tela pequena.
+ * 7. **Prop não refaz a cena.** `seed`, `density`, `trail` e `grain` chegam por
+ *    método: refazer gerava sete árvores por tique de um slider (6s de thread
+ *    presa num arrasto de 1s) e, pior, o `forceContextLoss` do descarte matava o
+ *    contexto do MESMO canvas, e a cena seguinte nascia morta. Por isso também o
+ *    canvas tem `key`: a única troca que refaz a cena (`reduce`) ganha canvas novo.
  *
  * Requer `three`, `@dgreenheck/ez-tree` e `framer-motion`.
  */
@@ -217,6 +222,21 @@ export function FogGarden({
     };
   }, [applyColors]);
 
+  // ── Parâmetros ao vivo (decisão 7). A cena nascendo lê o valor mais recente
+  //    por aqui; a que já existe recebe por método. ───────────────────────────
+  const clearingList = React.useMemo(
+    () => (clearingKey ? clearingKey.split(",").map(Number) : []),
+    [clearingKey],
+  );
+  const liveRef = React.useRef({ seed, density, clearings: clearingList, trail, grain });
+  liveRef.current = { seed, density, clearings: clearingList, trail, grain };
+
+  React.useEffect(() => {
+    sceneRef.current?.setPlanting({ seed, density, clearings: clearingList });
+  }, [seed, density, clearingList]);
+  React.useEffect(() => sceneRef.current?.setTrail(trail), [trail]);
+  React.useEffect(() => sceneRef.current?.setGrain(grain), [grain]);
+
   // ── Ciclo de vida da cena (decisão 6) ────────────────────────────────────
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -238,12 +258,8 @@ export function FogGarden({
             .then(({ createGardenScene }) => {
               if (!alive) return;
               const scene = createGardenScene(canvas, {
-                seed,
-                density,
-                clearings: clearingKey ? clearingKey.split(",").map(Number) : [],
+                ...liveRef.current,
                 landmark: landmarkRef.current,
-                trail,
-                grain,
                 reduce,
                 light: prefersLight(),
               });
@@ -283,7 +299,7 @@ export function FogGarden({
       sceneRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seed, density, clearingKey, trail, grain, reduce]);
+  }, [reduce]);
 
   const counterText = useTransform(prog, (v) => pad(Math.min(n, Math.floor(v * n) + 1)));
 
@@ -297,7 +313,7 @@ export function FogGarden({
       {...props}
     >
       <div className="sticky top-0 overflow-hidden" style={{ height: stageHeight }}>
-        <canvas ref={canvasRef} aria-hidden className="pointer-events-none absolute inset-0 block h-full w-full" />
+        <canvas key={String(reduce)} ref={canvasRef} aria-hidden className="pointer-events-none absolute inset-0 block h-full w-full" />
 
         <div
           className="pointer-events-none absolute inset-0 mix-blend-difference"

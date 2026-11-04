@@ -11,9 +11,13 @@ import { DemoCopy } from "./demo-copy";
 import { DemoMotion } from "./demo-motion";
 import { DemoRefine } from "./demo-refine";
 import { DemoDesign, DemoFrontend } from "./demo-interface";
-import { DemoEditor, DemoPremiere, DemoReels } from "./demo-video";
-import { DemoMcp, DemoMetodo, DemoPreflight } from "./demo-processo";
 import { Sugeridas } from "./sugeridas";
+import { Telas } from "./telas";
+import { TELAS as TELAS_DESIGN } from "./telas-design";
+import { TELAS as TELAS_FRONTEND } from "./telas-frontend";
+import { TELAS as TELAS_COPY } from "./telas-copy";
+import { TELAS as TELAS_MOTION } from "./telas-motion";
+import { TELAS as TELAS_REFINE } from "./telas-refine";
 
 const PECAS = ["photo-compare", "segmented-control", "sim-slider", "count-up"];
 
@@ -23,28 +27,27 @@ export function Resto({ instalando, setInstalando }: { instalando: boolean; setI
         <DemoKiller />
         <TelasKiller />
         <DemoDesign />
+        <Telas telas={TELAS_DESIGN} skill="visant-design" />
         <DemoFrontend />
+        <Telas telas={TELAS_FRONTEND} skill="visant-frontend" />
         <DemoCopy />
+        <Telas telas={TELAS_COPY} skill="visant-copy" />
         <DemoMotion />
+        <Telas telas={TELAS_MOTION} faixa skill="visant-motion" />
         <DemoRefine />
-        <DemoEditor />
-        <DemoReels />
-        <DemoPremiere />
-        <DemoPreflight />
-        <DemoMetodo />
-        <DemoMcp />
+        <Telas telas={TELAS_REFINE} skill="visant-refine" />
 
         <section data-fecho className={`shell grid min-w-0 content-center items-center gap-6 py-6 lg:grid-cols-2 lg:gap-16 ${ALTURA_LARGA}`}>
           <div className="min-w-0">
             <h2 className="text-[clamp(2.25rem,5vw,4rem)] font-medium leading-[1.12] tracking-[-0.02em]">
-              <CountUp>12</CountUp> skills, licença MIT.
+              <CountUp>6</CountUp> skills, licença MIT.
             </h2>
             <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
               <Acao onClick={() => setInstalando(true)} data-acao="fecho">
                 Instalar
               </Acao>
               <a href="https://github.com/pedrojaques99/visant-skills-public" className={`${LINK} inline-flex min-h-11 min-w-11 items-center text-casa-base text-casa-fg-2`}>
-                GitHub
+                Vídeo e projeto no GitHub
               </a>
               <a href="/docs" className={`${LINK} inline-flex min-h-11 min-w-11 items-center text-casa-base text-casa-fg-2`}>
                 Docs

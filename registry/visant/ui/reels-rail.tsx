@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { MoveHorizontal, Pause, Play, Volume2, VolumeX } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Rail } from "@/components/ui/rail";
@@ -156,6 +156,11 @@ export interface ReelsRailProps extends React.HTMLAttributes<HTMLDivElement> {
   drift?: boolean;
   /** Velocidade da deriva, em px por segundo. Acima de ~60 vira esteira. */
   driftSpeed?: number;
+  /**
+   * Ícone discreto sobre o card do meio, dizendo que a fileira arrasta. Dá dois
+   * balanços ao nascer e some de vez no primeiro gesto da pessoa.
+   */
+  dragHint?: boolean;
 }
 
 export function ReelsRail({
@@ -174,11 +179,13 @@ export function ReelsRail({
   playOn = "center",
   loop = true,
   drift = true,
+  dragHint = true,
   driftSpeed = 26,
   className,
   ...props
 }: ReelsRailProps) {
   const raizRef = React.useRef<HTMLDivElement>(null);
+  const [mexeu, setMexeu] = React.useState(false);
   const [ativo, setAtivo] = React.useState(0);
   const [naTela, setNaTela] = React.useState(true);
   const [comSom, setComSom] = React.useState(false);
@@ -543,6 +550,14 @@ export function ReelsRail({
       // Os quatro juntos porque a deriva tem que parar pelos DOIS caminhos de
       // atenção: o ponteiro que chega e o foco que entra por teclado. Parar só
       // no hover deixaria a fileira fugindo debaixo de quem navega com Tab.
+      // Captura: o gesto é da fileira, mas quem precisa saber é a dica. Apertar
+      // os botões do card não é arrastar, então não conta.
+      onPointerDownCapture={(e) => {
+        if (!(e.target as HTMLElement).closest("button")) setMexeu(true);
+      }}
+      onWheelCapture={(e) => {
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) setMexeu(true);
+      }}
       onPointerEnter={() => setComPonteiro(true)}
       onPointerLeave={() => setComPonteiro(false)}
       onFocusCapture={() => setComFoco(true)}
@@ -577,6 +592,7 @@ export function ReelsRail({
                 tocando={tocando}
                 comSom={sound && comSom}
                 mostrarSom={sound}
+                dica={dragHint ? (mexeu ? "sumiu" : "visivel") : null}
                 onPlay={alternarPlay}
                 onSom={() => setComSom((v) => !v)}
               />
@@ -588,6 +604,48 @@ export function ReelsRail({
   );
 }
 
+/**
+ * A dica mora no canto livre do card ativo: à direita ficam os controles e embaixo
+ * a legenda. Não recebe toque, então nunca atrapalha o arrasto que está anunciando.
+ *
+ * O balanço é Web Animations e não `@keyframes`: roda sem CSS nenhum na instalação.
+ */
+function DicaDeArrasto({ sumiu }: { sumiu: boolean }) {
+  const icone = React.useRef<HTMLSpanElement>(null);
+  React.useEffect(() => {
+    const el = icone.current;
+    if (!el?.animate || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const a = el.animate(
+      [
+        { transform: "translateX(0)" },
+        { transform: "translateX(-3px)" },
+        { transform: "translateX(3px)" },
+        { transform: "translateX(0)" },
+      ],
+      // motion-lint-disable-next-line hardcoded-duration  a dica balança devagar de propósito, fora da escala de resposta da interface
+      { duration: 1400, delay: 700, iterations: 2, easing: "ease-in-out" },
+    );
+    return () => a.cancel();
+  }, []);
+
+  return (
+    <span
+      aria-hidden="true"
+      data-reels-dica=""
+      className={cn(
+        "pointer-events-none absolute left-3 top-3 grid size-9 place-items-center",
+        "rounded-[var(--r-pill,9999px)] bg-black/40 text-white/90 backdrop-blur-[2px]",
+        "transition-opacity [transition-duration:var(--dur-slow,300ms)] [transition-timing-function:var(--ease-out)]",
+        sumiu && "opacity-0",
+      )}
+    >
+      <span ref={icone} className="grid place-items-center">
+        <MoveHorizontal className="size-4" />
+      </span>
+    </span>
+  );
+}
+
 function ReelCard({
   item,
   ratio,
@@ -595,6 +653,7 @@ function ReelCard({
   tocando,
   comSom,
   mostrarSom,
+  dica,
   onPlay,
   onSom,
   onHover,
@@ -605,6 +664,7 @@ function ReelCard({
   tocando: boolean;
   comSom: boolean;
   mostrarSom: boolean;
+  dica: "visivel" | "sumiu" | null;
   onPlay: () => void;
   onSom: () => void;
   /** Só existe no modo `playOn="hover"`. Ausente = o card não escuta ponteiro. */
@@ -695,6 +755,8 @@ function ReelCard({
        * pessoa de teclado atravessaria dois controles por card. Aqui há no
        * máximo dois, e eles pertencem ao vídeo que está tocando.
        */}
+      {ativo && dica ? <DicaDeArrasto sumiu={dica === "sumiu"} /> : null}
+
       {ativo ? (
         <div className="absolute right-3 top-3 flex flex-col gap-2">
           <ControleReel

@@ -9,7 +9,7 @@
  * objeto sangrado sobre o papel, a manchete grande no topo e o número da
  * edição no pé, sem caixa nenhuma. As internas seguem uma grade só (margem,
  * fólio no pé, legenda curta), que é o que faz cinco páginas parecerem a
- * mesma publicação.
+ * mesma publicação. Corpo de texto maior porque no celular o livro aberto encolhe.
  */
 
 import { Media, midia, useWireframe } from "../media";
@@ -33,7 +33,9 @@ function Objeto({ indice, className }: { indice: number; className?: string }) {
 }
 
 function Folio({ n }: { n: number }) {
-  return <span className="absolute bottom-3 right-4 text-[10px] tabular-nums text-muted-foreground">{n}</span>;
+  // Fólio na margem de fora: par à esquerda, ímpar à direita, como em livro.
+  const lado = n % 2 === 0 ? "left-4" : "right-4";
+  return <span className={`absolute bottom-3 ${lado} text-[10px] tabular-nums text-muted-foreground`}>{n}</span>;
 }
 
 function Capa() {
@@ -60,8 +62,8 @@ function Capa() {
 function Texto({ titulo, corpo, numero }: { titulo: string; corpo: string; numero: number }) {
   return (
     <div className="relative flex size-full flex-col justify-end gap-3 p-6 pb-10">
-      <h3 className="text-[22px] font-semibold leading-[1.05] tracking-tight text-foreground">{titulo}</h3>
-      <p className="text-[12px] leading-relaxed text-muted-foreground">{corpo}</p>
+      <h3 className="text-[26px] font-semibold leading-[1.05] tracking-tight text-foreground">{titulo}</h3>
+      <p className="text-[15px] leading-snug text-muted-foreground">{corpo}</p>
       <Folio n={numero} />
     </div>
   );
@@ -71,8 +73,8 @@ function Peca({ indice, nome, legenda, numero }: { indice: number; nome: string;
   return (
     <div className="relative flex size-full flex-col p-6 pb-10">
       <Objeto indice={indice} className="min-h-0 w-full flex-1" />
-      <p className="mt-3 text-[13px] font-medium text-foreground">{nome}</p>
-      <p className="text-[11px] leading-snug text-muted-foreground">{legenda}</p>
+      <p className="mt-3 text-[16px] font-medium text-foreground">{nome}</p>
+      <p className="text-[14px] leading-snug text-muted-foreground">{legenda}</p>
       <Folio n={numero} />
     </div>
   );
@@ -98,7 +100,7 @@ const PAGINAS = [
 
 export default function PageCurlDemo({ props }: DemoProps) {
   return (
-    <div className="flex h-full w-full items-center justify-center p-6">
+    <div className="flex h-full w-full items-center justify-center px-2 py-6">
       <PageCurl pages={PAGINAS} width={280} label="Revista Sem pressa" {...props} />
     </div>
   );

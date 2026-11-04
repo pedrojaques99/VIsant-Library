@@ -72,6 +72,8 @@ export interface ScrubInputProps {
   kind?: ScrubKind;
   /** "row" = rótulo e valor na mesma linha (campo metade da altura). */
   layout?: "stack" | "row";
+  /** Botões − e + em volta do valor, pra contagem de um em um e pro dedo. */
+  stepper?: boolean;
   disabled?: boolean;
   onChange: (value: number) => void;
   className?: string;
@@ -88,6 +90,7 @@ export const ScrubInput = React.memo<ScrubInputProps>(function ScrubInput({
   hint,
   kind = "number",
   layout = "stack",
+  stepper = false,
   disabled = false,
   onChange,
   className,
@@ -271,7 +274,16 @@ export const ScrubInput = React.memo<ScrubInputProps>(function ScrubInput({
         {icon && <span className="mr-1 inline-flex align-middle opacity-70">{icon}</span>}
         {label}
       </span>
-      <div className={cn("flex min-w-0 items-center", layout === "row" && "shrink-0")}>
+      <div
+        className={cn(
+          "flex min-w-0 items-center",
+          layout === "row" && "shrink-0",
+          stepper && "justify-between gap-2",
+        )}
+      >
+        {stepper && !editing ? (
+          <Passo rotulo={`Diminuir ${label}`} sinal="−" onClick={() => onChange(clamp(value - step))} />
+        ) : null}
         {editing ? (
           <input
             ref={inputRef}
@@ -295,6 +307,9 @@ export const ScrubInput = React.memo<ScrubInputProps>(function ScrubInput({
             {display}
           </span>
         )}
+        {stepper && !editing ? (
+          <Passo rotulo={`Aumentar ${label}`} sinal="+" onClick={() => onChange(clamp(value + step))} />
+        ) : null}
       </div>
 
       {/*
@@ -314,3 +329,18 @@ export const ScrubInput = React.memo<ScrubInputProps>(function ScrubInput({
     </div>
   );
 });
+
+/** Fora da ordem de Tab: no teclado as setas do campo já fazem o mesmo. */
+function Passo({ rotulo, sinal, onClick }: { rotulo: string; sinal: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      tabIndex={-1}
+      aria-label={rotulo}
+      onClick={onClick}
+      className="relative grid size-5 shrink-0 place-items-center rounded-[var(--r-control)] font-mono text-[13px] leading-none text-muted-foreground outline-none transition-colors [transition-duration:var(--dur-fast)] ease-[var(--ease-out)] hover:bg-muted hover:text-foreground pointer-coarse:size-6 pointer-coarse:after:absolute pointer-coarse:after:-inset-2.5"
+    >
+      {sinal}
+    </button>
+  );
+}

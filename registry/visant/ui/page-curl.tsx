@@ -17,8 +17,12 @@ import { cn } from "@/lib/utils";
  *
  * ── O que se vê, e o que reage a quê ───────────────────────────────────────
  *
- * - Em repouso: a página da vez, com o canto inferior direito levantado só um
- *   pouco quando o ponteiro chega perto (convite, não enfeite).
+ * - Fechada: só a capa, centrada. Virou a capa, o livro desliza até a lombada
+ *   ficar no meio e fica ABERTO, com duas páginas (verso da folha virada à
+ *   esquerda, a seguinte à direita). Onde duas páginas não cabem na largura da
+ *   frase cheia, o livro aberto encolhe por escala: a capa continua grande.
+ * - Em repouso: o canto inferior direito levanta só um pouco quando o ponteiro
+ *   chega perto (convite, não enfeite).
  * - Arrastando a metade direita: o canto segue o dedo. A parte dobrada mostra o
  *   verso do papel e, por baixo, já aparece a próxima página. A dobra projeta
  *   sombra na página de baixo.
@@ -51,6 +55,13 @@ import { cn } from "@/lib/utils";
  *    de dobra e recalculadas a cada quadro, então a luz gira com o papel. Some
  *    a lombada afundada e três folhas de miolo na borda, e a revista ganha
  *    corpo sem `perspective` nenhuma, que quebraria a conta do ponteiro.
+ * 6. **A folha é uma folha só, frente e verso.** A folha `n` tem a página `2n` na
+ *    frente e `2n + 1` no verso, e tudo o que está na tela sai daí. O verso é
+ *    desespelhado por dentro, então pousa na esquerda exatamente como a página
+ *    que fica ali, e a troca de estado não aparece.
+ * 7. **A espessura é sombra dura.** Três `drop-shadow` sem desfoque no invólucro
+ *    da aba desenham a borda do papel em qualquer ângulo, e a luz em cilindro dos
+ *    dois lados do vinco faz a dobra parecer cartão e não seda.
  */
 
 type Ponto = { x: number; y: number };
@@ -99,10 +110,18 @@ function gradienteNaDobra(
 
 /** Luz do verso: sombra colada no vinco e papel quase chapado. Brilho forte lia como metal. */
 const LUZ_VERSO: [number, string][] = [
-  [0, "color-mix(in oklab, black 22%, transparent)"],
-  [12, "color-mix(in oklab, black 5%, transparent)"],
-  [40, "color-mix(in oklab, white 6%, transparent)"],
+  [0, "color-mix(in oklab, black 36%, transparent)"],
+  [8, "color-mix(in oklab, black 12%, transparent)"],
+  [20, "color-mix(in oklab, white 9%, transparent)"],
+  [44, "color-mix(in oklab, white 3%, transparent)"],
   [220, "color-mix(in oklab, black 8%, transparent)"],
+];
+
+/** O outro lado do vinco: a frente da folha já começa a subir antes da dobra. */
+const LUZ_FRENTE: [number, string][] = [
+  [0, "color-mix(in oklab, black 24%, transparent)"],
+  [10, "color-mix(in oklab, white 7%, transparent)"],
+  [34, "transparent"],
 ];
 
 /** A sombra que a aba levantada joga na página de baixo, logo além do vinco. */
@@ -124,14 +143,15 @@ const ARCO = 0.26;
 export interface PageCurlProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
   /** As páginas, na ordem. Cada uma preenche a folha inteira. */
   pages: React.ReactNode[];
-  /** Página inicial (base 0). */
+  /** Página inicial (base 0). O livro abre na dupla que contém essa página. */
   defaultIndex?: number;
+  /** Avisa a primeira página à vista (base 0) depois de cada virada. */
   onIndexChange?: (index: number) => void;
   /** Quanto o canto levanta com o ponteiro perto, em px. */
   peek?: number;
   /** Rótulo da revista para leitor de tela. */
   label?: string;
-  /** Largura da folha em px. A altura segue 3:4. Sem valor, 240px. */
+  /** Largura de uma folha em px; aberto, o livro mede o dobro. A altura segue 3:4. Sem valor, 240px. */
   width?: number;
 }
 
@@ -146,20 +166,31 @@ export function PageCurl({
   ...props
 }: PageCurlProps) {
   const reduzir = useReducedMotion();
-  const [indice, setIndice] = React.useState(defaultIndex);
-  // A folha de cima (que curva) e a de baixo (que aparece). Na volta, a de cima
-  // é a anterior e a de baixo é a atual.
-  const [par, setPar] = React.useState<{ cima: number; baixo: number }>({
-    cima: defaultIndex,
-    baixo: defaultIndex + 1,
-  });
-  const indiceRef = React.useRef(defaultIndex);
+  const larguraFolha = width ?? 240;
+  const total = pages.length;
+  // Vista 0 é a capa; a vista `v` mostra as páginas `2v - 1` e `2v`.
+  const ultimaVista = Math.floor(total / 2);
+  const vistaInicial = Math.max(0, Math.min(ultimaVista, Math.ceil(defaultIndex / 2)));
+  const [vista, setVista] = React.useState(vistaInicial);
+  // A folha que curva. Na volta é a anterior, que entra virada por cima.
+  const [folhaAtual, setFolhaAtual] = React.useState(vistaInicial);
+  const vistaRef = React.useRef(vistaInicial);
+  const folhaRef = React.useRef(vistaInicial);
   const ocupado = React.useRef(false);
+  // Escala do livro fechado e do aberto, pra caber na largura que ele tem.
+  const [caber, setCaber] = React.useState({ fechado: 1, aberto: 1 });
+  const caberRef = React.useRef(caber);
 
+  const raiz = React.useRef<HTMLDivElement>(null);
   const folha = React.useRef<HTMLDivElement>(null);
   const frente = React.useRef<HTMLDivElement>(null);
+  const dobraFrente = React.useRef<HTMLDivElement>(null);
   const verso = React.useRef<HTMLDivElement>(null);
+  const luzVerso = React.useRef<HTMLDivElement>(null);
   const sombra = React.useRef<HTMLDivElement>(null);
+  const sombraEsq = React.useRef<HTMLDivElement>(null);
+  const miolosEsq = React.useRef<HTMLDivElement>(null);
+  const lombadaEsq = React.useRef<HTMLDivElement>(null);
   const px = useMotionValue(0);
   const py = useMotionValue(0);
   const dims = React.useRef({ w: 0, h: 0 });
@@ -173,10 +204,23 @@ export function PageCurl({
     const p = { x: px.get(), y: py.get() };
     const dist = Math.hypot(c.x - p.x, c.y - p.y);
     const sb = sombra.current;
+    const prog = w ? Math.max(0, Math.min(1, (w - p.x) / (2 * w))) : 0;
+    // O livro abre junto com a capa: desliza até a lombada ficar no meio.
+    const t = Math.max(0, Math.min(1, (prog - 0.05) / 0.9));
+    const abre = folhaRef.current > 0 ? 1 : t * t * (3 - 2 * t);
+    const { fechado, aberto } = caberRef.current;
+    const escalaLivro = fechado + (aberto - fechado) * abre;
+    if (folha.current) {
+      folha.current.style.transform = `translateX(${((abre * w) / 2) * escalaLivro}px) scale(${escalaLivro})`;
+    }
+    if (miolosEsq.current) miolosEsq.current.style.opacity = String(abre);
+    if (lombadaEsq.current) lombadaEsq.current.style.opacity = String(abre);
+    if (sombraEsq.current) sombraEsq.current.style.opacity = String(Math.sin(Math.PI * prog));
     if (dist < 0.5) {
       f.style.clipPath = "";
       v.style.visibility = "hidden";
       if (sb) sb.style.visibility = "hidden";
+      if (dobraFrente.current) dobraFrente.current.style.backgroundImage = "none";
       return;
     }
     const m = { x: (c.x + p.x) / 2, y: (c.y + p.y) / 2 };
@@ -196,7 +240,10 @@ export function PageCurl({
     v.style.visibility = "visible";
     // O verso é pintado no espaço de ANTES da reflexão: ali a aba fica do lado
     // do canto (`+n`), e a matriz leva luz e sombra junto com ela.
-    v.style.backgroundImage = gradienteNaDobra(w, h, m, n, LUZ_VERSO);
+    if (luzVerso.current) luzVerso.current.style.backgroundImage = gradienteNaDobra(w, h, m, n, LUZ_VERSO);
+    if (dobraFrente.current) {
+      dobraFrente.current.style.backgroundImage = gradienteNaDobra(w, h, m, { x: -n.x, y: -n.y }, LUZ_FRENTE);
+    }
     if (sb) {
       sb.style.clipPath = v.style.clipPath;
       sb.style.backgroundImage = gradienteNaDobra(w, h, m, n, SOMBRA_BAIXO);
@@ -208,6 +255,17 @@ export function PageCurl({
     const el = folha.current;
     if (!el) return;
     dims.current = { w: el.offsetWidth, h: el.offsetHeight };
+    // `clientWidth` é medida local: a escala do palco não entra na conta. Os 16px
+    // são as folhas de miolo que aparecem dos dois lados.
+    const util = (raiz.current?.clientWidth ?? 0) - 16;
+    const novo =
+      util > 0 && el.offsetWidth
+        ? { fechado: Math.min(1, util / el.offsetWidth), aberto: Math.min(1, util / (2 * el.offsetWidth)) }
+        : { fechado: 1, aberto: 1 };
+    if (novo.fechado !== caberRef.current.fechado || novo.aberto !== caberRef.current.aberto) {
+      caberRef.current = novo;
+      setCaber(novo);
+    }
   }, []);
 
   React.useLayoutEffect(() => {
@@ -225,6 +283,8 @@ export function PageCurl({
       desenhar();
     });
     if (folha.current) ro.observe(folha.current);
+    if (raiz.current) ro.observe(raiz.current);
+    desenhar();
     return () => {
       a();
       b();
@@ -291,21 +351,23 @@ export function PageCurl({
   };
 
   const assentar = (novo: number) => {
-    indiceRef.current = novo;
+    vistaRef.current = novo;
+    folhaRef.current = novo;
     // A troca de folhas precisa estar no DOM ANTES de a dobra desfazer: senão
     // a página velha pisca inteira por um quadro.
     flushSync(() => {
-      setIndice(novo);
-      setPar({ cima: novo, baixo: novo + 1 });
+      setVista(novo);
+      setFolhaAtual(novo);
     });
     px.set(dims.current.w);
     py.set(dims.current.h);
-    onIndexChange?.(novo);
+    desenhar();
+    onIndexChange?.(novo === 0 ? 0 : 2 * novo - 1);
   };
 
   const proxima = async () => {
-    const i = indiceRef.current;
-    if (ocupado.current || i >= pages.length - 1) return;
+    const i = vistaRef.current;
+    if (ocupado.current || i >= ultimaVista) return;
     ocupado.current = true;
     await virar(1);
     assentar(i + 1);
@@ -313,11 +375,12 @@ export function PageCurl({
   };
 
   const anterior = async () => {
-    const i = indiceRef.current;
+    const i = vistaRef.current;
     if (ocupado.current || i <= 0) return;
     ocupado.current = true;
     // A anterior entra virada por cima e desvira até cobrir a atual.
-    flushSync(() => setPar({ cima: i - 1, baixo: i }));
+    folhaRef.current = i - 1;
+    flushSync(() => setFolhaAtual(i - 1));
     px.set(-dims.current.w);
     py.set(dims.current.h);
     await virar(0);
@@ -325,6 +388,8 @@ export function PageCurl({
     ocupado.current = false;
   };
 
+  /* Puxar para a direita volta a página, de qualquer ponto da folha. */
+  const volta = React.useRef<{ x: number } | null>(null);
   const gesto = React.useRef<{
     x0: number;
     y0: number;
@@ -337,27 +402,34 @@ export function PageCurl({
   /** Alvo do convite de hover: o `pointermove` só reprograma a mola quando ele muda. */
   const convite = React.useRef(false);
 
-  const temProxima = indice < pages.length - 1;
+  const temProxima = vista < ultimaVista;
+  // Numeração impressa: a capa é a 1, a dupla da vista `v` é `2v` e `2v + 1`.
+  const paginasVisiveis =
+    vista === 0 ? "1" : 2 * vista + 1 <= total ? `${2 * vista}–${2 * vista + 1}` : `${2 * vista}`;
 
   return (
     <div
+      ref={raiz}
       role="group"
       aria-roledescription="revista"
       aria-label={label}
-      className={cn("flex flex-col items-center gap-3", className)}
+      className={cn("flex w-full flex-col items-center gap-3", className)}
       {...props}
     >
       <div
+        className="flex w-full items-center justify-center"
+        style={{ height: ((larguraFolha * 4) / 3) * caber.fechado }}
+      >
+      <div
         ref={folha}
         tabIndex={0}
-        aria-label={`Página ${indice + 1} de ${pages.length}. Use as setas para virar.`}
+        aria-label={`${vista === 0 ? "Capa" : `Páginas ${paginasVisiveis}`}, de ${total}. Use as setas para virar.`}
         className={cn(
-          "relative isolate aspect-[3/4] touch-pan-y select-none rounded-[var(--r-surface)] bg-card outline-none",
-          width === undefined && "w-60",
+          "relative isolate aspect-[3/4] shrink-0 touch-pan-y select-none rounded-l-[2px] rounded-r-[var(--r-surface)] bg-card outline-none",
           "[box-shadow:0_1px_2px_color-mix(in_oklab,black_18%,transparent),0_22px_40px_-14px_color-mix(in_oklab,black_50%,transparent)]",
           "focus-visible:[box-shadow:var(--focus)]",
         )}
-        style={width === undefined ? undefined : { width }}
+        style={{ width: larguraFolha }}
         onKeyDown={(e) => {
           if (e.key === "ArrowRight") {
             e.preventDefault();
@@ -404,13 +476,16 @@ export function PageCurl({
         // o ponteiro no meio do gesto.
         onDragStart={(e) => e.preventDefault()}
         onPointerDown={(e) => {
-          if (e.button !== 0 || ocupado.current || !temProxima) return;
+          if (e.button !== 0 || ocupado.current) return;
           const el = folha.current!;
           const r = el.getBoundingClientRect();
           const escala = r.width / (el.offsetWidth || 1);
-          // Só a metade direita pega a página; a esquerda é a lombada.
-          if ((e.clientX - r.left) / escala < dims.current.w / 2) return;
           el.setPointerCapture(e.pointerId);
+          volta.current = { x: e.clientX };
+          // Na capa só a metade direita pega a folha; a esquerda é a lombada. Com o
+          // livro aberto a página da direita inteira pega, e a da esquerda só volta.
+          const limite = vistaRef.current > 0 ? 0 : dims.current.w / 2;
+          if (!temProxima || (e.clientX - r.left) / escala < limite) return;
           px.stop();
           py.stop();
           gesto.current = {
@@ -423,22 +498,40 @@ export function PageCurl({
             ux: 0,
           };
         }}
-        onPointerUp={async () => {
+        onPointerUp={async (e) => {
           const g = gesto.current;
-          if (!g) return;
+          const inicio = volta.current;
+          volta.current = null;
           gesto.current = null;
+          // Limite em px de tela: dedo é dedo, seja qual for a escala do palco.
+          const voltou = !!inicio && e.clientX - inicio.x > 48 && vistaRef.current > 0;
+          if (voltou) {
+            if (g) {
+              ocupado.current = true;
+              await virar(0);
+              ocupado.current = false;
+            }
+            await anterior();
+            return;
+          }
+          if (!g) {
+            // Da página da esquerda, puxar para a esquerda também vira.
+            if (inicio && e.clientX - inicio.x < -48) await proxima();
+            return;
+          }
           const passou = px.get() < dims.current.w / 2 || g.vx < -0.6;
           ocupado.current = true;
           convite.current = false;
           if (passou) {
             await virar(1);
-            assentar(indiceRef.current + 1);
+            assentar(vistaRef.current + 1);
           } else {
             await virar(0);
           }
           ocupado.current = false;
         }}
         onPointerCancel={() => {
+          volta.current = null;
           gesto.current = null;
           void ir(fechado());
         }}
@@ -470,11 +563,46 @@ export function PageCurl({
             }}
           />
         ))}
+        {/* O miolo do lado esquerdo, que só existe com o livro aberto. */}
+        <div
+          ref={miolosEsq}
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 right-full -z-10 w-full"
+          style={{ opacity: 0 }}
+        >
+          {[3, 2, 1].map((k) => (
+            <div
+              key={k}
+              className="absolute inset-0 rounded-l-[var(--r-surface)] bg-card"
+              style={{
+                transform: `translate(${-k * 2.5}px, ${k * 1.5}px)`,
+                boxShadow: `inset 0 0 0 1px color-mix(in oklab, var(--foreground) ${6 + k * 3}%, transparent)`,
+                filter: `brightness(${1 - k * 0.05})`,
+              }}
+            />
+          ))}
+        </div>
+        {/* A página da esquerda: o verso da folha que já virou. */}
+        {folhaAtual > 0 && (
+          <div className="absolute inset-y-0 right-full w-full overflow-hidden rounded-l-[var(--r-surface)] rounded-r-[2px] bg-card [box-shadow:0_22px_40px_-14px_color-mix(in_oklab,black_50%,transparent)]">
+            {pages[2 * folhaAtual - 1]}
+            <div
+              ref={sombraEsq}
+              aria-hidden
+              className="pointer-events-none absolute inset-0"
+              style={{
+                opacity: 0,
+                backgroundImage:
+                  "linear-gradient(to left, color-mix(in oklab, black 34%, transparent), color-mix(in oklab, black 10%, transparent) 70%)",
+              }}
+            />
+          </div>
+        )}
         <div className="absolute inset-0 overflow-hidden rounded-[inherit]">
           {/* A de baixo: já está ali, só esperando a de cima sair. */}
-          {par.baixo < pages.length && (
+          {2 * folhaAtual + 2 < total && (
             <div aria-hidden className="absolute inset-0" {...({ inert: "" } as object)}>
-              {pages[par.baixo]}
+              {pages[2 * folhaAtual + 2]}
             </div>
           )}
           {/* A sombra da aba na página de baixo, grudada no vinco. */}
@@ -485,49 +613,70 @@ export function PageCurl({
             style={{ visibility: "hidden" }}
           />
           <div ref={frente} className="absolute inset-0 bg-card">
-            {pages[par.cima]}
+            {pages[2 * folhaAtual]}
+            <div ref={dobraFrente} aria-hidden className="pointer-events-none absolute inset-0" />
           </div>
-          {/* A sombra da dobra cai sobre a página de baixo: drop-shadow no
-              invólucro sem transformação segue a forma refletida do verso. */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0"
-            style={{
-              filter:
-                "drop-shadow(-6px 4px 10px color-mix(in oklab, var(--foreground) 28%, transparent))",
-            }}
-          >
-            <div
-              ref={verso}
-              className="absolute inset-0 origin-top-left bg-muted"
-              style={{ visibility: "hidden" }}
-            />
-          </div>
-          {/* A lombada: a página afunda na costura. Fica por cima de tudo,
-              inclusive do verso, porque a costura não vira com a folha. */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0"
-            style={{
-              backgroundImage:
-                "linear-gradient(to right, color-mix(in oklab, black 26%, transparent), color-mix(in oklab, black 6%, transparent) 3.5%, color-mix(in oklab, white 7%, transparent) 5%, transparent 12%)",
-            }}
-          />
         </div>
+        {/* A aba fica fora do recorte da folha: ela atravessa a lombada e pousa na
+            esquerda. A sombra dura é a espessura do papel (nota 7) e a desfocada
+            cai sobre as páginas; as duas seguem a forma refletida do verso porque
+            o invólucro não tem transformação. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            filter: [
+              "drop-shadow(-1.25px 0.75px 0 var(--page-curl-borda))",
+              "drop-shadow(-1.25px 0.75px 0 var(--page-curl-borda))",
+              "drop-shadow(-1.25px 0.75px 0 var(--page-curl-borda))",
+              "drop-shadow(-7px 6px 12px color-mix(in oklab, black 40%, transparent))",
+            ].join(" "),
+            ["--page-curl-borda" as string]: "color-mix(in oklab, var(--foreground) 34%, var(--card))",
+          }}
+        >
+          <div ref={verso} className="absolute inset-0 origin-top-left" style={{ visibility: "hidden" }} {...({ inert: "" } as object)}>
+            {/* Desespelhado por dentro: a reflexão da dobra desfaz este `scaleX`. */}
+            <div className="absolute inset-0 -scale-x-100 overflow-hidden rounded-l-[var(--r-surface)] rounded-r-[2px] bg-card">
+              {pages[2 * folhaAtual + 1]}
+            </div>
+            <div ref={luzVerso} className="absolute inset-0 rounded-l-[2px] rounded-r-[var(--r-surface)]" />
+          </div>
+        </div>
+        {/* A lombada: a página afunda na costura. Fica por cima de tudo,
+            inclusive do verso, porque a costura não vira com a folha. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-[inherit]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, color-mix(in oklab, black 26%, transparent), color-mix(in oklab, black 6%, transparent) 3.5%, color-mix(in oklab, white 7%, transparent) 5%, transparent 12%)",
+          }}
+        />
+        <div
+          ref={lombadaEsq}
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 right-full w-full"
+          style={{
+            opacity: 0,
+            backgroundImage:
+              "linear-gradient(to left, color-mix(in oklab, black 22%, transparent), color-mix(in oklab, black 5%, transparent) 3.5%, transparent 10%)",
+          }}
+        />
+      </div>
       </div>
 
       <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={() => void anterior()}
-          disabled={indice === 0}
+          disabled={vista === 0}
           aria-label="Página anterior"
           className="relative inline-flex size-8 pointer-coarse:after:absolute pointer-coarse:after:-inset-1.5 items-center justify-center rounded-[var(--r-control)] text-foreground outline-none transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-muted focus-visible:[box-shadow:var(--focus)] disabled:text-muted-foreground disabled:hover:bg-transparent"
         >
           <ChevronLeft className="size-4" aria-hidden />
         </button>
         <span aria-live="polite" className="min-w-24 text-center text-sm tabular-nums text-foreground">
-          {indice + 1} <span className="text-muted-foreground">de {pages.length}</span>
+          {paginasVisiveis} <span className="text-muted-foreground">de {total}</span>
         </span>
         <button
           type="button"

@@ -14,9 +14,11 @@ import { CircleHelp, X } from "lucide-react";
 import { redeLenta } from "@/lib/rede";
 import skills from "../skills.generated.json";
 
+import { FUNCAO } from "../filme/roteiro";
 export { ALTURA_DOBRA, ALTURA_LARGA, PaginaCtx, useLargo } from "./nucleo";
 import { ALTURA_LARGA, PaginaCtx } from "./nucleo";
 
+export { FUNCAO };
 export const SKILLS = skills as { nome: string; instalar: string }[];
 
 /**
@@ -178,10 +180,20 @@ export function Dobra({
   }, [aberto, folga, menos]);
 
   return (
-    <section ref={ref} id={nome} data-dobra={nome} style={{ paddingBottom: folga }} className={cx("scroll-mt-[5.75rem] lg:scroll-mt-14", faixa && "bg-casa-tile")}>
-      <div className={cx("shell flex min-w-0 flex-col py-6 lg:py-8", ALTURA_LARGA)}>
-        <header className="flex min-h-11 items-center justify-between gap-3">
-          <h2 className="min-w-0 truncate text-[clamp(1.5rem,3vw,2.25rem)] font-medium tracking-[-0.02em]">{nome}</h2>
+    <section ref={ref} id={nome} data-dobra={nome} style={{ paddingBottom: folga }} className={cx("scroll-mt-[3.5rem] border-t border-casa-fg-3 lg:scroll-mt-14", faixa && "bg-casa-tile")}>
+      <div className={cx("shell flex min-w-0 flex-col pb-6 lg:pb-8", ALTURA_LARGA)}>
+        {/* O nome fica preso no topo enquanto a skill dura: a troca de nome é a divisa. */}
+        <header
+          data-cabeca-skill
+          className={cx(
+            "sticky top-[var(--shell-header-h)] z-20 flex items-center justify-between gap-3 py-3 lg:py-4",
+            faixa ? "bg-casa-tile" : "bg-casa-bg",
+          )}
+        >
+          <div className="min-w-0">
+            <h2 className="truncate text-[clamp(1.75rem,3.5vw,2.75rem)] font-medium leading-tight tracking-[-0.02em]">{nome}</h2>
+            {FUNCAO[nome] ? <p className="truncate text-casa-base text-casa-fg-2">{FUNCAO[nome]}</p> : null}
+          </div>
           <button
             type="button"
             data-como={nome}

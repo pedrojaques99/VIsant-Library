@@ -55,6 +55,9 @@ const cartao = ({ titulo, subtitulo, nome }) => `<!doctype html>
 
 const alvos = [
   { arquivo: "home", titulo: "A library da Visant", subtitulo: RESUMO_DA_HOME, nome: null },
+  { arquivo: "skills", titulo: "Tire a cara de IA da sua interface", subtitulo: "Seis skills pro Claude Code que auditam tela, texto e animação.", nome: null },
+  { arquivo: "marca", titulo: "A sua marca em cada peça", subtitulo: "Troque de marca e veja cor, tipo e peças mudarem ao vivo.", nome: null },
+  { arquivo: "docs", titulo: "Docs", subtitulo: "Instale uma peça, vista a sua marca e conecte o agente.", nome: null },
   ...registry.items.map((i) => ({
     arquivo: i.name,
     titulo: i.title ?? i.name,
@@ -63,13 +66,17 @@ const alvos = [
   })),
 ];
 
+// `--only skills,marca` refaz só essas: a lista inteira leva minutos.
+const pedido = process.argv.indexOf("--only");
+const so = pedido > -1 ? process.argv[pedido + 1].split(",") : null;
+
 const destino = join(ROOT, "public", "og");
 mkdirSync(destino, { recursive: true });
 
 const navegador = await chromium.launch();
 const pagina = await navegador.newPage({ viewport: { width: 1200, height: 630 } });
 
-for (const alvo of alvos) {
+for (const alvo of so ? alvos.filter((a) => so.includes(a.arquivo)) : alvos) {
   // Título longo em corpo grande estoura a caixa; o tamanho acompanha.
   const html = cartao(alvo).replace("${TAMANHO}", alvo.titulo.length > 26 ? "76" : "92");
   await pagina.setContent(html, { waitUntil: "load" });

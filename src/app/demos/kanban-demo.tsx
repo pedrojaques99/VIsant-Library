@@ -89,6 +89,10 @@ const LADRILHO = {
  */
 const ESTREITO = 480;
 
+/* A borda responde ao mouse, e só a borda: o cartão anuncia que dá pra pegar sem se mexer. */
+const CARTAO =
+  "rounded-[var(--r-control,0.625rem)] border border-border bg-card [box-shadow:var(--e-flat)] transition-[border-color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] [@media(hover:hover)]:hover:border-[color-mix(in_oklab,var(--foreground)_28%,transparent)]";
+
 export default function KanbanDemo({ denso = false }: { denso?: boolean }) {
   const base = denso ? DENSO : LADRILHO;
   const [caixa, largura] = useElementWidth<HTMLDivElement>();
@@ -104,7 +108,8 @@ export default function KanbanDemo({ denso = false }: { denso?: boolean }) {
   return (
     <div
       ref={caixa}
-      className={`w-full p-3 ${
+      // O encaixe em borda de marca: é a única cor do gesto, e só no lugar do cartão.
+      className={`w-full p-3 [--kanban-accent:var(--brand,var(--foreground))] ${
         // No board denso a rolagem horizontal é o comportamento CERTO: board de
         // verdade tem mais coluna do que tela, e cortar a quarta a faca some com
         // ela. No card do catálogo continua `hidden` — lá a barra seria o palco
@@ -177,7 +182,7 @@ export default function KanbanDemo({ denso = false }: { denso?: boolean }) {
         // conteúdo em três níveis (o que, pra quem, quem e quando).
         renderCard={({ item }) =>
           empilhado ? (
-            <div className="flex min-h-11 items-center justify-between gap-3 rounded-[var(--r-control,0.625rem)] border border-border bg-card px-3 py-2 [box-shadow:var(--e-flat)]">
+            <div className={`flex min-h-11 items-center justify-between gap-3 px-3 py-2 ${CARTAO}`}>
               <span className="min-w-0 truncate text-[14px] font-medium leading-snug text-foreground">{item.data.t}</span>
               <span
                 aria-label={`Com ${item.data.quem}`}
@@ -187,7 +192,7 @@ export default function KanbanDemo({ denso = false }: { denso?: boolean }) {
               </span>
             </div>
           ) : (
-          <div className="flex flex-col gap-3 rounded-[var(--r-control,0.625rem)] border border-border bg-card px-3.5 py-3 [box-shadow:var(--e-flat)]">
+          <div className={`flex flex-col gap-3 px-3.5 py-3 ${CARTAO}`}>
             <div className="flex flex-col gap-0.5">
               <span className="text-[14px] font-medium leading-snug text-foreground">{item.data.t}</span>
               {item.data.cliente ? (

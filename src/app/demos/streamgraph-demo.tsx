@@ -7,12 +7,20 @@
  * se refaz num morph, sem corte. Os números são de mentira, mas contam uma
  * história plausível: "Cobrança" incha no fim do trimestre e "Acesso" murcha
  * depois do login novo.
+ *
+ * Um estilo por vez: as setas trocam, e o nome entre elas é o valor da prop.
  */
 
 import * as React from "react";
 
-import { Streamgraph, type StreamgraphDatum, type StreamgraphSeries } from "../../../registry/visant/ui/streamgraph";
+import {
+  Streamgraph,
+  type StreamgraphDatum,
+  type StreamgraphProps,
+  type StreamgraphSeries,
+} from "../../../registry/visant/ui/streamgraph";
 import type { DemoProps } from "../catalog";
+import { Trocador, useUmPorVez } from "./um-por-vez";
 
 const SERIES: StreamgraphSeries[] = [
   { key: "pedido", label: "Pedido" },
@@ -50,11 +58,26 @@ function semanas(n: number): StreamgraphDatum[] {
 const PERIODOS = { trimestre: semanas(12), semestre: semanas(26) };
 type Periodo = keyof typeof PERIODOS;
 
+const ESTILOS: Record<string, Pick<StreamgraphProps, "offset" | "shape">> = {
+  wiggle: { offset: "wiggle" },
+  zero: { offset: "zero" },
+  expand: { offset: "expand" },
+  ridge: { offset: "ridge" },
+  line: { shape: "line" },
+  bar: { shape: "bar", offset: "zero" },
+  // Por último: com estes dados, ao lado do wiggle a troca quase não se vê.
+  silhouette: { offset: "silhouette" },
+};
+const NOMES = Object.keys(ESTILOS);
+
 const opcao =
   "alvo-toque h-7 rounded-[var(--r-pill)] px-3 text-apoio font-medium [transition:background-color_var(--dur-fast)_var(--ease-out),color_var(--dur-fast)_var(--ease-out)] focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]";
 
 export default function StreamgraphDemo({ props }: DemoProps) {
   const [periodo, setPeriodo] = React.useState<Periodo>("trimestre");
+  const { offset: _o, shape: _s, ...resto } = (props ?? {}) as Pick<StreamgraphProps, "offset" | "shape"> &
+    Record<string, unknown>;
+  const { atual, rodada, passo, repetir } = useUmPorVez(NOMES, _s && _s !== "area" ? _s : _o);
 
   return (
     <div className="flex h-full w-full items-center justify-center">
@@ -76,14 +99,19 @@ export default function StreamgraphDemo({ props }: DemoProps) {
           </div>
         </div>
         <Streamgraph
+          key={`${atual}-${rodada}`}
           label="Pedidos de suporte por assunto"
           unit="pedidos"
           categoryLabel="Semana"
           series={SERIES}
           data={PERIODOS[periodo]}
           height={200}
-          {...props}
+          {...resto}
+          {...ESTILOS[atual!]}
         />
+        <div className="flex justify-center">
+          <Trocador nome={atual!} onPasso={passo} onRepetir={repetir} />
+        </div>
       </div>
     </div>
   );

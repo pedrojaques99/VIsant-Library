@@ -429,6 +429,8 @@ export function ComponentFocus({
   // várias peças aqui têm input, e roubar a seta do cursor seria hostil.
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Arrasto por teclado em andamento: seta move o cartão e Esc cancela, ambos dele.
+      if (document.querySelector("[data-kanban-dragging]")) return;
       const el = document.activeElement;
       if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return;
       // Controle que anda com seta (knob do painel, slider da demo, seletor): a seta é dele.

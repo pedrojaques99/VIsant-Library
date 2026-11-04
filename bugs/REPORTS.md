@@ -2,87 +2,9 @@
 
 <!-- Gerado por scripts/vite-bug-report.mjs. Não edite à mão: use `npm run bugs -- --resolve <id>`. -->
 
-**16 aberto(s)** · 246 resolvido(s)
+**0 aberto(s)** · 266 resolvido(s)
 
-## slide-to-confirm (1)
-
-- **slide-to-confirm-3** — a cor do bg do botão deve ser levemente mais clara. com profundidade não intrusiva
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 21:46</sub>
-
-## timeline (1)
-
-- **timeline-6** — ainda mt slop, pode remover
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:00</sub>
-
-## testimonial-wall (1)
-
-- **testimonial-wall-6** — precisa ter mais variações de bento grid
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:00</sub>
-
-## section-intro (1)
-
-- **section-intro-3** — mt simples e obvio, pode esconder
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:01</sub>
-
-## count-up (1)
-
-- **count-up-3** — trocar o reload por um icon button
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:01</sub>
-
-## reels-rail (1)
-
-- **reels-rail-4** — icon help não intrusivo q deixa intuitivo
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:01</sub>
-
-## fog-hero (1)
-
-- **fog-hero-1** — remover labels
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:01</sub>
-
-## lathe-object (1)
-
-- **lathe-object-2** — deixar na cor do brand
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:01</sub>
-
-## fog-garden (1)
-
-- **fog-garden-2** — mt bugado ainda qnd mexe nos parametros trava trudo
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:02</sub>
-
-## brand-selector (1)
-
-- **brand-selector-3** — mt mal apresentado e não intuitivo
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:03</sub>
-
-## kanban (1)
-
-- **kanban-6** — precisa melhorar a interatividade pra ficar nível vale do silicio bem burilado
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:03</sub>
-
-## inline-edit (1)
-
-- **inline-edit-3** — mt obvio e simples
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:03</sub>
-
-## scrub-input (1)
-
-- **scrub-input-3** — mostre todos os tipos de input, não só sliders
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:03</sub>
-
-## fader (1)
-
-- **fader-1** — igual feedback dos sliders
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:04</sub>
-
-## sticky-filterbar (1)
-
-- **sticky-filterbar-8** — mal posicionado no catlog qaundo tm pequeno, mt espremido
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:04</sub>
-
-## assignee-stack (1)
-
-- **assignee-stack-5** — mal posicionado no catlog qaundo tm pequeno, mt espremido
-  <sub>Quebrado · 1920×911 · escuro · marca: Vega Noturno · 2026-11-03 22:04</sub>
+_Nada aberto._
 
 ---
 
@@ -335,5 +257,25 @@ mais respiro visual, cards mais óbvcios~~
 - ~~assignee-stack-4 · assignee-stack — categoria inteira de dados poderia estar junto com conteúdo~~
 - ~~mesa-de-trabalho-2 · mesa-de-trabalho — pode esconder completamente toda a tab e rota dos "kits"~~
 - ~~mesa-de-trabalho-3 · mesa-de-trabalho — a tab de "marca" deve ser reorganizada e redesenhada pra ser um modelo de "brand system guidelines" ou branding book, que mostra o sistema de marca e identidade visual completo interativo e pesquisável, assim como já existe na visantlabs.com/brand-guidelines~~
+- ~~slide-to-confirm-3 · slide-to-confirm — a cor do bg do botão deve ser levemente mais clara. com profundidade não intrusiva~~
+- ~~timeline-6 · timeline — ainda mt slop, pode remover~~
+- ~~testimonial-wall-6 · testimonial-wall — precisa ter mais variações de bento grid~~
+- ~~section-intro-3 · section-intro — mt simples e obvio, pode esconder~~
+- ~~count-up-3 · count-up — trocar o reload por um icon button~~
+- ~~reels-rail-4 · reels-rail — icon help não intrusivo q deixa intuitivo~~
+- ~~fog-hero-1 · fog-hero — remover labels~~
+- ~~lathe-object-2 · lathe-object — deixar na cor do brand~~
+- ~~fog-garden-2 · fog-garden — mt bugado ainda qnd mexe nos parametros trava trudo~~
+- ~~brand-selector-3 · brand-selector — mt mal apresentado e não intuitivo~~
+- ~~kanban-6 · kanban — precisa melhorar a interatividade pra ficar nível vale do silicio bem burilado~~
+- ~~inline-edit-3 · inline-edit — mt obvio e simples~~
+- ~~scrub-input-3 · scrub-input — mostre todos os tipos de input, não só sliders~~
+- ~~fader-1 · fader — igual feedback dos sliders~~
+- ~~sticky-filterbar-8 · sticky-filterbar — mal posicionado no catlog qaundo tm pequeno, mt espremido~~
+- ~~assignee-stack-5 · assignee-stack — mal posicionado no catlog qaundo tm pequeno, mt espremido~~
+- ~~count-up-4 · count-up — pode centralizar os dados, botão de "reload" sempre num canto sem afetar o posicionamento do componente principal (fazer com todos os relacionados)~~
+- ~~page-curl-3 · page-curl — falta aparecer o livro aberto com duas paginas dps q abre a capa - e parece q a folha dobrando tá mt finininha, dá pra deixar mais grossinha?~~
+- ~~streamgraph-1 · streamgraph — precisa de mais estilos de gráficos em cima do tanstack~~
+- ~~wallet-stack-2 · wallet-stack — diminua a quantidade de linhas conforme o tamanho do grid catálogo pra nao ficar nada cortado~~
 
 </details>

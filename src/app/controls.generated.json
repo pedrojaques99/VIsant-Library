@@ -1084,6 +1084,12 @@
           "resumo": "O card do meio toca sozinho. Desligue e o play passa a ser sempre manual."
         },
         {
+          "prop": "dragHint",
+          "tipo": "chave",
+          "padrao": true,
+          "resumo": "Ícone discreto sobre o card do meio, dizendo que a fileira arrasta. Dá dois balanços ao nascer e some de vez no primeiro gesto da pessoa."
+        },
+        {
           "prop": "drift",
           "tipo": "chave",
           "padrao": true,
@@ -1099,7 +1105,8 @@
           "prop": "loop",
           "tipo": "chave",
           "padrao": true,
-          "resumo": "A fileira dá a volta em vez de acabar. Ver a nota do cabeçalho."
+          "resumo": "A fileira dá a volta em vez de acabar. Ver a nota do cabeçalho.",
+          "secundario": true
         },
         {
           "prop": "sound",
@@ -1486,6 +1493,12 @@
           "tipo": "chave",
           "padrao": false,
           "resumo": null
+        },
+        {
+          "prop": "landingId",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "Cartão ainda pousando: segue como buraco até o fantasma chegar."
         }
       ],
       "KanbanCard": [
@@ -1494,6 +1507,12 @@
           "tipo": "chave",
           "padrao": false,
           "resumo": null
+        },
+        {
+          "prop": "landing",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "O fantasma ainda está descendo até aqui."
         },
         {
           "prop": "selectable",
@@ -1772,7 +1791,7 @@
           ],
           "padrao": "sm",
           "resumo": null,
-          "inicial": "md"
+          "inicial": "lg"
         },
         {
           "prop": "max",
@@ -1781,7 +1800,8 @@
           "max": 20,
           "step": 1,
           "padrao": 4,
-          "resumo": null
+          "resumo": null,
+          "inicial": 3
         }
       ]
     }
@@ -2129,6 +2149,12 @@
           "resumo": null
         },
         {
+          "prop": "stepper",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Botões − e + em volta do valor, pra contagem de um em um e pro dedo."
+        },
+        {
           "prop": "max",
           "tipo": "numero",
           "min": 0,
@@ -2153,7 +2179,8 @@
           "max": 100,
           "step": 1,
           "padrao": null,
-          "resumo": null
+          "resumo": null,
+          "secundario": true
         },
         {
           "prop": "value",
@@ -2426,16 +2453,6 @@
     "componentes": {
       "BrandSelector": [
         {
-          "prop": "align",
-          "tipo": "escolha",
-          "valores": [
-            "start",
-            "end"
-          ],
-          "padrao": null,
-          "resumo": null
-        },
-        {
           "prop": "shortcut",
           "tipo": "texto",
           "padrao": "b",
@@ -2656,7 +2673,7 @@
             "bento"
           ],
           "padrao": "masonry",
-          "resumo": "`masonry` (padrão): colunas de CSS, altura de cada card pelo conteúdo. `bento`: grade que divide a altura do container; o retrato ocupa duas linhas e os cards esticam até a borda. Use com altura definida."
+          "resumo": "`masonry` (padrão): colunas de CSS, altura de cada card pelo conteúdo. `bento`: grade que divide a altura do container; o retrato ocupa duas linhas (ou o que `span` disser) e os cards esticam até a borda. Use com altura definida."
         }
       ]
     }
@@ -6623,7 +6640,7 @@
           "max": 20,
           "step": 1,
           "padrao": 0,
-          "resumo": "Página inicial (base 0)."
+          "resumo": "Página inicial (base 0). O livro abre na dupla que contém essa página."
         },
         {
           "prop": "peek",
@@ -6641,7 +6658,7 @@
           "max": 420,
           "step": 1,
           "padrao": null,
-          "resumo": "Largura da folha em px. A altura segue 3:4. Sem valor, 240px.",
+          "resumo": "Largura de uma folha em px; aberto, o livro mede o dobro. A altura segue 3:4. Sem valor, 240px.",
           "inicial": 280
         },
         {
@@ -6886,10 +6903,23 @@
           "valores": [
             "wiggle",
             "silhouette",
-            "zero"
+            "zero",
+            "expand",
+            "ridge"
           ],
           "padrao": "wiggle",
-          "resumo": "\"wiggle\" flui, \"silhouette\" centra a pilha, \"zero\" empilha de uma base reta."
+          "resumo": "\"wiggle\" flui, \"silhouette\" centra, \"zero\" empilha, \"expand\" mostra em 100%, \"ridge\" dá uma base a cada camada."
+        },
+        {
+          "prop": "shape",
+          "tipo": "escolha",
+          "valores": [
+            "area",
+            "line",
+            "bar"
+          ],
+          "padrao": "area",
+          "resumo": "\"area\" pinta as camadas, \"line\" desenha só a linha de cada uma, \"bar\" empilha em colunas."
         },
         {
           "prop": "directLabels",
@@ -6925,7 +6955,8 @@
           "prop": "emptyLabel",
           "tipo": "texto",
           "padrao": "Sem dados neste período",
-          "resumo": null
+          "resumo": null,
+          "secundario": true
         },
         {
           "prop": "label",
@@ -7042,6 +7073,15 @@
           "step": 1,
           "padrao": 0,
           "resumo": "Cartão da frente ao montar."
+        },
+        {
+          "prop": "height",
+          "tipo": "numero",
+          "min": 10,
+          "max": 900,
+          "step": 10,
+          "padrao": 440,
+          "resumo": "Altura da caixa dos cartões em px. Menor, o detalhe aberto tem menos espaço. Sem valor, 440px."
         },
         {
           "prop": "label",

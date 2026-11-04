@@ -69,6 +69,8 @@ export interface WalletStackProps {
   onActiveChange?: (card: WalletCard) => void;
   /** Avisa quando um cartão abre (com ele) ou fecha (`null`). */
   onOpenChange?: (card: WalletCard | null) => void;
+  /** Altura da caixa dos cartões em px. Menor, o detalhe aberto tem menos espaço. Sem valor, 440px. */
+  height?: number;
   className?: string;
 }
 
@@ -132,6 +134,7 @@ export function WalletStack({
   defaultIndex = 0,
   onActiveChange,
   onOpenChange,
+  height = CAIXA,
   className,
 }: WalletStackProps) {
   const reduzir = useReducedMotion();
@@ -180,10 +183,16 @@ export function WalletStack({
   const atual = cards[ativo];
 
   // Onde cada cartão mora, por profundidade (0 = frente).
-  const pousoFrente = aberto ? 0 : (CAIXA - ALT) / 2 + 24;
+  const pousoRepouso = (height - ALT) / 2 + 24;
+  // Em caixa baixa o da frente desce ao abrir o leque, pra as etiquetas caberem até
+  // o topo. Os recolhidos mostram só a borda: etiqueta pela metade lê como corte.
+  const pousoLeque = Math.max(pousoRepouso, Math.min(height - ALT - 2, (total - 1) * LEQUE + 2));
+  const pousoFrente = aberto ? 0 : leque ? pousoLeque : pousoRepouso;
+  const baixa = height < 400;
+  const recolhido = 14;
   const posicao = (prof: number) => {
     if (prof === 0) return { y: pousoFrente, scale: 1 };
-    if (aberto) return { y: CAIXA - 30 + (prof - 1) * 6, scale: 1 - prof * ENCOLHE };
+    if (aberto) return { y: height - recolhido + (prof - 1) * 6, scale: 1 - prof * ENCOLHE };
     return { y: pousoFrente - prof * (leque ? LEQUE : DEGRAU), scale: 1 - prof * ENCOLHE };
   };
 
@@ -218,7 +227,7 @@ export function WalletStack({
         ) : null}
       </div>
 
-      <div className="relative w-full overflow-hidden" style={{ height: CAIXA }}>
+      <div className="relative w-full overflow-hidden" style={{ height }}>
         {cards.map((card, i) => {
           const prof = (i - ativo + total) % total;
           const frente = prof === 0;
@@ -257,7 +266,7 @@ export function WalletStack({
             <motion.div
               key={atual.id}
               className="absolute inset-x-0 overflow-y-auto px-1"
-              style={{ top: ALT + 14, bottom: 40 }}
+              style={{ top: ALT + (baixa ? 10 : 14), bottom: recolhido + 6 }}
               initial={reduzir ? { opacity: 0 } : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, transition: { duration: DUR.press } }}

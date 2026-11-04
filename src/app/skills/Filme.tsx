@@ -474,7 +474,7 @@ function FilmeRolado({ vertical }: { vertical: boolean }) {
   }, [vertical, marcas, motor]);
 
   return (
-    <div ref={raiz} className="filme casa dark" data-vertical={vertical}>
+    <div ref={raiz} role="main" className="filme casa dark" data-vertical={vertical}>
       <div className="filme-trilho">
         <div className="filme-palco">
           <div className="filme-cenas">

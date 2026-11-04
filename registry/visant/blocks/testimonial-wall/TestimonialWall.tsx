@@ -52,6 +52,11 @@ import { cn } from "@/lib/utils";
  * `footer` fecha a composição embaixo, numa faixa separada por um fio: a nota
  * média, os logos, o link pra todos os depoimentos. É o que faltava pra parede
  * terminar em vez de só parar.
+ *
+ * `span` desenha a malha do bento: quantas colunas e linhas cada item ocupa. A
+ * coluna só vale de 31rem de container pra cima, onde a grade já tem duas trilhas;
+ * abaixo disso ela tem uma só, e um span criaria trilha fantasma e estouraria a
+ * largura. Quem manda é o container, como no resto da peça, não a janela.
  */
 
 type Tone = "card" | "muted" | "brand";
@@ -65,6 +70,8 @@ const TONE: Record<Tone, string> = {
 interface Base {
   id: string;
   tone?: Tone;
+  /** Só em `layout="bento"`: quantas colunas e linhas o item ocupa. */
+  span?: { col?: number; row?: number };
 }
 
 export interface QuoteItem extends Base {
@@ -109,7 +116,8 @@ export interface TestimonialWallProps extends React.HTMLAttributes<HTMLDivElemen
   /**
    * `masonry` (padrão): colunas de CSS, altura de cada card pelo conteúdo.
    * `bento`: grade que divide a altura do container; o retrato ocupa duas
-   * linhas e os cards esticam até a borda. Use com altura definida.
+   * linhas (ou o que `span` disser) e os cards esticam até a borda. Use com
+   * altura definida.
    */
   layout?: "masonry" | "bento";
   /** Faixa que fecha a parede embaixo: nota média, logos, link. */
@@ -166,7 +174,16 @@ export function TestimonialWall({
       }}
     >
       {items.map((item) => (
-        <div key={item.id} className={cn("flex min-h-0", item.kind === "portrait" && "row-span-2")}>
+        <div
+          key={item.id}
+          className={cn("flex min-h-0", item.span?.col && "@min-[31rem]:[grid-column:span_var(--bento-col)]")}
+          style={
+            {
+              "--bento-col": item.span?.col,
+              gridRow: `span ${item.span?.row ?? (item.kind === "portrait" ? 2 : 1)}`,
+            } as React.CSSProperties
+          }
+        >
           <Card item={item} fill />
         </div>
       ))}
@@ -207,7 +224,7 @@ export function TestimonialWall({
 
   return (
     <div className={cn("flex flex-col gap-4", className)} {...props}>
-      {parede}
+      {bento ? <div className="flex min-h-0 flex-1 flex-col @container">{parede}</div> : parede}
       {footer ? (
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-[var(--border)] pt-4">
           {footer}

@@ -296,6 +296,10 @@ export function FitStage({
  */
 const GESTO_DO_PALCO = "pan-y pinch-zoom";
 
+/* Até onde a peça vai no ladrilho: 80% do lado, e no máximo 1,3× o tamanho dela. */
+const TETO_DA_PECA = 1.3;
+const ALCANCE_DA_TINTA = 0.8;
+
 export const CAIXA_DO_PALCO: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
@@ -308,12 +312,15 @@ export function PalcoFixo({
   h,
   ratio = 4 / 3,
   active = true,
+  tinta,
   className,
   style,
   children,
 }: {
   w: number;
   h: number;
+  /** Quanto da caixa a peça ocupa, de 0 a 1 a partir do centro, em cada eixo. */
+  tinta?: readonly number[];
   /** Largura ÷ altura da moldura. Igual para todos os cards da grade. */
   ratio?: number;
   active?: boolean;
@@ -327,7 +334,18 @@ export function PalcoFixo({
   const altura = largura / ratio;
   // Antes da primeira medição a escala é 0 e a peça fica invisível por um quadro
   // — melhor que aparecer em tamanho natural e encolher na frente de quem olha.
-  const escala = largura ? Math.min(1, largura / w, altura / h) : 0;
+  const cabe = largura ? Math.min(1, largura / w, altura / h) : 0;
+  const escala =
+    largura && tinta
+      ? Math.max(
+          cabe,
+          Math.min(
+            TETO_DA_PECA,
+            (ALCANCE_DA_TINTA * largura) / (Math.max(tinta[0], 0.01) * w),
+            (ALCANCE_DA_TINTA * altura) / (Math.max(tinta[1], 0.01) * h),
+          ),
+        )
+      : cabe;
 
   return (
     <div

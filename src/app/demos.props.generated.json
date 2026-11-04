@@ -8,12 +8,12 @@
     "emailVerified": true
   },
   "assignee-stack": {
-    "max": 4,
-    "size": "md"
+    "max": 3,
+    "size": "lg"
   },
   "sticky-filterbar": {
     "headerSelector": "[data-demo-sem-cabecalho]",
-    "className": "px-4"
+    "className": "px-3"
   },
   "measure-picker": {
     "min": 130,

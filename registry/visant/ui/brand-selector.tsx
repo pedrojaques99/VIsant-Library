@@ -13,14 +13,15 @@
  *     interface. Escolher marca é uma decisão visual; obrigar a confirmar para
  *     só então ver é pedir que a pessoa decida no escuro. Sair da lista sem
  *     escolher volta exatamente ao estado anterior.
- *  2. **A lista é a evidência.** Cada linha mostra paleta, par tipográfico e
- *     quanto da guideline está preenchida. Uma marca com vault baixo produz
- *     tema pobre, e isso tem de aparecer ANTES do clique, não depois.
+ *  2. **A linha diz o que é a marca, e só.** Logo, nome, frase e paleta. Versão,
+ *     par tipográfico e completude do vault saíram da frente: quem troca de marca
+ *     não decide por eles, e quem não conhece o vault lia "MANROPE · V27" e "80%"
+ *     como defeito. A busca segue achando por fonte e por nome de cor.
  */
 
 import * as React from "react";
 import { Command } from "cmdk";
-import { Check, Palette, Search } from "lucide-react";
+import { Check, ChevronDown, Palette, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBrandTheme, type BrandSummary } from "@/lib/brand-theme";
 
@@ -78,30 +79,12 @@ function Swatches({ brand, max = 5 }: { brand: BrandSummary; max?: number }) {
   );
 }
 
-/** Completude do vault. Barra, não número solto: comparar 43% e 91% numa lista
- *  de vinte linhas é trabalho de forma, não de leitura. */
-function VaultMeter({ value }: { value: number | null }) {
-  const v = Math.max(0, Math.min(100, value ?? 0));
-  return (
-    <span className="flex items-center gap-1.5" title={`Guideline ${v}% preenchida`}>
-      <span className="h-1 w-10 overflow-hidden rounded-full bg-muted">
-        <span
-          className="block h-full origin-left transition-transform [transition-duration:var(--dur-slow,300ms)] [transition-timing-function:var(--ease-out)] motion-reduce:transition-none"
-          style={{ transform: `scaleX(${v / 100})`, background: "var(--accent-ink, var(--foreground))" }}
-        />
-      </span>
-      <span className="tabular-nums text-[10px] text-muted-foreground">{v}%</span>
-    </span>
-  );
-}
-
 // --- trigger -----------------------------------------------------------------
 
 export interface BrandSelectorProps {
   className?: string;
   /** Atalho de teclado. `null` desliga. Padrão: ⌘/Ctrl + B. */
   shortcut?: string | null;
-  align?: "start" | "end";
 }
 
 export function BrandSelector({ className, shortcut = "b" }: BrandSelectorProps) {
@@ -124,7 +107,9 @@ export function BrandSelector({ className, shortcut = "b" }: BrandSelectorProps)
   // Fechar sem escolher desfaz a prévia. Sem isso, "só estava olhando" vira
   // "trocou a marca do produto".
   React.useEffect(() => {
-    if (!open) previewBrand(null);
+    if (open) return;
+    previewBrand(null);
+    setHighlight(null);
   }, [open, previewBrand]);
 
   const commit = React.useCallback(
@@ -147,7 +132,7 @@ export function BrandSelector({ className, shortcut = "b" }: BrandSelectorProps)
           "transition-[background-color,border-color,box-shadow,transform] [transition-duration:var(--dur-fast)] ease-[var(--ease-out)]",
           "hover:border-[var(--brand,var(--border))] hover:[box-shadow:var(--e-raised)] active:scale-[0.985]",
           "focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]",
-          "disabled:opacity-60",
+          "disabled:opacity-60 pointer-coarse:min-h-11",
           className,
         )}
       >
@@ -160,10 +145,10 @@ export function BrandSelector({ className, shortcut = "b" }: BrandSelectorProps)
         )}
         <span className="flex min-w-0 flex-col leading-tight">
           <span className="truncate text-[13px] font-medium">
-            {brand ? brand.name : status === "error" ? "Vault offline" : "Escolher marca"}
+            {brand ? brand.name : status === "error" ? "Marcas fora do ar" : "Escolher marca"}
           </span>
-          <span className="truncate text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
-            {brand ? `${brand.fonts.display} · v${brand.version ?? "?"}` : `${brands.length} no vault`}
+          <span className="truncate text-[11px] text-muted-foreground">
+            {brand ? "Trocar marca" : `${brands.length} disponíveis`}
           </span>
         </span>
         {/*
@@ -172,13 +157,17 @@ export function BrandSelector({ className, shortcut = "b" }: BrandSelectorProps)
          * Fechado, o botão dizia "Marca · Geist" — nome e fonte, nenhuma cor.
          * Só que a coisa que ele troca é justamente a COR do produto inteiro, e
          * o único lugar onde ela aparecia era atrás do clique. Três amostras
-         * custam 30px e fazem o controle dizer o que ele é sem abrir nada.
+         * custam 30px e fazem o controle dizer o que ele é sem abrir nada. A
+         * seta é o que diz que ele abre.
          */}
-        {brand && brand.palette.length > 0 && (
-          <span className="ml-0.5 hidden sm:block">
-            <Swatches brand={brand} max={3} />
-          </span>
-        )}
+        <span className="ml-0.5 flex shrink-0 items-center gap-1.5">
+          {brand && brand.palette.length > 0 && (
+            <span className="hidden sm:block">
+              <Swatches brand={brand} max={3} />
+            </span>
+          )}
+          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+        </span>
         {shortcut && (
           <kbd className="ml-1 hidden rounded border border-border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:block">
             ⌘{shortcut.toUpperCase()}
@@ -191,7 +180,9 @@ export function BrandSelector({ className, shortcut = "b" }: BrandSelectorProps)
         onOpenChange={setOpen}
         label="Selecionar marca"
         shouldFilter
-        value={highlight ?? undefined}
+        // Abre em cima da marca atual: sem isto a primeira linha ganhava o foco e a
+        // prévia repintava o produto antes de a pessoa mexer em qualquer coisa.
+        value={open ? (highlight ?? brand?.slug) : undefined}
         onValueChange={(v) => {
           setHighlight(v);
           previewBrand(v || null);
@@ -208,7 +199,7 @@ export function BrandSelector({ className, shortcut = "b" }: BrandSelectorProps)
         <div className="flex items-center gap-2 border-b border-border px-3.5">
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
           <Command.Input
-            placeholder="Buscar marca, fonte ou cor…"
+            placeholder="Buscar marca…"
             className="h-12 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
           {status === "loading" && (
@@ -220,7 +211,7 @@ export function BrandSelector({ className, shortcut = "b" }: BrandSelectorProps)
 
         <Command.List className="max-h-[52vh] overflow-y-auto overscroll-contain p-1.5">
           <Command.Empty className="px-3 py-8 text-center text-sm text-muted-foreground">
-            {error ? `Vault indisponível: ${error}` : "Nenhuma marca com esse nome."}
+            {error ? "Não foi possível carregar as marcas." : "Nenhuma marca com esse nome."}
           </Command.Empty>
 
           {brands.map((b) => (
@@ -246,32 +237,20 @@ export function BrandSelector({ className, shortcut = "b" }: BrandSelectorProps)
                     <Check className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--accent-ink)" }} />
                   )}
                 </span>
-                <span className="truncate text-[11px] text-muted-foreground">
-                  {b.fonts.display}
-                  {b.fonts.sans !== b.fonts.display ? ` + ${b.fonts.sans}` : ""}
-                  {b.tagline ? ` · ${b.tagline}` : ""}
-                </span>
+                {b.tagline ? (
+                  <span className="truncate text-[11px] text-muted-foreground">{b.tagline}</span>
+                ) : null}
               </span>
-              <span className="flex shrink-0 items-center gap-3">
+              <span className="flex shrink-0 items-center">
                 <Swatches brand={b} />
-                <VaultMeter value={b.completeness} />
               </span>
             </Command.Item>
           ))}
         </Command.List>
 
-        {/* Rodapé de uma linha só: a instrução enquanto nada está em foco, o
-            comando de instalar o tema quando uma marca está. No toque não há
-            setas nem Enter: sem marca em foco, o rodapé some. */}
-        <div
-          className={cn(
-            "border-t border-border px-3.5 py-2 text-[10px] text-muted-foreground",
-            !highlight && "[@media(pointer:coarse)]:hidden",
-          )}
-        >
-          <span className="block truncate font-mono">
-            {highlight ? `npx shadcn add @visant/theme-${highlight}` : "Setas percorrem, Enter aplica"}
-          </span>
+        {/* No toque não há setas nem Enter: o rodapé some. */}
+        <div className="border-t border-border px-3.5 py-2 text-[11px] text-muted-foreground [@media(pointer:coarse)]:hidden">
+          Setas percorrem, Enter aplica
         </div>
       </Command.Dialog>
     </>

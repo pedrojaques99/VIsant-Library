@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -18,6 +19,7 @@ export function KanbanColumn<T, C>({
   items,
   enabled,
   isOver,
+  landingId,
   render,
   renderHeader,
   renderEmpty,
@@ -30,6 +32,8 @@ export function KanbanColumn<T, C>({
   items: KanbanItem<T>[];
   enabled: boolean;
   isOver: boolean;
+  /** Cartão ainda pousando: segue como buraco até o fantasma chegar. */
+  landingId?: string | null;
   render: (args: KanbanRenderCardArgs<T>) => React.ReactNode;
   renderHeader?: (column: Col<C>) => React.ReactNode;
   renderEmpty?: (column: Col<C>) => React.ReactNode;
@@ -41,6 +45,13 @@ export function KanbanColumn<T, C>({
   const droppable = enabled && !column.dropDisabled;
   const { setNodeRef } = useDroppable({ id: column.id, disabled: !droppable });
 
+  // A MESMA referência enquanto a ordem não muda. O sortable compara os itens por
+  // referência: array novo a cada render lia como "a lista mudou" e desligava o
+  // deslize de todos os cartões, em todo render.
+  const idsKey = items.map((i) => i.id).join("\n");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const ids = useMemo(() => items.map((i) => i.id), [idsKey]);
+
   return (
     <div
       className={cn(
@@ -51,7 +62,7 @@ export function KanbanColumn<T, C>({
     >
       {renderHeader?.(column)}
       <SortableContext
-        items={items.map((i) => i.id)}
+        items={ids}
         strategy={verticalListSortingStrategy}
       >
         <div ref={setNodeRef} className="kanban-column-body flex-1">
@@ -62,6 +73,7 @@ export function KanbanColumn<T, C>({
                   key={item.id}
                   item={item}
                   enabled={enabled}
+                  landing={landingId === item.id}
                   render={render}
                   selectable={selectable}
                   selected={selectedIds?.has(item.id) ?? false}

@@ -47,6 +47,7 @@ import { CopyCommand, useCopy } from "./copy-command";
 import { DepLogo } from "./dep-badges";
 import { SEM_DEPS, allDeps, matchesDep } from "./deps";
 import { PalcoFixo, useInView, useLazyDemo } from "./stage";
+import TINTA from "./zoom-do-ladrilho.generated.json";
 import { GRID_GAP, useFundoEscuro } from "./mosaic";
 import { ehNovo } from "./novidades";
 import { WireframeToggle } from "./media";
@@ -312,6 +313,7 @@ const Ladrilho = React.memo(function Ladrilho({
          `data-palco` dele não distingue mais as duas: é por aqui que a suíte
          prova que só o que está perto da tela fica montado. */
       data-viva={viva ? "" : undefined}
+      style={stageSurfaceOf(item)}
       onPointerEnter={acordarSemDedo}
       onFocus={acordar}
       className="palco group relative isolate overflow-hidden rounded-tile [contain:paint] has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--casa-fg-2)]"
@@ -323,7 +325,14 @@ const Ladrilho = React.memo(function Ladrilho({
           continua sendo o botão que sempre abre.
         */
         <div onClick={fotoVisivel ? tocarNaFoto : undefined} className={fotoVisivel ? "cursor-pointer" : undefined}>
-          <PalcoFixo w={w} h={h} ratio={16 / 10} active={active} style={stageSurfaceOf(item)}>
+          <PalcoFixo
+            w={w}
+            h={h}
+            ratio={16 / 10}
+            active={active}
+            tinta={(TINTA as Record<string, number[]>)[item.name]}
+            style={stageSurfaceOf(item)}
+          >
             {viva ? (
               /* Peça que quebra (ou chunk que o deploy novo apagou) cai sozinha:
                  o fallback é nada, a foto continua no lugar e a grade segue. Sem
@@ -451,7 +460,7 @@ function PilulaAgente() {
 
   return (
     // casa-lint/pilula: a pílula é o pedido do dono (referência de onboarding de agente), não chip genérico
-    <div className="mt-5 inline-flex items-center rounded-full border border-casa-line bg-casa-tile p-1 text-casa-fg">
+    <div className="inline-flex w-fit shrink-0 items-center rounded-full border border-casa-line bg-casa-tile p-1 text-casa-fg">
       <button
         type="button"
         onClick={abrirConectar}
@@ -704,7 +713,8 @@ export function Gallery({ onFocus, familia = null, onFamilia }: GalleryProps) {
        * título, tese com número de marcas e a contagem repetida na barra. Numa
        * página cuja única promessa é mostrar componente, a tese cabe numa linha.
        */}
-      <section ref={heroRef} className="casa shell pt-5 pb-5 sm:pt-16 sm:pb-8">
+      <section ref={heroRef} className="casa shell flex flex-col gap-4 pt-5 pb-5 sm:flex-row sm:items-end sm:justify-between sm:gap-8 sm:pt-16 sm:pb-8">
+        <div className="min-w-0">
         <h1 className="text-casa-xl font-medium">
           {familia ? familyLabel(familia) : "A library da Visant"}
         </h1>
@@ -717,6 +727,7 @@ export function Gallery({ onFocus, familia = null, onFamilia }: GalleryProps) {
           </p>
         )}
         {familia ? null : <MarcasNaDobra className="mt-2" />}
+        </div>
         {familia ? null : <PilulaAgente />}
       </section>
 

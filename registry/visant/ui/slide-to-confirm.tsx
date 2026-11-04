@@ -225,7 +225,7 @@ export function SlideToConfirm({
       ref={trilho}
       data-state={feito ? "done" : arrastando ? "dragging" : "idle"}
       className={cn(
-        "relative h-14 w-[300px] max-w-full select-none overflow-hidden rounded-[var(--r-pill)] border border-border bg-card text-foreground [box-shadow:var(--e-raised)] [--slide-thumb:3rem]",
+        "relative h-14 w-[300px] max-w-full select-none overflow-hidden rounded-[var(--r-pill)] border border-border bg-[color-mix(in_oklab,var(--card),white_7%)] text-foreground [box-shadow:inset_0_1px_0_rgb(255_255_255/0.07),0_1px_2px_rgb(0_0_0/0.2)] [--slide-thumb:3rem]",
         disabled && "opacity-50",
         className,
       )}
@@ -300,7 +300,7 @@ export function SlideToConfirm({
         onLostPointerCapture={soltar}
         onKeyDown={teclar}
         className={cn(
-          "absolute left-1 top-1 grid size-[var(--slide-thumb)] place-items-center rounded-[var(--r-pill)] outline-none [touch-action:pan-y] focus-visible:[box-shadow:var(--focus)]",
+          "absolute left-1 top-1 grid size-[var(--slide-thumb)] place-items-center rounded-[var(--r-pill)] outline-none [box-shadow:inset_0_1px_0_rgb(255_255_255/0.14),0_1px_3px_rgb(0_0_0/0.3)] [touch-action:pan-y] focus-visible:[box-shadow:var(--focus)]",
           TROCA_COR,
           cor,
           parado ? "cursor-default" : arrastando ? "cursor-grabbing" : "cursor-grab",

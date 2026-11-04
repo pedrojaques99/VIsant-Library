@@ -82,10 +82,10 @@
   }
 }
 
-/* Mobile: long-press no card é gesto de DRAG (250ms no TouchSensor) — sem
+/* Toque: long-press no card é gesto de DRAG (250ms no TouchSensor) — sem
    isto o browser responde primeiro com seleção de texto + callout do iOS e
-   quebra o gesto no meio. Desktop mantém seleção normal. */
-@media (max-width: 639px) {
+   quebra o gesto no meio. Mouse mantém seleção normal. */
+@media (max-width: 639px), (pointer: coarse) {
   .kanban-card {
     -webkit-user-select: none;
     user-select: none;
@@ -104,19 +104,18 @@
  * andando pro lado), não uma entrada nem uma saída.
  */
 .kanban-card {
-  transition-property: transform, outline-color, background-color;
+  transition-property: transform;
   transition-duration: var(--dur-base, 200ms);
   transition-timing-function: var(--ease-in-out);
 
   /*
    * O contorno do slot existe SEMPRE, transparente — e é isso que faz a entrada
-   * e a saída do buraco serem suaves.
+   * do buraco ser suave.
    *
    * `outline-style` não é animável: enquanto o repouso era `outline: none`, o
-   * tracejado do slot aparecia e sumia em um quadro, no meio de um gesto em que
-   * todo o resto desliza. Declarado aqui com cor transparente, só a COR muda de
-   * estado, e ela transiciona. `outline` não ocupa espaço, então o card parado
-   * continua com a mesma caixa de antes.
+   * tracejado do slot aparecia em um quadro, no meio de um gesto em que todo o
+   * resto desliza. Declarado aqui com cor transparente, só a COR muda de estado.
+   * `outline` não ocupa espaço, então o card parado continua com a mesma caixa.
    */
   border-radius: var(--kanban-card-radius);
   outline: 1.5px dashed transparent;
@@ -148,37 +147,41 @@
  * espaço — o buraco fica com o tamanho EXATO do card, que é a única forma de o
  * overlay pousar em cima dele sem sobrar nem faltar pixel.
  */
-.kanban-card.is-drop-slot,
-.kanban-card.is-landing {
+.kanban-card.is-drop-slot {
+  transition-property: transform, outline-color, background-color;
   outline-color: var(--kanban-drop-ring);
   background-color: var(--kanban-drop-bg);
 }
 
-.kanban-card > * {
-  transition-property: opacity;
-  transition-duration: var(--dur-fast, 160ms);
-  transition-timing-function: var(--ease-out);
+/*
+ * O aperto: antes de virar arraste, o cartão responde ao dedo e ao mouse. No toque
+ * são 250ms de espera até levantar, e sem isto eles pareciam tela travada. O atraso
+ * deixa passar o toque de quem está só rolando a página. A escala fica no conteúdo,
+ * nunca no `.kanban-card`: é ele que o dnd-kit mede.
+ */
+.kanban-card-movel > * {
+  transition: transform var(--dur-press, 120ms) var(--ease-out);
 }
 
-.kanban-card.is-drop-slot > *,
-.kanban-card.is-landing > * {
-  opacity: 0.12;
+.kanban-card-movel:active:not(.is-drop-slot) > * {
+  transform: scale(0.985);
+  transition-delay: 60ms;
 }
 
 /*
- * `is-landing` é o conserto do PULO AO SOLTAR, e vale explicar o defeito.
+ * O buraco só anima ao ENTRAR. Ao sair, o fantasma está exatamente em cima dele e
+ * os dois trocam de lugar no mesmo quadro: qualquer transição aqui aparece como o
+ * cartão aceso pela metade depois de pousado.
  *
- * Ao soltar, o React zerava o `activeId` no mesmo instante — então `isDragging`
- * virava false, o card de origem voltava a ficar 100% opaco IMEDIATAMENTE, e o
- * overlay ainda tinha 250ms de viagem pela frente. Por um quarto de segundo
- * existiam dois cards iguais na tela; quando o overlay finalmente sumia, o
- * conjunto estalava. Era isso o "motion pulando de flicker".
- *
- * A classe é posta pelo `sideEffects` da drop animation (Kanban.tsx), no nó de
- * destino, e só sai quando o overlay termina de pousar. O buraco continua sendo
- * buraco durante a viagem inteira, e o conteúdo acende no fim — um fade curto
- * que entra exatamente onde o overlay sai, em vez de uma troca num frame.
+ * O buraco fica aceso até o fim do pouso (`landing`, em Kanban.tsx). Ao soltar, o
+ * `isDragging` vira false na hora e o fantasma ainda tem a viagem inteira: antes o
+ * destino piscava inteiro, apagava e acendia de novo, com dois cartões iguais na tela.
  */
+.kanban-card.is-drop-slot > * {
+  opacity: 0.12;
+  transition: opacity var(--dur-fast, 160ms) var(--ease-out);
+}
+
 .kanban-card-overlay {
   cursor: grabbing;
   /* Fallback no ponto de uso, e não herança: o overlay é portalizado no `body`
@@ -187,11 +190,13 @@
   border-radius: var(--kanban-card-radius, var(--t-card-radius, 0.75rem));
   /* A sombra é o que diz "este está no ar e os outros no papel". Sem ela o card
      que viaja tem o mesmo peso visual dos parados e o gesto parece um bug de
-     render. Nada de `scale` aqui: o dnd-kit LÊ o transform computado deste nó
-     pra calcular o pouso, e uma escala nossa entraria na conta e erraria o alvo. */
+     render. O anel é a metade que vale no escuro: preto sobre palco escuro não se
+     vê, e no toque o cartão levantava sem mudar nada à vista.
+     Nada de `scale` aqui: o cartão levanta do tamanho que tem. */
   box-shadow:
-    0 1px 2px color-mix(in oklch, black 8%, transparent),
-    0 12px 28px -6px color-mix(in oklch, black 22%, transparent);
+    0 0 0 1px color-mix(in oklch, var(--foreground, black) 16%, transparent),
+    0 1px 2px color-mix(in oklch, black 16%, transparent),
+    0 16px 32px -8px color-mix(in oklch, black 45%, transparent);
   /* A ENTRADA do gesto. O overlay nascia já com a sombra inteira: o card não era
      "pego", ele aparecia no ar de um quadro pro outro, e o começo do arraste
      ficava com a mesma dureza que o fim tinha antes de o pouso ser animado.
@@ -201,14 +206,21 @@
      transform computado DESTE nó pra calcular o pouso, então escala ou
      deslocamento nossos entrariam na conta e errariam o alvo. */
   animation: kanban-overlay-erguer var(--dur-fast, 160ms)
-    var(--ease-out) both;
+    var(--ease-out) backwards;
+}
+
+/* O pouso: a sombra assenta enquanto o cartão desce, em vez de sumir com ele. */
+.kanban-pousando .kanban-card-overlay {
+  box-shadow: none;
+  transition: box-shadow var(--dur-base, 200ms) var(--ease-out);
 }
 
 @keyframes kanban-overlay-erguer {
   from {
     box-shadow:
-      0 0 0 color-mix(in oklch, black 0%, transparent),
-      0 0 0 -6px color-mix(in oklch, black 0%, transparent);
+      0 0 0 0 transparent,
+      0 0 0 transparent,
+      0 0 0 -8px transparent;
   }
 }
 
@@ -221,6 +233,9 @@
   }
   .kanban-card > * {
     transition-duration: 0.001ms;
+  }
+  .kanban-card-movel:active:not(.is-drop-slot) > * {
+    transform: none;
   }
   .kanban-card-overlay {
     animation-duration: 0.001ms;

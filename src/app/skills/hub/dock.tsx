@@ -20,12 +20,6 @@ export const INDICE = [
   { id: "visant-copy", curto: "copy", grupo: "Interface" },
   { id: "visant-motion", curto: "motion", grupo: "Interface" },
   { id: "visant-refine", curto: "refine", grupo: "Interface" },
-  { id: "visant-video-editor", curto: "editor", grupo: "Vídeo" },
-  { id: "site-reels", curto: "reels", grupo: "Vídeo" },
-  { id: "visant-premiere-editor", curto: "premiere", grupo: "Vídeo" },
-  { id: "visant-preflight", curto: "preflight", grupo: "Projeto" },
-  { id: "visant-methodology", curto: "método", grupo: "Projeto" },
-  { id: "visant-mcp-connect", curto: "mcp", grupo: "Projeto" },
 ];
 
 const BASE = "npx skills add pedrojaques99/visant-skills-public";
@@ -56,7 +50,7 @@ export function Dock({ onInstalar }: { onInstalar: () => void }) {
 
   return (
     <nav
-      aria-label="As 12 skills"
+      aria-label="As skills"
       data-dock
       className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-casa-line bg-casa-bg pb-[env(safe-area-inset-bottom)] pr-2 lg:inset-x-auto lg:bottom-4 lg:left-1/2 lg:-translate-x-1/2 lg:rounded-tile lg:border-t-0 lg:bg-casa-tile-2 lg:py-1 lg:pl-2 lg:[box-shadow:var(--casa-shadow)]"
     >
@@ -64,7 +58,7 @@ export function Dock({ onInstalar }: { onInstalar: () => void }) {
         <span
           data-posicao
           style={{ transform: `translateX(${Math.max(0, INDICE.findIndex((s) => s.id === ativo)) * 100}%)` }}
-          className="block h-full w-[calc(100%/12)] bg-casa-fg transition-transform [transition-duration:var(--dur-slow)] [transition-timing-function:var(--ease-out)]"
+          className="block h-full w-[calc(100%/6)] bg-casa-fg transition-transform [transition-duration:var(--dur-slow)] [transition-timing-function:var(--ease-out)]"
         />
       </span>
       <div className="min-w-0 flex-1 [container-type:inline-size] lg:[container-type:normal]">
@@ -174,11 +168,11 @@ export function Instalador({ aberto, onFechar }: { aberto: boolean; onFechar: ()
   };
 
   const todas = marcadas.size === INDICE.length;
-  const comando = todas ? BASE : `${BASE} --skill ${INDICE.filter((s) => marcadas.has(s.id)).map((s) => s.id).join(" ")}`;
+  /* Sempre com `--skill`: sem ele o comando instala também as de vídeo e projeto, que esta página não mostra. */
+  const comando = `${BASE} --skill ${INDICE.filter((s) => marcadas.has(s.id)).map((s) => s.id).join(" ")}`;
   const { done, copy } = useCopy(comando);
   const Icone = done ? Check : Copy;
 
-  const grupos = ["Interface", "Vídeo", "Projeto"];
   const alternar = (id: string) =>
     setMarcadas((m) => {
       const n = new Set(m);
@@ -186,7 +180,6 @@ export function Instalador({ aberto, onFechar }: { aberto: boolean; onFechar: ()
       else n.add(id);
       return n;
     });
-  const soGrupo = (g: string) => setMarcadas(new Set(INDICE.filter((s) => s.grupo === g).map((s) => s.id)));
 
   return (
     <dialog
@@ -223,17 +216,6 @@ export function Instalador({ aberto, onFechar }: { aberto: boolean; onFechar: ()
               >
                 Todas
               </button>
-              {grupos.map((g) => (
-                <button
-                  key={g}
-                  type="button"
-                  data-grupo={g}
-                  onClick={() => soGrupo(g)}
-                  className="h-11 rounded-control px-3 text-casa-base text-casa-fg-2 outline-none focus-visible:[box-shadow:var(--focus)]"
-                >
-                  {g}
-                </button>
-              ))}
             </div>
             <button type="button" aria-label="Fechar" onClick={onFechar} className="grid size-11 shrink-0 place-items-center rounded-control text-casa-fg-2 outline-none focus-visible:[box-shadow:var(--focus)]">
               <X className="size-4" />

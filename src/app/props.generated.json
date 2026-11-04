@@ -1329,6 +1329,13 @@
           "descricao": "Sangra pra fora do container. Passe o mesmo respiro lateral do pai."
         },
         {
+          "nome": "dragHint",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "true",
+          "descricao": "Ícone discreto sobre o card do meio, dizendo que a fileira arrasta. Dá dois balanços ao nascer e some de vez no primeiro gesto da pessoa."
+        },
+        {
           "nome": "drift",
           "tipo": "boolean",
           "obrigatoria": false,
@@ -1960,6 +1967,13 @@
           "descricao": null
         },
         {
+          "nome": "landingId",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Cartão ainda pousando: segue como buraco até o fantasma chegar."
+        },
+        {
           "nome": "onSelectToggle",
           "tipo": "(id: string) => void",
           "obrigatoria": false,
@@ -2020,6 +2034,13 @@
           "obrigatoria": true,
           "padrao": null,
           "descricao": null
+        },
+        {
+          "nome": "landing",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": "O fantasma ainda está descendo até aqui."
         },
         {
           "nome": "onSelectToggle",
@@ -3254,6 +3275,13 @@
           "descricao": null
         },
         {
+          "nome": "stepper",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Botões − e + em volta do valor, pra contagem de um em um e pro dedo."
+        },
+        {
           "nome": "suffix",
           "tipo": "string",
           "obrigatoria": false,
@@ -3513,17 +3541,6 @@
       "nome": "BrandSelector",
       "descricao": null,
       "props": [
-        {
-          "nome": "align",
-          "tipo": "enum",
-          "obrigatoria": false,
-          "padrao": null,
-          "descricao": null,
-          "valores": [
-            "start",
-            "end"
-          ]
-        },
         {
           "nome": "className",
           "tipo": "string",
@@ -3925,7 +3942,7 @@
           "tipo": "enum",
           "obrigatoria": false,
           "padrao": "masonry",
-          "descricao": "`masonry` (padrão): colunas de CSS, altura de cada card pelo conteúdo. `bento`: grade que divide a altura do container; o retrato ocupa duas linhas e os cards esticam até a borda. Use com altura definida.",
+          "descricao": "`masonry` (padrão): colunas de CSS, altura de cada card pelo conteúdo. `bento`: grade que divide a altura do container; o retrato ocupa duas linhas (ou o que `span` disser) e os cards esticam até a borda. Use com altura definida.",
           "valores": [
             "masonry",
             "bento"
@@ -3975,7 +3992,7 @@
           "tipo": "enum",
           "obrigatoria": false,
           "padrao": "masonry",
-          "descricao": "`masonry` (padrão): colunas de CSS, altura de cada card pelo conteúdo. `bento`: grade que divide a altura do container; o retrato ocupa duas linhas e os cards esticam até a borda. Use com altura definida.",
+          "descricao": "`masonry` (padrão): colunas de CSS, altura de cada card pelo conteúdo. `bento`: grade que divide a altura do container; o retrato ocupa duas linhas (ou o que `span` disser) e os cards esticam até a borda. Use com altura definida.",
           "valores": [
             "masonry",
             "bento"
@@ -11608,7 +11625,7 @@
           "tipo": "number",
           "obrigatoria": false,
           "padrao": "0",
-          "descricao": "Página inicial (base 0)."
+          "descricao": "Página inicial (base 0). O livro abre na dupla que contém essa página."
         },
         {
           "nome": "label",
@@ -11622,7 +11639,7 @@
           "tipo": "(index: number) => void",
           "obrigatoria": false,
           "padrao": null,
-          "descricao": null
+          "descricao": "Avisa a primeira página à vista (base 0) depois de cada virada."
         },
         {
           "nome": "peek",
@@ -11636,7 +11653,7 @@
           "tipo": "number",
           "obrigatoria": false,
           "padrao": null,
-          "descricao": "Largura da folha em px. A altura segue 3:4. Sem valor, 240px."
+          "descricao": "Largura de uma folha em px; aberto, o livro mede o dobro. A altura segue 3:4. Sem valor, 240px."
         }
       ]
     }
@@ -12093,11 +12110,13 @@
           "tipo": "enum",
           "obrigatoria": false,
           "padrao": "wiggle",
-          "descricao": "\"wiggle\" flui, \"silhouette\" centra a pilha, \"zero\" empilha de uma base reta.",
+          "descricao": "\"wiggle\" flui, \"silhouette\" centra, \"zero\" empilha, \"expand\" mostra em 100%, \"ridge\" dá uma base a cada camada.",
           "valores": [
             "wiggle",
             "silhouette",
-            "zero"
+            "zero",
+            "expand",
+            "ridge"
           ]
         },
         {
@@ -12106,6 +12125,18 @@
           "obrigatoria": false,
           "padrao": null,
           "descricao": null
+        },
+        {
+          "nome": "shape",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "area",
+          "descricao": "\"area\" pinta as camadas, \"line\" desenha só a linha de cada uma, \"bar\" empilha em colunas.",
+          "valores": [
+            "area",
+            "line",
+            "bar"
+          ]
         },
         {
           "nome": "unit",
@@ -12279,6 +12310,13 @@
           "obrigatoria": false,
           "padrao": "0",
           "descricao": "Cartão da frente ao montar."
+        },
+        {
+          "nome": "height",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "440",
+          "descricao": "Altura da caixa dos cartões em px. Menor, o detalhe aberto tem menos espaço. Sem valor, 440px."
         },
         {
           "nome": "label",

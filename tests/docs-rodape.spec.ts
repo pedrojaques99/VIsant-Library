@@ -120,6 +120,9 @@ test.describe("ficha, catálogo e títulos", () => {
     const linha = page.locator("[data-marcas-na-dobra] button");
     await expect(linha).toHaveCount(4);
     const antes = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--brand"));
+    // Empilhadas em repouso: com o cursor em cima elas abrem de lado, e só então se escolhe.
+    await linha.first().hover();
+    await page.waitForTimeout(500);
     await linha.nth(3).click();
     await expect(linha.nth(3)).toHaveAttribute("aria-pressed", "true");
     await expect

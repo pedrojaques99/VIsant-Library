@@ -14,6 +14,9 @@
  * no palco. Virou texto pequeno e apagado, com a escolha em `--foreground` e
  * um ponto embaixo. Continua sendo botão (foco, `aria-pressed`, alvo de toque),
  * só parou de gritar.
+ *
+ * O corpo sai na cor da marca: `--brand` é superfície, e aqui é o material do
+ * objeto, com a luz da cena dando a forma. As varetas seguem em `--foreground`.
  */
 
 import * as React from "react";
@@ -47,7 +50,7 @@ export default function LatheObjectDemo({ props }: DemoProps) {
   return (
     <div className="flex h-full w-full flex-col gap-3">
       <div className="min-h-0 flex-1">
-        <LatheObject profile={caso.profile} sticks={caso.sticks} aria-label={caso.label} {...props} />
+        <LatheObject profile={caso.profile} sticks={caso.sticks} body="var(--brand)" aria-label={caso.label} {...props} />
       </div>
       <div className="flex justify-center gap-4 pb-1 pointer-coarse:pb-3" role="group" aria-label="Objeto">
         {CASOS.map((c, n) => (

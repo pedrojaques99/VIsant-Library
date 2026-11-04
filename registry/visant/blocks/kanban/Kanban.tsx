@@ -54,11 +54,10 @@ import "./kanban.css";
  *    aterrissagem: `--dur-base` e `--ease-out`, que é como tudo o mais nesta
  *    casa desacelera ao chegar.
  * 2. O card de destino voltava do nada pro opaco no frame em que o overlay
- *    sumia. Aqui trocamos a opacidade crua pela classe `is-landing`: o buraco
- *    continua desenhado durante a viagem inteira e o conteúdo ACENDE por
- *    transição quando a classe sai (kanban.css). O overlay termina de pousar e
- *    o card aparece por baixo dele no mesmo movimento, em vez de os dois
- *    trocarem de lugar num piscar.
+ *    sumia. O buraco agora continua desenhado durante a viagem inteira, e quem
+ *    avisa o fim é o `sideEffects`: o overlay some e o card fica inteiro no mesmo
+ *    quadro. Sem fade na volta: os dois estão no mesmo pixel, então a troca é
+ *    invisível, e um fade ali deixava o card apagado depois do pouso.
  *
  * O tempo e a curva são LIDOS do CSS em vez de escritos aqui. A drop animation
  * é WAAPI, e a Web Animations API não aceita `var(--ease-out)` — mas ela aceita
@@ -74,7 +73,7 @@ import "./kanban.css";
 // Sem anotar `: DropAnimation`: aquele tipo é uma união que inclui a forma
 // "função", e por ela o `duration` some — e o guard de pouso abaixo precisa ler
 // essa duração. O objeto inferido continua sendo aceito pelo DragOverlay.
-function readDropAnimation() {
+function readDropAnimation(aoPousar: () => void) {
   const css = typeof window === "undefined" ? null : getComputedStyle(document.documentElement);
   const token = (name: string, fallback: string) =>
     (css?.getPropertyValue(name).trim() || "") || fallback;
@@ -85,19 +84,31 @@ function readDropAnimation() {
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  // A sombra assenta enquanto o card desce (`.kanban-pousando` no kanban.css).
+  const assentar = defaultDropAnimationSideEffects({
+    className: { dragOverlay: "kanban-pousando" },
+  });
+
   return {
     duration: reduzido ? 0 : Number.isFinite(ms) ? ms : 200,
     easing: token("--ease-out", EASE_OUT_CSS),
-    sideEffects: defaultDropAnimationSideEffects({
-      className: { active: "is-landing" },
-    }),
+    sideEffects: (args: Parameters<typeof assentar>[0]) => {
+      const desfazer = assentar(args);
+      return () => {
+        desfazer?.();
+        aoPousar();
+      };
+    },
   };
 }
 
 /* Sem isto o leitor de tela anuncia em inglês o id interno ("Draggable item a was dropped"). */
 const AVISOS: Announcements = {
   onDragStart: () => "Cartão pego.",
-  onDragOver: ({ over }) => (over ? "Cartão sobre uma nova posição." : "Cartão fora das colunas."),
+  // Sobre o próprio lugar não há o que dizer: o dnd-kit dispara isto ao pegar, e o
+  // aviso atropelava o "Cartão pego." no mesmo instante.
+  onDragOver: ({ active, over }) =>
+    over?.id === active.id ? undefined : over ? "Cartão sobre uma nova posição." : "Cartão fora das colunas.",
   onDragEnd: ({ over }) => (over ? "Cartão solto." : "Cartão devolvido."),
   onDragCancel: () => "Movimento cancelado. Cartão devolvido.",
 };
@@ -127,11 +138,15 @@ export function Kanban<T = unknown, C = unknown>({
 
   const colMeta = useMemo(() => new Map(columns.map((c) => [c.id, c])), [columns]);
 
+  // Fim real do pouso: quem manda é a animação; o relógio de `aguardaPouso` é só a
+  // rede para quando ela nem roda (duração zero, overlay já fora da tela).
+  const aoPousarRef = useRef<() => void>(() => {});
+
   // Uma vez por board: a config precisa ser a MESMA referência entre renders,
   // senão o dnd-kit refaz o handler de pouso no meio do gesto e a animação sai
   // pela metade. `[]` de propósito.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const dropAnimation = useMemo(readDropAnimation, []);
+  const dropAnimation = useMemo(() => readDropAnimation(() => aoPousarRef.current()), []);
 
   // Ordem vinda das props (a fonte da verdade do consumidor).
   const fromProps = useMemo(() => {
@@ -166,14 +181,23 @@ export function Kanban<T = unknown, C = unknown>({
    * então a verdade das props volta a mandar. Se ela discordar, a correção
    * aparece — mas aparece sozinha, à vista, e não escondida sob uma animação.
    */
-  const [pousando, setPousando] = useState(false);
+  const [pousando, setPousando] = useState<string | null>(null);
   const [fantasma, setFantasma] = useState<{ escala: number; largura: number } | null>(null);
   const pousoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const aguardaPouso = useCallback(() => {
+  const terminaPouso = useCallback(() => {
     if (pousoRef.current) clearTimeout(pousoRef.current);
-    setPousando(true);
-    pousoRef.current = setTimeout(() => setPousando(false), dropAnimation.duration ?? 0);
-  }, [dropAnimation.duration]);
+    setPousando(null);
+  }, []);
+  aoPousarRef.current = terminaPouso;
+  const aguardaPouso = useCallback(
+    (id: string) => {
+      if (pousoRef.current) clearTimeout(pousoRef.current);
+      setPousando(id);
+      const duracao = dropAnimation.duration ?? 0;
+      pousoRef.current = setTimeout(terminaPouso, duracao ? duracao + 120 : 0);
+    },
+    [dropAnimation.duration, terminaPouso],
+  );
   useEffect(() => () => void (pousoRef.current && clearTimeout(pousoRef.current)), []);
 
   useEffect(() => {
@@ -332,6 +356,11 @@ export function Kanban<T = unknown, C = unknown>({
     const id = String(e.active.id);
     setActiveId(id);
     medirFantasma(id);
+    // O dedo não vê o cartão por baixo dele: o toque curto confirma que pegou.
+    // iOS ignora, e tudo bem: lá sobra a sombra subindo.
+    if (typeof TouchEvent !== "undefined" && e.activatorEvent instanceof TouchEvent) {
+      navigator.vibrate?.(8);
+    }
     const col = columnOf(id) ?? null;
     fromColumnRef.current = col;
     fromIndexRef.current = col ? (ordered[col] ?? []).indexOf(id) : -1;
@@ -387,7 +416,7 @@ export function Kanban<T = unknown, C = unknown>({
   // handler o activeId nunca zerava: overlay preso, resync com as props
   // bloqueado e o card órfão na coluna errada até um remount.
   const handleDragCancel = () => {
-    aguardaPouso();
+    aguardaPouso(activeId ?? "");
     setActiveId(null);
     setOverColumn(null);
     fromColumnRef.current = null;
@@ -399,7 +428,7 @@ export function Kanban<T = unknown, C = unknown>({
     const active = String(e.active.id);
     const overId = e.over ? String(e.over.id) : null;
     const from = fromColumnRef.current;
-    aguardaPouso();
+    aguardaPouso(active);
     setActiveId(null);
     setOverColumn(null);
     fromColumnRef.current = null;
@@ -511,6 +540,7 @@ export function Kanban<T = unknown, C = unknown>({
             items={itemsOf(col.id)}
             enabled
             isOver={overColumn === col.id}
+            landingId={pousando}
             render={renderCard}
             renderHeader={renderColumnHeader}
             renderEmpty={renderColumnEmpty}

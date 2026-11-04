@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * /skills: a página de produto das 12 skills públicas, desenhada em 390x844.
+ * /skills: a página de produto das 6 skills de interface, desenhada em 390x844.
  *
  * Ao nascer, cada dobra é o nome e a demo já em ação. O resto só aparece quando a
  * pessoa pede: "como funciona" abre uma folha por cima, e o único "Instalar" mora
@@ -18,7 +18,7 @@ import hD from "./hub/posters/hero-d.webp";
 import { foto } from "./hub/fotos";
 
 /*
- * A primeira dobra é o título e as duas fotos. O resto da página (doze demos, o GSAP da cortina,
+ * A primeira dobra é o título e as duas fotos. O resto da página (as demos, o GSAP da cortina,
  * o motion do rodapé) desce depois que ela ficou de pé: em Slow 4G, junto, era 14 s de tela sem foto.
  */
 const Resto = React.lazy(() => import("./hub/resto").then((m) => ({ default: m.Resto })));
@@ -48,7 +48,7 @@ export function Hub() {
               Tire a cara de IA da sua interface.
             </h1>
             <p className="mt-2 text-casa-base text-casa-fg-2 [text-wrap:pretty] lg:mt-4 lg:text-casa-lg">
-              Doze skills pro Claude Code que auditam tela, texto, animação e vídeo. A gente só testou lá.
+              Seis skills pro Claude Code que auditam tela, texto e animação.
             </p>
           </div>
           <div className="min-w-0">

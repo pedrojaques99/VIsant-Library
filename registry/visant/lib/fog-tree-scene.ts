@@ -104,6 +104,9 @@ export interface FogTreeScene {
   setColors(paper: RGB, ink: RGB): void;
   setRunning(on: boolean): void;
   setDraggable(on: boolean): void;
+  setFog(fog: { start: number; end: number }): void;
+  setTrail(trail: number): void;
+  setGrain(grain: number): void;
   dispose(): void;
 }
 
@@ -305,6 +308,20 @@ export function createFogTreeScene(
       }
     },
     setDraggable,
+    setFog(v) {
+      opts.fog = v;
+      pedir();
+    },
+    setTrail(v) {
+      // movimento reduzido fica sem rastro: é a mesma regra de quando a cena nasce
+      if (opts.reduce) return;
+      post.setTrail(v);
+      pedir();
+    },
+    setGrain(v) {
+      post.setGrain(v);
+      pedir();
+    },
     dispose() {
       visivel = false;
       if (raf) cancelAnimationFrame(raf);

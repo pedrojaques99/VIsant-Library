@@ -210,7 +210,7 @@ export function InlineEdit({
                                 type="button"
                                 onClick={handleSave}
                                 aria-label="Salvar"
-                                className="rounded p-1 text-emerald-600 outline-none transition-colors [transition-duration:var(--dur-press,120ms)] hover:bg-emerald-500/15 focus-visible:[box-shadow:var(--focus)] dark:text-emerald-400"
+                                className="grid size-6 place-items-center rounded text-emerald-600 outline-none pointer-coarse:size-11 transition-colors [transition-duration:var(--dur-press,120ms)] hover:bg-emerald-500/15 focus-visible:[box-shadow:var(--focus)] dark:text-emerald-400"
                             >
                                 <Check className="h-3 w-3" />
                             </button>
@@ -218,7 +218,7 @@ export function InlineEdit({
                                 type="button"
                                 onClick={handleCancel}
                                 aria-label="Cancelar"
-                                className="rounded p-1 text-destructive outline-none transition-colors [transition-duration:var(--dur-press,120ms)] hover:bg-destructive/15 focus-visible:[box-shadow:var(--focus)]"
+                                className="grid size-6 place-items-center rounded text-destructive outline-none pointer-coarse:size-11 transition-colors [transition-duration:var(--dur-press,120ms)] hover:bg-destructive/15 focus-visible:[box-shadow:var(--focus)]"
                             >
                                 <X className="h-3 w-3" />
                             </button>

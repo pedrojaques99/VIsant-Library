@@ -76,7 +76,7 @@ export function RotaCatalogo({
    */
   if (focus && !peca) {
     return (
-      <main className="shell casa min-h-[60vh] pt-24">
+      <div className="shell casa min-h-[60vh] pt-24">
         <h1 className="text-casa-xl font-medium">Essa peça não existe.</h1>
         <button
           type="button"
@@ -85,7 +85,7 @@ export function RotaCatalogo({
         >
           Voltar ao catálogo
         </button>
-      </main>
+      </div>
     );
   }
 

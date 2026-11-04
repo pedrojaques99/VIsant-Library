@@ -207,7 +207,7 @@ function Numero({
       <SliderPrimitive.Track className="absolute inset-0">
         <SliderPrimitive.Range className="absolute inset-y-0 bg-[color-mix(in_oklch,var(--casa-fg)_14%,transparent)]" />
       </SliderPrimitive.Track>
-      <SliderPrimitive.Thumb className="block h-10 w-0.5 pointer-coarse:h-11 bg-casa-fg-3 outline-none transition-colors [transition-duration:var(--dur-fast)] group-hover/barra:bg-casa-fg-2 focus-visible:bg-casa-fg" />
+      <SliderPrimitive.Thumb aria-label={controle.prop} className="block h-10 w-0.5 pointer-coarse:h-11 bg-casa-fg-3 outline-none transition-colors [transition-duration:var(--dur-fast)] group-hover/barra:bg-casa-fg-2 focus-visible:bg-casa-fg" />
       <span className="pointer-events-none absolute inset-x-3 flex items-center justify-between gap-3">
         <Rotulo controle={controle} mexido={mexido} />
         <span className="shrink-0 text-casa-base tabular-nums text-casa-fg">
