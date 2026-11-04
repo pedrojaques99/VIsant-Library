@@ -33,6 +33,8 @@ test("como usar: um passo por tela, do botão de /skills até o fim", async ({ p
   await page.locator("[data-como-usar-link]").click();
   await expect(page).toHaveURL(/\/skills\/como-usar$/);
   await expect(page.locator("h1")).toHaveText("Envie isso para o seu agente de IA.");
+  await page.locator("[data-pedir-email] input[type=email]").fill("pessoa@exemplo.com");
+  await page.locator("[data-liberar]").click();
   await expect(page.locator("[data-escrita]")).toHaveAttribute("aria-label", /llms\.txt/);
   await page.locator("[data-copiar-mensagem]").click();
   for (let i = 0; i < 3; i++) {
@@ -44,6 +46,38 @@ test("como usar: um passo por tela, do botão de /skills até o fim", async ({ p
   await expect(page.locator("h1")).toHaveText("Pronto.");
   await page.getByRole("button", { name: "Voltar" }).click();
   await expect(page.locator("h1")).toHaveText("Peça um componente.");
+});
+
+test("e-mail: inválido não libera, válido libera, e o banco fora não segura ninguém", async ({ page }) => {
+  await page.route("**/api/interesse", (r) => {
+    const { email } = r.request().postDataJSON() as { email: string };
+    return r.fulfill(email.includes("@") ? { status: 502, json: { error: "banco fora" } } : { status: 400, json: { error: "e-mail inválido" } });
+  });
+  await page.goto("/skills/como-usar");
+  await page.locator("[data-pedir-email] input[type=email]").fill("sem-arroba");
+  await page.locator("[data-liberar]").click();
+  await expect(page.locator("[data-pedir-email]")).toContainText("Confira o e-mail");
+  await expect(page.locator("[data-copiar-mensagem]")).toHaveCount(0);
+  await page.locator("[data-pedir-email] input[type=email]").fill("pessoa@exemplo.com");
+  await page.locator("[data-liberar]").click();
+  await expect(page.locator("[data-copiar-mensagem]")).toBeVisible();
+  await page.reload();
+  await expect(page.locator("[data-copiar-mensagem]")).toBeVisible();
+});
+
+test("feedback: ao fim do como usar, envia e agradece", async ({ page }) => {
+  await page.route("**/api/interesse", (r) => r.fulfill({ status: 204 }));
+  await page.goto("/skills/como-usar");
+  await expect(page.locator("[data-continuar]")).toBeHidden();
+  await page.locator("[data-pedir-email] input[type=email]").fill("pessoa@exemplo.com");
+  await page.locator("[data-liberar]").click();
+  for (let i = 0; i < 3; i++) {
+    await page.locator("[data-continuar]").click();
+    await page.waitForTimeout(350);
+  }
+  await page.locator("[data-pedir-feedback] textarea").fill("faltou exemplo");
+  await page.locator("[data-enviar-feedback]").click();
+  await expect(page.locator("[data-feedback-enviado]")).toContainText("Recebido");
 });
 
 test("endereço que não existe mostra 404, e a volta do OAuth não", async ({ page }) => {

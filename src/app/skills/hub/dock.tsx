@@ -12,6 +12,7 @@ import { motion } from "motion/react";
 import { Check, Copy, X } from "lucide-react";
 import { useCopy } from "../../copy-command";
 import { ANIMA_COR, cx, DUR, EASE_OUT, useMenosMovimento, useSequencia } from "./base";
+import { PedirEmail, useLiberado } from "./interesse";
 
 export const INDICE = [
   { id: "visant-killer", curto: "killer", grupo: "Interface" },
@@ -111,6 +112,7 @@ export function Instalador({ aberto, onFechar }: { aberto: boolean; onFechar: ()
   const seq = useSequencia();
   const [marcadas, setMarcadas] = React.useState<Set<string>>(new Set(INDICE.map((s) => s.id)));
   const [customizando, setCustomizando] = React.useState(false);
+  const [liberado, liberar] = useLiberado();
 
   /* showModal prende o foco e o Esc. O resto é nosso: travar o fundo e devolver o foco. */
   React.useEffect(() => {
@@ -205,11 +207,11 @@ export function Instalador({ aberto, onFechar }: { aberto: boolean; onFechar: ()
             onPointerMove={mover}
             onPointerUp={soltar}
             onPointerCancel={soltar}
-            className="select-none bg-casa-tile p-4 pt-2 pb-[calc(1rem+env(safe-area-inset-bottom))] [touch-action:none] lg:pt-4"
+            className={cx("bg-casa-tile p-4 pt-2 pb-[calc(1rem+env(safe-area-inset-bottom))] [touch-action:none] lg:pt-4", liberado && "select-none")}
           >
           <span aria-hidden="true" className="mx-auto mb-1 block h-1 w-10 rounded-[2px] bg-casa-fg-3 lg:hidden" />
           <div className="flex items-center justify-between">
-            <div className="flex min-w-0 flex-wrap gap-1">
+            <div className={cx("flex min-w-0 flex-wrap gap-1", !liberado && "invisible")}>
               <button
                 type="button"
                 data-customizar
@@ -228,7 +230,13 @@ export function Instalador({ aberto, onFechar }: { aberto: boolean; onFechar: ()
               <X className="size-4" />
             </button>
           </div>
-          {customizando ? (
+          {!liberado ? (
+            <div className="mt-1">
+              <p className="mb-3 text-casa-lg font-medium">Deixe seu e-mail para liberar o comando.</p>
+              <PedirEmail origem="instalador" onLiberar={liberar} />
+            </div>
+          ) : null}
+          {liberado && customizando ? (
           <ul className="mt-2 grid grid-cols-2 gap-x-2">
             {INDICE.map((s) => (
               <li key={s.id}>
@@ -253,6 +261,7 @@ export function Instalador({ aberto, onFechar }: { aberto: boolean; onFechar: ()
             ))}
           </ul>
           ) : null}
+          {liberado ? (
           <button
             type="button"
             data-copiar
@@ -263,6 +272,7 @@ export function Instalador({ aberto, onFechar }: { aberto: boolean; onFechar: ()
             <code className="min-w-0 flex-1 font-casa-mono text-casa-sm [overflow-wrap:anywhere]">{comando}</code>
             <Icone className="size-4 shrink-0" aria-label={done ? "Copiado" : "Copiar"} />
           </button>
+          ) : null}
           </div>
         </motion.div>
       ) : null}

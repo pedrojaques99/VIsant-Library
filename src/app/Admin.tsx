@@ -24,13 +24,15 @@ type Contagem = { tipo: string; item: string; dia: string; n: number };
 type Dados = {
   login: boolean;
   admin: boolean;
-  fontes?: Record<"contagens" | "curadoria" | "burilacao" | "lab" | "skills" | "github", boolean>;
+  fontes?: Record<"contagens" | "curadoria" | "burilacao" | "lab" | "skills" | "github" | "interesse", boolean>;
   contagens?: Contagem[];
   notas?: { item: string; nota: number; comentario: string; excluir: boolean; data: string }[];
   votos?: { duelo: string; escolha: string }[];
   veredictos?: { id: string; status: string; at: string }[];
   skills?: { nome: string; instalacoes: number }[];
   github?: { estrelas: number; forks: number; views: number | null; clones: number | null } | null;
+  emails?: { email: string; origem: string; em: string }[];
+  feedback?: { texto: string; origem: string; em: string }[];
 };
 type Periodo = "7" | "30" | "90";
 
@@ -147,6 +149,7 @@ const FONTES = [
   { chave: "lab", nome: "Vereditos do lab", falta: "Confira o Supabase do lab." },
   { chave: "skills", nome: "Instalações (skills.sh)", falta: "O skills.sh não respondeu." },
   { chave: "github", nome: "GitHub", falta: "O GitHub não respondeu." },
+  { chave: "interesse", nome: "E-mails e feedback", falta: "Rode admin/interesse.sql no Supabase do lab." },
 ] as const;
 
 export function Admin() {
@@ -364,6 +367,49 @@ export function Admin() {
               GitHub em 14 dias: {num(dados.github.views)} views, {num(dados.github.clones ?? 0)} clones.
             </p>
           ) : null}
+        </Secao>
+      </div>
+
+      <div className="grid min-w-0 gap-6 lg:grid-cols-2">
+        <Secao titulo={`E-mails (${num(dados.emails?.length ?? 0)})`} className="min-w-0">
+          {dados.emails?.length ? (
+            <>
+              <ul data-emails className="max-h-72 divide-y divide-casa-line overflow-y-auto rounded-tile bg-casa-tile">
+                {dados.emails.map((e) => (
+                  <li key={e.email} className="flex flex-wrap items-baseline justify-between gap-x-3 p-3 text-casa-sm">
+                    <span className="min-w-0 [overflow-wrap:anywhere]">{e.email}</span>
+                    <span className="text-casa-fg-3">{e.em.slice(0, 10)}</span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                data-copiar-emails
+                onClick={() => void navigator.clipboard.writeText(dados.emails!.map((e) => e.email).join("\n"))}
+                className="mt-2 inline-flex min-h-11 items-center rounded-control bg-casa-tile-2 px-4 text-casa-sm outline-none focus-visible:[box-shadow:var(--focus)]"
+              >
+                Copiar todos
+              </button>
+            </>
+          ) : (
+            <Vazio>Nenhum e-mail ainda.</Vazio>
+          )}
+        </Secao>
+        <Secao titulo={`Feedback (${num(dados.feedback?.length ?? 0)})`} className="min-w-0">
+          {dados.feedback?.length ? (
+            <ul data-feedback className="max-h-72 divide-y divide-casa-line overflow-y-auto rounded-tile bg-casa-tile">
+              {dados.feedback.map((x) => (
+                <li key={`${x.em}${x.texto.slice(0, 20)}`} className="p-3 text-casa-sm">
+                  <p className="whitespace-pre-wrap [overflow-wrap:anywhere]">{x.texto}</p>
+                  <p className="mt-1 text-casa-fg-3">
+                    {x.origem}, {x.em.slice(0, 10)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <Vazio>Nenhum feedback ainda.</Vazio>
+          )}
         </Secao>
       </div>
 

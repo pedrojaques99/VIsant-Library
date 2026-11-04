@@ -8,7 +8,7 @@
  * poder comparar 90 dias com os 90 anteriores.
  */
 
-import { listContagens, listNotas, listVeredictos, listVotos, loginReady, session, storeReady } from "./_lab-auth.js";
+import { listContagens, listFeedback, listInteresse, listNotas, listVeredictos, listVotos, loginReady, session, storeReady } from "./_lab-auth.js";
 
 declare const process: { env: Record<string, string | undefined> };
 
@@ -55,13 +55,15 @@ export async function GET(request: Request) {
   if (s.isAdmin !== true) return json({ login: true, admin: false }, 200, headers);
 
   const banco = storeReady();
-  const [contagens, notas, votos, veredictos, sk, gh] = await Promise.allSettled([
+  const [contagens, notas, votos, veredictos, sk, gh, emails, feedback] = await Promise.allSettled([
     banco ? listContagens(180) : Promise.reject(new Error("sem store")),
     banco ? listNotas() : Promise.reject(new Error("sem store")),
     banco ? listVotos() : Promise.reject(new Error("sem store")),
     banco ? listVeredictos() : Promise.reject(new Error("sem store")),
     skills(),
     github(),
+    banco ? listInteresse() : Promise.reject(new Error("sem store")),
+    banco ? listFeedback() : Promise.reject(new Error("sem store")),
   ]);
   const valor = <T,>(r: PromiseSettledResult<T>, padrao: T) => (r.status === "fulfilled" ? r.value : padrao);
 
@@ -76,6 +78,7 @@ export async function GET(request: Request) {
         lab: veredictos.status === "fulfilled",
         skills: sk.status === "fulfilled",
         github: gh.status === "fulfilled",
+        interesse: emails.status === "fulfilled",
       },
       contagens: valor(contagens, []),
       notas: valor(notas, []),
@@ -84,6 +87,8 @@ export async function GET(request: Request) {
       veredictos: valor(veredictos, []).map(({ id, status, at }) => ({ id, status, at })),
       skills: valor(sk, []),
       github: valor(gh, null),
+      emails: valor(emails, []),
+      feedback: valor(feedback, []),
     },
     200,
     headers,

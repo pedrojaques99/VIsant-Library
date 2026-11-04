@@ -13,7 +13,7 @@ const hoje = new Date().toISOString().slice(0, 10);
 const COMPLETO = {
   login: true,
   admin: true,
-  fontes: { contagens: true, curadoria: true, burilacao: true, lab: true, skills: true, github: true },
+  fontes: { contagens: true, curadoria: true, burilacao: true, lab: true, skills: true, github: true, interesse: true },
   contagens: [
     { tipo: "visita", item: "site", dia: hoje, n: 42 },
     { tipo: "pagina", item: "/skills", dia: hoje, n: 30 },
@@ -31,6 +31,8 @@ const COMPLETO = {
     { nome: "visant-design", instalacoes: 5 },
   ],
   github: { estrelas: 82, forks: 2, views: null, clones: null },
+  emails: [{ email: "pessoa@exemplo.com", origem: "como-usar", em: hoje }],
+  feedback: [{ texto: "faltou exemplo", origem: "skills", em: hoje }],
 };
 
 const comApi = (page: Page, corpo: object) =>
@@ -54,6 +56,8 @@ test("o painel abre pelo que fazer, com a evidência ao lado", async ({ page }) 
   await expect(page.locator('[data-indicador="Visitas"]')).toContainText("42");
   await expect(page.locator('[data-indicador="Estrelas"]')).toContainText("82");
   await expect(page.locator("[data-fontes-fora]")).toHaveCount(0);
+  await expect(page.locator("[data-emails]")).toContainText("pessoa@exemplo.com");
+  await expect(page.locator("[data-feedback]")).toContainText("faltou exemplo");
 });
 
 test("fonte fora do ar é dita, e nunca vira zero", async ({ page }) => {

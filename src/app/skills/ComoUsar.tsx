@@ -13,6 +13,7 @@ import { ArrowLeft, ArrowRight, Check, Copy } from "lucide-react";
 import { useCopy } from "../copy-command";
 import { Acao, cx, DUR, EASE_OUT, useMenosMovimento } from "./hub/base";
 import { COMANDO_COMPLETO } from "./hub/dock";
+import { PedirEmail, PedirFeedback, useLiberado } from "./hub/interesse";
 
 /* O llms.txt ensina o agente a ligar o registry: nada disso precisa ficar na mensagem. */
 const MENSAGEM = `Instale as skills da Visant neste projeto:
@@ -25,7 +26,7 @@ type Passo = { titulo: string; texto: string; escrita: string; copiar?: boolean 
 const PASSOS: Passo[] = [
   {
     titulo: "Envie isso para o seu agente de IA.",
-    texto: "Copie e cole na conversa. Ele instala tudo sozinho.",
+    texto: "Deixe seu e-mail, copie a mensagem e cole na conversa. Ele instala tudo sozinho.",
     escrita: MENSAGEM,
     copiar: true,
   },
@@ -69,6 +70,7 @@ export function ComoUsar() {
   const [i, setI] = React.useState(0);
   const [sentido, setSentido] = React.useState(1);
   const [copiou, setCopiou] = React.useState(false);
+  const [liberado, liberar] = useLiberado();
   const menos = useMenosMovimento();
   const total = PASSOS.length;
   const fim = i === total;
@@ -78,16 +80,21 @@ export function ComoUsar() {
   const { done, copy } = useCopy(MENSAGEM);
   const Icone = done ? Check : Copy;
 
+  /* No primeiro passo o e-mail vem antes: sem ele, seguir pularia a própria porta. */
+  const preso = i === 0 && !liberado;
+
   const andar = React.useCallback(
     (d: number) => {
+      if (d > 0 && preso) return;
       setSentido(d);
       setI((v) => Math.min(total, Math.max(0, v + d)));
     },
-    [total],
+    [total, preso],
   );
 
   React.useEffect(() => {
     const tecla = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === "ArrowRight") andar(1);
       if (e.key === "ArrowLeft") andar(-1);
     };
@@ -143,6 +150,9 @@ export function ComoUsar() {
                   Pronto.
                 </h1>
                 <p className="mt-3 text-casa-lg text-casa-fg-2 [text-wrap:pretty]">Agora é só continuar pedindo.</p>
+                <div className="mt-8">
+                  <PedirFeedback origem="como-usar" />
+                </div>
               </>
             ) : (
               <>
@@ -150,6 +160,12 @@ export function ComoUsar() {
                   {passo.titulo}
                 </h1>
                 <p className="mt-3 text-casa-lg text-casa-fg-2 [text-wrap:pretty]">{passo.texto}</p>
+                {passo.copiar && !liberado ? (
+                  <div className="mt-6">
+                    <PedirEmail origem="como-usar" onLiberar={liberar} />
+                  </div>
+                ) : (
+                <>
                 <p
                   aria-label={passo.escrita}
                   data-escrita
@@ -170,6 +186,8 @@ export function ComoUsar() {
                     {done ? "Copiado" : "Copiar"}
                   </Acao>
                 ) : null}
+                </>
+                )}
               </>
             )}
           </motion.div>
@@ -197,7 +215,7 @@ export function ComoUsar() {
           </a>
         ) : (
           /* No primeiro passo a ação é copiar: Continuar só vira a principal depois disso. */
-          <Acao secundaria={i === 0 && !copiou} onClick={() => andar(1)} data-continuar>
+          <Acao secundaria={i === 0 && !copiou} onClick={() => andar(1)} data-continuar className={preso ? "invisible" : undefined}>
             Continuar
             <ArrowRight className="size-4" aria-hidden="true" />
           </Acao>

@@ -5,6 +5,7 @@
 import { CountUp } from "../../../../registry/visant/ui/count-up";
 import { Acao, LINK } from "./base";
 import { FotoQueGira } from "./foto-que-gira";
+import { PedirFeedback } from "./interesse";
 import { ALTURA_LARGA, useLargo } from "./nucleo";
 import { Dock, Instalador } from "./dock";
 import { DemoKiller, TelasKiller } from "./demo-killer";
@@ -56,6 +57,10 @@ export function Resto({ instalando, setInstalando }: { instalando: boolean; setI
             </div>
           </div>
           <FotoQueGira largo={largo} assentada />
+        </section>
+
+        <section data-feedback-skills className="shell max-w-2xl py-8">
+          <PedirFeedback origem="skills" pergunta="O que você quer que as skills façam?" />
         </section>
 
         <Sugeridas />

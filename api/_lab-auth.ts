@@ -112,6 +112,12 @@ export const contar = (linhas: LinhaDeContagem[]) => rpc<unknown>("contagem_soma
 export const listContagens = (dias: number) =>
   rpc<{ tipo: string; item: string; dia: string; n: number }[]>("contagem_lista", { p_dias: dias });
 
+/** E-mails e feedback de quem instala as skills. Tabelas em `admin/interesse.sql`. */
+export const putInteresse = (email: string, origem: string) => rpc<unknown>("interesse_put", { p_email: email, p_origem: origem });
+export const putFeedback = (texto: string, origem: string) => rpc<unknown>("feedback_put", { p_texto: texto, p_origem: origem });
+export const listInteresse = () => rpc<{ email: string; origem: string; em: string }[]>("interesse_lista");
+export const listFeedback = () => rpc<{ texto: string; origem: string; em: string }[]>("feedback_lista");
+
 export const redirect = (to: string, headers: Headers) => {
   headers.set("location", to);
   headers.set("cache-control", "no-store");
