@@ -76,7 +76,8 @@
 .filme-palavra {
   position: absolute;
   left: var(--g);
-  bottom: calc(var(--tempo) + 8px);
+  /* A palavra termina acima da legenda: no mesmo chão, a legenda passava por baixo dela. */
+  bottom: calc(var(--tempo) + 64px);
   margin: 0;
   font-size: var(--palavra);
   font-weight: 600;

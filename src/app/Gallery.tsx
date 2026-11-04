@@ -434,7 +434,7 @@ const Ladrilho = React.memo(function Ladrilho({
 const AGENTES = [siClaude, siOpenai, siCursor];
 
 /** O comando da primeira aba do "Conectar" (Claude Code), o caminho mais curto. */
-const COMANDO_AGENTE = "claude mcp add shadcn -- npx shadcn@latest mcp";
+const COMANDO_AGENTE = "claude mcp add --transport http visant-ui https://ui.visantlabs.com/mcp";
 
 /**
  * A porta pro agente, na dobra: uma pílula com os logos empilhados.

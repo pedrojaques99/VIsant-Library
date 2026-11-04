@@ -72,6 +72,21 @@ export function RotaCatalogo({
    * e o mesmo endereço tem de significar a mesma coisa pra quem colou o link
    * no chat.
    */
+  if (focus && !peca) {
+    return (
+      <main className="shell casa min-h-[60vh] pt-24">
+        <h1 className="text-casa-xl font-medium">Essa peça não existe.</h1>
+        <button
+          type="button"
+          onClick={() => onNavegar(null, null)}
+          className="alvo-toque mt-3 cursor-pointer rounded-control text-casa-lg text-casa-fg-2 underline underline-offset-4"
+        >
+          Voltar ao catálogo
+        </button>
+      </main>
+    );
+  }
+
   if (focus && peca) {
     return (
       <React.Suspense fallback={<div className="min-h-screen" aria-busy="true" />}>

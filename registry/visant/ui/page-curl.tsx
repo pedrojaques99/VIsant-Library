@@ -352,7 +352,7 @@ export function PageCurl({
         tabIndex={0}
         aria-label={`Página ${indice + 1} de ${pages.length}. Use as setas para virar.`}
         className={cn(
-          "relative isolate aspect-[3/4] touch-none select-none rounded-[var(--r-surface)] bg-card outline-none",
+          "relative isolate aspect-[3/4] touch-pan-y select-none rounded-[var(--r-surface)] bg-card outline-none",
           width === undefined && "w-60",
           "[box-shadow:0_1px_2px_color-mix(in_oklab,black_18%,transparent),0_22px_40px_-14px_color-mix(in_oklab,black_50%,transparent)]",
           "focus-visible:[box-shadow:var(--focus)]",

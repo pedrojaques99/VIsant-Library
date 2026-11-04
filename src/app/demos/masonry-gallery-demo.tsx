@@ -11,7 +11,8 @@
  * o que já está na tela.** Sem anexar página, não havia o que provar.
  *
  * Aqui o card é a janela: `overflow-y-auto` próprio, sentinela no fim e uma
- * página de doze a cada chegada.
+ * página de doze a cada chegada. No toque a rolagem interna vira botão: um feed
+ * sem fim do tamanho do polegar não deixava a página passar da peça.
  *
  * ── "Espremido" ─────────────────────────────────────────────────────────────
  * Eram cinco colunas a 10px num palco que a grade ainda encolhe pela metade,
@@ -72,6 +73,13 @@ export default function MasonryGalleryDemo({ props }: DemoProps) {
   const sentinela = React.useRef<HTMLDivElement>(null);
 
   const fim = pecas.length >= TETO;
+  const [toque] = React.useState(() => window.matchMedia("(pointer: coarse)").matches);
+
+  const maisFotos = () => {
+    setPecas((atual) => [...atual, ...Array.from({ length: PAGINA }, (_, i) => criar(atual.length + i))]);
+    const raiz = scroller.current;
+    if (raiz) requestAnimationFrame(() => raiz.scrollTo({ top: raiz.scrollTop + raiz.clientHeight, behavior: "smooth" }));
+  };
 
   React.useEffect(() => {
     if (!ativo || fim) return;
@@ -100,9 +108,10 @@ export default function MasonryGalleryDemo({ props }: DemoProps) {
   }, [ativo, fim, pecas.length]);
 
   return (
+    <div className="relative h-full w-full">
     <div
       ref={scroller}
-      className="h-full w-full overflow-y-auto px-5 pt-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className={`h-full w-full px-5 pt-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${toque ? "overflow-hidden" : "overflow-y-auto"}`}
       style={{
         maskImage: "linear-gradient(to bottom, black calc(100% - 64px), transparent)",
         WebkitMaskImage: "linear-gradient(to bottom, black calc(100% - 64px), transparent)",
@@ -127,6 +136,16 @@ export default function MasonryGalleryDemo({ props }: DemoProps) {
       {/* A sentinela tem altura: um alvo de 0px nunca intersecta com folga em
           alguns navegadores, e o feed morre no primeiro fundo de página. */}
       <div ref={sentinela} className="h-10" aria-hidden="true" />
+    </div>
+    {toque && !fim ? (
+      <button
+        type="button"
+        onClick={maisFotos}
+        className="absolute bottom-4 left-1/2 h-14 -translate-x-1/2 whitespace-nowrap rounded-[var(--r-pill,9999px)] bg-[var(--foreground)] px-8 text-lg font-medium text-[var(--background)]"
+      >
+        Mais fotos
+      </button>
+    ) : null}
     </div>
   );
 }

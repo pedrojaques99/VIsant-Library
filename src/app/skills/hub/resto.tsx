@@ -13,6 +13,7 @@ import { DemoRefine } from "./demo-refine";
 import { DemoDesign, DemoFrontend } from "./demo-interface";
 import { DemoEditor, DemoPremiere, DemoReels } from "./demo-video";
 import { DemoMcp, DemoMetodo, DemoPreflight } from "./demo-processo";
+import { Sugeridas } from "./sugeridas";
 
 const PECAS = ["photo-compare", "segmented-control", "sim-slider", "count-up"];
 
@@ -63,6 +64,8 @@ export function Resto({ instalando, setInstalando }: { instalando: boolean; setI
             </ul>
           </div>
         </section>
+
+        <Sugeridas />
 
         <Dock onInstalar={() => setInstalando(true)} />
         <Instalador aberto={instalando} onFechar={() => setInstalando(false)} />
