@@ -142,15 +142,6 @@
           "resumo": "Desliga a entrada do usuário e devolve o VU de vitrine, só leitura."
         },
         {
-          "prop": "defaultValue",
-          "tipo": "numero",
-          "min": 0,
-          "max": 20,
-          "step": 1,
-          "padrao": 0,
-          "resumo": "Nível inicial quando o medidor é não-controlado."
-        },
-        {
           "prop": "max",
           "tipo": "numero",
           "min": 0,
@@ -167,16 +158,6 @@
           "step": 1,
           "padrao": 0,
           "resumo": null
-        },
-        {
-          "prop": "value",
-          "tipo": "numero",
-          "min": 0,
-          "max": 100,
-          "step": 1,
-          "padrao": null,
-          "resumo": "Controlado. Sem ele o medidor guarda o próprio nível.",
-          "inicial": 4
         },
         {
           "prop": "label",
@@ -2465,16 +2446,6 @@
     "componentes": {
       "SectionIntro": [
         {
-          "prop": "align",
-          "tipo": "escolha",
-          "valores": [
-            "center",
-            "start"
-          ],
-          "padrao": "center",
-          "resumo": "Atalho antigo para `layout=\"center\"` ou `layout=\"start\"`."
-        },
-        {
           "prop": "as",
           "tipo": "escolha",
           "valores": [
@@ -2490,7 +2461,6 @@
           "tipo": "escolha",
           "valores": [
             "center",
-            "start",
             "split",
             "index",
             "editorial"
@@ -3136,7 +3106,8 @@
             "none"
           ],
           "padrao": null,
-          "resumo": "Como o bloco espera: `pulse` (default), `shimmer`, `wave` ou `none`. Ver a tabela no topo."
+          "resumo": "Como o bloco espera: `pulse` (default), `shimmer`, `wave` ou `none`. Ver a tabela no topo.",
+          "inicial": "pulse"
         },
         {
           "prop": "heading",
@@ -3194,7 +3165,8 @@
             "none"
           ],
           "padrao": null,
-          "resumo": "Como o bloco espera: `pulse` (default), `shimmer`, `wave` ou `none`. Ver a tabela no topo."
+          "resumo": "Como o bloco espera: `pulse` (default), `shimmer`, `wave` ou `none`. Ver a tabela no topo.",
+          "inicial": "pulse"
         },
         {
           "prop": "delay",
@@ -3226,7 +3198,8 @@
             "none"
           ],
           "padrao": null,
-          "resumo": "Como o bloco espera: `pulse` (default), `shimmer`, `wave` ou `none`. Ver a tabela no topo."
+          "resumo": "Como o bloco espera: `pulse` (default), `shimmer`, `wave` ou `none`. Ver a tabela no topo.",
+          "inicial": "pulse"
         },
         {
           "prop": "delay",
@@ -3277,7 +3250,8 @@
             "none"
           ],
           "padrao": null,
-          "resumo": "Como o bloco espera: `pulse` (default), `shimmer`, `wave` ou `none`. Ver a tabela no topo."
+          "resumo": "Como o bloco espera: `pulse` (default), `shimmer`, `wave` ou `none`. Ver a tabela no topo.",
+          "inicial": "pulse"
         },
         {
           "prop": "meta",
@@ -3330,7 +3304,8 @@
             "none"
           ],
           "padrao": null,
-          "resumo": "Como o bloco espera: `pulse` (default), `shimmer`, `wave` ou `none`. Ver a tabela no topo."
+          "resumo": "Como o bloco espera: `pulse` (default), `shimmer`, `wave` ou `none`. Ver a tabela no topo.",
+          "inicial": "pulse"
         },
         {
           "prop": "delay",
@@ -3500,12 +3475,6 @@
           "resumo": "Elemento raiz. `a` quando o card inteiro leva a algum lugar."
         },
         {
-          "prop": "flat",
-          "tipo": "chave",
-          "padrao": false,
-          "resumo": "Desliga o giro e mantém luz e borda. Para card dentro de grade densa."
-        },
-        {
           "prop": "rest",
           "tipo": "chave",
           "padrao": true,
@@ -3556,8 +3525,8 @@
       {
         "nome": "chapado",
         "props": {
-          "flat": true,
-          "glow": 0
+          "glow": 0,
+          "tilt": 0
         }
       }
     ]
@@ -6358,17 +6327,6 @@
           ],
           "padrao": "light",
           "resumo": "Tema inicial quando não controlada."
-        },
-        {
-          "prop": "theme",
-          "tipo": "escolha",
-          "valores": [
-            "light",
-            "dark"
-          ],
-          "padrao": null,
-          "resumo": "Tema atual. Passe para controlar; omita para a chave guardar o próprio estado.",
-          "inicial": "light"
         },
         {
           "prop": "iconOnly",

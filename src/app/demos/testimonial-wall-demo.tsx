@@ -50,8 +50,8 @@ const NUMERO: TestimonialItem = {
   id: "numero",
   kind: "stat",
   tone: "brand",
-  value: "00+",
-  label: "O número que você pode provar",
+  value: "120+",
+  label: "Marcas atendidas",
 };
 const MARINA: TestimonialItem = {
   id: "marina",

@@ -122,10 +122,13 @@
       {
         "nome": "chapado",
         "props": {
-          "flat": true,
-          "glow": 0
+          "glow": 0,
+          "tilt": 0
         }
       }
+    ],
+    "esconder": [
+      "flat"
     ]
   },
   "grid-dots": {
@@ -367,6 +370,9 @@
         "min": 0,
         "max": 64,
         "step": 4
+      },
+      "motion": {
+        "inicial": "pulse"
       }
     },
     "presets": [
@@ -591,6 +597,32 @@
     "ajustes": {
       "height": {
         "unidade": "px"
+      }
+    }
+  },
+  "eclipse-switch": {
+    "esconder": [
+      "theme"
+    ]
+  },
+  "vintage-meter": {
+    "esconder": [
+      "value",
+      "defaultValue"
+    ]
+  },
+  "section-intro": {
+    "esconder": [
+      "align"
+    ],
+    "ajustes": {
+      "layout": {
+        "valores": [
+          "center",
+          "split",
+          "index",
+          "editorial"
+        ]
       }
     }
   }

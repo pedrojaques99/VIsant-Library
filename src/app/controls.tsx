@@ -367,15 +367,22 @@ export function Customize({
   const destaque = controles.filter((c) => !c.secundario);
   const extras = controles.filter((c) => c.secundario);
 
+  /* O preset vale pelo que está na tela: "subir" acende com `variant` já em `rise`, sem ter sido clicado. */
+  const noPalco = (prop: string) => {
+    if (props[prop] !== undefined) return props[prop];
+    const c = controles.find((x) => x.prop === prop);
+    return c?.inicial ?? c?.padrao;
+  };
   const presetAtivo = presets.find(
     (p) =>
-      Object.keys(p.props).length === Object.keys(props).length &&
-      Object.entries(p.props).every(([k, v]) => props[k] === v),
+      Object.keys(props).every((k) => k in p.props) &&
+      Object.entries(p.props).every(([k, v]) => noPalco(k) === v),
   );
 
   return (
     <section className={cn("flex flex-col gap-2", className)}>
-      {presets.length || sujo ? (
+      {/* A linha existe mesmo vazia: quando o Restaurar surgia, tudo descia e o próximo controle fugia do dedo. */}
+      {controles.length || presets.length ? (
         <div className="flex min-h-8 flex-wrap items-center gap-x-4 gap-y-1">
           {presets.map((p) => (
             <button

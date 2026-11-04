@@ -75,7 +75,7 @@ export default function ScrubInputDemo({ props }: DemoProps) {
             <Popover.Trigger
               aria-label="Abrir o seletor de cor"
               data-abrir-cor
-              className="relative size-8 shrink-0 rounded-[var(--r-control)] border border-border outline-none after:absolute after:-inset-1.5 focus-visible:[box-shadow:var(--focus)]"
+              className="relative size-8 shrink-0 rounded-[var(--r-control)] border border-border outline-none after:absolute after:-inset-1.5 focus-visible:[box-shadow:var(--focus)] pointer-coarse:size-11 pointer-coarse:after:inset-0"
               style={{ background: cor }}
             />
             <Popover.Portal>

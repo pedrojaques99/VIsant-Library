@@ -45,7 +45,7 @@ export interface ColorPickerProps extends Omit<React.HTMLAttributes<HTMLDivEleme
 const CONTROLE = "grid size-10 shrink-0 place-items-center rounded-[var(--r-control)] outline-none focus-visible:[box-shadow:var(--focus)] pointer-coarse:size-11";
 
 /* `String.raw`: no Tailwind `_` vira espaço, e os nomes da lib têm dois. Escapado, chega como sublinhado. */
-const ESTILO_DA_LIB = String.raw`[&_.react-colorful\_\_saturation]:rounded-[var(--r-control)]! [&_.react-colorful\_\_saturation]:border-b-0! [&_.react-colorful\_\_hue]:h-3! [&_.react-colorful\_\_hue]:flex-none! [&_.react-colorful\_\_hue]:rounded-[var(--r-pill)]! pointer-coarse:[&_.react-colorful\_\_hue]:h-5! [&_.react-colorful\_\_interactive]:touch-none! [&_.react-colorful\_\_pointer]:size-5! pointer-coarse:[&_.react-colorful\_\_pointer]:size-7!`;
+const ESTILO_DA_LIB = String.raw`[&_.react-colorful\_\_saturation]:rounded-[var(--r-control)]! [&_.react-colorful\_\_saturation]:border-b-0! [&_.react-colorful\_\_hue]:h-3! [&_.react-colorful\_\_hue]:flex-none! [&_.react-colorful\_\_hue]:rounded-[var(--r-pill)]! pointer-coarse:[&_.react-colorful\_\_hue]:h-11! [&_.react-colorful\_\_interactive]:touch-none! [&_.react-colorful\_\_pointer]:size-5! pointer-coarse:[&_.react-colorful\_\_pointer]:size-7!`;
 
 export function ColorPicker({ value, onChange, swatches, eyedropper = true, label = "Cor", className, ...props }: ColorPickerProps) {
   const [contaGotas, setContaGotas] = React.useState<ConstrutorEyeDropper | null>(null);
@@ -107,7 +107,7 @@ export function ColorPicker({ value, onChange, swatches, eyedropper = true, labe
               aria-label={cor}
               aria-pressed={cor.toLowerCase() === atual}
               onClick={() => onChange(cor)}
-              className="relative size-7 rounded-[var(--r-control)] border border-border outline-none after:absolute after:-inset-2 aria-pressed:[box-shadow:0_0_0_2px_var(--background),0_0_0_4px_var(--foreground)] focus-visible:[box-shadow:var(--focus)]"
+              className="relative size-7 rounded-[var(--r-control)] border border-border outline-none after:absolute after:-inset-2 pointer-coarse:size-11 pointer-coarse:after:inset-0 aria-pressed:[box-shadow:0_0_0_2px_var(--background),0_0_0_4px_var(--foreground)] focus-visible:[box-shadow:var(--focus)]"
               style={{ background: cor }}
             />
           ))}

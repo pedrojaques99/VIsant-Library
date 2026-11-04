@@ -20,19 +20,16 @@ import { useStageActive } from "../stage";
 import { VintageMeter } from "../../../registry/vintage/ui/vintage-meter";
 import { VintageKnob } from "../../../registry/vintage/ui/vintage-knob";
 import type { DemoProps } from "../catalog";
-import { useDonoDoKnob } from "./dono-do-knob";
 
-export default function VintageMeterDemo({ props, onKnob }: DemoProps) {
+export default function VintageMeterDemo({ props }: DemoProps) {
   const ativo = useStageActive();
   const [ganho, setGanho] = React.useState(6);
   const [nivel, setNivel] = React.useState(4);
-  const mudarNivel = useDonoDoKnob<number>("value", 4, setNivel, { props, onKnob });
-  const fixada = props?.value !== undefined;
   const manualAte = React.useRef(0);
   const t = React.useRef(0);
 
   React.useEffect(() => {
-    if (!ativo || fixada) return;
+    if (!ativo) return;
     const id = setInterval(() => {
       if (performance.now() < manualAte.current) return;
       t.current += 1;
@@ -46,7 +43,7 @@ export default function VintageMeterDemo({ props, onKnob }: DemoProps) {
       setNivel(Math.max(0, Math.min(10, (base + estalo) * (ganho / 5) * 6)));
     }, 120);
     return () => clearInterval(id);
-  }, [ativo, ganho, fixada]);
+  }, [ativo, ganho]);
 
   return (
     <div className="flex h-full w-full items-center justify-center gap-4 p-4">
@@ -58,7 +55,7 @@ export default function VintageMeterDemo({ props, onKnob }: DemoProps) {
         onChange={(v) => {
           // A mão manda: o programa só volta um segundo depois do último toque.
           manualAte.current = performance.now() + 1000;
-          mudarNivel(v);
+          setNivel(v);
         }}
       />
     </div>
