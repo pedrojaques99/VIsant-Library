@@ -602,7 +602,7 @@ function Secoes({
   className?: string;
 }) {
   return (
-    <nav aria-label="Seção" className={cn("flex flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-5", className)}>
+    <nav aria-label="Seção" className={cn("flex flex-wrap content-center items-center gap-x-3 gap-y-1 sm:gap-x-5", className)}>
       {VIEWS.map((v) => (
         <a
           key={v.value}
