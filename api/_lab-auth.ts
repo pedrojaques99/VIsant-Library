@@ -86,7 +86,9 @@ async function rpc<T>(fn: string, args: Record<string, unknown> = {}): Promise<T
   if (key!.startsWith("eyJ")) headers.authorization = `Bearer ${key}`;
   const res = await fetch(`${db}/rest/v1/rpc/${fn}`, { method: "POST", headers, body: JSON.stringify(args) });
   if (!res.ok) throw new Error(`Supabase ${res.status} em ${fn}`);
-  return res.json() as Promise<T>;
+  /* Função `returns void` responde 204 sem corpo: `res.json()` quebraria com o dado já gravado. */
+  const texto = await res.text();
+  return (texto ? JSON.parse(texto) : undefined) as T;
 }
 export const listVeredictos = () => rpc<Veredicto[]>("lab_veredictos");
 export const putVeredicto = (id: string, status: Veredicto["status"], reason: string, motivos: string[], by: string) =>

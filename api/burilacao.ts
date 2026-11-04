@@ -75,6 +75,10 @@ export async function POST(request: Request) {
   const escrita = typeof body.escrita === "string" ? body.escrita.trim().slice(0, 280) : "";
   if (escolha === "minha" && !escrita) return json({ error: "faltou a frase" }, 400, headers);
 
-  await putVoto(duelo, s.user ?? "admin", escolha, motivos, escrita);
-  return json({ ok: true }, 200, headers);
+  try {
+    await putVoto(duelo, s.user ?? "admin", escolha, motivos, escrita);
+    return json({ ok: true }, 200, headers);
+  } catch (e) {
+    return json({ error: (e as Error).message }, 502, headers);
+  }
 }
