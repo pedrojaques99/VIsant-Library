@@ -211,6 +211,8 @@ export function createFogTreeScene(
     if (on) {
       controls.domElement = canvas;
       controls.connect();
+      // O `connect` escreve `none`: de lado gira, em pé a seção não vira armadilha.
+      canvas.style.touchAction = "pan-y";
     } else {
       controls.disconnect();
       soltar();

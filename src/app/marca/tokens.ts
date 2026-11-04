@@ -44,6 +44,8 @@ export function fundoDoLogo(tinta: "clara" | "escura" | "opaco" | null, paleta: 
   return tinta === "clara" ? ordem[0] : ordem[ordem.length - 1];
 }
 
+const VARIANTES: Record<string, string> = { primary: "Principal", main: "Principal", secondary: "Secundária", icon: "Ícone" };
+
 /** O rótulo de um item do mapa `mensagem`, na ordem em que aparece. */
 export const ROTULOS_DA_MENSAGEM = [
   ["produto", "Produto"],
@@ -195,6 +197,10 @@ export interface Resultado {
   valor: string;
   /** Presente quando o resultado é uma cor: pinta a amostra da lista. */
   cor?: string;
+  /** Presente quando o resultado é um logo: a lista mostra a miniatura. */
+  miniatura?: { url: string; fundo?: string };
+  /** Frase da marca, lida em texto corrido; token e valor ficam em mono. */
+  prosa?: boolean;
   texto: string;
 }
 
@@ -228,7 +234,9 @@ export function indiceDaBusca(
   }));
   const livro = livroDa(marca);
   const doLivro = (alvo: string, nome: string, valor: string | undefined, chaves: string): Resultado[] =>
-    valor ? [{ alvo, nome, detalhe: "Essência", valor, texto: dobrar(`${nome} ${valor} ${chaves} essencia`) }] : [];
+    valor
+      ? [{ alvo, nome, detalhe: "Essência", valor, prosa: true, texto: dobrar(`${nome} ${valor} ${chaves} essencia`) }]
+      : [];
   const ditos: Resultado[] = !livro
     ? []
     : [
@@ -244,9 +252,21 @@ export function indiceDaBusca(
         ...ROTULOS_DA_MENSAGEM.flatMap(([k, rotulo]) =>
           doLivro(`livro:mensagem-${k}`, rotulo, livro.mensagem?.[k], "mensagem central"),
         ),
-        ...(livro.logos ?? []).flatMap((l, i) =>
-          doLivro(`livro:logo-${i}`, `Logo ${i + 1}`, l.url, "logo logotipo marca simbolo arquivo png"),
-        ),
+        // A URL do bucket não entra no texto nem na busca: logo se acha por nome e fundo.
+        ...(livro.logos ?? []).map((l, i): Resultado => {
+          const fundo = fundoDoLogo(l.tinta, marca?.palette ?? []);
+          const variante = VARIANTES[l.variant ?? ""] ?? l.variant ?? "Versão";
+          const onde = fundo ? `sobre ${nomeDa(fundo)}` : "fundo próprio";
+          return {
+            alvo: `livro:logo-${i}`,
+            nome: `Logo ${i + 1}`,
+            detalhe: variante,
+            valor: onde,
+            prosa: true,
+            miniatura: { url: l.url, fundo: fundo?.hex ?? l.fundo },
+            texto: dobrar(`logo ${i + 1} ${variante} ${onde} logotipo simbolo arquivo png essencia`),
+          };
+        }),
       ];
   return [...paleta, ...cores, ...resto, ...ditos];
 }

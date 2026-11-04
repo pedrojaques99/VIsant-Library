@@ -300,7 +300,7 @@ export function SlideToConfirm({
         onLostPointerCapture={soltar}
         onKeyDown={teclar}
         className={cn(
-          "absolute left-1 top-1 grid size-[var(--slide-thumb)] place-items-center rounded-[var(--r-pill)] outline-none [touch-action:none] focus-visible:[box-shadow:var(--focus)]",
+          "absolute left-1 top-1 grid size-[var(--slide-thumb)] place-items-center rounded-[var(--r-pill)] outline-none [touch-action:pan-y] focus-visible:[box-shadow:var(--focus)]",
           TROCA_COR,
           cor,
           parado ? "cursor-default" : arrastando ? "cursor-grabbing" : "cursor-grab",

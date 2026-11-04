@@ -9,9 +9,7 @@ import * as React from "react";
 import { SimSlider } from "../../../../registry/visant/ui/sim-slider";
 import { SegmentedControl } from "../../../../registry/visant/ui/segmented-control";
 import { Acao, cx, Dobra, Terminal, useAoEntrar, useMenosMovimento, useSequencia } from "./base";
-import paginaA from "./posters/landing-d.webp";
-import paginaB from "./posters/mata-d.webp";
-import paginaC from "./posters/pauta-d.webp";
+import { fotoPequena } from "./fotos";
 
 /* ---- visant-video-editor ---- */
 
@@ -156,6 +154,7 @@ export function DemoEditor() {
               seq.limpar();
               setCortado((v) => !v);
             }}
+            secundaria={cortado}
             data-acao="editor"
           >
             {cortado ? "Bruto" : "Cortar"}
@@ -218,8 +217,8 @@ function MiniSite({ deslocamento, entrou }: { deslocamento: number; entrou: bool
   return (
     <div className="absolute inset-0 overflow-hidden bg-casa-bg">
       <div style={{ transform: `translateY(${-deslocamento}%)`, transition: `transform ${FILMAGEM_MS}ms var(--ease-in-out)`, opacity: entrou ? 1 : 0 }}>
-        {[paginaA, paginaB, paginaC].map((src) => (
-          <img key={src} src={src} alt="" className="block w-full" />
+        {[fotoPequena("landing-d"), fotoPequena("mata-d"), fotoPequena("pauta-d")].map((src) => (
+          <img key={src} src={src} alt="" loading="lazy" className="block w-full" />
         ))}
       </div>
     </div>
@@ -284,13 +283,14 @@ export function DemoReels() {
             <MiniSite deslocamento={desloca} entrou={entrou} />
           </div>
         </div>
-        <ul className="flex min-h-[4.5rem] gap-2" aria-live="polite">
-          {clipes.map((c) => (
-            <li key={c} data-clipe={c} className="w-24 min-w-0 lg:w-40">
-              <span className="relative block aspect-video overflow-hidden rounded-[8px]">
-                <MiniSite deslocamento={POSE[c].fim} entrou />
+        {/* Três vagas desde o começo: o MP4 entra na dele, sem empurrar nada. */}
+        <ul className="grid grid-cols-3 gap-2" aria-live="polite">
+          {(Object.keys(CENAS) as CenaId[]).map((c) => (
+            <li key={c} data-clipe={clipes.includes(c) ? c : undefined} className="min-w-0">
+              <span className="relative block aspect-video overflow-hidden rounded-[8px] bg-casa-tile">
+                {clipes.includes(c) ? <MiniSite deslocamento={POSE[c].fim} entrou /> : null}
               </span>
-              <span className="mt-1 block truncate font-casa-mono text-casa-sm text-casa-fg-2">{CENAS[c].arquivo}.mp4</span>
+              <span className={cx("mt-1 block truncate font-casa-mono text-casa-sm", clipes.includes(c) ? "text-casa-fg-2" : "text-casa-fg-3")}>{CENAS[c].arquivo}</span>
             </li>
           ))}
         </ul>
@@ -308,7 +308,7 @@ export function DemoReels() {
             options={(Object.keys(CENAS) as CenaId[]).map((c) => ({ value: c, label: CENAS[c].rotulo }))}
             className="min-w-0 max-w-xs flex-1 [&_button]:min-h-11"
           />
-          <Acao onClick={() => gravar(cena)} disabled={gravando} data-acao="reels">
+          <Acao onClick={() => gravar(cena)} disabled={gravando} secundaria={gravando} data-acao="reels">
             Gravar
           </Acao>
         </div>
@@ -395,7 +395,7 @@ export function DemoPremiere() {
           <p className="font-casa-mono text-casa-base text-casa-fg-2" data-erro-frame>
             {errada && montado > 0 ? `${errada.src_in_f} vira ${pelaMcp(errada.src_in_f ?? 0)}` : ""}
           </p>
-          <Acao onClick={montar} data-acao="premiere">
+          <Acao secundaria onClick={montar} data-acao="premiere">
             De novo
           </Acao>
         </div>

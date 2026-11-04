@@ -81,8 +81,9 @@ export function TabelaDeProps({ name }: { name: string }) {
         <section key={c.nome}>
           <h3 className="font-casa-mono text-casa-base text-casa-fg">{c.nome}</h3>
           {c.descricao ? (
-            <p className="mt-1 max-w-2xl text-casa-base text-casa-fg-2">
-              {c.descricao.split("\n")[0]}
+            <p className="mt-1 max-w-2xl whitespace-pre-line text-casa-base text-casa-fg-2">
+              {/* O primeiro parágrafo, inteiro: o resto do JSDoc conversa com quem mantém a peça. */}
+              {c.descricao.split("\n\n")[0]}
             </p>
           ) : null}
 
@@ -115,8 +116,8 @@ export function TabelaDeProps({ name }: { name: string }) {
                       <td className="py-2.5 pr-4 font-casa-mono text-casa-sm text-casa-fg-2">
                         {p.padrao ?? "—"}
                       </td>
-                      <td className="py-2.5 text-casa-sm text-casa-fg-2">
-                        {p.descricao?.split("\n")[0] ?? ""}
+                      <td className="whitespace-pre-line py-2.5 text-casa-sm text-casa-fg-2">
+                        {p.descricao ?? ""}
                       </td>
                     </tr>
                   ))}

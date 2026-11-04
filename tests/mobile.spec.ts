@@ -76,7 +76,7 @@ test.describe("iPhone 13", () => {
       const r = document.querySelector("header")!.getBoundingClientRect();
       const filtro = document.querySelector('button[aria-label^="Filtrar"]')!.getBoundingClientRect();
       const noFiltro = document.elementFromPoint(filtro.left + filtro.width / 2, filtro.top + filtro.height / 2);
-      const aba = Array.from(document.querySelectorAll("button[aria-pressed]")).find((b) => /^Tudo/.test(b.textContent ?? ""))!;
+      const aba = Array.from(document.querySelectorAll("button[aria-pressed]")).find((b) => /^Componentes/.test(b.textContent ?? ""))!;
       const ra = aba.getBoundingClientRect();
       const naAba = document.elementFromPoint(ra.left + ra.width / 2, ra.top + ra.height / 2);
       return {
@@ -116,7 +116,7 @@ test.describe("iPhone 13", () => {
     expect(comando!.y + comando!.height).toBeLessThanOrEqual(664);
   });
 
-  test("5. a foto da grade não finge controle: o toque acorda a peça, e o nome abre a ficha", async ({ page }) => {
+  test("5. a foto de GPU não finge controle: o toque acorda a peça, e o nome abre a ficha", async ({ page }) => {
     await abrir(page, "/");
     const card = page.locator('article[data-name="book-3d"]');
     await expect(card).not.toHaveAttribute("data-viva", "");
@@ -236,5 +236,171 @@ test.describe("360 com marca de nome longo", () => {
       expect(entrar.width).toBeGreaterThan(40);
       expect(await alvosPequenos(page), `${marca}: alvos`).toEqual([]);
     }
+  });
+});
+
+/*
+ * O gesto no dedo, por CDP: passa pelo reconhecedor de gesto da tela, então a
+ * rolagem e o `touch-action` são os de verdade. `npm run check:toque` mede o acervo
+ * inteiro; aqui fica a amostra que trava cada regra, em dez peças variadas.
+ */
+test.describe("gesto no dedo", () => {
+  test.use({ ...IPHONE, viewport: { width: 390, height: 844 } });
+
+  const dedo = async (page: Page) => {
+    const cdp = await page.context().newCDPSession(page);
+    const envia = (type: "touchStart" | "touchMove" | "touchEnd", x = 0, y = 0) =>
+      cdp.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x, y }] });
+    return {
+      arrastar: async (x0: number, y0: number, x1: number, y1: number, segurar = 30, antesDeSoltar?: () => Promise<void>) => {
+        await envia("touchStart", x0, y0);
+        await page.waitForTimeout(segurar);
+        for (let i = 1; i <= 14; i++) {
+          await envia("touchMove", x0 + ((x1 - x0) * i) / 14, y0 + ((y1 - y0) * i) / 14);
+          await page.waitForTimeout(16);
+        }
+        await antesDeSoltar?.();
+        await envia("touchEnd");
+        await page.waitForTimeout(450);
+      },
+    };
+  };
+
+  const FICHA = "[data-ficha] [data-palco]";
+  const caixa = async (page: Page, seletor: string) => (await page.locator(seletor).first().boundingBox())!;
+  const rolagem = (page: Page) => page.evaluate(() => window.scrollY);
+
+  /** De lado é da peça: `aria-valuenow` anda. Em pé é da página: rola, e a peça não anda. */
+  for (const nome of ["slide-to-confirm", "elastic-slider", "vintage-slider", "voice-note"]) {
+    test(`${nome}: de lado move a peça, em pé rola a página`, async ({ page }) => {
+      await abrir(page, `/c/${nome}`);
+      await page.waitForTimeout(800);
+      const seletor = `${FICHA} [role="slider"]`;
+      const b = await caixa(page, seletor);
+      const cx = b.x + b.width / 2;
+      const cy = b.y + b.height / 2;
+      const d = await dedo(page);
+
+      /* O polegar do slide-to-confirm só escreve o valor ao soltar: vale o valor ou a posição. */
+      const estado = async () => {
+        const el = page.locator(seletor).first();
+        return `${await el.getAttribute("aria-valuenow")}|${Math.round((await el.boundingBox())!.x)}`;
+      };
+      const antes = await estado();
+      let durante = antes;
+      await d.arrastar(cx, cy, cx + (cx < 195 ? 90 : -90), cy, 30, async () => {
+        durante = await estado();
+      });
+      expect(durante, "a peça andou com o dedo").not.toBe(antes);
+      expect(await rolagem(page), "arrastar de lado não rola").toBe(0);
+
+      await d.arrastar(cx, cy, cx, cy - 200);
+      expect(await rolagem(page), "em pé a página rola").toBeGreaterThan(60);
+    });
+  }
+
+  for (const nome of ["vintage-knob", "folding-bill"]) {
+    test(`${nome}: a peça vertical segura o arrasto em pé`, async ({ page }) => {
+      await abrir(page, `/c/${nome}`);
+      await page.waitForTimeout(800);
+      const alvo = page.locator(`${FICHA} [role="slider"], ${FICHA} [role="button"]`).first();
+      const b = (await alvo.boundingBox())!;
+      const antes = await page.locator(FICHA).screenshot();
+      const d = await dedo(page);
+      let durante: Buffer = antes;
+      await d.arrastar(b.x + b.width / 2, b.y + b.height / 2, b.x + b.width / 2, b.y + b.height / 2 - 60, 30, async () => {
+        durante = await page.locator(FICHA).screenshot();
+      });
+      expect(await rolagem(page), "a página fica").toBeLessThan(10);
+      expect(durante.equals(antes), "a peça mudou").toBe(false);
+    });
+  }
+
+  test("card-stack: de lado lança o cartão, em pé rola a página", async ({ page }) => {
+    await abrir(page, "/c/card-stack");
+    await page.waitForTimeout(800);
+    const seletor = `${FICHA} [aria-roledescription="card"]`;
+    const b = await caixa(page, seletor);
+    const rotulo = await page.locator(seletor).getAttribute("aria-label");
+    const d = await dedo(page);
+    await d.arrastar(b.x + b.width / 2, b.y + b.height / 2, b.x + b.width / 2, b.y + b.height / 2 - 200);
+    expect(await rolagem(page)).toBeGreaterThan(60);
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+    await page.waitForTimeout(200);
+    await d.arrastar(b.x + b.width / 2, b.y + b.height / 2, b.x + b.width + 80, b.y + b.height / 2);
+    await page.waitForTimeout(500);
+    expect(await page.locator(seletor).getAttribute("aria-label"), "o de cima foi pro fundo").not.toBe(rotulo);
+  });
+
+  test("pull-to-refresh: o dedo puxa o painel até o fim do gesto", async ({ page }) => {
+    await abrir(page, "/c/pull-to-refresh");
+    await page.waitForTimeout(800);
+    const seletor = `${FICHA} [role="region"]`;
+    const b = await caixa(page, seletor);
+    const d = await dedo(page);
+    let altura = 0;
+    await d.arrastar(b.x + b.width / 2, b.y + 30, b.x + b.width / 2, b.y + 170, 30, async () => {
+      altura = (await caixa(page, seletor)).height;
+    });
+    expect(altura, "o painel desce com o dedo: já morreu aos 10px por captura dupla").toBeGreaterThan(b.height + 30);
+  });
+
+  test("kanban: legível na ficha, e o cartão levantado não salta de tamanho", async ({ page }) => {
+    await abrir(page, "/c/kanban");
+    await page.waitForTimeout(1500);
+    const palco = await caixa(page, FICHA);
+    const cartao = await caixa(page, `${FICHA} .kanban-card`);
+    expect(palco.width, "usa a largura do celular").toBeGreaterThan(340);
+    expect(cartao.width, "sem miniatura").toBeGreaterThan(280);
+    expect(cartao.height, "alvo de dedo").toBeGreaterThanOrEqual(44);
+
+    const d = await dedo(page);
+    let voando: { width: number; height: number; x: number; y: number } | null = null;
+    const cx = cartao.x + cartao.width / 2;
+    const cy = cartao.y + cartao.height / 2;
+    await d.arrastar(cx, cy, cx, cy + 100, 330, async () => {
+      voando = await page.locator(".kanban-card-overlay").boundingBox();
+    });
+    expect(voando, "o fantasma existe").not.toBeNull();
+    expect(Math.abs(voando!.width - cartao.width), "mesma largura").toBeLessThan(3);
+    expect(Math.abs(voando!.y + voando!.height / 2 - (cy + 100)), "acompanha o dedo").toBeLessThan(30);
+  });
+
+  test("grade do celular: peça sem GPU já está viva e o primeiro toque é dela", async ({ page }) => {
+    await abrir(page, "/catalogo/controles");
+    const card = page.locator('article[data-name="elastic-slider"]');
+    await card.scrollIntoViewIfNeeded();
+    await expect(card, "acorda ao assentar na tela").toHaveAttribute("data-viva", "", { timeout: 4000 });
+    await page.waitForTimeout(500);
+    const slider = card.locator('[role="slider"]').first();
+    const b = (await slider.boundingBox())!;
+    const antes = await slider.getAttribute("aria-valuenow");
+    const d = await dedo(page);
+    await d.arrastar(b.x + b.width / 2, b.y + b.height / 2, b.x + b.width / 2 + 60, b.y + b.height / 2);
+    expect(await slider.getAttribute("aria-valuenow"), "o arrasto entrou").not.toBe(antes);
+    expect(new URL(page.url()).pathname, "continua na grade").toBe("/catalogo/controles");
+  });
+
+  test("grade do celular: foto de GPU avisa, e dois toques nela não abrem a ficha", async ({ page }) => {
+    await abrir(page, "/");
+    const card = page.locator('article[data-name="book-3d"]');
+    await card.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+    await expect(card.locator("svg.lucide-play"), "a foto diz que é foto").toBeVisible();
+    const b = (await card.locator("[data-palco]").boundingBox())!;
+    await page.touchscreen.tap(b.x + b.width / 2, b.y + b.height / 2);
+    await page.touchscreen.tap(b.x + b.width / 2, b.y + b.height / 2);
+    await page.waitForTimeout(300);
+    expect(new URL(page.url()).pathname, "continua na grade").toBe("/");
+    await expect(card).toHaveAttribute("data-viva", "");
+  });
+
+  test("a grade do celular respeita o teto de vivas", async ({ page }) => {
+    await abrir(page, "/catalogo/controles?nivel=baixo");
+    for (let y = 0; y < 6; y++) {
+      await page.evaluate(() => window.scrollBy(0, 500));
+      await page.waitForTimeout(350);
+    }
+    expect(await page.locator("article[data-viva]").count()).toBeLessThanOrEqual(3);
   });
 });

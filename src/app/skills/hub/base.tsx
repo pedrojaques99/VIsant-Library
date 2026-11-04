@@ -14,6 +14,9 @@ import { CircleHelp, X } from "lucide-react";
 import { redeLenta } from "@/lib/rede";
 import skills from "../skills.generated.json";
 
+export { ALTURA_DOBRA, ALTURA_LARGA, PaginaCtx, useLargo } from "./nucleo";
+import { ALTURA_LARGA, PaginaCtx } from "./nucleo";
+
 export const SKILLS = skills as { nome: string; instalar: string }[];
 
 /**
@@ -35,9 +38,6 @@ export const ANIMA_OPACIDADE =
 export const DUR = { base: 0.2 };
 export const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 
-/** Altura da dobra: a tela menos o cabeçalho do App e o rodapé fixo. */
-export const ALTURA_DOBRA = "min-h-[calc(100svh-9.5rem)] lg:min-h-[calc(100svh-7.5rem)]";
-
 /** Pede menos movimento? Lido no efeito, porque a página é hidratada no cliente. */
 export function useMenosMovimento() {
   const [menos, setMenos] = React.useState(false);
@@ -49,19 +49,6 @@ export function useMenosMovimento() {
     return () => mq.removeEventListener("change", ouvir);
   }, []);
   return menos;
-}
-
-/** Tela larga? Só para o que a CSS não alcança, como o viewBox de um gráfico. */
-export function useLargo() {
-  const [largo, setLargo] = React.useState(false);
-  React.useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    setLargo(mq.matches);
-    const ouvir = () => setLargo(mq.matches);
-    mq.addEventListener("change", ouvir);
-    return () => mq.removeEventListener("change", ouvir);
-  }, []);
-  return largo;
 }
 
 /** Timers de uma sequência de demo: morrem junto com a demo ou com a próxima rodada. */
@@ -108,22 +95,22 @@ export function useAoEntrar<T extends Element>(fn: () => void, limiar = 0.4) {
 
 /* ---- a página: qual folha está aberta e o instalador ---- */
 
-export const PaginaCtx = React.createContext<{
-  aberta: string | null;
-  setAberta: (n: string | null) => void;
-  instalar: () => void;
-}>({ aberta: null, setAberta: () => {}, instalar: () => {} });
-
 /** A ação da dobra. Uma por demo, 44px. */
-export function Acao({ className, children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+export function Acao({
+  className,
+  children,
+  secundaria,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { secundaria?: boolean }) {
   return (
     <button
       type="button"
       {...props}
       className={cx(
-        "inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-control bg-casa-cta px-5 text-casa-base font-medium text-casa-cta-fg outline-none",
+        "inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-control px-5 text-casa-base font-medium outline-none",
+        secundaria ? "bg-casa-tile-2 text-casa-fg" : "bg-casa-cta text-casa-cta-fg",
         "transition-[transform,opacity] [transition-duration:var(--dur-press)] [transition-timing-function:var(--ease-out)]",
-        "active:scale-[0.97] focus-visible:[box-shadow:var(--focus)] disabled:pointer-events-none disabled:opacity-50",
+        "active:scale-[0.97] focus-visible:[box-shadow:var(--focus)] disabled:pointer-events-none",
         className,
       )}
     >
@@ -192,7 +179,7 @@ export function Dobra({
 
   return (
     <section ref={ref} id={nome} data-dobra={nome} style={{ paddingBottom: folga }} className={cx("scroll-mt-[5.75rem] lg:scroll-mt-14", faixa && "bg-casa-tile")}>
-      <div className={cx("shell flex min-w-0 flex-col py-4 lg:py-8", ALTURA_DOBRA)}>
+      <div className={cx("shell flex min-w-0 flex-col py-6 lg:py-8", ALTURA_LARGA)}>
         <header className="flex min-h-11 items-center justify-between gap-3">
           <h2 className="min-w-0 truncate text-[clamp(1.5rem,3vw,2.25rem)] font-medium tracking-[-0.02em]">{nome}</h2>
           <button

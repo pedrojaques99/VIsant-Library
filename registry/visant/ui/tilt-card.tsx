@@ -38,8 +38,9 @@ import { cn } from "@/lib/utils";
  * 4. **A sombra anda contra a inclinação.** Um card que vira sem a sombra
  *    acompanhar parece decalque girando; a sombra deslocada é o que diz
  *    "levantou do chão".
- * 5. **Só onde há ponteiro fino.** No toque não existe hover: o card ficaria
- *    preso inclinado no último ponto tocado.
+ * 5. **No toque inclina sob o dedo.** Enquanto o dedo está no card ele segue, e
+ *    ao soltar volta deitado (`pointerleave` chega no fim do toque). Em pé a
+ *    página continua rolando (`touch-pan-y`).
  *
  * `prefers-reduced-motion`: o card fica plano; o conteúdo é o mesmo.
  */
@@ -65,22 +66,19 @@ export function TiltCard({
   className,
   children,
   style,
+  onPointerDown,
   onPointerMove,
   onPointerLeave,
   ...props
 }: TiltCardProps) {
   const reduzir = useReducedMotion();
-  const [fino, setFino] = React.useState(false);
+  const ativo = !reduzir;
 
-  React.useEffect(() => {
-    try {
-      setFino(window.matchMedia("(hover: hover) and (pointer: fine)").matches);
-    } catch {
-      setFino(false);
-    }
-  }, []);
-
-  const ativo = fino && !reduzir;
+  const seguir = (e: React.PointerEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    px.set(((e.clientX - r.left) / r.width) * 2 - 1);
+    py.set(((e.clientY - r.top) / r.height) * 2 - 1);
+  };
 
   // Ponteiro dentro do card, -1…1 em cada eixo; 0 é repouso.
   const px = useMotionValue(0);
@@ -112,17 +110,18 @@ export function TiltCard({
         // Sombra é ausência de luz nos dois temas: no claro, tinta do texto;
         // no escuro, o fundo da página, que é o tom mais fundo que existe.
         // Com `--foreground` no escuro ela virava um halo claro em volta do card.
-        "relative [--sombra-inclinada:color-mix(in_oklab,var(--foreground)_28%,transparent)]",
+        "relative touch-pan-y [--sombra-inclinada:color-mix(in_oklab,var(--foreground)_28%,transparent)]",
         "dark:[--sombra-inclinada:color-mix(in_oklab,var(--background)_85%,transparent)]",
         className,
       )}
       style={{ perspective, ...style }}
+      onPointerDown={(e) => {
+        onPointerDown?.(e);
+        if (ativo) seguir(e);
+      }}
       onPointerMove={(e) => {
         onPointerMove?.(e);
-        if (!ativo || e.pointerType !== "mouse") return;
-        const r = e.currentTarget.getBoundingClientRect();
-        px.set(((e.clientX - r.left) / r.width) * 2 - 1);
-        py.set(((e.clientY - r.top) / r.height) * 2 - 1);
+        if (ativo) seguir(e);
       }}
       onPointerLeave={(e) => {
         onPointerLeave?.(e);

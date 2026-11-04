@@ -178,3 +178,27 @@ export function fundoDoSolo(params: URLSearchParams): string | undefined {
   // Só cor literal: aceitar qualquer string aqui seria deixar a URL escrever CSS.
   return bg && /^#[0-9a-fA-F]{3,8}$/.test(bg) ? bg : undefined;
 }
+
+/** A rota `?solo=1` inteira: a casca não sabe nada de peça, e por isso nem o catálogo baixa. */
+export function RotaSolo({ params }: { params: URLSearchParams }) {
+  const nome = decodeURIComponent(window.location.pathname.split("/").filter(Boolean)[1] ?? "");
+  const fundo = fundoDoSolo(params);
+  if (params.get("caixa") === "1") {
+    // A captura no enquadramento do palco: sem fundo nenhum, nem o da casa.
+    document.documentElement.style.background = "transparent";
+    document.body.style.background = "transparent";
+    return (
+      <div className="palco" style={{ background: "transparent" }}>
+        <Solo name={nome} props={propsDaQuery(params)} caixa />
+      </div>
+    );
+  }
+  return (
+    <div
+      className={fundo ? "text-foreground" : "bg-background text-foreground"}
+      style={{ fontFamily: "var(--font-sans, ui-sans-serif, system-ui)", background: fundo }}
+    >
+      <Solo name={nome} props={propsDaQuery(params)} />
+    </div>
+  );
+}

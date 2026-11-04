@@ -244,7 +244,7 @@ export function VoiceNote({
           e.preventDefault();
           buscar(alvo);
         }}
-        className="relative h-7 min-w-0 flex-1 cursor-pointer touch-none rounded-[var(--r-control)] outline-none focus-visible:[box-shadow:var(--focus)]"
+        className="relative h-7 min-w-0 flex-1 cursor-pointer touch-pan-y rounded-[var(--r-control)] outline-none focus-visible:[box-shadow:var(--focus)]"
       >
         <span aria-hidden="true" className="absolute inset-0 opacity-30">
           <Barras peaks={peaks} cor="bg-muted-foreground" />

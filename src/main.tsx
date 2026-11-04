@@ -11,8 +11,6 @@ import { createRoot } from "react-dom/client";
  * está no disco quando o primeiro pixel é desenhado.
  */
 import "@fontsource-variable/manrope";
-import "@fontsource/oswald/400.css";
-import "@fontsource/oswald/500.css";
 
 /*
  * O tema antes do primeiro quadro. A casa é escura por padrão; só `?solo=1`

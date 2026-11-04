@@ -48,6 +48,8 @@ export const CASCA = [
   "src/app/avaliacao.tsx",
   "src/app/Lab.tsx",
   "src/app/Docs.tsx",
+  "src/app/rodape.tsx",
+  "src/app/marcas-na-dobra.tsx",
   "src/app/ShaderLab.tsx",
 ];
 

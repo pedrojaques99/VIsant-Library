@@ -78,9 +78,16 @@ export default defineConfig({
          * demo do kanban, que é justamente quem o usa. Deixando o Rollup decidir,
          * ele cai dentro do chunk da demo e só é buscado quando o card aparece.
          */
-        manualChunks: {
-          react: ['react', 'react-dom'],
-          motion: ['framer-motion'],
+        /*
+         * Por função, e não pela forma de objeto: `{ motion: ['framer-motion'] }` puxa junto o que
+         * o pacote importa, e o núcleo do React caía no chunk `motion`. Como todo mundo importa
+         * React, os 52 KB do motion desciam em toda rota, inclusive nas que não animam nada
+         * (PLANO-PERFORMANCE.md, rodada 6).
+         */
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+          if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) return 'react'
+          if (/[\\/]node_modules[\\/](framer-motion|motion|motion-dom|motion-utils)[\\/]/.test(id)) return 'motion'
         },
       },
     },

@@ -13,6 +13,16 @@ Applying A instincts to a B screen is the most expensive Visant frontend mistake
 
 | File | Surface (A/B/C) | Business variable it moves | Notes |
 |---|---|---|---|
+| src/app/busca-gatilho.tsx | A | instalação da peça | casca do catálogo |
+| src/app/conectar-sinal.tsx | A | instalação da peça | casca do catálogo |
+| src/app/marcas-na-dobra.tsx | A | instalação da peça | casca do catálogo |
+| src/app/rodape.tsx | A | instalação da peça | casca do catálogo |
+| src/app/RotaCatalogo.tsx | A | instalação da peça | casca do catálogo |
+| src/app/skills/carro-chefe/banca-linhas.tsx | A | instalação de skill | landing |
+| src/app/skills/carro-chefe/secoes-abaixo.tsx | A | instalação de skill | landing |
+| src/app/skills/hub/fotos-da-abertura.tsx | A | instalação de skill | landing |
+| src/app/skills/hub/resto.tsx | A | instalação de skill | landing |
+| src/app/som-da-casa.tsx | B | nenhuma direta | som opcional da casca |
 | src/app/App.tsx | A | instalação da peça | casca do catálogo |
 | src/app/avaliacao.tsx | B | tarefa concluída | interno ou agente |
 | src/app/BrandStudio.tsx | B | valores copiados por sessão | brand book |
@@ -296,6 +306,9 @@ were the dev server lying, not the screen.
 - /skills/filme, iPhone 13, 320 e 1440, Chrome, Firefox e WebKit: scrubbing nas duas direções; marcas com 44px; falha de vídeo cai no quadro certo.
 - /skills/killer, iPhone 13, 768 e 1440: saída real do scan nos 64 estados; GATE OPEN no fim; reduced-motion testado.
 - Rede: Slow 4G com CPU 4x em build local, h1 em cerca de 0,5 s nas 5 rotas medidas.
+
+- Portão de toque (`npm run check:toque`): perfil iPhone 13 em Chromium, gestos sintéticos, 161 peças em ficha e grade; sem aparelho físico.
+- Cartão da grade em repouso no desktop: etiqueta em hover, conferida em 1440.
 
 ## Not checked
 

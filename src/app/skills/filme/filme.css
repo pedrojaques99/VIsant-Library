@@ -586,3 +586,23 @@
   display: grid;
   gap: 8px;
 }
+
+/*
+ * A abertura antes do GSAP: o mesmo estado que a linha do tempo põe no tempo 0, escrito em CSS.
+ * Sem isto a rota só pintava depois de baixar os 45 KB dele (e o palco nascia todo escondido).
+ */
+.filme:not([data-rodando]) .filme-cena:first-child {
+  visibility: visible;
+}
+.filme:not([data-rodando]) .filme-cena:first-child :is(.filme-legenda, .filme-linha, [data-depois]) {
+  opacity: 0;
+}
+.filme:not([data-rodando])[data-vertical="true"] .filme-cena:first-child .filme-depois {
+  transform: translateY(100%);
+}
+.filme:not([data-rodando])[data-vertical="false"] .filme-cena:first-child .filme-depois {
+  clip-path: inset(0 100% 0 0);
+}
+.filme:not([data-rodando])[data-vertical="false"] .filme-cena:first-child .filme-imagem {
+  transform: translateX(23%) scale(0.56);
+}

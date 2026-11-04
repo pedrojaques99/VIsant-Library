@@ -438,7 +438,8 @@ export function Carousel3D({
       <div
         ref={rootRef}
         className={cn(
-          "relative h-[50vh] min-h-[350px] w-full cursor-grab active:cursor-grabbing [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]",
+          // `!`: o OrbitControls escreve `touch-action: none` em linha. De lado gira, em pé rola a página.
+          "relative h-[50vh] min-h-[350px] w-full cursor-grab active:cursor-grabbing [&_*]:[touch-action:pan-y]! [touch-action:pan-y] [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]",
           className,
         )}
       >

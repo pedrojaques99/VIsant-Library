@@ -31,20 +31,23 @@ function BrandMark({ brand, size = 28 }: { brand: BrandSummary; size?: number })
   const [broken, setBroken] = React.useState(false);
   const url = brand.logo?.thumbnailUrl ?? brand.logo?.url;
   const tint = brand.preview.light.brand ?? brand.palette[0]?.hex ?? "var(--muted)";
+  // O arquivo do logo é fixo e o tema muda: sobre o fundo da própria paleta ele
+  // nunca some, em tema nenhum, e não precisa de filtro alterando a marca.
+  const placa = brand.palette.find((c) => c.role === "background")?.hex ?? tint;
+  const comLogo = Boolean(url) && !broken;
 
   return (
     <span
       className="relative grid shrink-0 place-items-center overflow-hidden rounded-[var(--r-control,0.5rem)] border border-border/60"
-      style={{ width: size, height: size, background: tint }}
+      style={{ width: size, height: size, background: comLogo ? placa : tint }}
     >
-      {url && !broken ? (
+      {comLogo ? (
         <img
           src={url}
           alt=""
           loading="lazy"
           onError={() => setBroken(true)}
           className="h-full w-full object-contain p-[3px]"
-          style={{ background: "var(--card)" }}
         />
       ) : (
         <span

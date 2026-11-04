@@ -325,3 +325,13 @@ if (!DRY && !has("--no-perf")) {
     console.log(c.yellow("⚠ a produção saiu do orçamento de performance. O deploy está no ar; veja acima o que passou."));
   }
 }
+
+/* O que um agente enxerga, na produção. Avisa, não mata: o deploy já aconteceu. */
+if (!DRY) {
+  say("Portas de agente (produção)");
+  try {
+    execSync(`node scripts/agentes-check.mjs ${base}`, { cwd: ROOT, stdio: "inherit" });
+  } catch {
+    console.log(c.yellow("⚠ alguma porta de agente falhou em produção. O deploy está no ar; veja acima o que passou."));
+  }
+}

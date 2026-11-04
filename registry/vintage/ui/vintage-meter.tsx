@@ -199,11 +199,10 @@ export function VintageMeter({
         <div
           ref={faceRef}
           className={cn(
-            // `touch-none`: sem isso o arraste na face vira rolagem da página no
-            // celular e o medidor não anda.
+            // `touch-pan-y`: a agulha anda de lado, e em pé a página continua rolando.
             "absolute bottom-0 left-1/2 -translate-x-1/2 w-[150px] h-[75px] rounded-[4px] outline-none",
             "focus-visible:[box-shadow:var(--focus,0_0_0_2px_var(--vintage-value))]",
-            interativo && "touch-none cursor-grab active:cursor-grabbing"
+            interativo && "touch-pan-y cursor-grab active:cursor-grabbing"
           )}
           role={interativo ? "slider" : undefined}
           tabIndex={interativo ? 0 : undefined}

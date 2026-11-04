@@ -166,9 +166,12 @@ async function assentar(pagina, recorte) {
  * De quebra devolve a `tinta`: a fração de pixels não transparentes. É como o
  * script descobre sozinho que uma peça saiu vazia.
  */
-async function codificar(encoder, pngBase64, comoPng) {
+/* Grão de filme não comprime: a 0.9 a fog-hero dava 170 KB, e é a terceira foto da grade no celular. */
+const QUALIDADE = { "fog-hero": 0.45 };
+
+async function codificar(encoder, pngBase64, comoPng, qualidade = 0.9) {
   return encoder.evaluate(
-    async ({ pngBase64, comoPng }) => {
+    async ({ pngBase64, comoPng, qualidade }) => {
       const bmp = await createImageBitmap(
         await (await fetch(`data:image/png;base64,${pngBase64}`)).blob(),
       );
@@ -185,14 +188,14 @@ async function codificar(encoder, pngBase64, comoPng) {
       }
 
       const blob = await tela.convertToBlob(
-        comoPng ? { type: "image/png" } : { type: "image/webp", quality: 0.9 },
+        comoPng ? { type: "image/png" } : { type: "image/webp", quality: qualidade },
       );
       const buf = new Uint8Array(await blob.arrayBuffer());
       let bin = "";
       for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
       return { dados: btoa(bin), tinta: pintados / olhados };
     },
-    { pngBase64, comoPng },
+    { pngBase64, comoPng, qualidade },
   );
 }
 
@@ -280,7 +283,7 @@ for (const peca of alvos) {
       const caixa = { x: 0, y: 0, width: peca.w, height: peca.h };
       const png = await assentar(pagina, caixa);
 
-      const { dados, tinta } = await codificar(encoder, png.toString("base64"), SO_PNG);
+      const { dados, tinta } = await codificar(encoder, png.toString("base64"), SO_PNG, QUALIDADE[peca.name]);
       const bytes = Buffer.from(dados, "base64");
       if (bytes.length < 512) throw new Error(`arquivo degenerado (${bytes.length} bytes)`);
 

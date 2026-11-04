@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { useKnobDrag } from "@/hooks/use-knob-drag";
+import { KNOB_TOUCH_ACTION, useKnobDrag } from "@/hooks/use-knob-drag";
 
 interface VintageKnobProps {
   label?: string;
@@ -220,7 +220,7 @@ export function VintageKnob({
     currentValue,
     rotation,
     isDragging,
-    handleMouseDown,
+    handlePointerDown,
     handleDoubleClick,
     handleWheel,
     handleKeyDown,
@@ -246,14 +246,14 @@ export function VintageKnob({
       aria-valuenow={Number(currentValue.toFixed(2))}
       aria-valuetext={leitura}
       onKeyDown={handleKeyDown}
-      onMouseDown={handleMouseDown}
+      onPointerDown={handlePointerDown}
       onDoubleClick={handleDoubleClick}
       onWheel={handleWheel}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       title={`${label}: ${leitura}
 arraste ↕ · shift = fino · roda · duplo clique = centro`}
-      style={{ cursor: isDragging ? "grabbing" : "grab" }}
+      style={{ cursor: isDragging ? "grabbing" : "grab", touchAction: KNOB_TOUCH_ACTION }}
     >
       {/* Sem brilho no hover: luz é da sala, não do knob. Quem responde à mão
           é o rótulo gravado, que acende. */}

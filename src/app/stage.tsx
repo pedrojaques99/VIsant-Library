@@ -227,7 +227,7 @@ export function FitStage({
   }
 
   return (
-    <div ref={outer} className={className} style={{ height: naturalH * scale }}>
+    <div ref={outer} className={className} style={{ height: naturalH * scale, touchAction: GESTO_DO_PALCO }}>
       <div
         ref={inner}
         style={{
@@ -284,6 +284,18 @@ export function FitStage({
  * A captura (`Solo` com `?caixa=1`) usa o MESMO objeto: se os dois divergirem,
  * a foto sai fora de registro com a peça viva e o crossfade volta a pular.
  */
+/*
+ * Regra de gesto do palco: arrasto de lado é da peça, arrasto em pé é da página.
+ *
+ * Com o `touch-action` padrão o navegador decide nos primeiros pixels se o dedo
+ * é dele, e quando decide a peça recebe `pointercancel` no meio do gesto. A
+ * página aqui nunca rola de lado, então não há o que perder. Herança de
+ * `touch-action` é interseção até o scroller mais próximo: trilho com rolagem
+ * própria continua rolando, e peça que precisa do eixo vertical (`touch-none`,
+ * `pan-x`) continua podendo segurá-lo. A pinça fica: é acessibilidade.
+ */
+const GESTO_DO_PALCO = "pan-y pinch-zoom";
+
 export const CAIXA_DO_PALCO: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
@@ -328,7 +340,7 @@ export function PalcoFixo({
        * que mantém a página de oitenta e duas peças leve. */
       data-palco=""
       className={className}
-      style={{ ...style, aspectRatio: String(ratio), position: "relative", overflow: "hidden" }}
+      style={{ touchAction: GESTO_DO_PALCO, ...style, aspectRatio: String(ratio), position: "relative", overflow: "hidden" }}
     >
       <div
         style={{

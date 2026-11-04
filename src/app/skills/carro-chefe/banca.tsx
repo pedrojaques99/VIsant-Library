@@ -9,14 +9,21 @@
  */
 
 import * as React from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useDobraAssentada } from "@/lib/rede";
 import { ArrowDown, RotateCcw, Wrench } from "lucide-react";
-import { DUR, EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { Aba, Icone } from "../../casa-ui";
-import { TextMorph } from "../../../../registry/visant/ui/text-morph";
 import scan from "./scan.generated.json";
 import { ALVOS, cartao, chaveDe, fonte, type Conserto, type No } from "./reu";
+
+/*
+ * As linhas do terminal deslizam quando um conserto as reordena. Isso é o único motion da primeira
+ * dobra da página: as linhas nascem paradas e ganham o movimento quando os 50 KB dele chegarem.
+ */
+const TextMorph = React.lazy(() =>
+  import("../../../../registry/visant/ui/text-morph").then((m) => ({ default: m.TextMorph })),
+);
+const LinhasComMovimento = React.lazy(() => import("./banca-linhas").then((m) => ({ default: m.LinhasComMovimento })));
 
 type Gravacao = { codigo: number; linhas: number[] };
 const GRAVADO = scan as unknown as {
@@ -77,7 +84,13 @@ export function CartaoReu({
   className?: string;
 }) {
   const palco = React.useRef<HTMLDivElement>(null);
-  const [pos, setPos] = React.useState<{ x: number; y: number } | null>(null);
+  const [pos, setPos] = React.useState<{
+    fioX: number;
+    rotuloY: number;
+    rotuloBase: number;
+    alvoX: number;
+    alvoY: number;
+  } | null>(null);
 
   React.useLayoutEffect(() => {
     const raiz = palco.current;
@@ -90,7 +103,18 @@ export function CartaoReu({
       if (!alvo) return setPos(null);
       const a = alvo.getBoundingClientRect();
       const r = raiz.getBoundingClientRect();
-      setPos({ x: Math.max(8, a.left - r.left), y: Math.max(4, a.top - r.top - 24) });
+      const c = (raiz.querySelector('[data-alvo="cartao"]') ?? alvo).getBoundingClientRect();
+      /*
+       * A etiqueta mora na faixa acima do card, nunca em cima dele. O fio desce pelo
+       * respiro interno da esquerda, onde não há texto, e entra no alvo pela borda.
+       */
+      setPos({
+        fioX: Math.round(c.left - r.left + 10),
+        rotuloY: Math.max(2, Math.round(c.top - r.top - 24)),
+        rotuloBase: Math.max(22, Math.round(c.top - r.top - 4)),
+        alvoX: Math.round(a.left - r.left - 3),
+        alvoY: Math.round(a.top - r.top + Math.min(a.height / 2, 12)),
+      });
     };
     medir();
     const ro = new ResizeObserver(medir);
@@ -113,12 +137,22 @@ export function CartaoReu({
         <NoDoReu no={no} aceso={aceso} />
       </div>
       {pos && ativo ? (
-        <span
-          style={{ left: pos.x, top: pos.y, maxWidth: `calc(100% - ${pos.x + 8}px)` }}
-          className="pointer-events-none absolute z-10 rounded-[4px] bg-destructive px-1.5 py-0.5 font-casa-mono text-casa-sm text-destructive-foreground"
-        >
-          {ativo.texto}
-        </span>
+        <>
+          <svg aria-hidden className="pointer-events-none absolute inset-0 z-10 h-full w-full overflow-visible">
+            <polyline
+              points={`${pos.fioX + 0.5},${pos.rotuloBase} ${pos.fioX + 0.5},${pos.alvoY + 0.5} ${pos.alvoX},${pos.alvoY + 0.5}`}
+              fill="none"
+              stroke="var(--destructive)"
+              strokeWidth="1"
+            />
+          </svg>
+          <span
+            style={{ left: Math.max(0, pos.fioX - 6), top: pos.rotuloY, maxWidth: `calc(100% - ${Math.max(0, pos.fioX - 6)}px)` }}
+            className="pointer-events-none absolute z-10 rounded-[4px] bg-destructive px-1.5 py-0.5 font-casa-mono text-casa-sm text-destructive-foreground"
+          >
+            {ativo.texto}
+          </span>
+        </>
       ) : null}
     </div>
   );
@@ -188,7 +222,8 @@ function primeiraDiferenca(antes: string, depois: string) {
 }
 
 export function Banca({ aoLiberar }: { aoLiberar: () => void }) {
-  const reduzir = useReducedMotion();
+  const assentada = useDobraAssentada();
+  const reduzir = React.useMemo(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches, []);
   const hidratado = useHidratado();
   const [consertos, setConsertos] = React.useState<ReadonlySet<Conserto>>(new Set());
   const [aba, setAba] = React.useState<"tela" | "codigo">("tela");
@@ -261,6 +296,42 @@ export function Banca({ aoLiberar }: { aoLiberar: () => void }) {
   const linhaEmFoco = achadoEmFoco?.linha;
   const linhasMarcadas = new Set(achados.map((a) => a.linha));
 
+  const corDoVeredito = veredito === null ? "text-casa-fg-3" : fechado ? "text-destructive" : "text-casa-fg";
+
+  const desenharLinha = (i: number) => {
+    const l = saida[i]!;
+    const regra = l.achado?.regra;
+    return regra && ALVOS[regra] ? (
+        <button
+          type="button"
+          disabled={imprimindo}
+          onClick={() => consertar(regra)}
+          onPointerEnter={() => setSobre(regra)}
+          onPointerLeave={() => setSobre(null)}
+          onFocus={() => setSobre(regra)}
+          onBlur={() => setSobre(null)}
+          aria-label={`Consertar ${regra}, linha ${l.achado?.linha}`}
+          className={cn(
+            "alvo-toque group -mx-2 flex w-[calc(100%+1rem)] items-start gap-3 rounded-[6px] px-2 py-0.5 text-left",
+            "transition-colors [transition-duration:var(--dur-fast)] hover:bg-casa-tile-2 focus-visible:bg-casa-tile-2",
+          )}
+        >
+          <span className="min-w-0 flex-1 whitespace-pre-wrap pl-[2ch] text-casa-fg [overflow-wrap:anywhere] lg:pl-[12ch]">{l.texto.trimStart()}</span>
+          <span className="flex shrink-0 items-center gap-1 font-casa text-casa-sm text-casa-fg-2 group-hover:text-casa-fg" lang="pt-BR">
+            <Wrench className="h-3 w-3" aria-hidden />
+            consertar
+          </span>
+        </button>
+      ) : (
+        <TextoDaLinha texto={l.texto} />
+      );
+  };
+  const linhasParadas = saida.map((l, i) => (
+    <div key={l.chave} style={{ opacity: i < impressas ? 1 : 0 }}>
+      {desenharLinha(i)}
+    </div>
+  ));
+
   return (
     <div className="casa dark bg-casa-tile text-casa-fg">
       <div className="shell flex flex-col gap-6 py-6 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-12 lg:py-10">
@@ -323,7 +394,13 @@ export function Banca({ aoLiberar }: { aoLiberar: () => void }) {
         <div className="min-w-0">
           <div className="mb-5 flex items-center gap-3">
             <p role="status" className="text-casa-xl font-medium tabular-nums">
-              <TextMorph className={veredito === null ? "text-casa-fg-3" : fechado ? "text-destructive" : "text-casa-fg"}>{veredito ?? "Rodando"}</TextMorph>
+              <React.Suspense fallback={<span className={corDoVeredito}>{veredito ?? "Rodando"}</span>}>
+                {assentada ? (
+                  <TextMorph className={corDoVeredito}>{veredito ?? "Rodando"}</TextMorph>
+                ) : (
+                  <span className={corDoVeredito}>{veredito ?? "Rodando"}</span>
+                )}
+              </React.Suspense>
             </p>
             <p className="text-casa-base tabular-nums text-casa-fg-2">
               {imprimindo ? `${achados.length} até agora` : totalDeAchados === 1 ? "1 achado" : `${totalDeAchados} achados`}
@@ -336,46 +413,13 @@ export function Banca({ aoLiberar }: { aoLiberar: () => void }) {
           <p className="mb-3 font-casa-mono text-casa-sm leading-5 text-casa-fg [overflow-wrap:anywhere]">$ {GRAVADO.comando}</p>
 
           <div className="font-casa-mono text-casa-sm leading-5" lang="en">
-            <AnimatePresence initial={false}>
-              {saida.map((l, i) => {
-                const impressa = i < impressas;
-                const regra = l.achado?.regra;
-                return (
-                  <motion.div
-                    key={l.chave}
-                    layout={reduzir ? false : "position"}
-                    transition={{ duration: DUR.base, ease: EASE_OUT }}
-                    exit={{ opacity: 0, transition: { duration: DUR.fast } }}
-                    style={{ opacity: impressa ? 1 : 0 }}
-                  >
-                    {regra && ALVOS[regra] ? (
-                      <button
-                        type="button"
-                        disabled={imprimindo}
-                        onClick={() => consertar(regra)}
-                        onPointerEnter={() => setSobre(regra)}
-                        onPointerLeave={() => setSobre(null)}
-                        onFocus={() => setSobre(regra)}
-                        onBlur={() => setSobre(null)}
-                        aria-label={`Consertar ${regra}, linha ${l.achado?.linha}`}
-                        className={cn(
-                          "alvo-toque group -mx-2 flex w-[calc(100%+1rem)] items-start gap-3 rounded-[6px] px-2 py-0.5 text-left",
-                          "transition-colors [transition-duration:var(--dur-fast)] hover:bg-casa-tile-2 focus-visible:bg-casa-tile-2",
-                        )}
-                      >
-                        <span className="min-w-0 flex-1 whitespace-pre-wrap pl-[2ch] text-casa-fg [overflow-wrap:anywhere] lg:pl-[12ch]">{l.texto.trimStart()}</span>
-                        <span className="flex shrink-0 items-center gap-1 font-casa text-casa-sm text-casa-fg-2 group-hover:text-casa-fg" lang="pt-BR">
-                          <Wrench className="h-3 w-3" aria-hidden />
-                          consertar
-                        </span>
-                      </button>
-                    ) : (
-                      <TextoDaLinha texto={l.texto} />
-                    )}
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+            {assentada ? (
+              <React.Suspense fallback={linhasParadas}>
+                <LinhasComMovimento chaves={saida.map((l) => l.chave)} opacidades={saida.map((_, i) => (i < impressas ? 1 : 0))} linha={desenharLinha} />
+              </React.Suspense>
+            ) : (
+              linhasParadas
+            )}
           </div>
 
           {veredito === "GATE INCOMPLETE" ? (

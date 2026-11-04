@@ -250,9 +250,8 @@ arraste · shift = fino · roda · duplo clique = centro`}
       <div
         ref={trackRef}
         className={cn(
-          // `touch-none` impede o navegador de interpretar o arraste como
-          // rolagem da página no toque — sem isso o slider não anda no celular.
-          "relative cursor-ew-resize touch-none rounded-[4px] outline-none",
+          // `touch-pan-y`: o arraste de lado é do slider, e em pé a página continua rolando.
+          "relative cursor-ew-resize touch-pan-y rounded-[4px] outline-none",
           "focus-visible:[box-shadow:var(--focus,0_0_0_2px_var(--vintage-value))]",
           dense ? "h-6" : "h-8"
         )}

@@ -22,15 +22,8 @@ import * as React from "react";
 import { Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BrandThemeProvider } from "@/lib/brand-theme";
-import { redeLenta } from "@/lib/rede";
-import { Solo, fundoDoSolo, propsDaQuery } from "./Solo";
-import { Busca, BotaoDeBusca, useAtalhoDeBusca } from "./busca";
-import { BrandSelector } from "../../registry/visant/ui/brand-selector";
-import { SfxToggle } from "../../registry/visant/ui/sfx-toggle";
-import { Conectar } from "./conectar";
-import { useSfxWiring, SFX_DEFAULT_SELECTOR } from "@/lib/sfx-bus";
-import { Gallery } from "./Gallery";
-import { CATALOG, FAMILIA_ANTIGA, FAMILIES, type Family } from "./catalog";
+import { redeLenta, useDobraAssentada } from "@/lib/rede";
+import { BotaoDeBusca, useAtalhoDeBusca } from "./busca-gatilho";
 
 /*
  * Studio e bancada chegam quando alguém abre a aba.
@@ -46,16 +39,35 @@ const BrandStudioBody = React.lazy(() =>
 );
 
 /*
- * A ficha também sai da entrada. Ela arrasta `props.generated.json` (442 KB) e
- * `controls.generated.json` (180 KB), que a grade nunca lê, e isso era 80% do
- * chunk de entrada. Para o clique não pagar a espera, o chunk é buscado quando o
- * navegador fica ocioso depois do load.
+ * O catálogo sai da entrada, e com ele a grade, os metadados das peças, a ficha e o motion.
+ *
+ * Em Slow 4G (50 KB/s) cada 50 KB é um segundo, e quem abria `/skills` ou `/marca` baixava
+ * o catálogo inteiro antes de ver a própria página (PLANO-PERFORMANCE.md, rodada 6). A casca
+ * só conhece o caminho: quem resolve família, peça e título é `RotaCatalogo`.
  */
-const carregarFicha = () => import("./ComponentFocus");
-const ComponentFocus = React.lazy(() => carregarFicha().then((m) => ({ default: m.ComponentFocus })));
+const RotaCatalogo = React.lazy(() => import("./RotaCatalogo").then((m) => ({ default: m.RotaCatalogo })));
+const RotaSolo = React.lazy(() => import("./Solo").then((m) => ({ default: m.RotaSolo })));
+const Busca = React.lazy(() => import("./busca").then((m) => ({ default: m.Busca })));
+const KitRoom = React.lazy(() =>
+  Promise.all([import("./KitRoom"), import("./kits")]).then(([sala, lista]) => ({
+    default: (props: { slug: string | null; onSlug: (s: string) => void; onFocus: (f: string | null) => void }) => (
+      <sala.KitRoom {...props} slug={props.slug ?? lista.KITS[0].slug} />
+    ),
+  })),
+);
+/* Só a marca do cabeçalho pedia cmdk, Radix e o logo: chegam depois da primeira dobra. */
+const BrandSelector = React.lazy(() =>
+  import("../../registry/visant/ui/brand-selector").then((m) => ({ default: m.BrandSelector })),
+);
+const Conectar = React.lazy(() => import("./conectar").then((m) => ({ default: m.Conectar })));
+/* O rodapé nunca está na primeira dobra de quem chega: fora da entrada, ele não pesa em /skills. */
+const Rodape = React.lazy(() => import("./rodape").then((m) => ({ default: m.Rodape })));
+const SomDaCasa = React.lazy(() => import("./som-da-casa").then((m) => ({ default: m.SomDaCasa })));
+
+/* A rede boa não espera por ninguém: a ficha desce no ocioso, e o clique não paga. */
 if (typeof window !== "undefined" && !redeLenta() && /^\/($|c\/|catalogo)/.test(window.location.pathname)) {
   const ocioso = window.requestIdleCallback ?? ((fn: () => void) => window.setTimeout(fn, 1500));
-  window.addEventListener("load", () => ocioso(() => void carregarFicha()), { once: true });
+  window.addEventListener("load", () => ocioso(() => void import("./ComponentFocus")), { once: true });
 }
 
 /*
@@ -64,9 +76,12 @@ if (typeof window !== "undefined" && !redeLenta() && /^\/($|c\/|catalogo)/.test(
  * pintado sumia na subida do app e voltava segundos depois. Sem prerender, a altura de uma tela.
  */
 const dobraDoHtml = typeof document !== "undefined" ? (document.querySelector("#root > main")?.outerHTML ?? "") : "";
+const caminhoDaDobra = typeof window !== "undefined" ? window.location.pathname : "";
 
+/* A dobra só vale para o endereço que a escreveu: navegar por dentro não pode mostrar o título de outra página. */
 function EsperaDaRota() {
-  return <div className="min-h-screen" aria-busy="true" dangerouslySetInnerHTML={{ __html: dobraDoHtml }} />;
+  const dobra = window.location.pathname === caminhoDaDobra ? dobraDoHtml : "";
+  return <div className="min-h-screen" aria-busy="true" dangerouslySetInnerHTML={{ __html: dobra }} />;
 }
 /* O laboratório de interações (`/lab`): só quem abre a rota paga pelo chunk. */
 const Lab = React.lazy(() => import("./Lab").then((m) => ({ default: m.Lab })));
@@ -74,8 +89,7 @@ const Docs = React.lazy(() => import("./Docs").then((m) => ({ default: m.Docs })
 const SkillsHub = React.lazy(() => import("./skills/Hub").then((m) => ({ default: m.Hub })));
 const SkillsFilme = React.lazy(() => import("./skills/Filme").then((m) => ({ default: m.Filme })));
 const SkillsCarroChefe = React.lazy(() => import("./skills/CarroChefe").then((m) => ({ default: m.CarroChefe })));
-import { KitRoom } from "./KitRoom";
-import { KITS } from "./kits";
+import { FAMILIA_DA_PECA } from "./rota-familia";
 import { DEFAULT_BRAND, REGISTRY_URL } from "./registry-meta";
 import { VisantAuthProvider } from "./visant-auth";
 import { MinhasMarcas } from "./MinhasMarcas";
@@ -88,8 +102,11 @@ interface Route {
   focus: string | null;
   /** Sala aberta. Só existe nos kits. */
   kit: string | null;
-  /** Fatia do catálogo. `null` = "Tudo". */
-  familia: Family | null;
+  /**
+   * Fatia do catálogo, como veio no caminho. `null` = "Tudo", `FAMILIA_DA_PECA` = a da peça em
+   * foco. Quem valida é `RotaCatalogo`, que é quem conhece as famílias.
+   */
+  familia: string | null;
 }
 
 /**
@@ -102,20 +119,7 @@ interface Route {
  * primeira é `catalogo`. Dar à família um endereço de primeiro nível é que
  * criaria ambiguidade — e roubaria o endereço curto de uma seção inteira.
  */
-const familiaDe = (parte: string | undefined): Family | null =>
-  FAMILIES.find((f) => f.key === parte)?.key ?? (parte ? FAMILIA_ANTIGA[parte] : undefined) ?? null;
-
-/**
- * Link direto de peça (`/c/kanban`) abre dentro da fatia dela.
- *
- * `/c/<item>` não carrega família no caminho, e sem esta linha a peça abriria
- * por cima do ÍNDICE de categorias: as setas não teriam lista para percorrer e
- * fechar devolveria a pessoa a uma página de capas, sem nenhuma relação com o
- * que ela veio ver. Com a família derivada do item, o link de chat entrega a
- * peça em cima da vizinhança dela — que é o contexto que faz o `add` acontecer.
- */
-const familiaDaPeca = (nome: string | null): Family | null =>
-  (nome ? CATALOG.find((i) => i.name === nome)?.family : null) ?? null;
+const FAMILIAS_DOS_DOCS = ["fundacao", "marca", "base"];
 
 /*
  * Kits primeiro, e não por ordem alfabética.
@@ -132,7 +136,8 @@ const VIEWS: { value: View; label: string }[] = [
 ];
 
 /* Kits saíram do cabeçalho em 2026-11-03: as salas seguem abrindo por link, sem
-   porta na navegação e com noindex no prerender. */
+   porta na navegação e com noindex no prerender. Docs também fica fora do cabeçalho:
+   a porta é discreta, no rodapé e em /skills. */
 const ROTAS_SEM_PORTA: View[] = ["kits", "docs"];
 const SUBPAGINAS_DE_SKILLS = ["filme", "killer"];
 /* `callback` é a volta do OAuth (`visant-auth.tsx`), que cai no catálogo. */
@@ -176,7 +181,7 @@ function parsePath(loc: Location): Route {
   if (partes[0] && !ROTAS_CONHECIDAS.includes(partes[0])) return { view: "404", focus: null, kit: null, familia: null };
   if (partes[0] === "c" && partes[1]) {
     const focus = decodeURIComponent(partes[1]);
-    return { view: "catalogo", focus, kit: null, familia: familiaDaPeca(focus) };
+    return { view: "catalogo", focus, kit: null, familia: FAMILIA_DA_PECA };
   }
   if (partes[0] === "kit" && partes[1]) {
     return { view: "kits", focus: null, kit: decodeURIComponent(partes[1]), familia: null };
@@ -196,22 +201,21 @@ function parsePath(loc: Location): Route {
   /* A família só é lida sob `catalogo`: é o que mantém `/marca` (o estúdio)
      separado de `/catalogo/marca` (a fatia do catálogo). Nome de família que não
      existe cai no índice, em vez de mostrar uma fatia vazia. */
-  const familia = view?.value === "catalogo" ? familiaDe(partes[1]) : null;
+  const familia = view?.value === "catalogo" ? (partes[1] ?? null) : null;
   /* Fundação não tem fatia: é o conteúdo de `/docs`. */
-  if (familia === "fundacao") return { view: "docs", focus: null, kit: null, familia: null };
+  if (familia && FAMILIAS_DOS_DOCS.includes(familia)) return { view: "docs", focus: null, kit: null, familia: null };
   return { view: view?.value ?? "catalogo", focus: null, kit: null, familia };
 }
 
 function parseLegacyHash(hash: string): Route {
   if (hash.startsWith("#/c/")) {
     const focus = decodeURIComponent(hash.slice(4)) || null;
-    return { view: "catalogo", focus, kit: null, familia: familiaDaPeca(focus) };
+    return { view: "catalogo", focus, kit: null, familia: FAMILIA_DA_PECA };
   }
   if (hash.startsWith("#/rig"))
     return { view: "kits", focus: null, kit: "rig-vintage", familia: null };
   const view = VIEWS.find((v) => hash.startsWith(`#/${v.value}`));
-  const familia =
-    view?.value === "catalogo" ? familiaDe(hash.replace(/^#\//, "").split("/")[1]) : null;
+  const familia = view?.value === "catalogo" ? (hash.replace(/^#\//, "").split("/")[1] ?? null) : null;
   return { view: view?.value ?? "catalogo", focus: null, kit: null, familia };
 }
 
@@ -313,21 +317,13 @@ function Shell() {
 
   /* O prerender só cuida da primeira carga: navegar por dentro precisa trocar o título também. */
   React.useEffect(() => {
-    const peca = route.focus ? CATALOG.find((i) => i.name === route.focus) : null;
-    document.title = peca
-      ? `${peca.title} / @visant/ui`
-      : route.view === "skills"
+    /* O título da peça e o da família quem põe é `RotaCatalogo`: só ela conhece os dois. */
+    if (route.focus || route.familia) return;
+    document.title = route.view === "skills"
         ? (TITULO_DA_SKILL[route.kit ?? ""] ?? "Skills / Visant")
-        : (TITULO_DA_VIEW[route.view] ?? "@visant/ui — a library da Visant");
-  }, [route.focus, route.view, route.kit]);
+        : (TITULO_DA_VIEW[route.view] ?? "A library da Visant / @visant/ui");
+  }, [route.focus, route.familia, route.view, route.kit]);
   const [dark, setDark] = useDarkMode();
-  /*
-   * O som da casa: só clique, nunca hover. Passar o ponteiro pela grade não é
-   * agir, e sessenta cards estalando sob o mouse é o som que faz desligar.
-   * Armado por padrão, mudo sob reduced-motion, e a escolha salva vence.
-   */
-  useSfxWiring(SFX_DEFAULT_SELECTOR, { hover: false });
-
   const setView = React.useCallback(
     // Clicar na aba "Catálogo" volta ao índice das categorias, nunca à última
     // fatia aberta: aba é começo de caminho, não retomada de estado.
@@ -346,7 +342,7 @@ function Shell() {
     [navigate, familiaAtual],
   );
   const setFamilia = React.useCallback(
-    (familia: Family | null) => navigate({ view: "catalogo", focus: null, kit: null, familia }),
+    (familia: string | null) => navigate({ view: "catalogo", focus: null, kit: null, familia }),
     [navigate],
   );
   const setKit = React.useCallback(
@@ -354,41 +350,18 @@ function Shell() {
     [navigate],
   );
 
+  const dobraAssentada = useDobraAssentada();
   /*
-   * A busca abre em qualquer seção e entrega na ficha da peça.
-   *
-   * Ela não muda a fatia aberta atrás: quem estava na família "marca" e buscou
-   * um item de "trabalho" volta pra "marca" ao fechar. A busca é um atalho pra
-   * uma peça, não uma mudança de lugar.
+   * A busca abre em qualquer seção e entrega na ficha da peça, sem mudar a fatia aberta atrás:
+   * é um atalho pra uma peça, não uma mudança de lugar. O chunk dela só desce na primeira vez.
    */
-  /*
-   * A vizinhança da peça em foco: a família dela, na ordem do catálogo.
-   *
-   * É o que dá sentido a `←`/`→` e ao contador "13/20" — e é derivado da peça,
-   * então o mesmo endereço percorre a mesma lista pra qualquer pessoa.
-   */
-  const pecaEmFoco = React.useMemo(
-    () => (route.focus ? (CATALOG.find((i) => i.name === route.focus) ?? null) : null),
-    [route.focus],
-  );
-  const irmas = React.useMemo(
-    () => (pecaEmFoco ? CATALOG.filter((i) => i.family === pecaEmFoco.family) : []),
-    [pecaEmFoco],
-  );
-  const indiceEmFoco = pecaEmFoco ? irmas.findIndex((i) => i.name === pecaEmFoco.name) : 0;
-
-  const andarNaFamilia = React.useCallback(
-    (passo: number) => {
-      if (!irmas.length) return;
-      const alvo = irmas[(indiceEmFoco + passo + irmas.length) % irmas.length];
-      setFocus(alvo.name);
-    },
-    [irmas, indiceEmFoco, setFocus],
-  );
-
   const [buscando, setBuscando] = React.useState(false);
-  const abrirBusca = React.useCallback(() => setBuscando(true), []);
-  useAtalhoDeBusca(abrirBusca);
+  const [buscaUsada, setBuscaUsada] = React.useState(false);
+  const abrirBusca = React.useCallback(() => {
+    setBuscaUsada(true);
+    setBuscando(true);
+  }, []);
+  useAtalhoDeBusca(abrirBusca, route.view === "catalogo" && !route.focus);
   const escolherNaBusca = React.useCallback(
     (name: string) => {
       setBuscando(false);
@@ -398,7 +371,7 @@ function Shell() {
   );
 
   return (
-    <div className="min-h-screen bg-casa-bg text-casa-fg">
+    <div className="flex min-h-screen flex-col bg-casa-bg text-casa-fg">
       {/*
        * O cabeçalho da casa.
        *
@@ -433,8 +406,12 @@ function Shell() {
             <BotaoDeBusca onClick={abrirBusca} />
             {/* O liga e desliga do som, no tom dos outros ícones da casa. */}
             {/* O catálogo no agente de IA de quem chegou: MCP do shadcn + @visant. */}
-            <Conectar className="max-lg:!hidden" />
-            <SfxToggle className={SOM_DA_CASA} />
+            {dobraAssentada ? (
+              <React.Suspense fallback={null}>
+                <Conectar className="max-lg:!hidden" />
+                <SomDaCasa />
+              </React.Suspense>
+            ) : null}
             <button
               type="button"
               onClick={() => setDark(!dark)}
@@ -449,7 +426,10 @@ function Shell() {
               diálogo, que é onde se escolhe; no gatilho eram ruído. O atalho
               segue valendo, só não é anunciado.
             */}
-            <BrandSelector className={GATILHO_DE_MARCA} />
+            {/* O vão espera do tamanho do gatilho: a marca chegar não empurra o resto da linha. */}
+            <React.Suspense fallback={<span aria-hidden className={VAO_DA_MARCA} />}>
+              {dobraAssentada ? <BrandSelector className={GATILHO_DE_MARCA} /> : <span aria-hidden className={VAO_DA_MARCA} />}
+            </React.Suspense>
             <MinhasMarcas />
           </div>
         </div>
@@ -461,48 +441,22 @@ function Shell() {
       </div>
 
       {route.view === "kits" && (
-        <KitRoom
-          slug={route.kit ?? KITS[0].slug}
-          onSlug={setKit}
-          onFocus={setFocus}
-        />
+        <React.Suspense fallback={<EsperaDaRota />}>
+          <KitRoom slug={route.kit} onSlug={setKit} onFocus={setFocus} />
+        </React.Suspense>
       )}
 
-      {/*
-       * A ficha é uma ROTA, não um estado por cima da grade.
-       *
-       * `/c/<item>` renderiza a ficha no lugar do catálogo, dentro da mesma
-       * casca. Enquanto ela era um diálogo, a grade continuava montada atrás do
-       * overlay: oitenta demos vivas gastando CPU embaixo de uma peça que ninguém
-       * estava vendo.
-       *
-       * A lista que as setas percorrem é a FAMÍLIA da peça, e não o resultado do
-       * filtro que estava na grade. Filtro é estado da outra página; herdá-lo
-       * faria `→` levar a lugares diferentes dependendo de como a pessoa chegou,
-       * e o mesmo endereço tem de significar a mesma coisa pra quem colou o link
-       * no chat.
-       */}
-      {route.view === "catalogo" &&
-        (route.focus && pecaEmFoco ? (
-          <React.Suspense fallback={<div className="min-h-screen" aria-busy="true" />}>
-            <ComponentFocus
-              key={pecaEmFoco.name}
-              item={pecaEmFoco}
-              index={indiceEmFoco}
-              total={irmas.length}
-              onClose={() => navigate({ view: "catalogo", focus: null, kit: null, familia: route.familia })}
-              onPrev={() => andarNaFamilia(-1)}
-              onNext={() => andarNaFamilia(1)}
-            />
-          </React.Suspense>
-        ) : (
-          <Gallery
-            onFocus={setFocus}
+      {route.view === "catalogo" && (
+        <React.Suspense fallback={<EsperaDaRota />}>
+          <RotaCatalogo
+            focus={route.focus}
             familia={route.familia}
+            onNavegar={(focus, familia) => navigate({ view: "catalogo", focus, kit: null, familia })}
+            onFocus={setFocus}
             onFamilia={setFamilia}
-            onBuscar={abrirBusca}
           />
-        ))}
+        </React.Suspense>
+      )}
 
       {/* A espera nunca é um "carregando…": trocar de aba não deve fazer a página encolher
           e voltar a crescer, e a abertura segura o título que o HTML já pintou. */}
@@ -526,7 +480,28 @@ function Shell() {
           (route.kit === "filme" ? <SkillsFilme /> : route.kit === "killer" ? <SkillsCarroChefe /> : <SkillsHub />)}
       </React.Suspense>
 
-      <Busca aberto={buscando} onAberto={setBuscando} onEscolher={escolherNaBusca} />
+      {dobraAssentada ? (
+        <React.Suspense fallback={null}>
+          <Rodape
+            atual={route.view}
+            onPorta={setView}
+            className={cn(
+              /* O dock de /skills é fixo: fica acima dele no celular e abaixo do flutuante na tela larga. */
+              route.view === "skills" && !route.kit
+                ? "pb-[calc(3.75rem+env(safe-area-inset-bottom))] lg:pb-20"
+                : "pb-[env(safe-area-inset-bottom)]",
+              /* Shaders em desktop é a janela inteira, com só o painel rolando (explicado em rodape.tsx). */
+              route.view === "catalogo" && route.familia === "shaders" && !route.focus && "lg:hidden",
+            )}
+          />
+        </React.Suspense>
+      ) : null}
+
+      {buscaUsada ? (
+        <React.Suspense fallback={null}>
+          <Busca aberto={buscando} onAberto={setBuscando} onEscolher={escolherNaBusca} />
+        </React.Suspense>
+      ) : null}
     </div>
   );
 }
@@ -541,11 +516,7 @@ function Shell() {
  * que não decide nada aqui: a linha de fonte e versão, as amostras e a tecla.
  */
 // casa-lint/vidro: aqui o blur é DESLIGADO — a peça publicada traz o vidro de fábrica
-/** O `SfxToggle` do registry vestido de ícone da casa: tom e raio da casca,
- *  nunca os da marca. As ondas recolhendo continuam dizendo o estado. Some
- *  abaixo de lg: no toque o bus não toca, e no tablet o cabeçalho não tem folga. */
-const SOM_DA_CASA =
-  "max-lg:!hidden size-8 rounded-control text-casa-fg-2 hover:border-transparent hover:bg-casa-tile hover:text-casa-fg data-[state=on]:text-casa-fg-2 focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]";
+const VAO_DA_MARCA = "h-8 w-[5.5rem] shrink-0 max-[479px]:w-11 pointer-coarse:h-11";
 
 const GATILHO_DE_MARCA = [
   /* O nome da marca é o que menos cabe: no celular fica o ícone, e o nome segue para leitor de tela. */
@@ -618,25 +589,10 @@ function Raiz() {
   }, [ehSolo, params]);
 
   if (ehSolo) {
-    const nome = decodeURIComponent(window.location.pathname.split("/").filter(Boolean)[1] ?? "");
-    const fundo = fundoDoSolo(params);
-    if (params.get("caixa") === "1") {
-      // A captura no enquadramento do palco: sem fundo nenhum, nem o da casa.
-      document.documentElement.style.background = "transparent";
-      document.body.style.background = "transparent";
-      return (
-        <div className="palco" style={{ background: "transparent" }}>
-          <Solo name={nome} props={propsDaQuery(params)} caixa />
-        </div>
-      );
-    }
     return (
-      <div
-        className={fundo ? "text-foreground" : "bg-background text-foreground"}
-        style={{ fontFamily: "var(--font-sans, ui-sans-serif, system-ui)", background: fundo }}
-      >
-        <Solo name={nome} props={propsDaQuery(params)} />
-      </div>
+      <React.Suspense fallback={null}>
+        <RotaSolo params={params} />
+      </React.Suspense>
     );
   }
 

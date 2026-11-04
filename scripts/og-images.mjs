@@ -15,6 +15,7 @@
 import { mkdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { contaDaVitrine } from "./conta-vitrine.mjs";
 import { chromium } from "@playwright/test";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -23,7 +24,7 @@ const registry = JSON.parse(readFileSync(join(ROOT, "registry.json"), "utf8"));
 const escapar = (s = "") =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const RESUMO_DA_HOME = `${registry.items.length} componentes React em registry shadcn, com temas de marca compilados: nenhum componente sabe a cor de um cliente.`;
+const RESUMO_DA_HOME = `${contaDaVitrine(ROOT).frase} pra React em registry shadcn, com temas de marca compilados: nenhum componente sabe a cor de um cliente.`;
 
 const cartao = ({ titulo, subtitulo, nome }) => `<!doctype html>
 <meta charset="utf-8" />

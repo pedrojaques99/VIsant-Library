@@ -43,7 +43,7 @@ button:focus-visible, .bpm:focus-visible { outline: 1.5px solid var(--ring, High
 .led:hover { box-shadow: inset 0 0 0 1px var(--tb-fg); }
 .led i { width: 8px; height: 8px; border-radius: 50%; background: var(--tb-brand); box-shadow: 0 0 10px var(--tb-brand); opacity: 0.3; }
 :host([off]) .led i { background: var(--tb-dim); box-shadow: none; opacity: 0.4; }
-.bpm { display: flex; align-items: baseline; gap: 6px; flex: 1; cursor: ew-resize; touch-action: none; user-select: none; -webkit-user-select: none;
+.bpm { display: flex; align-items: baseline; gap: 6px; flex: 1; cursor: ew-resize; touch-action: pan-y; user-select: none; -webkit-user-select: none;
   font-family: var(--tb-mono); font-variant-numeric: tabular-nums; border-radius: 6px; }
 .bpm b { font-size: 30px; font-weight: 500; letter-spacing: -0.04em; line-height: 1; }
 .bpm small { font-size: 11px; color: var(--tb-dim); }

@@ -48,7 +48,8 @@ if (args.includes("--colheita"))
     .map((f) => JSON.parse(readFileSync(join(ROOT, "colheita", f), "utf8")).catalogo.name);
 
 /** Gestos que não mudam a tela pra peças que só reagem a um tipo de entrada. */
-const SO_PONTEIRO = new Set(["heat-word", "tilt-card", "magnify-dock", "fog-tree"]);
+/* lathe-riso e fog-tree giram sozinhas: o arrasto só muda o ângulo, não há estado a alcançar. */
+const SO_PONTEIRO = new Set(["lathe-riso", "heat-word", "tilt-card", "magnify-dock", "fog-tree"]);
 
 /** Gritos combinados, escritos nos dois lados (ver tests/vitrine.spec.ts). */
 const AVISO_COMBINADO = /\[OctahedronLoader\]/;

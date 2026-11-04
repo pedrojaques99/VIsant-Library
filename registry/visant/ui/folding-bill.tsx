@@ -148,19 +148,20 @@ export function FoldingBill({
     if (novo === dobrada) assentar(novo ? 1 : 0); // soltou perto de onde estava
   };
 
-  const gesto = React.useRef<{ y: number; p: number; t: number; vy: number; moveu: boolean } | null>(null);
+  const gesto = React.useRef<{ y: number; p: number; t: number; vy: number; moveu: boolean; escala: number } | null>(null);
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (e.button !== 0) return;
     p.stop();
-    gesto.current = { y: e.clientY, p: p.get(), t: e.timeStamp, vy: 0, moveu: false };
+    const el = e.currentTarget as HTMLElement;
+    gesto.current = { y: e.clientY, p: p.get(), t: e.timeStamp, vy: 0, moveu: false, escala: el.getBoundingClientRect().height / (el.offsetHeight || 1) || 1 };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
     const g = gesto.current;
     if (!g) return;
-    const dy = e.clientY - g.y;
+    const dy = (e.clientY - g.y) / g.escala;
     if (Math.abs(dy) > 4) g.moveu = true;
     if (!g.moveu) return;
     // Duas dobras de curso: arrastar 2× a altura do painel vai de aberta a dobrada.
@@ -208,7 +209,7 @@ export function FoldingBill({
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
       className={cn(
-        "relative w-[280px] cursor-grab touch-none select-none rounded-[var(--r-surface)] outline-none active:cursor-grabbing",
+        "relative w-[280px] cursor-grab touch-pan-x select-none rounded-[var(--r-surface)] outline-none active:cursor-grabbing",
         "focus-visible:[box-shadow:var(--focus)] [perspective:900px]",
         className,
       )}

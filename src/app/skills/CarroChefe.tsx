@@ -13,8 +13,10 @@ import * as React from "react";
 import { Check, Copy } from "lucide-react";
 import { CopyCommand, useCopy } from "../copy-command";
 import { Banca } from "./carro-chefe/banca";
-import { Julgamento, Porta, Prova, TelaInteira } from "./carro-chefe/secoes";
-import { Sinais } from "./carro-chefe/sinais";
+import { useDobraAssentada } from "@/lib/rede";
+
+/* Da segunda dobra em diante: descem depois da banca, que é o que a pessoa está vendo. */
+const Secoes = React.lazy(() => import("./carro-chefe/secoes-abaixo").then((m) => ({ default: m.SecoesAbaixo })));
 
 const INSTALAR = "npx skills add pedrojaques99/visant-skills-public --skill visant-design visant-killer";
 const CONJUNTO =
@@ -45,6 +47,7 @@ function ComandoInstalar({ className }: { className?: string }) {
 
 export function CarroChefe() {
   const julgamento = React.useRef<HTMLElement>(null);
+  const assentada = useDobraAssentada();
 
   React.useEffect(() => {
     const antes = document.title;
@@ -69,11 +72,9 @@ export function CarroChefe() {
       </header>
 
       <Banca aoLiberar={() => julgamento.current?.scrollIntoView({ behavior: "smooth" })} />
-      <Julgamento ancora={julgamento} />
-      <Sinais />
-      <Porta />
-      <TelaInteira />
-      <Prova />
+      <React.Suspense fallback={<div className="min-h-screen" />}>
+        {assentada ? <Secoes ancora={julgamento} /> : <div className="min-h-screen" />}
+      </React.Suspense>
 
       <section className="shell pb-24 pt-16 lg:pb-36 lg:pt-28">
         <div className="max-w-[720px]">

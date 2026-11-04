@@ -90,7 +90,11 @@ export function DemoCopy() {
     >
       <div ref={palco} className="flex min-w-0 flex-col gap-3 lg:mx-auto lg:w-full lg:max-w-4xl" data-demo="copy">
         <div className="relative grid rounded-tile bg-casa-tile">
-          <div aria-hidden="true" className={`${corpo} col-start-1 row-start-1 min-h-[15rem] lg:min-h-[18rem]`}>
+          {/* O texto de IA, invisível, segura a altura: a reescrita não dá pulo. */}
+          <div aria-hidden="true" className={`${corpo} invisible col-start-1 row-start-1`}>
+            {ORIGINAL}
+          </div>
+          <div aria-hidden="true" className={`${corpo} col-start-1 row-start-1`}>
             <Pintado texto={texto} faixas={achados} />
             {"\n"}
           </div>
@@ -116,6 +120,7 @@ export function DemoCopy() {
               else reescrever();
             }}
             disabled={digitando}
+            secundaria={limpo || digitando}
             data-acao="copy"
           >
             {limpo ? "De novo" : "Reescrever"}

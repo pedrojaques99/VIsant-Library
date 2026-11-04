@@ -15,27 +15,34 @@
 
 import * as React from "react";
 
+import { fold } from "./fold";
 import { useStageActive } from "./stage";
 import { Media, type Papel } from "./media";
 import { depKeysOf } from "./deps";
 import { PAD_VOICES, PEOPLE } from "./demo-fixtures";
 
-import { Chip } from "../../registry/visant/ui/chip";
-import { PaperShuttle } from "../../registry/visant/ui/paper-shuttle";
-import { CtaSurface, CtaAction } from "../../registry/visant/ui/cta-surface";
-import { EraseField } from "../../registry/visant/ui/erase-field";
-import { SpringDots } from "../../registry/visant/ui/spring-dots";
-import { SfxToggle } from "../../registry/visant/ui/sfx-toggle";
-import { EmptyState } from "../../registry/visant/ui/empty-state";
-import { MagneticCta } from "../../registry/visant/ui/magnetic-cta";
 
-import { VintageLargeKnob } from "../../registry/vintage/ui/vintage-large-knob";
-import { VintageButton } from "../../registry/vintage/ui/vintage-button";
-import { VintageEQ } from "../../registry/vintage/ui/vintage-eq";
-import { VintageToggle } from "../../registry/vintage/ui/vintage-toggle";
-import { VintageTvFrame } from "../../registry/vintage/ui/vintage-tv-frame";
-import { VintageSoundboardPad } from "../../registry/vintage/ui/vintage-soundboard-pad";
-import { VintageXYPad } from "../../registry/vintage/ui/vintage-xy-pad";
+/*
+ * As peças usadas pelas demos escritas aqui dentro: também sob demanda. Importadas direto,
+ * levavam o kit vintage e o motion para o chunk de quem só queria ler a lista de nomes.
+ */
+const Chip = React.lazy(() => import("../../registry/visant/ui/chip").then((m) => ({ default: m.Chip })));
+const PaperShuttle = React.lazy(() => import("../../registry/visant/ui/paper-shuttle").then((m) => ({ default: m.PaperShuttle })));
+const CtaSurface = React.lazy(() => import("../../registry/visant/ui/cta-surface").then((m) => ({ default: m.CtaSurface })));
+const CtaAction = React.lazy(() => import("../../registry/visant/ui/cta-surface").then((m) => ({ default: m.CtaAction })));
+const EraseField = React.lazy(() => import("../../registry/visant/ui/erase-field").then((m) => ({ default: m.EraseField })));
+const SpringDots = React.lazy(() => import("../../registry/visant/ui/spring-dots").then((m) => ({ default: m.SpringDots })));
+const SfxToggle = React.lazy(() => import("../../registry/visant/ui/sfx-toggle").then((m) => ({ default: m.SfxToggle })));
+const EmptyState = React.lazy(() => import("../../registry/visant/ui/empty-state").then((m) => ({ default: m.EmptyState })));
+const MagneticCta = React.lazy(() => import("../../registry/visant/ui/magnetic-cta").then((m) => ({ default: m.MagneticCta })));
+const VintageLargeKnob = React.lazy(() => import("../../registry/vintage/ui/vintage-large-knob").then((m) => ({ default: m.VintageLargeKnob })));
+const VintageButton = React.lazy(() => import("../../registry/vintage/ui/vintage-button").then((m) => ({ default: m.VintageButton })));
+const VintageEQ = React.lazy(() => import("../../registry/vintage/ui/vintage-eq").then((m) => ({ default: m.VintageEQ })));
+const VintageToggle = React.lazy(() => import("../../registry/vintage/ui/vintage-toggle").then((m) => ({ default: m.VintageToggle })));
+const VintageTvFrame = React.lazy(() => import("../../registry/vintage/ui/vintage-tv-frame").then((m) => ({ default: m.VintageTvFrame })));
+const VintageSoundboardPad = React.lazy(() => import("../../registry/vintage/ui/vintage-soundboard-pad").then((m) => ({ default: m.VintageSoundboardPad })));
+const VintageXYPad = React.lazy(() => import("../../registry/vintage/ui/vintage-xy-pad").then((m) => ({ default: m.VintageXYPad })));
+
 /*
  * As demos que moram em arquivo próprio — todas sob demanda.
  *
@@ -307,9 +314,7 @@ export const ehPecaVisual = (i: CatalogItem) => contaComoComponente(i) && Boolea
 
 export const familyLabel = (key: Family) => FAMILIES.find((f) => f.key === key)?.label ?? key;
 
-/** Busca sem acento dos dois lados — em pt-BR ninguém digita cedilha correndo. */
-export const fold = (s: string) =>
-  s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+export { fold };
 
 /**
  * Corta a terminação da palavra em português.

@@ -1,0 +1,71 @@
+"use client";
+
+/** Tudo de /skills que fica abaixo da primeira dobra: as demos, o fecho e o rodapé fixo. */
+
+import { CountUp } from "../../../../registry/visant/ui/count-up";
+import { Acao, LINK, Video } from "./base";
+import { ALTURA_LARGA } from "./nucleo";
+import { Dock, Instalador } from "./dock";
+import { DemoKiller, TelasKiller } from "./demo-killer";
+import { DemoCopy } from "./demo-copy";
+import { DemoMotion } from "./demo-motion";
+import { DemoRefine } from "./demo-refine";
+import { DemoDesign, DemoFrontend } from "./demo-interface";
+import { DemoEditor, DemoPremiere, DemoReels } from "./demo-video";
+import { DemoMcp, DemoMetodo, DemoPreflight } from "./demo-processo";
+
+const PECAS = ["photo-compare", "segmented-control", "sim-slider", "count-up"];
+
+export function Resto({ instalando, setInstalando }: { instalando: boolean; setInstalando: (v: boolean) => void }) {
+  return (
+    <>
+        <DemoKiller />
+        <TelasKiller />
+        <DemoDesign />
+        <DemoFrontend />
+        <DemoCopy />
+        <DemoMotion />
+        <DemoRefine />
+        <DemoEditor />
+        <DemoReels />
+        <DemoPremiere />
+        <DemoPreflight />
+        <DemoMetodo />
+        <DemoMcp />
+
+        <section data-fecho className={`shell grid min-w-0 content-center items-center gap-6 py-6 lg:grid-cols-2 lg:gap-16 ${ALTURA_LARGA}`}>
+          <div className="min-w-0">
+            <h2 className="text-[clamp(2.25rem,5vw,4rem)] font-medium leading-[1.12] tracking-[-0.02em]">
+              <CountUp>12</CountUp> skills, licença MIT.
+            </h2>
+            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
+              <Acao onClick={() => setInstalando(true)} data-acao="fecho">
+                Instalar
+              </Acao>
+              <a href="https://github.com/pedrojaques99/visant-skills-public" className={`${LINK} inline-flex min-h-11 min-w-11 items-center text-casa-base text-casa-fg-2`}>
+                GitHub
+              </a>
+              <a href="/docs" className={`${LINK} inline-flex min-h-11 min-w-11 items-center text-casa-base text-casa-fg-2`}>
+                Docs
+              </a>
+            </div>
+          </div>
+          <div className="min-w-0">
+            <Video nome="library" proporcao="16 / 9" alt="Filme do catálogo @visant/ui com peças de dados e shaders" />
+            <ul className="mt-3 flex flex-wrap gap-x-4">
+              {PECAS.map((nome) => (
+                <li key={nome}>
+                  <a href={`/c/${nome}`} className="inline-flex min-h-11 items-center font-casa-mono text-casa-sm text-casa-fg-2 underline underline-offset-2 outline-none focus-visible:[box-shadow:var(--focus)]">
+                    {nome}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <Dock onInstalar={() => setInstalando(true)} />
+        <Instalador aberto={instalando} onFechar={() => setInstalando(false)} />
+    </>
+  );
+}

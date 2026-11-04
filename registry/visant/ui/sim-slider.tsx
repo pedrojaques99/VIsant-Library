@@ -263,6 +263,8 @@ export function SimSlider({
         onValueChange={handle}
         aria-label={label}
         aria-valuetext={format(value)}
+        // O Slider do shadcn vem com `touch-none`: a dobra inteira virava armadilha pra rolagem.
+        className="[touch-action:pan-y]!"
       />
 
       <p className="text-[12px] leading-[1.5] text-[var(--muted-foreground)]">{assumption}</p>

@@ -55,8 +55,18 @@ export function DemoDesign() {
           setMao(true);
           setI((n) => (n + 1) % ROTAS.length);
         }}
-        className="flex min-h-[20rem] w-full flex-col justify-center gap-5 rounded-tile bg-casa-tile p-6 text-left outline-none focus-visible:[box-shadow:var(--focus)] lg:min-h-[26rem] lg:items-center lg:p-12 lg:text-center"
+        className="grid w-full rounded-tile bg-casa-tile p-6 text-left outline-none focus-visible:[box-shadow:var(--focus)] lg:min-h-[26rem] lg:content-center lg:justify-items-center lg:p-12 lg:text-center"
       >
+        {/* Todas as falas, invisíveis, seguram a altura enquanto elas giram. */}
+        <span aria-hidden="true" className="invisible col-start-1 row-start-1 flex flex-col gap-5 lg:items-center">
+          <span className="grid text-[clamp(2rem,5vw,4rem)] font-medium leading-[1.12] tracking-[-0.02em]">
+            {ROTAS.map((r) => (
+              <span key={r.fala} className="col-start-1 row-start-1">{r.fala}</span>
+            ))}
+          </span>
+          <span className="size-5" />
+          <span className="w-fit px-3 py-2 font-casa-mono text-casa-sm">{rota.trilha}</span>
+        </span>
         <AnimatePresence mode="wait" initial={false}>
           <motion.span
             key={i}
@@ -64,7 +74,7 @@ export function DemoDesign() {
             animate={{ opacity: 1, y: 0 }}
             exit={menos ? undefined : { opacity: 0 }}
             transition={{ duration: DUR.base, ease: EASE_OUT }}
-            className="flex flex-col gap-5 lg:items-center"
+            className="col-start-1 row-start-1 flex flex-col gap-5 lg:items-center"
           >
             <span className="text-[clamp(2rem,5vw,4rem)] font-medium leading-[1.12] tracking-[-0.02em]">{rota.fala}</span>
             <ArrowDown className="size-5 text-casa-fg-3" aria-hidden="true" />
@@ -203,7 +213,7 @@ export function DemoFrontend() {
           </motion.button>
         </motion.div>
         <div className="flex justify-end">
-          <Acao onClick={rodar} data-acao="frontend">
+          <Acao onClick={rodar} secundaria={fim} data-acao="frontend">
             {fim ? "De novo" : "Cortar"}
           </Acao>
         </div>

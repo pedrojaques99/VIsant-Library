@@ -80,6 +80,7 @@ export function DemoPreflight() {
 
   const resolver = () => {
     seq.limpar();
+    setLidas(CHECAGENS.length);
     CHECAGENS.filter((c) => !ok.has(c.id)).forEach((c, i) => seq.depois(i * 450, () => void tocar(c.id)));
   };
 
@@ -136,7 +137,7 @@ export function DemoPreflight() {
           <p className="text-[2rem] font-medium leading-none tabular-nums" data-veredito aria-label={`${verdes} de 5 verdes`}>
             {verdes}/5
           </p>
-          <Acao onClick={verdes === CHECAGENS.length ? rodar : resolver} disabled={lidas < CHECAGENS.length} data-acao="preflight">
+          <Acao onClick={verdes === CHECAGENS.length ? rodar : resolver} secundaria={verdes === CHECAGENS.length} data-acao="preflight">
             {verdes === CHECAGENS.length ? "De novo" : "Resolver"}
           </Acao>
         </div>

@@ -155,6 +155,7 @@ export function Kanban<T = unknown, C = unknown>({
    * aparece — mas aparece sozinha, à vista, e não escondida sob uma animação.
    */
   const [pousando, setPousando] = useState(false);
+  const [fantasma, setFantasma] = useState<{ escala: number; largura: number } | null>(null);
   const pousoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const aguardaPouso = useCallback(() => {
     if (pousoRef.current) clearTimeout(pousoRef.current);
@@ -318,9 +319,24 @@ export function Kanban<T = unknown, C = unknown>({
   const handleDragStart = (e: DragStartEvent) => {
     const id = String(e.active.id);
     setActiveId(id);
+    medirFantasma(id);
     const col = columnOf(id) ?? null;
     fromColumnRef.current = col;
     fromIndexRef.current = col ? (ordered[col] ?? []).indexOf(id) : -1;
+  };
+
+  /*
+   * Board dentro de um `transform: scale` (vitrine, card, modal animando): o
+   * fantasma vai pro `body` e perderia a escala, e o cartão saltava de tamanho ao
+   * ser levantado. A escala medida na largura do cartão volta num invólucro, por
+   * fora do nó com a sombra, e o dedo continua movendo em pixel de tela. Fora de
+   * um palco escalado isto é nulo.
+   */
+  const medirFantasma = (id: string) => {
+    const el = boardEl?.querySelector<HTMLElement>(`[data-kanban-card-id="${CSS.escape(id)}"]`);
+    const largura = el?.offsetWidth ?? 0;
+    const escala = largura ? el!.getBoundingClientRect().width / largura : 1;
+    setFantasma(Math.abs(escala - 1) > 0.01 ? { escala, largura } : null);
   };
 
   const handleDragOver = (e: DragOverEvent) => {
@@ -448,8 +464,10 @@ export function Kanban<T = unknown, C = unknown>({
   const overlay = (
     <DragOverlay dropAnimation={dropAnimation}>
       {activeItem ? (
-        <div className="kanban-card-overlay">
-          {renderCard({ item: activeItem, overlay: true })}
+        <div style={fantasma ? { width: fantasma.largura, transform: `scale(${fantasma.escala})`, transformOrigin: "top left" } : undefined}>
+          <div className="kanban-card-overlay">
+            {renderCard({ item: activeItem, overlay: true })}
+          </div>
         </div>
       ) : null}
     </DragOverlay>

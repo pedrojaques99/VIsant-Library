@@ -20,6 +20,7 @@
  */
 
 import * as React from "react";
+import { useDobraAssentada } from "@/lib/rede";
 import { cn } from "@/lib/utils";
 
 const CodigoRealcado = React.lazy(() => import("./codigo-realce"));
@@ -78,9 +79,11 @@ function Cru({ codigo, numerado, className }: CodigoProps) {
 }
 
 export function Codigo(props: CodigoProps) {
+  /* O motor do realce pesa 26 KB, e o código legível já está na tela: desce depois da primeira dobra. */
+  const assentada = useDobraAssentada();
   return (
     <React.Suspense fallback={<Cru {...props} />}>
-      <CodigoRealcado {...props} />
+      {assentada ? <CodigoRealcado {...props} /> : <Cru {...props} />}
     </React.Suspense>
   );
 }

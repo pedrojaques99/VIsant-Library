@@ -171,7 +171,7 @@ export function SloshSlider({
 
       <div
         ref={trilho}
-        className="relative h-11 cursor-pointer touch-none select-none overflow-hidden rounded-[var(--r-pill)] bg-muted"
+        className="relative h-11 cursor-pointer touch-pan-y select-none overflow-hidden rounded-[var(--r-pill)] bg-muted"
         onPointerDown={(e) => {
           if (e.button !== 0) return;
           arrastando.current = true;

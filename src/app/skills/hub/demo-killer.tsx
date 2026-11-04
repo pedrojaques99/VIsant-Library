@@ -10,17 +10,8 @@ import * as React from "react";
 import { Check, X } from "lucide-react";
 import { PhotoCompare } from "../../../../registry/visant/ui/photo-compare";
 import { SAIDA_ABERTA, SAIDA_FECHADA, SLOP_CARTAO } from "./amostras";
-import { Acao, ALTURA_DOBRA, ANIMA_COR, ANIMA_OPACIDADE, cx, Dobra, LINK, Terminal, useAoEntrar, useMenosMovimento, useSequencia } from "./base";
-import cA from "./posters/checkout-a.webp";
-import cD from "./posters/checkout-d.webp";
-import lA from "./posters/landing-a.webp";
-import lD from "./posters/landing-d.webp";
-import mA from "./posters/mata-a.webp";
-import mD from "./posters/mata-d.webp";
-import pA from "./posters/pauta-a.webp";
-import pD from "./posters/pauta-d.webp";
-import sA from "./posters/settings-a.webp";
-import sD from "./posters/settings-d.webp";
+import { Acao, ALTURA_LARGA, ANIMA_COR, ANIMA_OPACIDADE, cx, Dobra, LINK, Terminal, useAoEntrar, useMenosMovimento, useSequencia } from "./base";
+import { foto, miniatura } from "./fotos";
 
 /** O elemento do cartão e o que o portão diz dele (saída real, linha a linha). */
 const ACHADOS = {
@@ -102,14 +93,15 @@ export function DemoKiller() {
     >
       <div ref={palco} className="flex min-w-0 flex-col gap-3 lg:mx-auto lg:w-full lg:max-w-4xl" data-demo="killer">
         <div className="relative min-w-0 overflow-hidden rounded-tile bg-casa-bg p-5 pr-12 lg:p-10 lg:pr-14">
-          {limpo ? (
-            <div data-cartao="limpo">
-              <p className="text-[1.75rem] font-medium leading-tight lg:text-[2.5rem]">Pro</p>
-              <p className="mt-2 text-casa-lg text-casa-fg-2">For studios with up to 5 people.</p>
-              <p className="mt-6 text-[1.5rem] text-casa-fg lg:text-[2rem]">$49 per month</p>
+          <div className="grid">
+            <div data-cartao="limpo" aria-hidden={!limpo} className={cx("col-start-1 row-start-1 flex flex-col justify-between", ANIMA_OPACIDADE, !limpo && "invisible opacity-0")}>
+              <div>
+                <p className="text-[1.75rem] font-medium leading-tight lg:text-[2.5rem]">Pro</p>
+                <p className="mt-2 text-casa-lg text-casa-fg-2">For studios with up to 5 people.</p>
+              </div>
+              <p className="text-[1.75rem] text-casa-fg lg:text-[2.25rem]">$49 per month</p>
             </div>
-          ) : (
-            <div data-cartao="slop" className="space-y-3">
+            <div data-cartao="slop" aria-hidden={limpo} className={cx("col-start-1 row-start-1 space-y-3", limpo && "invisible")}>
               <div className="relative">
                 <p className="font-casa-mono text-casa-sm uppercase tracking-widest text-casa-fg-3">{SLOP_CARTAO.rotulo}</p>
                 <Marca alvo="rotulo" passo={passo} ativo={ativo} onToque={setAtivo} />
@@ -132,7 +124,7 @@ export function DemoKiller() {
                 <Marca alvo="preco" passo={passo} ativo={ativo} onToque={setAtivo} />
               </div>
             </div>
-          )}
+          </div>
           {/* a varredura: atravessa uma vez por rodada */}
           {!limpo && !fim && !menos ? (
             <span
@@ -154,7 +146,7 @@ export function DemoKiller() {
               </span>
             ) : null}
           </p>
-          <Acao onClick={limpo ? varrer : corrigir} disabled={!limpo && !fim} data-acao="killer">
+          <Acao onClick={limpo ? varrer : corrigir} secundaria={limpo} data-acao="killer">
             {limpo ? "De novo" : "Corrigir"}
           </Acao>
         </div>
@@ -164,12 +156,14 @@ export function DemoKiller() {
 }
 
 const TELAS = [
-  { id: "mata", antes: mA, depois: mD, nome: "café" },
-  { id: "pauta", antes: pA, depois: pD, nome: "agenda" },
-  { id: "checkout", antes: cA, depois: cD, nome: "checkout" },
-  { id: "landing", antes: lA, depois: lD, nome: "landing" },
-  { id: "settings", antes: sA, depois: sD, nome: "configurações" },
+  { id: "mata", nome: "café" },
+  { id: "pauta", nome: "agenda" },
+  { id: "checkout", nome: "checkout" },
+  { id: "landing", nome: "landing" },
+  { id: "settings", nome: "configurações" },
 ];
+
+const TAMANHOS = "(min-width: 1024px) 896px, 100vw";
 
 /** Arrasta a cortina. As miniaturas trocam a tela, sem palavra nenhuma. */
 export function TelasKiller() {
@@ -177,16 +171,24 @@ export function TelasKiller() {
   const t = TELAS.find((x) => x.id === id) ?? TELAS[0];
   return (
     <section className="bg-casa-tile" data-demo="telas" aria-label="Antes e depois em cinco telas, com marcas inventadas">
-      <div className={cx("shell flex min-w-0 flex-col justify-center gap-3 py-4 lg:py-8", ALTURA_DOBRA)}>
+      <div className={cx("shell flex min-w-0 flex-col justify-center gap-3 py-6 lg:py-8", ALTURA_LARGA)}>
         <div data-sobreposicao className="contents">
+        <div className="w-full min-w-0 lg:mx-auto lg:max-w-4xl">
         <PhotoCompare
           key={t.id}
           ratio="880/580"
           label={`Antes e depois da tela de ${t.nome}`}
-          before={<img src={t.antes} alt="" />}
-          after={<img src={t.depois} alt="" />}
-          className="w-full overflow-hidden rounded-tile lg:mx-auto lg:max-w-4xl"
+          beforeLabel={null}
+          afterLabel={null}
+          before={<img {...foto(`${t.id}-a`)} sizes={TAMANHOS} alt="" loading="lazy" decoding="async" />}
+          after={<img {...foto(`${t.id}-d`)} sizes={TAMANHOS} alt="" loading="lazy" decoding="async" />}
+          className="w-full overflow-hidden rounded-tile"
         />
+        <p className="mt-1.5 flex justify-between px-1 text-casa-sm text-casa-fg-2">
+          <span>depois</span>
+          <span>antes</span>
+        </p>
+        </div>
         </div>
         <div className="flex justify-center gap-2" role="group" aria-label="Escolher a tela">
           {TELAS.map((x) => (
@@ -203,7 +205,7 @@ export function TelasKiller() {
                 x.id === id ? "opacity-100 [box-shadow:0_0_0_2px_var(--casa-fg)]" : "opacity-50",
               )}
             >
-              <img src={x.depois} alt="" onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} className="size-full object-cover" />
+              <img src={miniatura(`${x.id}-d`)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} className="size-full object-cover" />
             </button>
           ))}
         </div>

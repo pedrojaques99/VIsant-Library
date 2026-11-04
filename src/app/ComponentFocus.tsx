@@ -115,11 +115,39 @@ const useSemColuna = () =>
  * ocupa menos que ela. Então a escala sai do que a peça desenhou, medido nos
  * primeiros instantes e depois fechado: acompanhar para sempre faria o palco
  * pulsar a cada frase de um ticker.
+ *
+ * `onAltura`: a peça alta não encolhe até virar miniatura. Reprovado em aparelho
+ * real: o kanban ficava com 169px de largura em 390, cartão de 24px, texto de 11px.
+ * O palco pede a altura da peça na escala da largura, e a página rola; a escala só
+ * encolhe por largura. Com controles embaixo o palco gruda e tolera até 25% de
+ * encolhimento; passando disso ele cresce e para de grudar (`tolerancia`).
  */
-function PalcoDaPilha({ w, h, children }: { w: number; h: number; children: React.ReactNode }) {
+function PalcoDaPilha({
+  w: wMinimo,
+  h,
+  onAltura,
+  tolerancia = 1,
+  children,
+}: {
+  w: number;
+  h: number;
+  onAltura?: (altura: number | null) => void;
+  tolerancia?: number;
+  children: React.ReactNode;
+}) {
   const caixa = React.useRef<HTMLDivElement>(null);
   const [tela, setTela] = React.useState({ w: 0, h: 0 });
+  /* A peça ocupa a largura do palco: o `frameW` é um piso, e nunca amplia nada. */
+  const w = Math.max(wMinimo, tela.w);
   const [peca, setPeca] = React.useState({ w, h });
+  const [medida, setMedida] = React.useState(false);
+  const base = React.useRef(0);
+  React.useEffect(() => {
+    if (!onAltura || !medida || !tela.h) return;
+    base.current ||= tela.h;
+    const alvo = Math.ceil(peca.h * Math.min(1, tela.w / peca.w));
+    onAltura(alvo * tolerancia > base.current ? alvo : null);
+  }, [onAltura, medida, tela.h, tela.w, peca.h, peca.w]);
 
   React.useEffect(() => {
     const el = caixa.current;
@@ -137,9 +165,13 @@ function PalcoDaPilha({ w, h, children }: { w: number; h: number; children: Reac
       let largura = w;
       for (const filho of Array.from(miolo.children) as HTMLElement[]) {
         altura = Math.max(altura, filho.offsetHeight);
-        largura = Math.max(largura, filho.scrollWidth);
+        /* Trilho infinito tem `scrollWidth` de dezenas de telas, e a peça virava um risco. */
+        if (filho.scrollWidth <= w * 2) largura = Math.max(largura, filho.scrollWidth);
       }
-      if (altura) setPeca({ w: largura, h: altura });
+      if (altura) {
+        setPeca({ w: largura, h: altura });
+        setMedida(true);
+      }
     };
     const ro = new ResizeObserver(medir);
     let fim: ReturnType<typeof setTimeout> | undefined;
@@ -160,7 +192,9 @@ function PalcoDaPilha({ w, h, children }: { w: number; h: number; children: Reac
       clearTimeout(fim);
       soltar();
     };
-  }, [w]);
+    /* `tela.h`: o `PalcoFixo` só nasce depois da primeira medida da caixa. Sem isto a
+       medição não achava o miolo, nunca mais rodava e valia a altura do catálogo. */
+  }, [w, tela.h > 0]);
 
   return (
     <div ref={caixa} className="h-full w-full">
@@ -169,6 +203,38 @@ function PalcoDaPilha({ w, h, children }: { w: number; h: number; children: Reac
           {children}
         </PalcoFixo>
       ) : null}
+    </div>
+  );
+}
+
+/** A caixa do palco na pilha: altura de tela, ou a da peça quando não há controle grudado. */
+function CaixaDaPilha({
+  controles,
+  w,
+  h,
+  onCresceu,
+  children,
+}: {
+  controles: boolean;
+  w: number;
+  h: number;
+  onCresceu: (cresceu: boolean) => void;
+  children: React.ReactNode;
+}) {
+  const [altura, setAltura] = React.useState<number | null>(null);
+  React.useEffect(() => {
+    onCresceu(altura !== null);
+    return () => onCresceu(false);
+  }, [altura, onCresceu]);
+  /* 64 = o respiro de `pt-14 pb-2`, que a altura da caixa inclui. */
+  return (
+    <div
+      className={cn("px-3 pb-2 pt-14", controles ? "h-[max(14rem,38svh)]" : "h-[max(15rem,44svh)]")}
+      style={altura ? { height: altura + 64 } : undefined}
+    >
+      <PalcoDaPilha w={w} h={h} onAltura={setAltura} tolerancia={controles ? 0.75 : 1}>
+        {children}
+      </PalcoDaPilha>
     </div>
   );
 }
@@ -392,6 +458,7 @@ export function ComponentFocus({
   const frameH = Math.max(natural.h, MIN_STAGE_H);
   const semColuna = useSemColuna();
   const compacto = semColuna && !preset.px && aba === "demo";
+  const [palcoCresceu, setPalcoCresceu] = React.useState(false);
 
   return (
     <article
@@ -420,7 +487,7 @@ export function ComponentFocus({
           /* Na pilha o palco sangra até as bordas: grudado, canto redondo deixaria o conteúdo vazar por trás. */
           "max-lg:order-2 max-lg:-mx-[var(--shell-pad)]",
           aba === "demo" && Demo ? "palco" : "casa bg-casa-tile",
-          compacto && controles
+          compacto && controles && !palcoCresceu
             ? "z-20 [@media(max-width:1023px)_and_(min-height:560px)]:sticky [@media(max-width:1023px)_and_(min-height:560px)]:top-[var(--shell-header-h)]"
             : null,
         )}
@@ -476,15 +543,13 @@ export function ComponentFocus({
         ) : null}
 
         {aba === "demo" && Demo && compacto ? (
-          <div className={cn("px-3 pb-2 pt-14", controles ? "h-[max(14rem,38svh)]" : "h-[max(15rem,44svh)]")}>
-            <PalcoDaPilha w={frameW} h={natural.h}>
-              <ErrorBoundary fallback={null}>
-                <React.Suspense fallback={null}>
-                  <Demo props={knobs.props} />
-                </React.Suspense>
-              </ErrorBoundary>
-            </PalcoDaPilha>
-          </div>
+          <CaixaDaPilha key={item.name} controles={Boolean(controles)} w={frameW} h={natural.h} onCresceu={setPalcoCresceu}>
+            <ErrorBoundary fallback={null}>
+              <React.Suspense fallback={null}>
+                <Demo props={knobs.props} />
+              </React.Suspense>
+            </ErrorBoundary>
+          </CaixaDaPilha>
         ) : aba === "demo" && Demo ? (
           <div
             /*

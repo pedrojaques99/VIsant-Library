@@ -226,7 +226,8 @@ export function PullToRefresh({
         const g = gesto.current;
         if (!g || g.id !== e.pointerId) return;
         const dy = (e.clientY - g.inicioY) / (g.escala || 1);
-        if (dy > 4 && !e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.setPointerCapture(e.pointerId);
+        // Toque já tem captura implícita: pedir de novo dispara `lostpointercapture`, e o gesto morria aos 10px.
+        if (dy > 4 && e.pointerType !== "touch" && !e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.setPointerCapture(e.pointerId);
         altura.set(dy <= 0 ? 0 : max * (1 - 1 / (dy / max + 1)));
       }}
       onPointerUp={soltar}

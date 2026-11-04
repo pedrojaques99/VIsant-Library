@@ -7,10 +7,10 @@
  * chegavam no primeiro carregamento, antes de qualquer pessoa rolar até ele.
  * Aqui o pedaço só é buscado quando o card entra na tela.
  *
- * Uma nota sobre o palco: o `FitStage` escala a demo com `transform` quando ela
- * não cabe, e o dnd-kit move o card em pixel de tela, sem saber da escala. No
- * ladrilho o fantasma anda um pouco mais rápido que o board; a ficha e a sala têm
- * escala maior. É limite do palco, não da peça.
+ * Uma nota sobre o palco: o ladrilho escala a demo com `transform` e o dnd-kit
+ * move o card em pixel de tela. O fantasma mora no `body`, então acompanha o dedo,
+ * e o Kanban devolve a ele a escala do palco. Na ficha do celular não há escala:
+ * o palco cresce até a altura do quadro.
  */
 
 import * as React from "react";
@@ -177,7 +177,7 @@ export default function KanbanDemo({ denso = false }: { denso?: boolean }) {
         // conteúdo em três níveis (o que, pra quem, quem e quando).
         renderCard={({ item }) =>
           empilhado ? (
-            <div className="flex items-center justify-between gap-3 rounded-[var(--r-control,0.625rem)] border border-border bg-card px-3 py-2 [box-shadow:var(--e-flat)]">
+            <div className="flex min-h-11 items-center justify-between gap-3 rounded-[var(--r-control,0.625rem)] border border-border bg-card px-3 py-2 [box-shadow:var(--e-flat)]">
               <span className="min-w-0 truncate text-[14px] font-medium leading-snug text-foreground">{item.data.t}</span>
               <span
                 aria-label={`Com ${item.data.quem}`}

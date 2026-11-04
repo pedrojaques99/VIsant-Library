@@ -26,9 +26,10 @@
 import { mkdirSync, readFileSync, readdirSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { contaDaVitrine } from "./conta-vitrine.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const DIST = join(ROOT, "dist");
+const DIST = process.env.VISANT_DIST ? resolve(process.env.VISANT_DIST) : join(ROOT, "dist");
 const SITE = "https://ui.visantlabs.com";
 
 const registry = JSON.parse(readFileSync(join(ROOT, "registry.json"), "utf8"));
@@ -38,12 +39,13 @@ const escapar = (s = "") =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** Injeta as meta tags no lugar do `<title>` que o Vite deixou. */
-function comMeta({ titulo, descricao, url, imagem, noindex }) {
+function comMeta({ titulo, descricao, url, imagem, noindex, markdown }) {
   const tags = [
     `<title>${escapar(titulo)}</title>`,
     ...(noindex ? [`<meta name="robots" content="noindex" />`] : []),
     `<meta name="description" content="${escapar(descricao)}" />`,
     `<link rel="canonical" href="${url}" />`,
+    ...(markdown ? [`<link rel="alternate" type="text/markdown" href="${markdown}" />`] : []),
     `<meta property="og:type" content="website" />`,
     `<meta property="og:site_name" content="@visant/ui" />`,
     `<meta property="og:title" content="${escapar(titulo)}" />`,
@@ -90,12 +92,18 @@ const DOBRAS = {
     h1: "A library da Visant",
     classe: H1_CASA,
     sub: "Componentes e shaders pra React. Cada um veste a marca que você escolher.",
+    chunks: [/^RotaCatalogo-.*\.js$/],
+    /* As três primeiras fotos da grade no celular, no tema padrão. */
+    imagens: JSON.parse(readFileSync(join(ROOT, "curadoria", "destaques.json"), "utf8"))
+      .slice(0, 3)
+      .map((n) => ({ src: `/shots/${n}-escuro.webp`, media: "(max-width: 639px)" })),
   },
   marca: {
     h1: "Marca",
     classe: H1_CASA,
     sub: "Identidade, cor, tipografia, forma e movimento, com um comando para instalar.",
     chunks: [/^BrandStudio-.*\.js$/],
+    imagens: ["/logos/visant.webp"],
   },
   skills: {
     fonte: "src/app/skills/Hub.tsx",
@@ -103,6 +111,18 @@ const DOBRAS = {
     classe: H1_HUB,
     sub: "Skills pro Claude Code: interface, copy, motion, vídeo e projeto grande.",
     chunks: [/^Hub-.*\.js$/],
+    imagens: [
+      /* Só no celular: a tela larga escolhe a foto por `srcset`, e o preload pediria outra. */
+      { asset: /^hero-a-.*\.webp$/, media: "(max-width: 1023px)" },
+      { asset: /^hero-d-.*\.webp$/, media: "(max-width: 1023px)" },
+    ],
+  },
+  docs: {
+    fonte: "src/app/Docs.tsx",
+    h1: "Docs",
+    classe: H1_CASA,
+    sub: JSON.parse(readFileSync(join(ROOT, "src", "app", "docs-conteudo.json"), "utf8")).lead,
+    chunks: [/^Docs-.*\.js$/],
   },
   "skills/filme": {
     fonte: "src/app/skills/Filme.tsx",
@@ -110,7 +130,9 @@ const DOBRAS = {
     classe: H1_HUB,
     sub: "Skills grátis pro Claude Code. Role a página e veja esta tela ficar limpa.",
     chunks: [/^Filme-.*\.js$/, /^skills\.generated-.*\.js$/],
-    imagens: ["/media/skills/filme/mata-antes.webp"],
+    /* A abertura do filme é o checkout (`ABERTURA` em roteiro.ts). */
+    imagens: ["/media/skills/filme/checkout-antes.webp"],
+    estilos: [/^Filme-.*\.css$/],
   },
   "skills/killer": {
     fonte: "src/app/skills/CarroChefe.tsx",
@@ -122,6 +144,23 @@ const DOBRAS = {
 };
 
 const ASSETS = readdirSync(join(DIST, "assets"));
+
+/*
+ * O chunk da rota e o que ele importa direto. Sem a lista inteira no HTML, cada nível do grafo só
+ * é descoberto depois do anterior baixar, e em Slow 4G cada nível custa 400 ms de ida e volta.
+ */
+function comDependencias(chunks) {
+  const vistos = new Set();
+  const visitar = (f) => {
+    if (vistos.has(f)) return;
+    vistos.add(f);
+    const codigo = readFileSync(join(DIST, "assets", f), "utf8");
+    for (const [, dep] of codigo.matchAll(/(?:from|import)\s*"\.\/([^"]+\.js)"/g)) visitar(dep);
+  };
+  chunks.forEach(visitar);
+  /* A entrada e o que ela importa já estão no HTML que o Vite escreveu. */
+  return [...vistos].filter((f) => !base.includes(`/assets/${f}`));
+}
 
 function comDobra(html, slug) {
   const d = DOBRAS[slug];
@@ -136,8 +175,18 @@ function comDobra(html, slug) {
     process.exit(1);
   }
   const preloads = [
-    ...(d.chunks ?? []).flatMap((re) => ASSETS.filter((f) => re.test(f))).map((f) => `<link rel="modulepreload" crossorigin href="/assets/${f}">`),
-    ...(d.imagens ?? []).map((src) => `<link rel="preload" as="image" href="${src}" fetchpriority="low">`),
+    ...comDependencias((d.chunks ?? []).flatMap((re) => ASSETS.filter((f) => re.test(f)))).map((f) => `<link rel="modulepreload" crossorigin href="/assets/${f}">`),
+    ...(d.estilos ?? []).flatMap((re) => ASSETS.filter((f) => re.test(f))).map((f) => `<link rel="preload" as="style" crossorigin href="/assets/${f}">`),
+    /* O tema da marca padrão: o provider pede um depois do outro, e eram duas idas e voltas depois do React. */
+    `<link rel="preload" as="fetch" crossorigin href="/r/brands.json">`,
+    `<link rel="preload" as="fetch" crossorigin href="/r/theme-visant.json">`,
+    /* A fonte da casa e as fotos da dobra saem junto com o HTML: pedidas só depois do React, esperavam uma ida e volta a mais com a banda parada. */
+    ...ASSETS.filter((f) => /^geist-latin-wght-normal-.*\.woff2$/.test(f)).map((f) => `<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/${f}">`),
+    ...(d.imagens ?? []).map((i) => {
+      const { src, asset, media } = typeof i === "string" ? { src: i } : i;
+      const href = asset ? `/assets/${ASSETS.find((f) => asset.test(f))}` : src;
+      return `<link rel="preload" as="image" href="${href}"${media ? ` media="${media}"` : ""}>`;
+    }),
   ];
   /* O tema sai aqui também: esta dobra pinta antes de o `main.tsx` rodar. */
   const tema = `<script>try{document.documentElement.classList.toggle("dark",localStorage.getItem("visant:ui:tema")!=="claro")}catch(e){document.documentElement.classList.add("dark")}</script>`;
@@ -158,30 +207,11 @@ function comDobra(html, slug) {
  * das famílias ocultas e não arquivada pela curadoria. Antes este número saía
  * de `registry.items.length` e dizia 183 enquanto a página dizia 176.
  */
-const catalogSrc = readFileSync(join(ROOT, "src", "app", "catalog.tsx"), "utf8");
-const notas = JSON.parse(readFileSync(join(ROOT, "curadoria", "notas.json"), "utf8"));
-const arquivada = (n) => Boolean(n && (n.excluir || n.nota <= 2));
-const familias = [
-  ...catalogSrc
-    .slice(catalogSrc.indexOf("export const FAMILIES"), catalogSrc.indexOf("export const MIN_ABA"))
-    .matchAll(/key:\s*"([^"]+)",\s*label:\s*"([^"]+)"[^}]*?(oculta: true)?\s*\}/g),
-].map(([, key, label, oculta]) => ({ key, label, oculta: Boolean(oculta) }));
-
-const catalogBlock = catalogSrc.slice(catalogSrc.indexOf("export const CATALOG"));
-const pecasPorFamilia = new Map();
-for (const [, nome, key] of catalogBlock.matchAll(
-  /^\s{4}name: "([^"]+)",(?:(?!\n\s{4}name: ")[\s\S])*?family: "([^"]+)"/gm,
-)) {
-  if (arquivada(notas[nome])) continue;
-  pecasPorFamilia.set(key, (pecasPorFamilia.get(key) ?? 0) + 1);
-}
-const totalComponentes = familias
-  .filter((f) => !f.oculta)
-  .reduce((n, f) => n + (pecasPorFamilia.get(f.key) ?? 0), 0);
+const { notas, arquivada, familias, pecasPorFamilia, frase: CONTA } = contaDaVitrine(ROOT);
 
 const HOME = {
-  titulo: "@visant/ui — a library da Visant",
-  descricao: `${totalComponentes} componentes React em registry shadcn. Cada um veste a marca que você escolher.`,
+  titulo: "A library da Visant / @visant/ui",
+  descricao: `${CONTA} pra React, em registry shadcn. Cada um veste a marca que você escolher.`,
 };
 
 writeFileSync(
@@ -201,7 +231,7 @@ const SECOES = [
     titulo: "Catálogo / @visant/ui",
     /* `/catalogo` deixou de ser a página com tudo dentro: virou o índice das
        categorias, e cada fatia tem endereço próprio em `/catalogo/<familia>`. */
-    descricao: `As ${registry.items.length} peças do registry, divididas por categoria — cada fatia com demo viva e comando de instalação.`,
+    descricao: `${CONTA} pra React, divididos por categoria, cada fatia com demo viva e comando de instalação.`,
   },
   {
     slug: "skills",
@@ -221,7 +251,7 @@ const SECOES = [
   {
     slug: "docs",
     titulo: "Docs / @visant/ui",
-    descricao: "Libs, hooks, temas e regras do registry, sem interface própria.",
+    descricao: "Instale uma peça, troque de marca em runtime, conecte o agente e consulte libs, hooks, temas e regras.",
   },
   {
     slug: "marca",
@@ -241,6 +271,7 @@ const SECOES = [
      dá 404 na Vercel, porque o rewrite pro index.html não cobre esta vitrine. */
   {
     slug: "lab",
+    noindex: true,
     titulo: "Lab / @visant/ui",
     descricao: "Bancada de interações: uma nova por dia, e só fica a que presta.",
   },
@@ -249,6 +280,7 @@ const SECOES = [
      ler o `?code=`, e o login nunca fecha. */
   {
     slug: "callback",
+    noindex: true,
     titulo: "Entrando / @visant/ui",
     descricao: "Conectando sua conta Visant Labs.",
   },
@@ -296,11 +328,9 @@ const FAMILIAS = familias.map(({ key, label }) => {
   const n = pecasPorFamilia.get(key) ?? 0;
   return {
     slug: `catalogo/${key}`,
-    /* "— catálogo" não é enfeite: a família `marca` e a seção `/marca` (o Brand
-       Studio) têm o mesmo rótulo, e sem isto os dois documentos sairiam com o
-       título "Marca / @visant/ui". Dois links diferentes com a mesma cara no
-       chat e na busca é o defeito que o prerender existe para não ter. */
-    titulo: `${label} — catálogo @visant/ui`,
+    /* "catálogo" não é enfeite: a família `marca` e a seção `/marca` (o Brand Studio) têm o
+       mesmo rótulo. O mesmo título sai no cliente (`RotaCatalogo`). */
+    titulo: `${label} / catálogo @visant/ui`,
     descricao: `${n} ${n === 1 ? "peça" : "peças"} da categoria ${label}, com demo viva e comando de instalação.`,
   };
 });
@@ -325,8 +355,18 @@ writeFileSync(
 
 const comDobraFinal = (slug, meta) => comDobra(comMeta(meta), slug);
 
+/* As páginas que têm versão em Markdown própria, gerada por scripts/llms.mjs. */
+const COM_MARKDOWN = new Set(["docs", "skills", "skills/killer", "marca"]);
+
 for (const s of [...SECOES, ...FAMILIAS, ...KITS]) {
-  escrever(s.slug, comDobraFinal(s.slug, { titulo: s.titulo, descricao: s.descricao, url: `${SITE}/${s.slug}`, imagem: `${SITE}/og/home.png`, noindex: s.noindex }));
+  escrever(s.slug, comDobraFinal(s.slug, {
+    titulo: s.titulo,
+    descricao: s.descricao,
+    url: `${SITE}/${s.slug}`,
+    imagem: `${SITE}/og/home.png`,
+    noindex: s.noindex,
+    markdown: COM_MARKDOWN.has(s.slug) ? `/${s.slug}.md` : undefined,
+  }));
 }
 
 for (const item of registry.items) {
@@ -337,6 +377,8 @@ for (const item of registry.items) {
       descricao: item.description ?? HOME.descricao,
       url: `${SITE}/c/${item.name}`,
       imagem: `${SITE}/og/${item.name}.png`,
+      noindex: arquivada(notas[item.name]),
+      markdown: `/r/${item.name}.md`,
     }),
   );
 }
@@ -344,6 +386,45 @@ for (const item of registry.items) {
 console.log(
   `páginas: ${registry.items.length + SECOES.length + FAMILIAS.length + KITS.length + 1}`,
 );
+
+/*
+ * O que o robô pode ler. Só entra rota que responde 200 e quer ser indexada: sem
+ * `noindex`, sem família oculta, sem endereço que o vercel.json redireciona e sem
+ * peça arquivada. A fundação fica fora do catálogo, mas é o que /docs lista.
+ */
+const redirecionados = new Set(
+  JSON.parse(readFileSync(join(ROOT, "vercel.json"), "utf8")).redirects.filter((r) => !r.has).map((r) => r.source.slice(1)),
+);
+const familiaOculta = new Set(familias.filter((f) => f.oculta).map((f) => f.key));
+const rotas = [
+  "",
+  ...SECOES.filter((s) => !s.noindex).map((s) => s.slug),
+  ...familias.filter((f) => !f.oculta).map((f) => `catalogo/${f.key}`),
+  ...registry.items
+    .filter((i) => !arquivada(notas[i.name]))
+    .filter((i) => i.categories?.[0] === "fundacao" || !familiaOculta.has(i.categories?.[0]))
+    .map((i) => `c/${i.name}`),
+].filter((r) => !redirecionados.has(r));
+
+const xml = [
+  `<?xml version="1.0" encoding="UTF-8"?>`,
+  `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
+  ...rotas.map((r) => `  <url><loc>${SITE}/${r}</loc></url>`),
+  `</urlset>`,
+  ``,
+];
+writeFileSync(join(DIST, "sitemap.xml"), xml.join("\n"));
+/* `llms.txt` não é campo do padrão de robots (RFC 9309): vai como comentário, e o Sitemap é o oficial. */
+const robots = [
+  `# Agentes: comece por ${SITE}/llms.txt ou conecte ${SITE}/mcp`,
+  `User-agent: *`,
+  `Allow: /`,
+  `Disallow: /api/`,
+  ``,
+  `Sitemap: ${SITE}/sitemap.xml`,
+  ``,
+];
+writeFileSync(join(DIST, "robots.txt"), robots.join("\n"));
 
 if (!existsSync(join(DIST, "c"))) {
   console.error("dist/c não foi criado — o prerender rodou antes do build?");

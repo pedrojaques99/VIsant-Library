@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
  * então o gesto tem o mesmo "peso" para 0–1 e para 0–5000.
  *
  * Pointer events (não mouse events) porque o mesmo painel roda em tablet — e
- * `touch-none` nos alvos de arrasto impede o scroll da página de roubar o gesto.
+ * `touch-pan-y` nos alvos de arrasto: de lado é do número, em pé continua rolando a página.
  *
  * Listeners vão no `document`, não no elemento: o ponteiro sai do campo em
  * qualquer arrasto real. Por isso o cleanup no unmount existe — sem ele um
@@ -263,7 +263,7 @@ export const ScrubInput = React.memo<ScrubInputProps>(function ScrubInput({
     >
       <span
         className={cn(
-          "cursor-ew-resize touch-none select-none truncate font-mono text-[10px] uppercase leading-none tracking-widest text-muted-foreground",
+          "cursor-ew-resize touch-pan-y select-none truncate font-mono text-[10px] uppercase leading-none tracking-widest text-muted-foreground",
           layout === "row" && "min-w-0 flex-1",
         )}
         onPointerDown={onScrubDown}
@@ -288,7 +288,7 @@ export const ScrubInput = React.memo<ScrubInputProps>(function ScrubInput({
           />
         ) : (
           <span
-            className="cursor-ew-resize touch-none select-none font-mono text-[12px] leading-none tabular-nums text-foreground"
+            className="cursor-ew-resize touch-pan-y select-none font-mono text-[12px] leading-none tabular-nums text-foreground"
             onPointerDown={onScrubDown}
             onDoubleClick={startEdit}
           >

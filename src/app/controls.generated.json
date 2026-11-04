@@ -15,7 +15,7 @@
           "max": 1,
           "step": 0.05,
           "padrao": 0.5,
-          "resumo": "Detente, na escala normalizada (0…1). O arraste \"cai\" nele e precisa de um"
+          "resumo": "Detente, na escala normalizada (0…1). O arraste \"cai\" nele e precisa de um empurrão a mais pra sair, como o clique do meio de um pot de EQ. `null` desliga. Teclado e roda passam reto: são passos exatos, não mão."
         },
         {
           "prop": "max",
@@ -87,7 +87,7 @@
           "prop": "dense",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Aperta a caixa pra ~56px: rótulo, leitura e trilho continuam, só a régua",
+          "resumo": "Aperta a caixa pra ~56px: rótulo, leitura e trilho continuam, só a régua min/max de baixo sai (os limites não mudam de um fader pro vizinho).",
           "inicial": true
         },
         {
@@ -437,7 +437,7 @@
           "max": 1,
           "step": 0.05,
           "padrao": 1,
-          "resumo": "Quanto o LED está aceso, de 0 a 1. É o que separa \"ligado\" de \"no talo\":"
+          "resumo": "Quanto o LED está aceso, de 0 a 1. É o que separa \"ligado\" de \"no talo\": um indicador de nível precisa clarear com o sinal, não só acender."
         },
         {
           "prop": "color",
@@ -596,7 +596,7 @@
             "vox"
           ],
           "padrao": null,
-          "resumo": "Que som o pad faz. Sem ela, a voz sai do rótulo (\"KICK\" toca bumbo); rótulo"
+          "resumo": "Que som o pad faz. Sem ela, a voz sai do rótulo (\"KICK\" toca bumbo); rótulo que não nomeia voz nenhuma toca o `drop` da casa."
         },
         {
           "prop": "active",
@@ -1316,7 +1316,7 @@
           "prop": "hideProgress",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Desliga o fio de progresso. Aditivo: ligado por padrão, e some sozinho"
+          "resumo": "Desliga o fio de progresso. Aditivo: ligado por padrão, e some sozinho quando a região governada não rola o bastante para haver progresso."
         },
         {
           "prop": "headerSelector",
@@ -1395,7 +1395,7 @@
           "prop": "hideReadout",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Esconde a linha de cabeçalho (rótulo + valor). Aditivo e desligado por"
+          "resumo": "Esconde a linha de cabeçalho (rótulo + valor). Aditivo e desligado por padrão: o valor formatado só existia no `aria-valuetext`, ou seja, quem enxerga nunca via o número que estava escolhendo."
         },
         {
           "prop": "max",
@@ -1459,7 +1459,7 @@
           "prop": "selectable",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Liga a seleção múltipla: marquee \"select by area\" (arrastar sobre o vazio) +"
+          "resumo": "Liga a seleção múltipla: marquee \"select by area\" (arrastar sobre o vazio) + shift/ctrl/cmd-clique num card. Só faz efeito com `enabled` (board editável). O consumidor desenha a UI de batch a partir de `onSelectionChange`."
         },
         {
           "prop": "columnClassName",
@@ -1517,13 +1517,13 @@
           "prop": "batchBarInFlow",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Render the batch action bar in normal flow (full-width, wraps and pushes the"
+          "resumo": "Render the batch action bar in normal flow (full-width, wraps and pushes the table down) instead of the default absolute overlay. Only safe when the toolbar search is hidden; otherwise the bar collides with the search box. Default false (absolute overlay)."
         },
         {
           "prop": "canEdit",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Libera a edição inline das colunas com `meta.editable` (precisa de"
+          "resumo": "Libera a edição inline das colunas com `meta.editable` (precisa de `onCellUpdate`). Desligada por padrão: a permissão é decisão de quem usa."
         },
         {
           "prop": "compact",
@@ -1535,7 +1535,7 @@
           "prop": "disableSorting",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Desliga a ordenação por cabeçalho. Use quando a tela já tem um controle de"
+          "resumo": "Desliga a ordenação por cabeçalho. Use quando a tela já tem um controle de ordenação próprio — dois eixos de ordenação sobre a mesma tabela se contradizem (o controle externo continua dizendo \"Prazo\" enquanto a tabela já reordenou por outra coluna)."
         },
         {
           "prop": "enableRowSelection",
@@ -1553,7 +1553,7 @@
           "prop": "hideToolbarSearch",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Hide the built-in toolbar search box. Use when the parent already provides",
+          "resumo": "Hide the built-in toolbar search box. Use when the parent already provides its own search input feeding the data (avoids two competing search fields). Default false.",
           "secundario": true
         },
         {
@@ -1584,7 +1584,7 @@
           "prop": "primaryColumnId",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "The ID of the column that should be treated as \"primary\".",
+          "resumo": "The ID of the column that should be treated as \"primary\". This column will have width: auto (hug content/fill) and take remaining space.",
           "secundario": true
         },
         {
@@ -1697,7 +1697,7 @@
             "bottom"
           ],
           "padrao": "bottom",
-          "resumo": "De que lado do gatilho o painel abre. `\"bottom\"` (padrão) é o canto do"
+          "resumo": "De que lado do gatilho o painel abre. `\"bottom\"` (padrão) é o canto do header, que foi onde a peça nasceu."
         },
         {
           "prop": "status",
@@ -1895,7 +1895,7 @@
           "prop": "loop",
           "tipo": "chave",
           "padrao": true,
-          "resumo": "Volta ao primeiro passo depois do último. `false` segura no último, que é"
+          "resumo": "Volta ao primeiro passo depois do último. `false` segura no último, que é o honesto quando a lista descreve um processo de verdade (`etapas`)."
         },
         {
           "prop": "showTimer",
@@ -1934,7 +1934,7 @@
           "max": 1,
           "step": 0.05,
           "padrao": 1,
-          "resumo": "Multiplicador do grão. `<1` abre a névoa (manchas largas, fundo de marca);"
+          "resumo": "Multiplicador do grão. `<1` abre a névoa (manchas largas, fundo de marca); `>1` fecha (grão de papel)."
         },
         {
           "prop": "speed",
@@ -2282,7 +2282,7 @@
           "max": 230,
           "step": 1,
           "padrao": null,
-          "resumo": "Raio em px do halo que segue o ponteiro. Sem isto a malha é estática —",
+          "resumo": "Raio em px do halo que segue o ponteiro. Sem isto a malha é estática — que continua sendo o uso certo em superfície de trabalho.",
           "inicial": 150
         },
         {
@@ -2479,7 +2479,7 @@
             "editorial"
           ],
           "padrao": null,
-          "resumo": "A composição da abertura:"
+          "resumo": "A composição da abertura: · `center`: tudo no eixo, rótulo em pílula. O padrão. · `start`: a mesma pilha, alinhada à esquerda. · `split`: título à esquerda, contexto e ações à direita. Empilha sozinho quando o container aperta. · `index`: o número da seção em corpo grande ao lado do título. · `editorial`: fio de ponta a ponta com o rótulo em cima, título largo e o contexto recuado à direita, como abertura de capítulo. Ausente, vale o `align`."
         },
         {
           "prop": "leadWidth",
@@ -2656,7 +2656,7 @@
             "bento"
           ],
           "padrao": "masonry",
-          "resumo": "`masonry` (padrão): colunas de CSS, altura de cada card pelo conteúdo."
+          "resumo": "`masonry` (padrão): colunas de CSS, altura de cada card pelo conteúdo. `bento`: grade que divide a altura do container; o retrato ocupa duas linhas e os cards esticam até a borda. Use com altura definida."
         }
       ]
     }
@@ -2961,7 +2961,7 @@
           "max": 100,
           "step": 1,
           "padrao": null,
-          "resumo": "0–1. **Sem default de propósito.** Omitir não desenha régua; é a saída"
+          "resumo": "0–1. **Sem default de propósito.** Omitir não desenha régua; é a saída honesta pra número que é piso, não proporção."
         }
       ]
     }
@@ -3082,7 +3082,7 @@
           "prop": "framed",
           "tipo": "chave",
           "padrao": true,
-          "resumo": "Caixa com borda e fundo de card, arte sangrando no topo. `false` tira a"
+          "resumo": "Caixa com borda e fundo de card, arte sangrando no topo. `false` tira a caixa: o vazio pousa direto na superfície que o recebeu (painel, coluna, lista), com a arte como um selo pequeno em cima do texto. É o modo certo quando o vazio mora DENTRO de um card, pra não virar caixa dentro de caixa."
         }
       ],
       "EmptyArt": [
@@ -3100,7 +3100,7 @@
           "prop": "seed",
           "tipo": "texto",
           "padrao": "vazio",
-          "resumo": "A semente. Passe o nome da coleção vazia (`\"favoritos\"`, `\"arquivados\"`) e",
+          "resumo": "A semente. Passe o nome da coleção vazia (`\"favoritos\"`, `\"arquivados\"`) e cada tela vazia do app ganha uma composição própria — de graça, e estável.",
           "inicial": "favoritos-vazio"
         }
       ]
@@ -3125,7 +3125,7 @@
           "prop": "heading",
           "tipo": "chave",
           "padrao": true,
-          "resumo": "Reserva a fileira de controle que o `@visant/rail` desenha acima do trilho",
+          "resumo": "Reserva a fileira de controle que o `@visant/rail` desenha acima do trilho (as duas setas, a partir de `lg`). Antes isto desenhava uma barra de título — que o trilho não tem — e era metade do salto de altura.",
           "inicial": false
         },
         {
@@ -3390,7 +3390,7 @@
             "words"
           ],
           "padrao": "lines",
-          "resumo": "O que se quebra. `lines` é a revelação de título; `words` serve a frases"
+          "resumo": "O que se quebra. `lines` é a revelação de título; `words` serve a frases curtas onde a linha inteira subindo parece pesada demais."
         },
         {
           "prop": "variant",
@@ -3408,7 +3408,7 @@
           "prop": "immediate",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Anima na montagem, sem esperar a rolagem. Para o herói do topo, que já está",
+          "resumo": "Anima na montagem, sem esperar a rolagem. Para o herói do topo, que já está visível quando a página abre — ali um ScrollTrigger nunca dispararia bem.",
           "inicial": true
         },
         {
@@ -3492,7 +3492,7 @@
           "prop": "rest",
           "tipo": "chave",
           "padrao": true,
-          "resumo": "Pose de repouso: sem ponteiro em cima, o card fica inclinado e aceso, com a"
+          "resumo": "Pose de repouso: sem ponteiro em cima, o card fica inclinado e aceso, com a luz no canto de cima à esquerda. `false` deixa plano e apagado."
         },
         {
           "prop": "glow",
@@ -3594,7 +3594,7 @@
           "prop": "ceilingLabel",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "O que o topo da caixa significa. É a régua da curva — sem ela a linha é um"
+          "resumo": "O que o topo da caixa significa. É a régua da curva — sem ela a linha é um traço num retângulo. Ausente, o tracejado ainda desenha, mudo."
         },
         {
           "prop": "label",
@@ -3632,7 +3632,7 @@
           "max": 210,
           "step": 1,
           "padrao": 84,
-          "resumo": "Raio do campo magnético em px, medido a partir da borda do botão. É o quanto"
+          "resumo": "Raio do campo magnético em px, medido a partir da borda do botão. É o quanto ANTES de chegar o ponteiro começa a puxar. Abaixo de ~48px o efeito só acontece depois que o cursor já está em cima, e aí não serve pra nada."
         },
         {
           "prop": "labelLag",
@@ -3807,7 +3807,7 @@
           "prop": "stepHeight",
           "tipo": "texto",
           "padrao": "100svh",
-          "resumo": "Altura de cada passo — é o que define o comprimento de rolagem da cena.",
+          "resumo": "Altura de cada passo — é o que define o comprimento de rolagem da cena. `100svh` é o padrão (e `svh`, não `vh`: no iOS o `vh` conta a barra de endereço que já recolheu, e cada passo ganharia uns 70px de vão morto). Baixar pra `70svh` deixa a cena mais rápida; abaixo disso a arte troca antes de a pessoa terminar de ler.",
           "inicial": "520px"
         },
         {
@@ -3985,7 +3985,7 @@
             "right"
           ],
           "padrao": "right",
-          "resumo": "De que lado fica o \"antes\". `left` é a ordem de leitura: antes, depois.",
+          "resumo": "De que lado fica o \"antes\". `left` é a ordem de leitura: antes, depois. O padrão continua `right` para não trocar as fotos de quem já instalou.",
           "inicial": "left"
         },
         {
@@ -4142,7 +4142,7 @@
           "prop": "studio",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "Fundo do estúdio virtual. Não é o fundo da PÁGINA (o canvas é"
+          "resumo": "Fundo do estúdio virtual. Não é o fundo da PÁGINA (o canvas é transparente): é o que o ambiente reflete na capa."
         }
       ],
       "bookstage": [
@@ -4165,7 +4165,7 @@
           "prop": "artColor",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "Cor curada da arte, se houver. Ganha da amostragem automática — uma pessoa"
+          "resumo": "Cor curada da arte, se houver. Ganha da amostragem automática — uma pessoa (ou um extrator com noção de papel) sabe que o ocre da pedra é o assunto e o céu é o fundo; uma média não sabe."
         },
         {
           "prop": "mark",
@@ -4206,7 +4206,7 @@
           "prop": "artColor",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "Cor curada da arte, se houver. Ganha da amostragem automática — uma pessoa"
+          "resumo": "Cor curada da arte, se houver. Ganha da amostragem automática — uma pessoa (ou um extrator com noção de papel) sabe que o ocre da pedra é o assunto e o céu é o fundo; uma média não sabe."
         },
         {
           "prop": "mark",
@@ -4415,7 +4415,7 @@
           "prop": "preserveDrawingBuffer",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Mantém o último quadro no buffer. Ligue quando outro efeito lê este canvas"
+          "resumo": "Mantém o último quadro no buffer. Ligue quando outro efeito lê este canvas (ex.: `shader-riso` com `source`): sem isso o navegador pode entregar o buffer já limpo. Custa um pouco de desempenho, por isso vem desligado."
         },
         {
           "prop": "body",
@@ -4670,64 +4670,64 @@
           "prop": "castShadow",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Whether the object gets rendered into shadow map."
+          "resumo": "Whether the object gets rendered into shadow map. @defaultValue `false`"
         },
         {
           "prop": "frustumCulled",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "When this is set, it checks every frame if the object is in the frustum of the camera before rendering the object."
+          "resumo": "When this is set, it checks every frame if the object is in the frustum of the camera before rendering the object. If set to `false` the object gets rendered every frame even if it is not in the frustum of the camera. @defaultValue `true`"
         },
         {
           "prop": "matrixAutoUpdate",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "When this is set, it calculates the matrix of position, (rotation or quaternion) and"
+          "resumo": "When this is set, it calculates the matrix of position, (rotation or quaternion) and scale every frame and also recalculates the matrixWorld property. @defaultValue {@link DEFAULT_MATRIX_AUTO_UPDATE } - that is `(true)`."
         },
         {
           "prop": "matrixWorldAutoUpdate",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "If set, then the renderer checks every frame if the object and its children need matrix updates."
+          "resumo": "If set, then the renderer checks every frame if the object and its children need matrix updates. When it isn't, then you have to maintain all matrices in the object and its children yourself. @defaultValue {@link DEFAULT_MATRIX_WORLD_AUTO_UPDATE } - that is `(true)`."
         },
         {
           "prop": "matrixWorldNeedsUpdate",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "When this is set, it calculates the matrixWorld in that frame and resets this property to false."
+          "resumo": "When this is set, it calculates the matrixWorld in that frame and resets this property to false. @defaultValue `false`"
         },
         {
           "prop": "receiveShadow",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Whether the material receives shadows."
+          "resumo": "Whether the material receives shadows. @defaultValue `false`"
         },
         {
           "prop": "visible",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Object gets rendered if `true`.",
+          "resumo": "Object gets rendered if `true`. @defaultValue `true`",
           "secundario": true
         },
         {
           "prop": "name",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "Optional name of the object",
+          "resumo": "Optional name of the object @remarks _(doesn't need to be unique)_. @defaultValue `\"\"`",
           "secundario": true
         },
         {
           "prop": "type",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A Read-only _string_ to check `this` object type.",
+          "resumo": "A Read-only _string_ to check `this` object type. @remarks This can be used to find a specific type of Object3D in a scene. Sub-classes will update this value. @defaultValue `Object3D`",
           "secundario": true
         },
         {
           "prop": "uuid",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "{@link http://en.wikipedia.org/wiki/Universally_unique_identifier UUID} of this object instance.",
+          "resumo": "{@link http://en.wikipedia.org/wiki/Universally_unique_identifier UUID} of this object instance. @remarks This gets automatically assigned and shouldn't be edited.",
           "secundario": true
         }
       ],
@@ -4849,7 +4849,7 @@
           "prop": "outputColorSpace",
           "tipo": "texto",
           "padrao": "THREE.SRGBColorSpace.",
-          "resumo": "Color space used for output to HTMLCanvasElement. Supported values are",
+          "resumo": "Color space used for output to HTMLCanvasElement. Supported values are {@link SRGBColorSpace } and {@link LinearSRGBColorSpace }.",
           "secundario": true
         }
       ],
@@ -4858,43 +4858,43 @@
           "prop": "castShadow",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Whether the object gets rendered into shadow map."
+          "resumo": "Whether the object gets rendered into shadow map. @defaultValue `false`"
         },
         {
           "prop": "frustumCulled",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "When this is set, it checks every frame if the object is in the frustum of the camera before rendering the object."
+          "resumo": "When this is set, it checks every frame if the object is in the frustum of the camera before rendering the object. If set to `false` the object gets rendered every frame even if it is not in the frustum of the camera. @defaultValue `true`"
         },
         {
           "prop": "matrixAutoUpdate",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "When this is set, it calculates the matrix of position, (rotation or quaternion) and"
+          "resumo": "When this is set, it calculates the matrix of position, (rotation or quaternion) and scale every frame and also recalculates the matrixWorld property. @defaultValue {@link DEFAULT_MATRIX_AUTO_UPDATE } - that is `(true)`."
         },
         {
           "prop": "matrixWorldAutoUpdate",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "If set, then the renderer checks every frame if the object and its children need matrix updates."
+          "resumo": "If set, then the renderer checks every frame if the object and its children need matrix updates. When it isn't, then you have to maintain all matrices in the object and its children yourself. @defaultValue {@link DEFAULT_MATRIX_WORLD_AUTO_UPDATE } - that is `(true)`."
         },
         {
           "prop": "matrixWorldNeedsUpdate",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "When this is set, it calculates the matrixWorld in that frame and resets this property to false."
+          "resumo": "When this is set, it calculates the matrixWorld in that frame and resets this property to false. @defaultValue `false`"
         },
         {
           "prop": "receiveShadow",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Whether the material receives shadows."
+          "resumo": "Whether the material receives shadows. @defaultValue `false`"
         },
         {
           "prop": "visible",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Object gets rendered if `true`.",
+          "resumo": "Object gets rendered if `true`. @defaultValue `true`",
           "secundario": true
         },
         {
@@ -4921,21 +4921,21 @@
           "prop": "name",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "Optional name of the object",
+          "resumo": "Optional name of the object @remarks _(doesn't need to be unique)_. @defaultValue `\"\"`",
           "secundario": true
         },
         {
           "prop": "type",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "A Read-only _string_ to check `this` object type.",
+          "resumo": "A Read-only _string_ to check `this` object type. @remarks This can be used to find a specific type of Object3D in a scene. Sub-classes will update this value. @defaultValue `Object3D`",
           "secundario": true
         },
         {
           "prop": "uuid",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "{@link http://en.wikipedia.org/wiki/Universally_unique_identifier UUID} of this object instance.",
+          "resumo": "{@link http://en.wikipedia.org/wiki/Universally_unique_identifier UUID} of this object instance. @remarks This gets automatically assigned and shouldn't be edited.",
           "secundario": true
         }
       ],
@@ -4974,7 +4974,7 @@
           "prop": "scroll",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Prende o progresso ao scroll da própria seção: a peça vira uma `<section>`"
+          "resumo": "Prende o progresso ao scroll da própria seção: a peça vira uma `<section>` com `scrollLength` de altura e o palco fica preso (sticky) na tela."
         },
         {
           "prop": "grain",
@@ -5100,7 +5100,7 @@
           "prop": "viewport",
           "tipo": "texto",
           "padrao": null,
-          "resumo": "Altura do palco preso. Com `container`, o padrão é a altura do container",
+          "resumo": "Altura do palco preso. Com `container`, o padrão é a altura do container (medida), porque `svh` é da janela e não do scroller.",
           "secundario": true
         }
       ]
@@ -5800,7 +5800,7 @@
           "prop": "peek",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Ao montar, a linha dá uma espiada curta pro lado das ações e volta: ensina"
+          "resumo": "Ao montar, a linha dá uma espiada curta pro lado das ações e volta: ensina o gesto sem texto. Use numa linha só (a primeira), nunca na lista toda."
         },
         {
           "prop": "label",
@@ -6779,7 +6779,7 @@
             "tone"
           ],
           "padrao": "success",
-          "resumo": "Cor do trilho depois de confirmado. `success` (padrão) pinta polegar e"
+          "resumo": "Cor do trilho depois de confirmado. `success` (padrão) pinta polegar e rastro de aprovação, lido do token `--success` com verde de reserva; `tone` mantém a cor de antes."
         },
         {
           "prop": "tone",
@@ -7709,7 +7709,7 @@
           "prop": "shortcut",
           "tipo": "texto",
           "padrao": "k",
-          "resumo": "Tecla do atalho global, combinada com ⌘/Ctrl. `null` desliga o atalho e",
+          "resumo": "Tecla do atalho global, combinada com ⌘/Ctrl. `null` desliga o atalho e deixa só o clique no gatilho.",
           "secundario": true
         },
         {
@@ -8289,7 +8289,7 @@
           "prop": "resting",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai.",
+          "resumo": "Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai. Sem isto, a peça parada é a foto pura: o efeito só existe com ponteiro.",
           "inicial": true
         },
         {
@@ -8332,7 +8332,7 @@
           "prop": "resting",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai.",
+          "resumo": "Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai. Sem isto, a peça parada é a foto pura: o efeito só existe com ponteiro.",
           "inicial": true
         },
         {
@@ -8375,7 +8375,7 @@
           "prop": "resting",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai.",
+          "resumo": "Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai. Sem isto, a peça parada é a foto pura: o efeito só existe com ponteiro.",
           "inicial": true
         },
         {
@@ -8418,7 +8418,7 @@
           "prop": "resting",
           "tipo": "chave",
           "padrao": false,
-          "resumo": "Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai.",
+          "resumo": "Nasce com o efeito armado no centro e volta pra lá quando o ponteiro sai. Sem isto, a peça parada é a foto pura: o efeito só existe com ponteiro.",
           "inicial": true
         },
         {
@@ -8622,7 +8622,7 @@
           "max": 100,
           "step": 1,
           "padrao": 0,
-          "resumo": "Bagunça: 0 é malha regular com todo traço girando pelo campo; 100 é limalha"
+          "resumo": "Bagunça: 0 é malha regular com todo traço girando pelo campo; 100 é limalha caída ao acaso, com ângulo, posição e comprimento sorteados."
         },
         {
           "prop": "strength",

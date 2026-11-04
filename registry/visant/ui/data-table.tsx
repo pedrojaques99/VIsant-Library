@@ -444,7 +444,7 @@ export function DataTable<TData, TValue>({
       <div
         ref={scrollContainerRef}
         className={cn(
-          'group relative w-full max-w-full min-w-0 overflow-x-auto overflow-y-auto max-h-[calc(100vh-10rem)] rounded-md border touch-pan-x',
+          'group relative w-full max-w-full min-w-0 overflow-x-auto overflow-y-auto max-h-[calc(100vh-10rem)] rounded-md border touch-pan-x touch-pan-y',
           // Custom Scrollbar for better UX
           'scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent'
         )}

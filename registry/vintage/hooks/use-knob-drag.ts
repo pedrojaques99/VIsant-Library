@@ -16,6 +16,9 @@ interface UseKnobDragOptions {
   onChange?: (value: number) => void;
 }
 
+/** O gesto do knob é em pé: de lado o navegador pode rolar quem estiver em volta. */
+export const KNOB_TOUCH_ACTION = "pan-x" as const;
+
 /** Passos de som no curso inteiro: um estalo a cada 1/20 da volta. */
 const PASSOS_SOM = 20;
 
@@ -87,13 +90,18 @@ export function useKnobDrag({
     }
   }, [value]);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+  /*
+   * Pointer, não mouse: com `onMouseDown` o dedo não movia o knob, e no celular o
+   * arrasto rolava a página. O elemento leva `touchAction: "pan-x"`
+   * (`KNOB_TOUCH_ACTION`) porque o gesto do knob é em pé.
+   */
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
     if (e.button !== 0) return;
     setIsDragging(true);
     lastY.current = e.clientY;
     brutoRef.current = toNorm(valRef.current);
     passoRef.current = Math.round(toNorm(valRef.current) * PASSOS_SOM);
-    e.preventDefault();
+    if (e.pointerType === "mouse") e.preventDefault();
   }, [toNorm]);
 
   const handleDoubleClick = useCallback(() => {
@@ -120,7 +128,7 @@ export function useKnobDrag({
   useEffect(() => {
     if (!isDragging) return;
 
-    const onMove = (e: MouseEvent) => {
+    const onMove = (e: PointerEvent) => {
       const dy = lastY.current - e.clientY;
       lastY.current = e.clientY;
       const fine = e.shiftKey ? 0.004 : sensitivity;
@@ -140,11 +148,13 @@ export function useKnobDrag({
 
     const onUp = () => setIsDragging(false);
 
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onUp);
+    document.addEventListener("pointermove", onMove);
+    document.addEventListener("pointerup", onUp);
+    document.addEventListener("pointercancel", onUp);
     return () => {
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onUp);
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("pointercancel", onUp);
     };
   }, [isDragging, sensitivity, toNorm, fromNorm, clamp, estalar]);
 
@@ -183,7 +193,7 @@ export function useKnobDrag({
     currentValue,
     rotation,
     isDragging,
-    handleMouseDown,
+    handlePointerDown,
     handleDoubleClick,
     handleWheel,
     handleKeyDown,

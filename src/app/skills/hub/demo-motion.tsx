@@ -183,7 +183,7 @@ export function DemoMotion() {
             options={(Object.keys(CENAS_MOTION) as Cena[]).map((c) => ({ value: c, label: CENAS_MOTION[c].nome }))}
             className="min-w-0 max-w-xs flex-1 [&_button]:min-h-11"
           />
-          <Acao onClick={() => { setMao(true); disparar(cena); }} data-acao="motion">
+          <Acao secundaria onClick={() => { setMao(true); disparar(cena); }} data-acao="motion">
             De novo
           </Acao>
         </div>

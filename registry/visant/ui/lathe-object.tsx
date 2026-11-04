@@ -168,6 +168,8 @@ async function criarCena(
   scene.add(peca);
 
   const controls = new OrbitControls(camera, canvas);
+  // O OrbitControls escreve `none` ao conectar: de lado gira, em pé rola a página.
+  canvas.style.touchAction = "pan-y";
   controls.enableZoom = false;
   controls.enablePan = false;
   controls.enableDamping = !opts.reduce;
@@ -371,8 +373,8 @@ export function LatheObject({
         onPointerLeave?.(e);
         cenaRef.current?.setWind(false);
       }}
-      // `touch-none`: sem isso o arrasto no celular rola a página em vez de girar.
-      className={cn("block h-full w-full cursor-grab touch-none active:cursor-grabbing", className)}
+      // `touch-pan-y`: de lado gira, em pé a página continua rolando.
+      className={cn("block h-full w-full cursor-grab touch-pan-y active:cursor-grabbing", className)}
       {...props}
     />
   );

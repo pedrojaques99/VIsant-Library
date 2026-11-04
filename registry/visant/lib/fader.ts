@@ -33,7 +33,7 @@ const CSS = `
 :host([hidden]) { display: none; }
 :host([disabled]) { opacity: 0.4; pointer-events: none; }
 .f { display: grid; grid-template-columns: var(--fader-label-w, 64px) 1fr var(--fader-value-w, 28px); align-items: center; gap: 10px; }
-.l { cursor: ew-resize; user-select: none; -webkit-user-select: none; touch-action: none; transition: color var(--fd-fast) ease; }
+.l { cursor: ew-resize; user-select: none; -webkit-user-select: none; touch-action: pan-y; transition: color var(--fd-fast) ease; }
 .f:hover .l, .l.on { color: var(--fd-fg); }
 output { font: 11px var(--font-mono, ui-monospace, monospace); font-variant-numeric: tabular-nums; text-align: right; color: var(--fd-fg); }
 input { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; margin: 0; cursor: ew-resize; touch-action: pan-y;

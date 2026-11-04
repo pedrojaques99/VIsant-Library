@@ -38,6 +38,13 @@ import { cn } from "@/lib/utils";
  *    da página livre no telefone.
  */
 
+/** Lido depois de montar: o servidor não sabe do dedo, e a hidratação tem de bater. */
+function usePorToque() {
+  const [toque, setToque] = React.useState(false);
+  React.useEffect(() => setToque(window.matchMedia?.("(pointer: coarse)").matches ?? false), []);
+  return toque;
+}
+
 export interface CardStackProps<T> {
   /** Os cards, na ordem em que a pilha começa. */
   items: T[];
@@ -87,6 +94,7 @@ interface CartaProps {
 }
 
 function Carta({ depth, total, topo, reduce, envio, onSend, avanco, label, children }: CartaProps) {
+  const porToque = usePorToque();
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const rotate = useTransform(x, [-240, 240], [-10, 10]);
@@ -183,7 +191,9 @@ function Carta({ depth, total, topo, reduce, envio, onSend, avanco, label, child
         aria-roledescription={topo ? "card" : undefined}
         aria-label={topo ? label : undefined}
         style={{ x, y, rotate }}
-        drag={topo && !voando}
+        // No dedo só de lado: `drag` livre faz o motion escrever `touch-action: none` e
+        // a pilha inteira deixava de rolar a página. Com mouse segue livre.
+        drag={topo && !voando ? (porToque ? "x" : true) : false}
         dragMomentum={false}
         // Livre na horizontal, borracha na vertical: o gesto é de lado, e o card mostra isso.
         dragConstraints={{ top: 0, bottom: 0 }}

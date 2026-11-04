@@ -20,19 +20,7 @@ import { ArrowUpRight, ChevronRight, Globe, MessageSquareText, Plug, X } from "l
 import { siClaude, siCursor, siGithubcopilot, siOpenai, type SimpleIcon } from "simple-icons";
 import { cn } from "@/lib/utils";
 import { CopyCommand } from "./copy-command";
-
-/**
- * O traço de um logo do `simple-icons`, na cor do texto. Local e não Iconify:
- * logo que depende de rede vira bolinha vazia quando a API falha.
- * EXCEPTION to noise-scan/hand-drawn-icon: o traço vem do pacote simple-icons por dado, ninguém desenhou nada aqui.
- */
-export function LogoAgente({ icone, className = "size-3.5" }: { icone: SimpleIcon; className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden className={cn("shrink-0 fill-current", className)}>
-      <path d={icone.path} />
-    </svg>
-  );
-}
+import { EVENTO_CONECTAR as EVENTO, LogoAgente } from "./conectar-sinal";
 
 const SITE = "https://ui.visantlabs.com";
 const REGISTRY_URL = `${SITE}/r/{name}.json`;
@@ -121,10 +109,6 @@ const AGENTES: {
   },
 ];
 
-const EVENTO = "visant:conectar";
-
-/** Abre o painel de onde estiver (um só por página, montado no cabeçalho). */
-export const abrirConectar = () => window.dispatchEvent(new Event(EVENTO));
 
 const ehAgente = (v: string | null): v is Agente => AGENTES.some((a) => a.id === v);
 

@@ -139,6 +139,8 @@ type TrilhaId = "clean" | "end" | "audit" | "single";
 const TRILHAS: {
   id: TrilhaId;
   nome: string;
+  /* O nome da trilha no SKILL.md, em inglês: é o que a pessoa acha quando abre o arquivo. */
+  termo: string;
   pedido: string;
   passos: string[];
   resultado: string;
@@ -147,7 +149,8 @@ const TRILHAS: {
 }[] = [
   {
     id: "clean",
-    nome: "Clean",
+    nome: "Limpar",
+    termo: "Clean",
     pedido: "“limpa o slop”, “tá com cara de IA”",
     passos: [
       "Roda o check.mjs no código e na tela aberta.",
@@ -161,7 +164,8 @@ const TRILHAS: {
   },
   {
     id: "end",
-    nome: "End to end",
+    nome: "Do início ao fim",
+    termo: "End to end",
     pedido: "“melhora a ui”, “redesenha essa tela”",
     passos: [
       "Abre a tela antes de ler o código.",
@@ -178,7 +182,8 @@ const TRILHAS: {
   },
   {
     id: "audit",
-    nome: "Audit",
+    nome: "Auditar",
+    termo: "Audit",
     pedido: "“audita essa tela”, “isso tá bom?”",
     passos: [
       "Passa pra visant-killer e classifica o alvo pelo tamanho do risco.",
@@ -192,7 +197,8 @@ const TRILHAS: {
   },
   {
     id: "single",
-    nome: "Single topic",
+    nome: "Um detalhe",
+    termo: "Single topic",
     pedido: "“só a animação”, “esse gráfico”, “tira o excesso”",
     passos: [
       "Animação, transição ou espera: visant-motion.",
@@ -227,6 +233,7 @@ export function Porta() {
       <div className="mt-8 grid gap-8 lg:grid-cols-2 lg:gap-12">
         <div className="min-w-0">
           <p className="text-casa-lg">{t.pedido}</p>
+          <p className="mt-1 text-casa-sm text-casa-fg-3">No SKILL.md, a trilha {t.termo}.</p>
           <ol className="mt-5 grid gap-2.5">
             {t.passos.map((p, i) => (
               <li key={p} className="flex gap-3 text-casa-base text-casa-fg-2 animate-in fade-in motion-reduce:animate-none [animation-duration:var(--dur-base)]">

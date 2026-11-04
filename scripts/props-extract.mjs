@@ -95,6 +95,27 @@ function faixaDe(descricao) {
 /** A descrição sem as tags de faixa — elas viram controle, não texto. */
 const semTagsDeFaixa = (d) => (d ? d.replace(TAGS_DE_FAIXA, "").replace(/[ \t]+\n/g, "\n").trim() || null : null);
 
+/**
+ * O JSDoc quebra linha por largura de coluna, não por sentido. Quem lia só a primeira linha
+ * mostrava "dentro da mesma. O" na tabela. Aqui a linha quebrada volta a ser frase, e o que
+ * separa parágrafo (linha em branco) e item de lista continua separado.
+ */
+const CABECA_DE_LISTA = /^(?:[-*•]|\d+[.)])\s/;
+function reflow(texto) {
+  if (!texto) return null;
+  const paragrafos = texto.split(/\n\s*\n/).map((p) => {
+    const linhas = [];
+    for (const bruta of p.split("\n")) {
+      const linha = bruta.trim();
+      if (!linha) continue;
+      if (linhas.length && !CABECA_DE_LISTA.test(linha)) linhas[linhas.length - 1] += " " + linha;
+      else linhas.push(linha);
+    }
+    return linhas.join("\n");
+  });
+  return paragrafos.filter(Boolean).join("\n\n") || null;
+}
+
 const saida = {};
 let comProps = 0;
 let comValores = 0;
@@ -118,7 +139,7 @@ for (const item of registry.items) {
   const componentes = docs
     .map((d) => ({
       nome: d.displayName,
-      descricao: d.description || null,
+      descricao: reflow(d.description),
       props: Object.values(d.props ?? {})
         .map((p) => {
           const valores = valoresDaUniao(p.type);
@@ -130,7 +151,7 @@ for (const item of registry.items) {
             tipo: p.type?.name ?? "unknown",
             obrigatoria: p.required,
             padrao: p.defaultValue?.value ?? null,
-            descricao: semTagsDeFaixa(p.description),
+            descricao: reflow(semTagsDeFaixa(p.description)),
             ...(valores ? { valores } : {}),
             ...(faixa ? { faixa } : {}),
           };

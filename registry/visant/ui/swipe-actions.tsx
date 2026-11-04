@@ -101,6 +101,7 @@ type Arrasto = {
   origem: number;
   trava: "x" | "y" | null;
   amostras: [number, number][];
+  escala: number;
 };
 
 /** Largura de uma ação com a linha aberta em repouso. */
@@ -320,6 +321,7 @@ export function SwipeActionsRow({
       origem: x.get(),
       trava: null,
       amostras: [[e.timeStamp, e.clientX]],
+      escala: e.currentTarget.getBoundingClientRect().width / (e.currentTarget.offsetWidth || 1) || 1,
     };
   }
 
@@ -341,7 +343,7 @@ export function SwipeActionsRow({
       if (linhaRef.current) linhaRef.current.dataset.dragging = "";
       setAbertaId(id);
     }
-    const v = conter(a.origem + e.clientX - a.x0);
+    const v = conter(a.origem + (e.clientX - a.x0) / a.escala);
     x.set(v);
     a.amostras.push([e.timeStamp, e.clientX]);
     if (a.amostras.length > 12) a.amostras.shift();

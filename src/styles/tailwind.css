@@ -171,6 +171,23 @@
   }
 
   /*
+   * Segurar o dedo numa peça não seleciona texto nem abre o menu do iOS: a
+   * lupa e o menu tomam o gesto de quem ia arrastar, e nenhum evento avisa a peça.
+   * Campo de texto continua selecionável.
+   */
+  @media (pointer: coarse) {
+    [data-palco] {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    [data-palco] :is(input, textarea, [contenteditable="true"]) {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+  }
+
+  /*
    * Afordância que aparece no hover — e que existe em touch.
    *
    * O botão de copiar o comando só surgia com o mouse em cima. No celular não

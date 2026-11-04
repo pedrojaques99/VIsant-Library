@@ -83,14 +83,16 @@ export function VintageEQ({
 
   useEffect(() => {
     if (draggingIndex === null) return;
-    const onMove = (e: MouseEvent) =>
+    const onMove = (e: PointerEvent) =>
       updateValue(draggingIndex, e.clientY, e.shiftKey);
     const onUp = () => setDraggingIndex(null);
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onUp);
+    document.addEventListener("pointermove", onMove);
+    document.addEventListener("pointerup", onUp);
+    document.addEventListener("pointercancel", onUp);
     return () => {
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onUp);
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("pointercancel", onUp);
     };
   }, [draggingIndex, updateValue]);
 
@@ -149,7 +151,7 @@ export function VintageEQ({
               <div
                 id={`vintage-eq-slider-${index}`}
                 className="relative h-[168px] w-8 select-none rounded-[4px] outline-none focus-visible:[box-shadow:var(--focus,0_0_0_2px_var(--vintage-value))]"
-                style={{ cursor: draggingIndex === index ? "grabbing" : "grab" }}
+                style={{ cursor: draggingIndex === index ? "grabbing" : "grab", touchAction: "pan-x" }}
                 tabIndex={0}
                 role="slider"
                 aria-label={label}
@@ -159,7 +161,7 @@ export function VintageEQ({
                 aria-valuenow={Number(values[index].toFixed(2))}
                 aria-valuetext={values[index].toFixed(1)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
-                onMouseDown={(e) => {
+                onPointerDown={(e) => {
                   setDraggingIndex(index);
                   updateValue(index, e.clientY, e.shiftKey);
                 }}

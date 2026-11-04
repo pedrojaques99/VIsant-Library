@@ -37,7 +37,7 @@ type Lado = NonNullable<PhotoFrameProps["from"]>;
 const LADOS: readonly Lado[] = ["bottom", "left", "top", "right"];
 /** Uma foto por lado: trocar a variação também troca a imagem, e a troca se vê. */
 const FOTO: Record<Lado, { papel: "cena" | "retrato"; indice: number }> = {
-  bottom: { papel: "cena", indice: 1 },
+  bottom: { papel: "cena", indice: 5 },
   left: { papel: "retrato", indice: 2 },
   top: { papel: "cena", indice: 3 },
   right: { papel: "cena", indice: 0 },

@@ -27,7 +27,7 @@
 
 import * as React from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { ArrowUpRight, Check, Copy, Grid2x2, Grid3x3, LayoutGrid, SlidersHorizontal } from "lucide-react";
+import { ArrowUpRight, Check, Copy, Grid2x2, Grid3x3, LayoutGrid, Play, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   CATALOG,
@@ -51,15 +51,18 @@ import { GRID_GAP, useFundoEscuro } from "./mosaic";
 import { ehNovo } from "./novidades";
 import { WireframeToggle } from "./media";
 import { Aba, ehToque } from "./casa-ui";
-import { LogoAgente, abrirConectar } from "./conectar";
+import { LogoAgente, abrirConectar } from "./conectar-sinal";
 import { Miniatura } from "./miniatura";
-import { nivelDoAparelho, pesoGpu, useVaga } from "./aparelho";
+import { nivelDoAparelho, pediuEconomia, pesoGpu, useVaga } from "./aparelho";
 import DESTAQUES from "../../curadoria/destaques.json";
 import { BugButton } from "./bug-report";
-import { ShaderLab } from "./ShaderLab";
 import { CURADORIA_ATIVA, arquivada, useNotas, type Notas } from "./curadoria";
 import LANG from "./lang.generated.json";
 import { siClaude, siCursor, siOpenai } from "simple-icons";
+import { useDobraAssentada } from "@/lib/rede";
+import { MarcasNaDobra } from "./marcas-na-dobra";
+
+const ShaderLab = React.lazy(() => import("./ShaderLab").then((m) => ({ default: m.ShaderLab })));
 
 /**
  * O tamanho do card, num clique só. A lista em texto saiu (2026-10-20): o
@@ -189,12 +192,17 @@ function Pronto({ onPronto }: { onPronto: () => void }) {
  * do mesmo `PalcoFixo`, e só desbota quando a peça já pintou (`Pronto`) —
  * nenhum quadro mostra as duas fora de registro, e nenhum mostra o palco vazio.
  *
- * No toque a foto mostraria controle que não responde (as setas de variação, os
- * botões da peça). Então tocar nela nunca leva embora: o primeiro toque acorda a
- * peça ali mesmo, e daí em diante o controle é de verdade. A ficha é o nome, no
- * rodapé. Sobrou foto depois do toque (sem vaga de GPU, peça que quebrou): o
- * segundo toque abre a ficha, para o card nunca virar beco.
+ * No toque, foto é controle que não responde. Testado em aparelho real: o dedo ia
+ * arrastar e nada acontecia, e o segundo toque, com a peça ainda carregando, abria
+ * a ficha sem ninguém pedir. Agora a peça sem GPU acorda sozinha quando assenta na
+ * tela e há vaga, e o primeiro toque já é dela. A foto só fica onde falta vaga,
+ * na peça de GPU e em quem pediu economia de dados: ali o ícone de tocar avisa, e
+ * o toque acorda, furando a fila. A ficha é o nome, no rodapé. Só quando a peça
+ * não sobe depois do toque (quebrou) a foto volta a abrir a ficha, para o card
+ * nunca virar beco.
  */
+let ultimaUrgencia = 0;
+
 const Ladrilho = React.memo(function Ladrilho({
   item,
   onOpen,
@@ -237,8 +245,10 @@ const Ladrilho = React.memo(function Ladrilho({
    * - médio: foto, e a peça acorda por intenção: cursor, foco ou toque no
    *   ladrilho. Acordada, fica viva enquanto estiver perto da tela (`active`);
    *   tirar o cursor não a devolve pra foto, que seria a troca no pior momento.
-   * - baixo: a grade é foto até o toque na própria foto, que acorda aquela peça.
-   *   Rolar não acorda nada, e sair de perto da tela devolve à foto.
+   * - baixo: foto para quem usa mouse e para quem pediu economia, até o toque na
+   *   própria foto. No celular, a peça sem GPU acorda ao assentar na tela
+   *   (`TETO_VIVAS`), porque a demo é para o dedo; a de GPU espera o toque. Rolar
+   *   rápido não acorda nada, e sair de perto da tela devolve à foto.
    * Peça de GPU, em qualquer nível, só vive na tela e com vaga no orçamento de
    * contextos; no médio, toda peça também disputa uma das 6 vagas de viva. Sem
    * vaga, mostra a foto.
@@ -247,20 +257,50 @@ const Ladrilho = React.memo(function Ladrilho({
   const gpu = pesoGpu(item.name) > 0;
   const comFoto = (foto || gpu || nivel !== "alto") && Boolean(Demo) && !semFoto;
   const [acordada, setAcordada] = React.useState(false);
+  const [urgencia, setUrgencia] = React.useState(0);
   React.useEffect(() => {
-    if (!active) setAcordada(false);
+    if (!active) {
+      setAcordada(false);
+      setUrgencia(0);
+    }
   }, [active]);
+  /* Cursor e foco acordam no médio. Dedo não: `pointerenter` de toque dispara ao rolar também. */
   const acordar = nivel === "medio" && !acordada ? () => setAcordada(true) : undefined;
+  const acordarSemDedo = acordar ? (e: React.PointerEvent) => void (e.pointerType !== "touch" && acordar()) : undefined;
   const porIntencao = nivel === "medio" || (nivel === "baixo" && comFoto);
   const quer = Boolean(Demo) && (porIntencao ? acordada && active : gpu ? active : foto ? perto : mounted);
-  const viva = useVaga(item.name, quer, naVista);
+  const viva = useVaga(item.name, quer, naVista, urgencia);
+
+  /* Assenta na tela por 220ms e acorda: quem passa rolando não paga a montagem. */
+  const toque = ehToque();
+  const acordaNaVista = toque && porIntencao && !gpu && !pediuEconomia();
+  React.useEffect(() => {
+    if (!acordaNaVista || !naVista || acordada) return;
+    const t = window.setTimeout(() => setAcordada(true), 220);
+    return () => window.clearTimeout(t);
+  }, [acordaNaVista, naVista, acordada]);
 
   React.useEffect(() => {
     if (!viva) setPronto(false);
   }, [viva]);
 
   const fotoVisivel = comFoto && !(viva && pronto);
-  const tocarNaFoto = ehToque() && !acordada ? () => setAcordada(true) : onOpen;
+  /*
+   * Foto de fora da tela só desce depois da primeira dobra. Em rede lenta o navegador amplia a
+   * margem do `loading="lazy"` para 2500px, e dez fotos dividiam a banda com as três que a pessoa
+   * está olhando. Na rede boa nada muda: `dobraAssentada` nasce verdadeira.
+   */
+  const dobraAssentada = useDobraAssentada();
+  const fotoPedida = naVista || dobraAssentada;
+  const tocadaEm = React.useRef(0);
+  const tocarNaFoto = () => {
+    if (!toque) return onOpen();
+    /* Peça carregando não é beco: quatro segundos antes de desistir dela. */
+    if (tocadaEm.current && performance.now() - tocadaEm.current > 4000) return onOpen();
+    tocadaEm.current ||= performance.now();
+    setAcordada(true);
+    setUrgencia(++ultimaUrgencia);
+  };
 
   return (
     <article
@@ -272,9 +312,8 @@ const Ladrilho = React.memo(function Ladrilho({
          `data-palco` dele não distingue mais as duas: é por aqui que a suíte
          prova que só o que está perto da tela fica montado. */
       data-viva={viva ? "" : undefined}
-      onPointerEnter={acordar}
+      onPointerEnter={acordarSemDedo}
       onFocus={acordar}
-      onTouchStart={acordar}
       className="palco group relative isolate overflow-hidden rounded-tile [contain:paint] has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--casa-fg-2)]"
     >
       {Demo ? (
@@ -298,9 +337,10 @@ const Ladrilho = React.memo(function Ladrilho({
             ) : null}
             {comFoto ? (
               <img
-                src={`/shots/${item.name}-${escuro ? "escuro" : "claro"}.webp`}
+                src={fotoPedida ? `/shots/${item.name}-${escuro ? "escuro" : "claro"}.webp` : undefined}
                 alt=""
-                loading="lazy"
+                data-foto-palco=""
+                loading={naVista ? "eager" : "lazy"}
                 decoding="async"
                 draggable={false}
                 onError={() => setSemFoto(true)}
@@ -312,14 +352,26 @@ const Ladrilho = React.memo(function Ladrilho({
         </div>
       ) : null}
 
+      {/* A foto que ficou no toque avisa que é foto. Ícone, sem frase: quem acorda é o dedo. */}
+      {toque && fotoVisivel && !(viva && !pronto) && (acordada || !acordaNaVista) ? (
+        <span aria-hidden className="casa pointer-events-none absolute left-2 top-2 z-10 grid size-7 place-items-center rounded-control bg-casa-bg text-casa-fg-2">
+          <Play className="size-3" />
+        </span>
+      ) : null}
+
       {/* Reportar bug: só existe com o reporte ligado (modo dev), e aparece
           junto com o nome. Nunca é ação de quem visita a vitrine. */}
-      <div className="casa no-hover absolute right-3 top-3 rounded-[10px] bg-casa-bg empty:hidden">
+      <div data-bug-botao="" className="casa no-hover absolute right-3 top-3 rounded-[10px] bg-casa-bg empty:hidden">
         <BugButton item={item.name} />
       </div>
 
       {/*
         O rodapé do ladrilho: abrir a ficha e copiar o comando.
+
+        Fica numa faixa própria, abaixo da moldura. Com mouse o ladrilho é só a peça em repouso: a faixa
+        tem lugar reservado e acende no hover ou no foco. No dedo fica sempre. Por cima do palco a
+        etiqueta cobria o título do demo no hover ("Fog Hero" sobre "… em névoa"), e nenhuma
+        posição fixa acerta sessenta composições diferentes.
 
         O nome era uma etiqueta parada e não dizia que levava a algum lugar. Agora
         é um botão: no hover (e no foco de teclado) ele acende e uma seta abre
@@ -328,15 +380,15 @@ const Ladrilho = React.memo(function Ladrilho({
         precisa abrir a ficha. Os dois aparecem com o cursor no ladrilho e ficam
         fixos no toque (`no-hover`).
       */}
-      <div className="casa no-hover pointer-events-none absolute inset-x-3 bottom-3 flex items-end justify-between gap-2 pointer-coarse:static pointer-coarse:px-3 pointer-coarse:pb-3 pointer-coarse:pt-2">
+      <div className="casa no-hover flex items-center justify-between gap-2 px-2 pb-2 pt-1.5 pointer-coarse:px-3 pointer-coarse:pb-3 pointer-coarse:pt-2">
         <button
           type="button"
           data-card-index={index}
           onClick={onOpen}
           aria-label={`Ver ${item.title}`}
           className={cn(
-            "group/abrir pointer-events-auto flex min-w-0 cursor-pointer items-center gap-1.5 rounded-[8px] bg-casa-bg py-1 pl-2 pr-2 text-casa-sm text-casa-fg outline-none pointer-coarse:min-h-11",
-            "transition-[background-color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
+            "group/abrir flex min-w-0 cursor-pointer items-center gap-1.5 rounded-[8px] py-1 pl-2 pr-2 text-casa-sm text-casa-fg-2 outline-none group-hover:text-casa-fg pointer-coarse:min-h-11 pointer-coarse:bg-casa-bg pointer-coarse:text-casa-fg",
+            "transition-[background-color,color] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
             "hover:bg-casa-tile-2 focus-visible:[box-shadow:var(--focus)]",
           )}
         >
@@ -360,7 +412,7 @@ const Ladrilho = React.memo(function Ladrilho({
             <ArrowUpRight className="h-3.5 w-3.5" />
           </span>
         </button>
-        <span className="pointer-events-auto shrink-0 rounded-[8px] bg-casa-bg">
+        <span className="no-hover shrink-0 rounded-[8px] pointer-coarse:bg-casa-bg">
           <CopyCommand variant="chip" text={installCommand(item.name)} className="size-7 pointer-coarse:size-11" />
         </span>
       </div>
@@ -448,10 +500,9 @@ export interface GalleryProps {
   familia?: Family | null;
   onFamilia?: (f: Family | null) => void;
   /** Abre a busca do cabeçalho — a única da casa. */
-  onBuscar?: () => void;
 }
 
-export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: GalleryProps) {
+export function Gallery({ onFocus, familia = null, onFamilia }: GalleryProps) {
   /** `null` = não filtra por dependência. `SEM_DEPS` = só o que não puxa nada. */
   const [dep, setDep] = React.useState<string | null>(null);
   const [tipo, setTipo] = React.useState<TipoFilter>(null);
@@ -599,8 +650,7 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
     if (window.scrollY > target) window.scrollTo({ top: target, behavior: "auto" });
   }, [familia, dep, tipo, lang, tamanho, results.length]);
 
-  // Atalhos da grade. `/` abre a busca — convenção de quem usa o teclado — e as
-  // setas percorrem os cards a partir do que estiver focado, com o número de
+  // Atalhos da grade. As setas percorrem os cards a partir do que estiver focado, com o número de
   // colunas lido do próprio grid em vez de chutado por breakpoint.
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -611,11 +661,6 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
         (el instanceof HTMLElement && el.isContentEditable);
       if (typing) return;
 
-      if (e.key === "/") {
-        e.preventDefault();
-        onBuscar?.();
-        return;
-      }
       if (!listRef.current) return;
       if (
         el instanceof HTMLElement &&
@@ -648,7 +693,7 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [onBuscar]);
+  }, []);
 
   return (
     <div className="pb-24">
@@ -671,6 +716,7 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
             veste a marca que você escolher.
           </p>
         )}
+        {familia ? null : <MarcasNaDobra className="mt-2" />}
         {familia ? null : <PilulaAgente />}
       </section>
 
@@ -687,7 +733,8 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
               onClick={() => onFamilia?.(null)}
               count={CATALOG.filter((i) => contaComoComponente(i) && i.family !== "shaders" && naVitrine(i)).length}
             >
-              Tudo
+              {/* "Componentes", e não "Tudo": ao lado de "Shaders 20", o número fecha com a frase da dobra sem nota nenhuma. */}
+              Componentes
             </Aba>
             {/* Família oculta ou com menos de MIN_ABA peças não vira aba: as peças
                 seguem em "Tudo" e na busca. A aberta por link continua visível. */}
@@ -835,7 +882,9 @@ export function Gallery({ onFocus, familia = null, onFamilia, onBuscar }: Galler
                 fotos, e liam como peça quebrada.
               */}
               {familia === "shaders" ? (
-                <ShaderLab itens={comPalco} onFocus={onFocus} />
+                <React.Suspense fallback={<div className="min-h-screen" aria-busy="true" />}>
+                  <ShaderLab itens={comPalco} onFocus={onFocus} />
+                </React.Suspense>
               ) : comPalco.length ? (
                 <div
                   data-grade

@@ -411,16 +411,43 @@ function useThemeEpoch(): number {
  * espera o `COMPLETION_STATUS` sem travar. O canvas nasce com `frameloop`
  * "never", e o livro 2D de reserva (`Book3D`) segue na tela até o primeiro
  * quadro inteiro, como já era. Só a espera deixa de ser uma tarefa longa.
+ *
+ * A espera é nossa e não o `compileAsync`: o timer dele não para quando a peça
+ * desmonta e lê `currentProgram` de material já descartado. Isso jogava
+ * `isReady of undefined` fora de qualquer `catch`, e a promessa nunca resolvia:
+ * o livro ficava preso na reserva. Aqui material sem programa conta como pronto,
+ * o laço para ao desmontar e, passado o teto, libera e o three compila no quadro.
  */
+const TETO_DA_COMPILACAO_MS = 8000;
+
 function CompilarAntes({ onCompilado }: { onCompilado: () => void }) {
   const { gl, scene, camera } = useThree();
   React.useEffect(() => {
     let vivo = true;
-    gl.compileAsync(scene, camera)
-      .catch(() => undefined) // sem a extensão, o three compila no primeiro quadro, como antes
-      .then(() => vivo && onCompilado());
+    let relogio: ReturnType<typeof setTimeout> | undefined;
+    const inicio = performance.now();
+    let pendentes: Set<THREE.Material>;
+    try {
+      pendentes = gl.compile(scene, camera) as unknown as Set<THREE.Material>;
+    } catch {
+      onCompilado();
+      return;
+    }
+    const conferir = () => {
+      if (!vivo) return;
+      for (const material of pendentes) {
+        const { currentProgram: programa } = gl.properties.get(material) as {
+          currentProgram?: { isReady(): boolean };
+        };
+        if (!programa || programa.isReady()) pendentes.delete(material);
+      }
+      if (pendentes.size === 0 || performance.now() - inicio > TETO_DA_COMPILACAO_MS) onCompilado();
+      else relogio = setTimeout(conferir, 10);
+    };
+    conferir();
     return () => {
       vivo = false;
+      clearTimeout(relogio);
     };
   }, [gl, scene, camera, onCompilado]);
   return null;

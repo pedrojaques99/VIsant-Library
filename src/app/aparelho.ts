@@ -61,6 +61,12 @@ function gpuPorSoftware(): boolean {
   }
 }
 
+/** A pessoa pediu pra gastar pouco: nada acorda sozinho, mesmo com vaga. */
+export const pediuEconomia = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return Boolean((navigator as Nav).connection?.saveData) || (window.matchMedia?.("(prefers-reduced-data: reduce)").matches ?? false);
+};
+
 let nivel: Nivel | null = null;
 export const nivelDoAparelho = (): Nivel => (nivel ??= medirNivel());
 
@@ -101,7 +107,12 @@ const TETO_PESADAS: Record<Nivel, number> = { alto: 2, medio: 1, baixo: 1 };
  * pré-aquecimento usa só as vagas que sobram. Grade densa num monitor grande
  * pode passar de 12 na tela, e nenhuma delas vira foto.
  */
-const TETO_VIVAS: Record<Nivel, number> = { alto: 12, medio: 6, baixo: Infinity };
+/*
+ * Baixo: 3. O celular mostra de duas a três peças por tela no tamanho padrão, e é
+ * o que acorda sozinho no toque: foto na mão de quem quer arrastar era o conflito
+ * relatado no aparelho real. Grade densa (duas colunas) fica com o resto em foto.
+ */
+const TETO_VIVAS: Record<Nivel, number> = { alto: 12, medio: 6, baixo: 3 };
 // `?vivas=N` força o teto de vivas em qualquer nível, para medir a curva.
 const vivasForcado = typeof window === "undefined" ? NaN : Number(new URLSearchParams(window.location.search).get("vivas") ?? NaN);
 const tetoVivas = (n: Nivel) => (Number.isFinite(vivasForcado) ? vivasForcado : TETO_VIVAS[n]);
@@ -183,17 +194,18 @@ function redistribuir() {
 let proximoId = 0;
 
 /**
- * `true` quando a peça pode montar. `quer` falso devolve a vaga. Peça que não
+ * `true` quando a peça pode montar. `quer` falso devolve a vaga. `urgencia` > 0 é
+ * o toque da pessoa: a maior passa na frente, sem aumentar teto nenhum. Peça que não
  * pesa em nenhum orçamento (sem GPU, num nível sem teto de vivas) recebe na
  * hora, sem entrar na fila.
  */
-export function useVaga(nome: string, quer: boolean, naTela = true): boolean {
+export function useVaga(nome: string, quer: boolean, naTela = true, urgencia = 0): boolean {
   const gpu = pesoGpu(nome);
   const pesada = ehPesada(nome) ? 1 : 0;
   const viva = Number.isFinite(tetoVivas(nivelDoAparelho())) ? 1 : 0;
   const naFila = gpu > 0 || viva > 0;
   const id = React.useMemo(() => ++proximoId, []);
-  const prioridade = naTela ? 0 : 1;
+  const prioridade = urgencia ? -urgencia : naTela ? 0 : 1;
   const prioridadeRef = React.useRef(prioridade);
   prioridadeRef.current = prioridade;
   React.useEffect(() => {

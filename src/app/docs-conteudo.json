@@ -1,0 +1,75 @@
+{
+  "lead": "Instale uma peça, vista a sua marca e conecte o agente. Os três passos foram rodados num projeto Vite limpo.",
+  "passos": [
+    {
+      "titulo": "Configure o registry",
+      "texto": "Projeto sem shadcn começa por `npx shadcn@latest init`. Depois, acrescente o `@visant` ao `components.json`.",
+      "comando": "npx shadcn@latest init",
+      "codigo": "{\n  \"registries\": {\n    \"@visant\": \"https://ui.visantlabs.com/r/{name}.json\"\n  }\n}",
+      "linguagem": "json"
+    },
+    {
+      "titulo": "Instale uma peça",
+      "texto": "O arquivo vai pro seu projeto, em `src/components/ui`, e é seu pra editar. As dependências npm vêm junto.",
+      "comando": "npx shadcn@latest add @visant/slide-to-confirm",
+      "codigo": "import { SlideToConfirm } from \"@/components/ui/slide-to-confirm\"\n\nexport function Pagar() {\n  return <SlideToConfirm label=\"Deslize pra pagar\" onConfirm={() => console.log(\"pago\")} />\n}",
+      "linguagem": "tsx"
+    },
+    {
+      "titulo": "Aplique um tema",
+      "texto": "O tema escreve as cores no seu CSS, e as peças leem dali.",
+      "comando": "npx shadcn@latest add @visant/theme-norte-verde"
+    }
+  ],
+  "runtime": {
+    "titulo": "Trocar de marca em runtime",
+    "texto": "Pra quando a marca só se decide com o app aberto: proposta, painel de vários clientes. O provider baixa o tema e troca uma folha de estilo, sem recarregar a página.",
+    "comando": "npx shadcn@latest add @visant/brand-theme",
+    "codigo": "import { BrandThemeProvider, useBrandTheme } from \"@/lib/brand-theme\"\n\nfunction TrocaDeMarca() {\n  const { brands, active, setBrand } = useBrandTheme()\n  return brands.map((b) => (\n    <button key={b.slug} aria-pressed={active?.slug === b.slug} onClick={() => setBrand(b.slug)}>\n      {b.name}\n    </button>\n  ))\n}\n\nexport default function App() {\n  return (\n    <BrandThemeProvider defaultBrand=\"norte-verde\">\n      <TrocaDeMarca />\n    </BrandThemeProvider>\n  )\n}"
+  },
+  "agente": {
+    "titulo": "Conectar o agente",
+    "texto": "O servidor MCP recomenda e busca peças, sem chave. Quem não usa MCP lê o acervo em texto.",
+    "linhas": [
+      {
+        "rotulo": "Conector MCP, sem chave",
+        "comando": "https://ui.visantlabs.com/mcp"
+      },
+      {
+        "rotulo": "Claude Code",
+        "comando": "claude mcp add --transport http visant-ui https://ui.visantlabs.com/mcp"
+      },
+      {
+        "rotulo": "Acervo em texto",
+        "comando": "https://ui.visantlabs.com/llms.txt"
+      },
+      {
+        "rotulo": "Esta página em Markdown",
+        "comando": "https://ui.visantlabs.com/docs.md"
+      },
+      {
+        "rotulo": "Regras no agente",
+        "comando": "npx shadcn@latest add @visant/agent-rules"
+      },
+      {
+        "rotulo": "Skills",
+        "comando": "npx skills add pedrojaques99/visant-skills-public --skill visant-design"
+      }
+    ]
+  },
+  "exemplos": {
+    "use-knob-drag": "import { useKnobDrag } from \"@/hooks/use-knob-drag\"\n\nexport function Ganho() {\n  const { currentValue, rotation, handleMouseDown, handleKeyDown } = useKnobDrag({ min: 0, max: 10, value: 5 })\n  return (\n    <div role=\"slider\" tabIndex={0} aria-valuenow={currentValue} onMouseDown={handleMouseDown} onKeyDown={handleKeyDown} style={{ rotate: `${rotation}deg` }} />\n  )\n}",
+    "use-media-query": "import { useMediaQuery } from \"@/hooks/use-media-query\"\n\nexport function Menu() {\n  const largo = useMediaQuery(\"(min-width: 1024px)\")\n  return largo ? <nav>Barra lateral</nav> : <button>Abrir menu</button>\n}",
+    "motion": "import { motion } from \"motion/react\"\nimport { DUR, EASE_OUT } from \"@/lib/motion\"\n\nexport function Entrada() {\n  return <motion.div animate={{ opacity: 1 }} initial={{ opacity: 0 }} transition={{ duration: DUR.base, ease: EASE_OUT }} />\n}",
+    "motion-layer": "import { useEffect } from \"react\"\nimport { mount } from \"@/lib/motion-layer\"\n\nexport function Secao() {\n  useEffect(() => mount(), [])\n  return <h2 data-reveal=\"lines\">O texto sobe de dentro de um corte</h2>\n}",
+    "smooth-scroll-provider": "import type { ReactNode } from \"react\"\nimport { SmoothScrollProvider } from \"@/lib/smooth-scroll-provider\"\n\nexport function Landing({ children }: { children: ReactNode }) {\n  return <SmoothScrollProvider>{children}</SmoothScrollProvider>\n}",
+    "tempo-clock": "import { createTempoClock } from \"@/lib/tempo-clock\"\n\nconst relogio = createTempoClock({ bpm: 120, div: 2 })\n\nfunction quadro(agora: number) {\n  const { beat, env } = relogio.tick(agora)\n  document.body.style.opacity = String(beat ? 1 : env)\n  requestAnimationFrame(quadro)\n}\n\nrequestAnimationFrame(quadro)",
+    "brand-theme": "import { BrandThemeProvider, useBrandTheme } from \"@/lib/brand-theme\"\n\nfunction Atual() {\n  const { active, setBrand } = useBrandTheme()\n  return <button onClick={() => setBrand(\"vega-noturno\")}>{active?.name}</button>\n}\n\nexport const App = () => (\n  <BrandThemeProvider defaultBrand=\"visant\">\n    <Atual />\n  </BrandThemeProvider>\n)",
+    "sfx-bus": "import { SfxProvider, playSfx } from \"@/lib/sfx-bus\"\n\nexport const App = () => (\n  <SfxProvider>\n    <button onClick={() => playSfx(\"complete\")}>Salvar</button>\n  </SfxProvider>\n)",
+    "use-pointer-parallax": "import { useRef } from \"react\"\nimport { usePointerParallax } from \"@/hooks/use-pointer-parallax\"\n\nexport function Cena() {\n  const ref = useRef<HTMLDivElement>(null)\n  usePointerParallax(ref)\n  return <div ref={ref} style={{ transform: \"translate3d(calc(var(--px, 0) * 8px), calc(var(--py, 0) * 8px), 0)\" }} />\n}",
+    "fold-motion": "import { Fold } from \"@/lib/fold-motion\"\n\nexport const Secao = () => (\n  <Fold variant=\"rise\">\n    <h2>Entra quando chega na tela</h2>\n  </Fold>\n)",
+    "use-local-search": "import { useState } from \"react\"\nimport { useLocalSearch } from \"@/hooks/use-local-search\"\n\nconst MARCAS = [\"Visant\", \"Norte Verde\", \"Grão Editora\"]\n\nexport function Busca() {\n  const [query, setQuery] = useState(\"\")\n  const achadas = useLocalSearch(MARCAS, { query, fields: (m) => [m] })\n  return (\n    <>\n      <input value={query} onChange={(e) => setQuery(e.target.value)} />\n      {achadas.map((m) => <p key={m}>{m}</p>)}\n    </>\n  )\n}",
+    "css-color": "import { onThemeChange, resolveCssColor } from \"@/lib/css-color\"\n\nconst pintar = () => {\n  const [r, g, b] = resolveCssColor(\"var(--brand)\")\n  console.log(r, g, b)\n}\n\npintar()\nonThemeChange(pintar)",
+    "use-debounce": "import { useState } from \"react\"\nimport { useDebounce } from \"@/hooks/use-debounce\"\n\nexport function Busca() {\n  const [texto, setTexto] = useState(\"\")\n  const termo = useDebounce(texto, 300)\n  return <input value={texto} onChange={(e) => setTexto(e.target.value)} aria-label={termo} />\n}"
+  }
+}

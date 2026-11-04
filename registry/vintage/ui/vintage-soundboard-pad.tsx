@@ -243,7 +243,7 @@ export function VintageSoundboardPad({
       // O bus da casa não toca por cima: quem toca é o pad, logo abaixo.
       data-sfx-silent=""
       className={cn(
-        "group relative flex cursor-pointer select-none touch-none flex-col items-center justify-center gap-1",
+        "group relative flex cursor-pointer select-none touch-pan-y flex-col items-center justify-center gap-1",
         "rounded-[var(--r-control,10px)] outline-none",
         className
       )}

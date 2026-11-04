@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { useKnobDrag } from "@/hooks/use-knob-drag";
+import { KNOB_TOUCH_ACTION, useKnobDrag } from "@/hooks/use-knob-drag";
 
 interface VintageLargeKnobProps {
   label?: string;
@@ -178,7 +178,7 @@ export function VintageLargeKnob({
     currentValue,
     rotation,
     isDragging,
-    handleMouseDown,
+    handlePointerDown,
     handleDoubleClick,
     handleWheel,
     handleKeyDown,
@@ -201,6 +201,7 @@ arraste ↕ · shift = fino · roda · duplo clique = centro`}
           width: size,
           height: size,
           cursor: isDragging ? "grabbing" : "grab",
+          touchAction: KNOB_TOUCH_ACTION,
         }}
         // Alcançável por teclado: setas, Page, Home/End (ver `useKnobDrag`).
         tabIndex={0}
@@ -211,7 +212,7 @@ arraste ↕ · shift = fino · roda · duplo clique = centro`}
         aria-valuenow={Number(currentValue.toFixed(2))}
         aria-valuetext={leitura}
         onKeyDown={handleKeyDown}
-        onMouseDown={handleMouseDown}
+        onPointerDown={handlePointerDown}
         onDoubleClick={handleDoubleClick}
         onWheel={handleWheel}
       >

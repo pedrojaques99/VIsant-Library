@@ -80,7 +80,7 @@ export default function GleamDemo({ props }: DemoProps) {
             que é o que faz o card ler como vidro sobre imagem. */}
         <Media
           papel="cena"
-          indice={1}
+          indice={2}
           ratio="4/5"
           className="rounded-[var(--r-control,0.5rem)]"
         />

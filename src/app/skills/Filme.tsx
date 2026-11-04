@@ -9,8 +9,7 @@
  */
 
 import * as React from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useDobraAssentada } from "@/lib/rede";
 import { Check, Copy } from "lucide-react";
 import { CopyCommand, useCopy } from "../copy-command";
 import skills from "./skills.generated.json";
@@ -28,7 +27,15 @@ import {
 import { trilhaVideo, type Trilha } from "./filme/quadros";
 import "./filme/filme.css";
 
-gsap.registerPlugin(ScrollTrigger);
+/*
+ * O GSAP só dirige a rolagem: a abertura é CSS puro e pinta sem ele (`.filme:not([data-rodando])`
+ * em filme.css). Em Slow 4G os 45 KB dele não podem vir antes da foto da abertura.
+ */
+const carregarGsap = () =>
+  Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(([{ default: gsap }, { ScrollTrigger }]) => {
+    gsap.registerPlugin(ScrollTrigger);
+    return { gsap, ScrollTrigger };
+  });
 
 /* O filme é dirigido pela rolagem: o `duration` do GSAP aqui é trecho da linha do
    tempo, medido em vh rolados. Não são segundos, então os tokens de DUR não se aplicam. */
@@ -69,12 +76,13 @@ function Letras({ texto }: { texto: string }) {
 
 /** `adiada`: a cena fica fora de quadro na abertura, e `loading="lazy"` não ajuda porque o palco cobre a tela. */
 function ImagemPar({ par, adiada }: { par: Par; adiada?: boolean }) {
-  const fonte = (nome: string) => (adiada ? { "data-src": midia(nome) } : { src: midia(nome) });
+  const fonte = (nome: string, depois = adiada) => (depois ? { "data-src": midia(nome) } : { src: midia(nome) });
   return (
     <div className="filme-imagem par">
       <img {...fonte(`${par.id}-antes.webp`)} alt={`${par.nome} Antes das skills.`} decoding="async" />
       <div className="filme-depois">
-        <img {...fonte(`${par.id}-depois.webp`)} alt={`${par.nome} Depois das skills.`} decoding="async" />
+        {/* Fora de quadro até a pessoa rolar: desce quando o GSAP chega, não junto com a primeira foto. */}
+        <img {...fonte(`${par.id}-depois.webp`, true)} alt={`${par.nome} Depois das skills.`} decoding="async" />
       </div>
       <div className="filme-linha" data-linha />
     </div>
@@ -155,7 +163,22 @@ function FilmeRolado({ vertical }: { vertical: boolean }) {
     r.style.marginTop = `${-(r.getBoundingClientRect().top + window.scrollY)}px`;
   }, []);
 
+  const assentada = useDobraAssentada();
+  const [motor, setMotor] = React.useState<Awaited<ReturnType<typeof carregarGsap>> | null>(null);
   React.useEffect(() => {
+    if (!assentada) return;
+    let vivo = true;
+    void carregarGsap().then((m) => {
+      if (vivo) setMotor(m);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [assentada]);
+
+  React.useEffect(() => {
+    if (!motor) return;
+    const { gsap, ScrollTrigger } = motor;
     const r = raiz.current!;
     ScrollTrigger.config({ ignoreMobileResize: true });
     const cenas = [...r.querySelectorAll<HTMLElement>(".filme-cena")];
@@ -424,6 +447,8 @@ function FilmeRolado({ vertical }: { vertical: boolean }) {
       });
       aplicar();
       ScrollTrigger.refresh();
+      /* Só aqui: até este ponto quem desenha a abertura é a CSS, e não pode haver quadro sem nenhum dos dois. */
+      r.dataset.rodando = "";
 
       /* Corte seco, sem atravessar o filme. O fim da cena é onde o comando já está inteiro. */
       setSaltar(() => (id: string) => {
@@ -435,13 +460,14 @@ function FilmeRolado({ vertical }: { vertical: boolean }) {
     }, r);
 
     return () => {
+      delete r.dataset.rodando;
       ctx.revert();
       for (const tr of trilhas.values()) {
         tr.soltar();
         tr.el.remove();
       }
     };
-  }, [vertical, marcas]);
+  }, [vertical, marcas, motor]);
 
   return (
     <div ref={raiz} className="filme casa dark" data-vertical={vertical}>

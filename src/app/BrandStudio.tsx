@@ -24,13 +24,14 @@ import {
   type BrandThemeItem,
 } from "@/lib/brand-theme";
 import { onThemeChange } from "@/lib/css-color";
+import { useDobraAssentada } from "@/lib/rede";
 import { cn } from "@/lib/utils";
 import { Chip } from "../../registry/visant/ui/chip";
 import { CtaAction, CtaSurface } from "../../registry/visant/ui/cta-surface";
 import { ProfileForm, type ProfileValue } from "../../registry/visant/ui/profile-form";
 import { SearchField } from "../../registry/visant/ui/search-field";
 import { SegmentedControl } from "../../registry/visant/ui/segmented-control";
-import { fold } from "./catalog";
+import { fold } from "./fold";
 import { ehToque } from "./casa-ui";
 import { Codigo } from "./codigo";
 import { CopyCommand, useCopy } from "./copy-command";
@@ -649,6 +650,7 @@ function ListaDeVoz({
 
 /** O que a marca diz de si. Campo sem dado não desenha nada: nem título, nem buraco. */
 function Essencia({ marca, livro }: { marca: BrandSummary; livro: LivroDaMarca }) {
+  const assentada = useDobraAssentada();
   const tom = livro.tom?.join(", ");
   const mensagem = ROTULOS_DA_MENSAGEM.filter(([k]) => livro.mensagem?.[k]);
   const temVoz = livro.voz || livro.faz?.length || livro.naoFaz?.length;
@@ -750,14 +752,16 @@ function Essencia({ marca, livro }: { marca: BrandSummary; livro: LivroDaMarca }
                 <div key={l.url} data-token={`livro:logo-${i}`} className="overflow-hidden rounded-tile bg-casa-tile">
                   {/* A cor da placa sai da tinta medida no sync: o logo nunca some no fundo. */}
                   <div
-                    className="palco grid h-36 place-items-center overflow-hidden"
+                    className="palco relative grid aspect-[2/1] place-items-center overflow-hidden"
                     style={{ background: fundo?.hex ?? l.fundo }}
                   >
                     <img
-                      src={l.url}
+                      src={assentada ? l.url : undefined}
                       alt={`Logo ${marca.name}, versão ${i + 1}`}
                       loading="lazy"
-                      className={fundo ? "max-h-16 max-w-[70%] object-contain" : "max-h-36 w-full object-contain"}
+                      // Arquivo fora do ar tira o ladrilho inteiro: placa vazia não ajuda ninguém.
+                      onError={(e) => e.currentTarget.closest("[data-token]")?.setAttribute("hidden", "")}
+                      className={fundo ? "max-h-[55%] max-w-[70%] object-contain" : "absolute inset-0 size-full object-cover"}
                     />
                   </div>
                   <div className="casa flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 py-3 text-casa-sm">
@@ -984,19 +988,36 @@ function BuscaNaMarca({ indice, marca }: { indice: Resultado[]; marca?: string }
                   i === foco && "bg-casa-tile-2",
                 )}
               >
-                {r.cor ? (
+                {r.miniatura ? (
+                  <span
+                    aria-hidden
+                    className="grid h-6 w-10 shrink-0 place-items-center overflow-hidden rounded-[5px] [box-shadow:inset_0_0_0_1px_var(--casa-line)]"
+                    style={{ background: r.miniatura.fundo }}
+                  >
+                    <img src={r.miniatura.url} alt="" className="max-h-full max-w-full object-contain p-0.5" />
+                  </span>
+                ) : r.cor ? (
                   <span
                     aria-hidden
                     className="size-5 shrink-0 rounded-[5px] [box-shadow:inset_0_0_0_1px_var(--casa-line)]"
                     style={{ background: r.cor }}
                   />
                 ) : null}
-                <span className="min-w-0">
-                  <code className="block truncate text-casa-sm text-casa-fg">{r.nome}</code>
-                  <code className="block truncate text-casa-sm text-casa-fg-3">
-                    {r.detalhe}, {r.valor || "ausente"}
-                  </code>
-                </span>
+                {r.prosa ? (
+                  <span className="min-w-0">
+                    <span className="block truncate text-casa-sm text-casa-fg">{r.nome}</span>
+                    <span className="block truncate text-casa-sm text-casa-fg-3">
+                      {r.detalhe}, {r.valor}
+                    </span>
+                  </span>
+                ) : (
+                  <span className="min-w-0">
+                    <code className="block truncate text-casa-sm text-casa-fg">{r.nome}</code>
+                    <code className="block truncate text-casa-sm text-casa-fg-3">
+                      {r.detalhe}, {r.valor || "ausente"}
+                    </code>
+                  </span>
+                )}
               </button>
             ))
           ) : (
@@ -1124,7 +1145,15 @@ export function BrandStudioBody() {
                   // casa-lint/raio-da-marca: a placa está no palco e veste o raio da marca
                   style={{ background: fundoDaPaleta ?? "var(--card)", borderRadius: "var(--r-surface)" }}
                 >
-                  <img src={shown.logo.url} alt={`Logo ${shown.name}`} className="h-12 w-auto object-contain" />
+                  {/* A versão leve (`npm run build:logos`); marca sem ela cai no arquivo do vault. */}
+                  <img
+                    src={`/logos/${shown.slug}.webp`}
+                    alt={`Logo ${shown.name}`}
+                    onError={(e) => {
+                      if (shown.logo && e.currentTarget.src !== shown.logo.url) e.currentTarget.src = shown.logo.url;
+                    }}
+                    className="h-12 w-auto object-contain"
+                  />
                 </div>
               ) : null}
               <h1
@@ -1260,6 +1289,17 @@ export function BrandStudioBody() {
 
         <Capitulo id="exportar" titulo="Exportar">
           <Exportar marca={shown} item={item} />
+          <div className="casa mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="min-w-0 flex-1">
+              <CopyCommand variant="cta" text={installCommand(`theme-${shown?.slug ?? DEFAULT_BRAND}`)} />
+            </div>
+            <a
+              href="/catalogo"
+              className="alvo-toque shrink-0 rounded-control px-3 py-2 text-center text-casa-base text-casa-fg outline-none transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:bg-casa-tile focus-visible:[box-shadow:var(--focus)]"
+            >
+              Ver o catálogo
+            </a>
+          </div>
         </Capitulo>
       </div>
     </main>

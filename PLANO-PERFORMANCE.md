@@ -201,6 +201,47 @@ em `getProgramParameter(LINK_STATUS)` até o driver terminar.
   pelo retângulo já escalado, o canvas mede o layout sem escala, e na grade os
   livros sairiam desalinhados. O `compileAsync` resolve o custo sem esse risco.
 
+### Rodada 6: conteúdo real em Slow 4G (2026-11-04)
+
+Pixel 7, 400 kbps, 400 ms, CPU 4x, cache vazio, Chrome real, `dist` servido com
+brotli em HTTP/1.1. "Pronto" é: React montado, dobra do HTML fora, elemento
+principal visível, tema carregado e imagens da viewport completas. Mediana de 3.
+
+| Rota | JS no HTML, gzip | KB até pronto | Pronto |
+|---|---|---|---|
+| /skills | 231 → **77** | 599 → **199** | 14,4 → **5,2 s** |
+| /skills/filme | 216 → **79** | 558 → **193** | 12,7 → **5,5 s** |
+| /skills/killer | 221 → **80** | 402 → **158** | 10,3 → **4,7 s** |
+| /marca | 219 → **98** | 482 → **157** | 12,5 → **5,1 s** |
+| /catalogo | 208 → **120** | 583 → **283** | 13,7 → **6,7 s** |
+
+O que pesava, medido, em ordem:
+
+- **`manualChunks` em forma de objeto** puxava o núcleo do React para o chunk
+  `motion`: os 52 KB dele desciam em toda rota. Por função, isso acabou.
+- **O catálogo na entrada** (metadados, grade, 16 peças estáticas). `App.tsx` só
+  conhece o caminho; quem resolve família e peça é `RotaCatalogo`.
+- **Logo de 65 KB** num ícone de 20 px. O seletor de marca desce depois da dobra
+  (`useDobraAssentada`), e `/marca` usa `public/logos/<slug>.webp` (6 KB,
+  `npm run build:logos`).
+- **O que fica abaixo da dobra descia junto**: demos do Hub, GSAP, motion, realce
+  de código, fotos da grade. A peça viva continua: a foto parada dá lugar a ela
+  sem sair do lugar.
+- **Idas e voltas paradas**: fonte, fotos, tema e dependências da rota só eram
+  pedidos depois do React. Saem no HTML (`prerender.mjs`). O preload de
+  `/skills/filme` apontava para a foto errada (`mata-antes`, 43 KB).
+- **`fog-hero`, terceira foto da grade, tinha 170 KB**: agora 51 KB (q 0,45, fixo
+  em `capture-registry.mjs`). Oswald, sem uso, saiu da folha.
+
+Hipóteses descartadas: `brands.json` não vai inline (é fetch, 4 KB), e o
+`fog-tree-scene` de 4 MB é JS sob demanda, fora de toda rota medida.
+
+Sem alcançar 5 s: `/catalogo` (283 KB, sendo 28 de metadados e 102 das três
+fotos) e, por pouco, `/skills`, `/skills/filme` e `/marca`. A 50 KB/s, o piso com
+React, CSS e Geist é de ~120 KB, ou 2,4 s, antes de qualquer conteúdo. A próxima
+alavanca é a qualidade das fotos da grade (0,9 → 0,6 corta metade), e a escolha
+é de produto.
+
 ## Resultado (produção, mesma régua)
 
 | Perfil | Quadros > 33ms antes → depois | Bloqueado antes → depois |
