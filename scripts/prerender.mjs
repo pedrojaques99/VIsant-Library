@@ -231,6 +231,11 @@ const SECOES = [
     descricao: `${CONTA} pra React, divididos por categoria, cada fatia com demo viva e comando de instalação.`,
   },
   {
+    slug: "mockups",
+    titulo: "Mockups (beta) / @visant/ui",
+    descricao: "Em beta. Monte um mockup de celular com a sua tela, escolha pose, luz e movimento, e exporte em PNG ou vídeo direto do navegador.",
+  },
+  {
     slug: "skills",
     titulo: "Skills / Visant",
     descricao: "Seis skills da Visant para Claude Code: interface, motion e copy, mostradas em uso.",

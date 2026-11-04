@@ -90,6 +90,8 @@ const Admin = React.lazy(() => import("./Admin").then((m) => ({ default: m.Admin
 /* A burilação de copy (`/burilar`): duelos A ou B, só para admin. */
 const Burilar = React.lazy(() => import("./Burilar").then((m) => ({ default: m.Burilar })));
 const Docs = React.lazy(() => import("./Docs").then((m) => ({ default: m.Docs })));
+/* O estúdio de mockups: as libs de exportação só descem para quem abre a rota. */
+const Estudio = React.lazy(() => import("./mockups/Estudio").then((m) => ({ default: m.Estudio })));
 const SkillsHub = React.lazy(() => import("./skills/Hub").then((m) => ({ default: m.Hub })));
 const SkillsFilme = React.lazy(() => import("./skills/Filme").then((m) => ({ default: m.Filme })));
 const SkillsCarroChefe = React.lazy(() => import("./skills/CarroChefe").then((m) => ({ default: m.CarroChefe })));
@@ -100,7 +102,7 @@ import { VisantAuthProvider } from "./visant-auth";
 import { MinhasMarcas } from "./MinhasMarcas";
 import { contarPagina } from "./metricas";
 
-type View = "kits" | "catalogo" | "marca" | "lab" | "burilar" | "admin" | "docs" | "skills" | "404";
+type View = "kits" | "catalogo" | "marca" | "mockups" | "lab" | "burilar" | "admin" | "docs" | "skills" | "404";
 
 interface Route {
   view: View;
@@ -137,9 +139,10 @@ const FAMILIAS_DOS_DOCS = ["fundacao", "marca", "base"];
  * instala uma mesa de trabalho inteira. O catálogo continua a um clique, para
  * quem já sabe o nome do que quer.
  */
-const VIEWS: { value: View; label: string }[] = [
+const VIEWS: { value: View; label: string; beta?: boolean }[] = [
   { value: "catalogo", label: "Catálogo" },
   { value: "marca", label: "Marca" },
+  { value: "mockups", label: "Mockups", beta: true },
   { value: "skills", label: "Skills" },
   { value: "docs", label: "Docs" },
 ];
@@ -149,10 +152,11 @@ const VIEWS: { value: View; label: string }[] = [
 const ROTAS_SEM_PORTA: View[] = ["kits", "docs"];
 const SUBPAGINAS_DE_SKILLS = ["filme", "killer", "como-usar"];
 /* `callback` é a volta do OAuth (`visant-auth.tsx`), que cai no catálogo. */
-const ROTAS_CONHECIDAS = ["catalogo", "estilo", "marca", "skills", "kits", "kit", "c", "rig", "lab", "burilar", "admin", "docs", "callback"];
+const ROTAS_CONHECIDAS = ["catalogo", "estilo", "marca", "mockups", "skills", "kits", "kit", "c", "rig", "lab", "burilar", "admin", "docs", "callback"];
 
 const TITULO_DA_VIEW: Partial<Record<View, string>> = {
   marca: "Marca / @visant/ui",
+  mockups: "Mockups (beta) / @visant/ui",
   docs: "Docs / @visant/ui",
   kits: "Kits / @visant/ui",
   lab: "Lab / @visant/ui",
@@ -437,7 +441,7 @@ function Shell() {
             telas montadas) e Marca (a prova do multi-marca). Kits e Marca
             saíram do menu e voltaram depois do audit de 2026-10-20.
           */}
-          <Secoes view={route.view} onView={setView} className="hidden sm:flex" />
+          <Secoes view={route.view} onView={setView} className="hidden md:flex" />
 
           <div className="ml-auto flex min-w-0 items-center gap-1.5 pointer-coarse:gap-0">
             <BotaoDeBusca onClick={abrirBusca} />
@@ -476,7 +480,7 @@ function Shell() {
       {/* No celular as seções descem para uma linha própria, que rola com a página. */}
       {/* Na ficha, não: a peça vem antes da navegação, e o X e o logo já tiram de lá. */}
       {route.focus ? null : (
-        <div className="casa shell sm:hidden">
+        <div className="casa shell md:hidden">
           <Secoes view={route.view} onView={setView} className="h-11" />
         </div>
       )}
@@ -507,6 +511,11 @@ function Shell() {
           e voltar a crescer, e a abertura segura o título que o HTML já pintou. */}
       <React.Suspense fallback={<EsperaDaRota />}>
         {route.view === "marca" && <BrandStudioBody />}
+        {route.view === "mockups" && (
+          <React.Suspense fallback={<EsperaDaRota />}>
+            <Estudio />
+          </React.Suspense>
+        )}
         {route.view === "lab" && <Lab />}
         {route.view === "burilar" && <Burilar />}
         {route.view === "admin" && <Admin />}
@@ -527,7 +536,8 @@ function Shell() {
           (route.kit === "filme" ? <SkillsFilme /> : route.kit === "killer" ? <SkillsCarroChefe /> : route.kit === "como-usar" ? <SkillsComoUsar /> : <SkillsHub />)}
       </React.Suspense>
 
-      {dobraAssentada ? (
+      {/* Estúdio é ferramenta de tela cheia: rodapé nenhum embaixo do painel. */}
+      {dobraAssentada && route.view !== "mockups" ? (
         <React.Suspense fallback={null}>
           <Rodape
             atual={route.view}
@@ -603,6 +613,7 @@ function Secoes({
           )}
         >
           {v.label}
+          {v.beta ? <span className="ml-1 text-casa-sm text-casa-fg-3">beta</span> : null}
         </a>
       ))}
     </nav>

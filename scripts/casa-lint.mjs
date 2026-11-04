@@ -30,6 +30,8 @@ const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 /** A casca: o que envolve a peça, nunca a peça. */
 export const CASCA = [
   "src/app/App.tsx",
+  "src/app/mockups/Estudio.tsx",
+  "src/app/mockups/controles.tsx",
   "src/app/Gallery.tsx",
   "src/app/ComponentFocus.tsx",
   "src/app/busca.tsx",

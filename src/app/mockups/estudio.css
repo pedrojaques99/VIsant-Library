@@ -1,0 +1,199 @@
+/*
+ * O estúdio de mockups. A casca fala só `--casa-*`: neutra, sem a cor da marca, porque
+ * aqui a obra é o que está no palco. Uma família só de medidas: linha de 32px, raio de
+ * 10px no controle e 8px no que está dentro dele, e separação por linha, nunca caixa em caixa.
+ */
+
+.mk-estudio {
+  --mk-linha: 2rem;
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - var(--shell-header-h) - 2.75rem);
+  overflow: hidden;
+  background: var(--casa-bg);
+  color: var(--casa-fg);
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (min-width: 768px) {
+  .mk-estudio { height: calc(100dvh - var(--shell-header-h)); }
+}
+
+@media (min-width: 900px) {
+  .mk-estudio { flex-direction: row; }
+}
+
+/* ── O palco ─────────────────────────────────────────────────────────── */
+.mk-area { position: relative; display: flex; flex-direction: column; flex: 0 0 44%; min-width: 0; min-height: 0; }
+@media (min-width: 900px) { .mk-area { flex: 1 1 0; } }
+
+.mk-palco { position: relative; flex: 1; min-height: 0; display: grid; place-items: center; overflow: hidden; background: var(--casa-tile); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.mk-palco:active { cursor: grabbing; }
+.mk-palco[data-transparente] { background: repeating-conic-gradient(var(--casa-tile) 0 25%, var(--casa-tile-2) 0 50%) 0 0 / 20px 20px; }
+/* Absoluto: o quadro tem 1080px de layout, e no fluxo do grid estouraria o palco antes da escala. */
+.mk-escala { position: absolute; left: 50%; top: 50%; transform-origin: center; }
+.mk-quadro { position: relative; overflow: hidden; box-shadow: 0 0 0 1px var(--casa-line); }
+.mk-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); pointer-events: none; }
+/* Sem preserve-3d aqui: sombra e aparelho no mesmo contexto 3D se interceptam, e a sombra corta a tela na diagonal. */
+.mk-pose { position: absolute; }
+.mk-sombra { position: absolute; inset: 2%; border-radius: 12%/6%; background: black; pointer-events: none; }
+
+.mk-tela-midia { position: absolute; inset: 0; width: 100%; height: 100%; background: black; pointer-events: none; }
+.mk-tela-sensor { position: absolute; inset: 0; }
+.mk-tela-camera { position: absolute; inset: 0 0 60%; filter: blur(14px); background: radial-gradient(60% 90% at 26% 8%, oklch(0.56 0.07 85), transparent), radial-gradient(70% 90% at 76% 28%, oklch(0.5 0.07 320), transparent), oklch(0.56 0.03 165); }
+.mk-tela-folha { position: absolute; inset: 9% 0 0; overflow: hidden; border-radius: 9cqw 9cqw 0 0; --sensor-sheet: oklch(0.72 0.05 165); --sensor-hit: oklch(0.92 0.17 110); --sensor-title: white; }
+
+.mk-historico { position: absolute; top: 0.75rem; left: 0.75rem; display: flex; gap: 2px; padding: 2px; border-radius: var(--radius-control, 10px); background: var(--casa-bg); box-shadow: var(--casa-shadow); }
+.mk-historico button { display: grid; place-items: center; width: 2rem; height: 2rem; border: 0; border-radius: 8px; background: none; color: var(--casa-fg); cursor: pointer; }
+.mk-historico button:hover:not(:disabled) { background: var(--casa-tile); }
+.mk-historico button:disabled { color: var(--casa-fg-3); opacity: 0.45; cursor: default; }
+
+/* ── A linha do tempo ────────────────────────────────────────────────── */
+.mk-linha-tempo { display: flex; align-items: center; gap: 0.625rem; height: 3rem; padding: 0 0.75rem; border-top: 1px solid var(--casa-line); }
+.mk-linha-tempo > button { display: grid; place-items: center; flex: none; width: 2rem; height: 2rem; border: 0; border-radius: 8px; background: none; color: var(--casa-fg); cursor: pointer; }
+.mk-linha-tempo > button:hover { background: var(--casa-tile); }
+.mk-trilha { position: relative; flex: 1; height: 2rem; cursor: pointer; touch-action: none; border-radius: 4px; }
+.mk-trilha::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; border-radius: 2px; background: var(--casa-tile-2); }
+.mk-trilha span { position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; border-radius: 2px; background: var(--casa-fg); transform-origin: left; transform: scaleX(0); }
+.mk-tempo { flex: none; margin: 0; font-variant-numeric: tabular-nums; }
+.mk-tempo i { font-style: normal; color: var(--casa-fg-3); }
+
+/* ── O painel ────────────────────────────────────────────────────────── */
+.mk-painel { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0; border-top: 1px solid var(--casa-line); background: var(--casa-bg); }
+@media (min-width: 900px) { .mk-painel { flex: 0 0 19.5rem; border-top: 0; border-left: 1px solid var(--casa-line); } }
+.mk-rolagem { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+
+.mk-pasta { border-bottom: 1px solid var(--casa-line); }
+.mk-pasta-topo { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; height: 2.5rem; padding: 0 0.5rem 0 0.75rem; background: var(--casa-bg); }
+.mk-pasta-titulo { display: flex; align-items: center; gap: 0.375rem; flex: 1; height: 100%; border: 0; background: none; color: var(--casa-fg); font: inherit; font-weight: 500; text-align: left; cursor: pointer; }
+.mk-pasta-titulo svg { color: var(--casa-fg-3); transition: transform var(--dur-fast, 160ms) var(--ease-out); }
+.mk-pasta[data-aberta] .mk-pasta-titulo svg { transform: rotate(90deg); }
+.mk-reset { display: grid; place-items: center; width: 1.75rem; height: 1.75rem; border: 0; border-radius: 8px; background: none; color: var(--casa-fg-2); cursor: pointer; }
+.mk-reset:hover { background: var(--casa-tile); color: var(--casa-fg); }
+/* Abrir sem medir: a grade vai de 0fr a 1fr. */
+.mk-pasta-corpo { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--dur-base, 200ms) var(--ease-out); }
+.mk-pasta[data-aberta] .mk-pasta-corpo { grid-template-rows: 1fr; }
+.mk-pasta-corpo > div { min-height: 0; overflow: hidden; visibility: hidden; transition: visibility var(--dur-base, 200ms); }
+.mk-pasta[data-aberta] .mk-pasta-corpo > div { display: flex; flex-direction: column; gap: 0.375rem; padding: 0 0.75rem 0.875rem; visibility: visible; }
+.mk-dependente { display: flex; flex-direction: column; gap: 0.375rem; }
+.mk-dependente[hidden] { display: none; }
+
+.mk-rotulo { color: var(--casa-fg-2); }
+.mk-valor { color: var(--casa-fg); font-variant-numeric: tabular-nums; }
+.mk-valor i { font-style: normal; color: var(--casa-fg-3); }
+.mk-linha { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; min-height: var(--mk-linha); }
+
+/* Foco só no teclado, e igual em tudo. */
+.mk-estudio :focus-visible { outline: 2px solid var(--casa-fg); outline-offset: 1px; }
+
+/* A linha É o slider. */
+.mk-slider { position: relative; display: flex; align-items: center; justify-content: space-between; height: var(--mk-linha); padding: 0 0.625rem; overflow: hidden; border-radius: 8px; background: var(--casa-tile); cursor: ew-resize; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.mk-slider:hover .mk-rotulo { color: var(--casa-fg); }
+.mk-slider > span:not(.mk-slider-cheio, .mk-slider-marca), .mk-slider-campo { position: relative; }
+.mk-slider-cheio { position: absolute; top: 0; bottom: 0; background: var(--casa-tile-2); }
+.mk-slider-marca { position: absolute; top: 25%; bottom: 25%; width: 1px; background: var(--casa-fg-3); opacity: 0.6; }
+.mk-slider-campo { width: 4rem; border: 0; outline: 0; background: none; color: var(--casa-fg); font: inherit; font-size: 16px; text-align: right; font-variant-numeric: tabular-nums; }
+@media (pointer: fine) { .mk-slider-campo { font-size: inherit; } }
+
+/* Poucas opções: todas à vista, e a luz desliza. */
+.mk-seg { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; height: var(--mk-linha); padding: 2px; border-radius: 8px; background: var(--casa-tile); }
+.mk-seg-luz { position: absolute; top: 2px; bottom: 2px; left: 2px; width: calc((100% - 4px) / var(--n)); border-radius: 6px; background: var(--casa-bg); box-shadow: 0 1px 2px oklch(0 0 0 / 0.12), 0 0 0 0.5px var(--casa-line); transform: translateX(calc(var(--i) * 100%)); transition: transform var(--dur-base, 200ms) var(--ease-out); }
+.mk-saida-par { display: grid; grid-template-columns: 1fr 1fr; gap: 0.375rem; }
+.mk-seg-fixo { display: grid; place-items: center; color: var(--casa-fg-2); font-variant-numeric: tabular-nums; }
+.mk-seg button { position: relative; border: 0; border-radius: 6px; background: none; color: var(--casa-fg-2); font: inherit; cursor: pointer; transition: color var(--dur-fast, 160ms) var(--ease-out); }
+.mk-seg button[aria-checked="true"] { color: var(--casa-fg); font-weight: 500; }
+.mk-seg button:disabled { opacity: 0.4; cursor: default; }
+
+/* Miniaturas: a escolha se reconhece pelo desenho. */
+.mk-minis { display: grid; grid-template-columns: repeat(var(--colunas), minmax(0, 1fr)); gap: 0.375rem; }
+.mk-mini { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; padding: 0; border: 0; background: none; color: var(--casa-fg-2); font: inherit; font-size: 0.6875rem; cursor: pointer; }
+.mk-mini-arte { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 1; overflow: hidden; border-radius: 8px; background: var(--casa-tile); box-shadow: inset 0 0 0 1px transparent; transition: box-shadow var(--dur-fast, 160ms) var(--ease-out); }
+.mk-mini:hover .mk-mini-arte { box-shadow: inset 0 0 0 1px var(--casa-fg-3); }
+.mk-mini[aria-checked="true"] { color: var(--casa-fg); }
+.mk-mini[aria-checked="true"] .mk-mini-arte { box-shadow: 0 0 0 1.5px var(--casa-fg); }
+.mk-mini-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
+.mk-enviar .mk-mini-arte { color: var(--casa-fg-2); box-shadow: inset 0 0 0 1px var(--casa-line); }
+.mk-arte-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mk-arte-fundo { position: absolute; inset: 0; background-size: cover; background-position: center; }
+.mk-arte-sensor { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, oklch(0.97 0 0) 0 14%, oklch(0.16 0.02 260) 15% 44%, oklch(0.72 0.05 165) 72%); }
+.mk-arte-proporcao { display: block; height: 62%; max-width: 72%; border-radius: 3px; box-shadow: inset 0 0 0 1.5px var(--casa-fg-2); }
+.mk-mini[aria-checked="true"] .mk-arte-proporcao { box-shadow: inset 0 0 0 1.5px var(--casa-fg); }
+
+.mk-fone-palco { position: relative; display: grid; place-items: center; width: 100%; height: 100%; perspective: 140px; }
+.mk-fone { display: block; width: 26%; aspect-ratio: 1 / 2.05; border-radius: 16%/8%; background: var(--casa-fg); box-shadow: inset 0 0 0 1.5px var(--casa-fg), inset 0 0 0 3px var(--casa-tile-2); }
+.mk-fone-claro { background: oklch(0.86 0.004 250); box-shadow: 0 0 0 0.5px oklch(0 0 0 / 0.2); }
+
+/* Em repouso, cada movimento já tem o seu desenho: tampe os nomes e ainda dá para distinguir. */
+.mk-anima-flutuar { transform: translateY(-8%) rotateY(14deg); }
+.mk-anima-balancar { transform: rotateY(32deg); }
+.mk-anima-pendulo { transform: rotateZ(12deg); }
+.mk-anima-aproximar { transform: scale(1.32); }
+.mk-anima-entrada { transform: rotateX(46deg); }
+.mk-anima-varredura { transform: rotateY(-40deg); }
+
+/* O movimento se mostra no próprio desenho, e só no escolhido ou sob o ponteiro. */
+@keyframes mk-flutuar { 50% { transform: translateY(-6%) rotateY(14deg); } }
+@keyframes mk-balancar { 25% { transform: rotateY(32deg); } 75% { transform: rotateY(-32deg); } }
+@keyframes mk-pendulo { 25% { transform: rotateZ(12deg); } 75% { transform: rotateZ(-12deg); } }
+@keyframes mk-aproximar { 50% { transform: scale(1.32); } }
+@keyframes mk-entrada { 0% { transform: rotateX(50deg) translateY(30%); opacity: 0; } 70%, 100% { transform: none; opacity: 1; } }
+@keyframes mk-varredura { 0% { transform: rotateY(-40deg); } 100% { transform: rotateY(40deg); } }
+@media (prefers-reduced-motion: no-preference) {
+  .mk-mini:is([aria-checked="true"], :hover) .mk-anima-flutuar { animation: mk-flutuar 2.4s var(--ease-in-out) infinite; }
+  .mk-mini:is([aria-checked="true"], :hover) .mk-anima-balancar { animation: mk-balancar 2.4s var(--ease-in-out) infinite; }
+  .mk-mini:is([aria-checked="true"], :hover) .mk-anima-pendulo { animation: mk-pendulo 2.4s var(--ease-in-out) infinite; }
+  .mk-mini:is([aria-checked="true"], :hover) .mk-anima-aproximar { animation: mk-aproximar 2.4s var(--ease-in-out) infinite; }
+  .mk-mini:is([aria-checked="true"], :hover) .mk-anima-entrada { animation: mk-entrada 2.4s var(--ease-out) infinite; }
+  .mk-mini:is([aria-checked="true"], :hover) .mk-anima-varredura { animation: mk-varredura 2.4s var(--ease-in-out) infinite alternate; }
+}
+
+/* No celular o painel divide a tela com o palco: miniaturas numa fileira que corre de lado. */
+@media (max-width: 899px) {
+  .mk-minis { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 4.25rem; overflow-x: auto; margin: 0 -0.75rem; padding: 2px 0.75rem; scroll-padding: 0.75rem; scrollbar-width: none; }
+  .mk-minis::-webkit-scrollbar { display: none; }
+}
+
+/* Amostras e cor. */
+.mk-amostras { display: flex; flex-wrap: wrap; gap: 0.375rem; padding: 0.125rem 0; }
+.mk-amostras button { width: 1.5rem; height: 1.5rem; padding: 0; border: 0; border-radius: 50%; box-shadow: inset 0 0 0 1px oklch(0.5 0 0 / 0.25); cursor: pointer; }
+.mk-amostras button[aria-checked="true"] { box-shadow: 0 0 0 2px var(--casa-bg), 0 0 0 3.5px var(--casa-fg); }
+@media (pointer: coarse) { .mk-amostras button { width: 2.125rem; height: 2.125rem; } }
+.mk-cor { padding: 0 0.25rem 0 0.625rem; border-radius: 8px; background: var(--casa-tile); }
+.mk-cor-hex { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--casa-fg); font: inherit; font-size: 16px; text-align: right; font-variant-numeric: tabular-nums; text-transform: uppercase; }
+@media (pointer: fine) { .mk-cor-hex { font-size: inherit; } }
+.mk-cor-poco { position: relative; flex: none; width: 1.5rem; height: 1.5rem; overflow: hidden; border-radius: 6px; box-shadow: inset 0 0 0 1px oklch(0.5 0 0 / 0.25); cursor: pointer; }
+.mk-cor-poco input { position: absolute; inset: -4px; width: 200%; height: 200%; opacity: 0; cursor: pointer; }
+.mk-barra { height: 1.25rem; border-radius: 6px; box-shadow: inset 0 0 0 1px oklch(0.5 0 0 / 0.2); }
+.mk-sugestao { display: flex; align-items: center; gap: 0.5rem; height: var(--mk-linha); padding: 0 0.625rem; border: 0; border-radius: 8px; background: none; color: var(--casa-fg-2); font: inherit; cursor: pointer; }
+.mk-sugestao:hover { background: var(--casa-tile); color: var(--casa-fg); }
+.mk-sugestao span { flex: none; width: 1.75rem; height: 0.75rem; border-radius: 3px; }
+
+/* Vetor: um valor com partes, numa linha só. */
+.mk-vetor { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 0.25rem; }
+.mk-parte { display: flex; align-items: center; height: var(--mk-linha); overflow: hidden; border-radius: 8px; background: var(--casa-tile); }
+.mk-parte-letra { flex: none; width: 1.5rem; height: 100%; display: grid; place-items: center; color: var(--casa-fg-3); cursor: ew-resize; touch-action: none; user-select: none; -webkit-user-select: none; }
+.mk-parte input { flex: 1; min-width: 0; width: 100%; height: 100%; padding-right: 0.5rem; border: 0; outline: 0; background: none; color: var(--casa-fg); font: inherit; font-size: 16px; text-align: right; font-variant-numeric: tabular-nums; }
+@media (pointer: fine) { .mk-parte input { font-size: inherit; } }
+.mk-parte:focus-within { box-shadow: inset 0 0 0 1px var(--casa-fg-3); }
+
+/* A saída: sempre à vista, porque é para ela que o resto existe. */
+.mk-saida { flex: none; display: flex; flex-direction: column; gap: 0.375rem; padding: 0.75rem; border-top: 1px solid var(--casa-line); }
+.mk-resumo { min-height: 1rem; margin: 0.125rem 0; color: var(--casa-fg-2); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+.mk-exportar { display: flex; align-items: center; justify-content: center; gap: 0.5rem; height: 2.75rem; border: 0; border-radius: var(--radius-control, 10px); background: var(--casa-cta); color: var(--casa-cta-fg); font: inherit; font-weight: 500; cursor: pointer; transition: transform var(--dur-press, 120ms) var(--ease-out); }
+.mk-exportar:active { transform: scale(0.985); }
+.mk-exportar:disabled { opacity: 0.6; cursor: default; }
+.mk-beta { margin: 0; color: var(--casa-fg-3); font-size: 0.75rem; line-height: 1rem; text-align: center; }
+.mk-progresso > div { height: 4px; overflow: hidden; border-radius: 2px; background: var(--casa-tile-2); }
+.mk-progresso > div span { display: block; height: 100%; background: var(--casa-fg); transform-origin: left; transition: transform var(--dur-fast, 160ms) linear; }
+.mk-progresso p { display: flex; align-items: center; justify-content: space-between; height: 2.25rem; margin: 0; color: var(--casa-fg-2); font-variant-numeric: tabular-nums; }
+.mk-progresso button { display: grid; place-items: center; width: 2rem; height: 2rem; border: 0; border-radius: 8px; background: none; color: var(--casa-fg); cursor: pointer; }
+.mk-progresso button:hover { background: var(--casa-tile); }
+
+@media (max-height: 760px) and (min-width: 900px) {
+  .mk-saida { gap: 0.25rem; padding: 0.5rem 0.75rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk-pasta-corpo, .mk-pasta-corpo > div, .mk-seg-luz, .mk-exportar, .mk-mini-arte, .mk-pasta-titulo svg { transition: none; }
+}
