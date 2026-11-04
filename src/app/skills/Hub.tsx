@@ -11,11 +11,12 @@
 
 import * as React from "react";
 import { useDobraAssentada } from "@/lib/rede";
-import { ALTURA_DOBRA, PaginaCtx, useLargo } from "./hub/nucleo";
-import { FotoDaAbertura } from "./hub/foto-da-abertura";
+import { ALTURA_DOBRA, PaginaCtx } from "./hub/nucleo";
+import { Gleam } from "../../../registry/visant/ui/gleam";
+import { Video } from "./hub/video";
 
 /*
- * A primeira dobra é o título e as duas fotos. O resto da página (as demos, o motion do rodapé)
+ * A primeira dobra é o título e o reel. O resto da página (as demos, o motion do rodapé)
  * desce depois que ela ficou de pé: em Slow 4G, junto, era 14 s de tela sem foto.
  */
 const Resto = React.lazy(() => import("./hub/resto").then((m) => ({ default: m.Resto })));
@@ -23,7 +24,6 @@ const Resto = React.lazy(() => import("./hub/resto").then((m) => ({ default: m.R
 export function Hub() {
   const [aberta, setAberta] = React.useState<string | null>(null);
   const [instalando, setInstalando] = React.useState(false);
-  const largo = useLargo();
   const ctx = React.useMemo(() => ({ aberta, setAberta, instalar: () => setInstalando(true) }), [aberta]);
   const assentada = useDobraAssentada();
 
@@ -46,7 +46,16 @@ export function Hub() {
               Como usar
             </a>
           </div>
-          <FotoDaAbertura largo={largo} assentada={assentada} />
+          {/* O reel mostra o que a frase promete: uma tela passando pelas skills. Luz neutra: a casa não fala com a cor da marca. */}
+          <div className="min-w-0 lg:ml-auto lg:w-full lg:max-w-[calc(100svh-12rem)]">
+            <Gleam tilt={9} tint="var(--casa-fg)" className="overflow-hidden rounded-tile">
+              <Video
+                nome="reel"
+                liberado={assentada}
+                alt="Uma tela de painel com cara de IA passando pelas skills, uma correção por vez, até ficar limpa"
+              />
+            </Gleam>
+          </div>
         </section>
 
         {/* A altura de uma dobra segura a página enquanto o resto não chega. */}

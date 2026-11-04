@@ -3,8 +3,9 @@
 /** Tudo de /skills que fica abaixo da primeira dobra: as demos, o fecho e o rodapé fixo. */
 
 import { CountUp } from "../../../../registry/visant/ui/count-up";
-import { Acao, LINK, Video } from "./base";
-import { ALTURA_LARGA } from "./nucleo";
+import { Acao, LINK } from "./base";
+import { FotoQueGira } from "./foto-que-gira";
+import { ALTURA_LARGA, useLargo } from "./nucleo";
 import { Dock, Instalador } from "./dock";
 import { DemoKiller, TelasKiller } from "./demo-killer";
 import { DemoCopy } from "./demo-copy";
@@ -19,6 +20,7 @@ import { TELAS as TELAS_COPY } from "./telas-copy";
 import { TELAS as TELAS_REFINE } from "./telas-refine";
 
 export function Resto({ instalando, setInstalando }: { instalando: boolean; setInstalando: (v: boolean) => void }) {
+  const largo = useLargo();
   return (
     <>
         <DemoKiller />
@@ -53,10 +55,7 @@ export function Resto({ instalando, setInstalando }: { instalando: boolean; setI
               </a>
             </div>
           </div>
-          {/* O reel é o que a seção promete: uma tela passando pelas skills, cada passo com o nome da que agiu. */}
-          <div className="min-w-0 lg:ml-auto lg:w-full lg:max-w-[calc(100svh-12rem)]">
-            <Video nome="reel" alt="Uma tela de painel com cara de IA passando pelas skills, uma correção por vez, até ficar limpa" />
-          </div>
+          <FotoQueGira largo={largo} assentada />
         </section>
 
         <Sugeridas />

@@ -1,15 +1,13 @@
 "use client";
 
 /**
- * A foto da primeira dobra: a cortina dentro da `Gleam`, girando por outros exemplos.
+ * O antes e depois do fecho: a cortina girando por outros exemplos.
  *
- * A `Gleam` dá a perspectiva e a luz: parada ela já repousa inclinada, e no mouse acompanha
- * o ponteiro. A troca acontece dentro das camadas da cortina, então a alça fica onde a pessoa
- * deixou. Só troca com a foto seguinte já decodificada, e nunca em cima de quem está arrastando.
+ * A troca acontece dentro das camadas da cortina, então a alça fica onde a pessoa deixou. Só
+ * troca com a foto seguinte já decodificada, e nunca em cima de quem está arrastando.
  */
 
 import * as React from "react";
-import { Gleam } from "../../../../registry/visant/ui/gleam";
 import { redeLenta } from "@/lib/rede";
 import { FotosDoAntesDepois } from "./fotos-da-abertura";
 import { foto, fotoPequena } from "./fotos";
@@ -50,7 +48,7 @@ function preparar(id: string, largo: boolean) {
   );
 }
 
-export function FotoDaAbertura({ largo, assentada }: { largo: boolean; assentada: boolean }) {
+export function FotoQueGira({ largo, assentada }: { largo: boolean; assentada: boolean }) {
   const [par, setPar] = React.useState<{ atual: number; anterior: number | null }>({ atual: 0, anterior: null });
   const [caixa, naTela] = useNaTela<HTMLDivElement>();
   const menos = useMenosMovimento();
@@ -101,9 +99,7 @@ export function FotoDaAbertura({ largo, assentada }: { largo: boolean; assentada
 
   return (
     <div ref={caixa} className="min-w-0">
-      {/* Luz neutra: a casa não fala com a cor da marca. */}
-      <Gleam tilt={9} tint="var(--casa-fg)" className="overflow-hidden rounded-tile">
-        <React.Suspense fallback={paradas}>
+      <React.Suspense fallback={paradas}>
           {assentada ? (
             <PhotoCompare
               key={largo ? "largo" : "celular"}
@@ -121,8 +117,7 @@ export function FotoDaAbertura({ largo, assentada }: { largo: boolean; assentada
           ) : (
             paradas
           )}
-        </React.Suspense>
-      </Gleam>
+      </React.Suspense>
       {/* O rótulo mora fora da foto: dentro, ele cobria o texto da tela. */}
       <p className="mt-1.5 flex justify-between px-1 text-casa-sm text-casa-fg-2">
         <span>depois</span>

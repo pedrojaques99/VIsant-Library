@@ -111,11 +111,8 @@ const DOBRAS = {
     classe: H1_HUB,
     sub: "Skills pro Claude Code: interface, copy, motion, vídeo e projeto grande.",
     chunks: [/^Hub-.*\.js$/],
-    imagens: [
-      /* Só no celular: a tela larga escolhe a foto por `srcset`, e o preload pediria outra. */
-      { asset: /^hero-a-.*\.webp$/, media: "(max-width: 1023px)" },
-      { asset: /^hero-d-.*\.webp$/, media: "(max-width: 1023px)" },
-    ],
+    /* A abertura é o reel: o pôster dele é o que a pessoa vê primeiro. */
+    imagens: ["/media/skills/reel.webp"],
   },
   docs: {
     fonte: "src/app/Docs.tsx",
