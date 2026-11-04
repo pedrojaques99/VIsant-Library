@@ -494,7 +494,7 @@ test.describe("vista de foco", () => {
     await page.goto("/c/vintage-eq");
     await page.waitForTimeout(500);
 
-    for (const preset of ["Largura de celular (360px)", "Largura de tablet (768px)", "Largura cheia"]) {
+    for (const preset of ["Celular (390 por 844)", "Tablet (768 por 1024)", "Largura cheia"]) {
       await page.getByLabel(preset).click();
       await page.waitForTimeout(250);
       const vazando = await page.evaluate(() => {
@@ -656,7 +656,7 @@ test.describe("painel de controles", () => {
     await page.goto("/c/logo-wall");
 
     const dialog = ficha(page);
-    await dialog.getByLabel("Largura de celular (360px)").click();
+    await dialog.getByLabel("Celular (390 por 844)").click();
 
     const frame = dialog.locator("iframe");
     await expect(frame).toBeVisible();

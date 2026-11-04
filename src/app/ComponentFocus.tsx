@@ -54,7 +54,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FitStage, PalcoFixo, useElementWidth } from "./stage";
-import { MSG_ALTURA, MSG_PROPS } from "./Solo";
+import { MSG_PROPS } from "./Solo";
 import {
   Customize,
   controlesDe,
@@ -64,7 +64,7 @@ import {
   type ValorDeKnob,
 } from "./controls";
 import { useBrandTheme } from "@/lib/brand-theme";
-import { previewOf, stageSurfaceOf, type CatalogItem } from "./catalog";
+import { previewOf, sangra, stageSurfaceOf, type CatalogItem } from "./catalog";
 import { useCopy } from "./copy-command";
 import { Instalar } from "./instalar";
 import { CopiarPraIA } from "./copiar-pra-ia";
@@ -76,9 +76,9 @@ import { Avaliacao } from "./avaliacao";
 
 /** Larguras de teste. `0` = o que couber na tela. */
 const VIEWPORTS = [
-  { value: "sm" as const, px: 360, icon: Smartphone, ariaLabel: "Largura de celular (360px)" },
-  { value: "md" as const, px: 768, icon: Tablet, ariaLabel: "Largura de tablet (768px)" },
-  { value: "full" as const, px: 0, icon: Monitor, ariaLabel: "Largura cheia" },
+  { value: "sm" as const, px: 390, alto: 844, icon: Smartphone, ariaLabel: "Celular (390 por 844)" },
+  { value: "md" as const, px: 768, alto: 1024, icon: Tablet, ariaLabel: "Tablet (768 por 1024)" },
+  { value: "full" as const, px: 0, alto: 0, icon: Monitor, ariaLabel: "Largura cheia" },
 ];
 
 type ViewportKey = (typeof VIEWPORTS)[number]["value"];
@@ -247,24 +247,24 @@ function CaixaDaPilha({
  * a largura do preset, que é a única condição em que uma media query diz a
  * verdade.
  *
- * A altura vem de dentro por `postMessage`. Chutar altura de iframe é como
- * chutar altura de palco — foi o que encheu a vitrine antiga de vazio.
+ * O preset é um aparelho: largura E altura de tela, com moldura. A peça vive naquele canvas
+ * e, se for mais alta que a tela, rola por dentro, como rolaria no celular. Sem caber no palco,
+ * o aparelho encolhe inteiro por `transform` e o viewport interno continua o do preset.
  */
 function SoloFrame({
   item,
   largura,
+  altura,
   escala,
-  alturaMinima,
   props,
 }: {
   item: CatalogItem;
   largura: number;
+  altura: number;
   escala: number;
-  alturaMinima: number;
   /** Os valores dos knobs. Entram na query no primeiro paint e por mensagem depois. */
   props: Record<string, ValorDeKnob>;
 }) {
-  const [altura, setAltura] = React.useState(alturaMinima);
   const { brand } = useBrandTheme();
   const frame = React.useRef<HTMLIFrameElement>(null);
 
@@ -285,18 +285,6 @@ function SoloFrame({
     );
   }, [props, item.name]);
 
-  React.useEffect(() => {
-    const ouvir = (e: MessageEvent) => {
-      // Só a nossa mensagem, e só deste item: a vitrine pode ter outro iframe.
-      if (e.origin !== window.location.origin) return;
-      const d = e.data as { type?: string; name?: string; altura?: number };
-      if (d?.type !== MSG_ALTURA || d.name !== item.name || !d.altura) return;
-      setAltura(Math.max(alturaMinima, d.altura));
-    };
-    window.addEventListener("message", ouvir);
-    return () => window.removeEventListener("message", ouvir);
-  }, [item.name, alturaMinima]);
-
   const escuro = document.documentElement.classList.contains("dark");
   const query = new URLSearchParams({ solo: "1" });
   // `slug`, que é como o provider procura a marca — passar o id faria o iframe
@@ -305,28 +293,28 @@ function SoloFrame({
   if (escuro) query.set("dark", "1");
   if (Object.keys(propsIniciais).length) query.set("p", JSON.stringify(propsIniciais));
 
+  const borda = largura < 500 ? 10 : 14;
   return (
-    <div
-      className="overflow-hidden rounded-control"
-      // A caixa encolhe junto com a escala, senão sobra um buraco do tamanho da
-      // diferença embaixo da peça.
-      style={{ width: largura * escala, height: altura * escala }}
-    >
-      <iframe
-        ref={frame}
-        // A chave amarra o iframe ao item: trocar de peça com `←`/`→` recarrega
-        // o documento em vez de reaproveitar o anterior e piscar o conteúdo velho.
-        key={item.name}
-        title={`${item.name} em ${largura}px`}
-        src={`/c/${encodeURIComponent(item.name)}?${query}`}
-        style={{
-          width: largura,
-          height: altura,
-          border: 0,
-          transform: `scale(${escala})`,
-          transformOrigin: "top left",
-        }}
-      />
+    <div className="casa shrink-0" style={{ width: (largura + borda * 2) * escala, height: (altura + borda * 2) * escala }}>
+      <div
+        data-aparelho={largura}
+        className="relative origin-top-left bg-casa-bg [box-shadow:0_0_0_1px_var(--casa-fg-3),var(--casa-shadow)]"
+        style={{ width: largura + borda * 2, height: altura + borda * 2, padding: borda, borderRadius: borda * 4, transform: `scale(${escala})` }}
+      >
+        <div className="relative size-full overflow-hidden" style={{ borderRadius: borda * 3 }}>
+          <iframe
+            ref={frame}
+            // A chave amarra o iframe ao item: trocar de peça com `←`/`→` recarrega
+            // o documento em vez de reaproveitar o anterior e piscar o conteúdo velho.
+            key={item.name}
+            title={`${item.name} em ${largura} por ${altura}`}
+            src={`/c/${encodeURIComponent(item.name)}?${query}`}
+            style={{ display: "block", width: largura, height: altura, border: 0 }}
+          />
+          {/* casa-lint/pilula: é o recorte da tela do celular, não um chip */}
+          {largura < 500 ? <span aria-hidden className="pointer-events-none absolute left-1/2 top-2 h-5 w-20 -translate-x-1/2 rounded-full bg-casa-bg" /> : null}
+        </div>
+      </div>
     </div>
   );
 }
@@ -416,6 +404,7 @@ export function ComponentFocus({
 }) {
   const [aba, setAba] = React.useState<Aba>(() => (item.demo ? "demo" : "codigo"));
   const [viewport, setViewport] = React.useState<ViewportKey>("full");
+  const [instalarAberto, setInstalarAberto] = React.useState(false);
   const [stageRef, available] = useElementWidth<HTMLDivElement>();
   const Demo = item.demo;
   const natural = previewOf(item);
@@ -456,6 +445,13 @@ export function ComponentFocus({
   }, [onPrev, onNext, onClose]);
 
   const preset = VIEWPORTS.find((v) => v.value === viewport)!;
+  const cheia = sangra(item);
+  const [alturaDaJanela, setAlturaDaJanela] = React.useState(() => window.innerHeight);
+  React.useEffect(() => {
+    const medir = () => setAlturaDaJanela(window.innerHeight);
+    window.addEventListener("resize", medir);
+    return () => window.removeEventListener("resize", medir);
+  }, []);
   // O palco tem respiro de 32px de cada lado; a peça mede o que sobra.
   const util = Math.max(available - (available < 640 ? 40 : 64), 0);
   const frameW = preset.px || Math.max(util, 320);
@@ -546,7 +542,23 @@ export function ComponentFocus({
           </div>
         ) : null}
 
-        {aba === "demo" && Demo && compacto ? (
+        {aba === "demo" && Demo && !preset.px && cheia ? (
+          <div
+            data-palco-cheio
+            className={cn(
+              "relative",
+              semColuna ? (controles ? "h-[max(14rem,38svh)]" : "h-[max(15rem,44svh)]") : "min-h-[min(72vh,640px)] lg:h-[calc(100svh-7rem)]",
+            )}
+          >
+            <PalcoFixo w={frameW} h={frameH} sangra>
+              <ErrorBoundary fallback={null}>
+                <React.Suspense fallback={null}>
+                  <Demo props={knobs.props} />
+                </React.Suspense>
+              </ErrorBoundary>
+            </PalcoFixo>
+          </div>
+        ) : aba === "demo" && Demo && compacto ? (
           <CaixaDaPilha key={item.name} controles={Boolean(controles)} w={frameW} h={natural.h} onCresceu={setPalcoCresceu}>
             <ErrorBoundary fallback={null}>
               <React.Suspense fallback={null}>
@@ -573,8 +585,9 @@ export function ComponentFocus({
               <SoloFrame
                 item={item}
                 largura={preset.px}
-                escala={Math.min(1, (util || preset.px) / preset.px)}
-                alturaMinima={MIN_STAGE_H}
+                altura={preset.alto}
+                /* 28 = a moldura; 170 = cabeçalho, controles flutuantes e o respiro do palco. */
+                escala={Math.min(1, (util || preset.px) / (preset.px + 28), Math.max(alturaDaJanela - 170, 320) / (preset.alto + 28))}
                 props={knobs.props}
               />
             ) : (
@@ -595,8 +608,8 @@ export function ComponentFocus({
 
       {/*
        * O painel da peça, no modelo do Bench: nome e fechar no topo, uma frase,
-       * os controles, e as duas ações no pé — o destaque único é o comando de
-       * instalar. Gruda no topo enquanto o palco rola.
+       * os controles, e as ações no pé: copiar pra IA em destaque, e o comando de
+       * instalar recolhido num ícone ao lado. Gruda no topo enquanto o palco rola.
        */}
       <aside className="casa flex w-full shrink-0 flex-col gap-5 rounded-tile bg-casa-tile p-5 max-lg:contents lg:sticky lg:top-[calc(var(--shell-header-h)+1rem)] lg:min-h-[min(72vh,640px)] lg:w-[340px]">
         <header className="flex items-start gap-2 max-lg:order-1 max-lg:items-center">
@@ -654,10 +667,40 @@ export function ComponentFocus({
           <div className="empty:hidden max-lg:order-7 pointer-coarse:[&_a]:inline-flex pointer-coarse:[&_a]:min-h-11 pointer-coarse:[&_a]:items-center">
             <DepResumo name={item.name} />
           </div>
-          <div className="max-lg:order-4">
-            <CopiarPraIA item={item} controles={controles?.controles ?? []} props={knobs.props} />
+          <div className="max-lg:order-3">
+            <div className="flex items-stretch gap-2">
+              <div className="min-w-0 flex-1">
+                <CopiarPraIA item={item} controles={controles?.controles ?? []} props={knobs.props} />
+              </div>
+              <button
+                type="button"
+                data-abrir-instalar
+                aria-label="Comando de instalar"
+                title="Comando de instalar"
+                aria-expanded={instalarAberto}
+                onClick={() => setInstalarAberto((v) => !v)}
+                className={cn(
+                  "casa grid min-h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-control outline-none focus-visible:[box-shadow:var(--focus)]",
+                  "transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)]",
+                  instalarAberto ? "bg-casa-fg text-casa-bg" : "bg-casa-tile-2 text-casa-fg-2 hover:text-casa-fg",
+                )}
+              >
+                <Code2 className="size-4" aria-hidden />
+              </button>
+            </div>
+            {/* Recolhido por padrão: o comando branco roubava a cena da peça. Abre sem medir, de 0fr a 1fr. */}
+            <div
+              {...(instalarAberto ? {} : ({ inert: "" } as React.HTMLAttributes<HTMLDivElement>))}
+              className={cn(
+                "grid transition-[grid-template-rows,opacity] [transition-duration:var(--dur-base)] [transition-timing-function:var(--ease-out)]",
+                instalarAberto ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+              )}
+            >
+              <div className="min-h-0 overflow-hidden">
+                <Instalar name={item.name} className="pt-3" />
+              </div>
+            </div>
           </div>
-          <Instalar name={item.name} className="max-lg:order-3" />
         </div>
       </aside>
     </article>

@@ -7,22 +7,48 @@
  * toda. Não baixa nada novo: o `brands.json` já desceu com o provider e o tema só desce no toque.
  * Em rede lenta os botões esperam a dobra assentar, com o vão já reservado.
  *
- * As amostras são DADO da marca (`palette` do índice) em estilo inline: a casca em volta segue
- * neutra, sem fundo, sem borda e sem texto no celular.
+ * Cada opção se identifica: logo ou monograma, mais o nome. Era uma pilha de faixas de cor, e
+ * quatro paletas apertadas não diziam nem que aquilo era um seletor de marca. No celular cabem só
+ * as miniaturas, e o nome da escolhida fica ao lado. A cor vem da marca, em estilo inline, e a
+ * casca em volta segue neutra.
  */
 
+import * as React from "react";
 import { useBrandTheme, type BrandSummary } from "@/lib/brand-theme";
 import { useDobraAssentada } from "@/lib/rede";
 import { cn } from "@/lib/utils";
 
-const ORDEM_DOS_PAPEIS = ["primary", "accent", "background", "foreground", "text", "secondary", "muted"];
-
-function amostras(marca: BrandSummary) {
-  const peso = (papel?: string | null) => {
-    const i = ORDEM_DOS_PAPEIS.indexOf(papel ?? "");
-    return i < 0 ? ORDEM_DOS_PAPEIS.length : i;
-  };
-  return [...marca.palette].sort((a, b) => peso(a.role) - peso(b.role)).slice(0, 4);
+/**
+ * Mesma regra do `BrandMark` de `brand-selector`, que não dá para importar daqui porque traz o
+ * cmdk para a primeira dobra: logo sobre o fundo da própria paleta, ou monograma na cor da marca.
+ */
+function Miniatura({ marca }: { marca: BrandSummary }) {
+  const [semLogo, setSemLogo] = React.useState(!marca.logo);
+  const placa = marca.palette.find((c) => c.role === "background")?.hex;
+  const tinta = marca.preview.light.brand ?? marca.palette[0]?.hex;
+  return (
+    <span
+      aria-hidden
+      className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-[6px] outline outline-1 -outline-offset-1 outline-casa-fg-3"
+      style={{ background: semLogo ? tinta : placa }}
+    >
+      {semLogo ? (
+        <span className="text-[11px] font-medium leading-none" style={{ color: marca.preview.light["brand-foreground"] }}>
+          {marca.name.split(/\s+/).map((p) => p[0]).join("").slice(0, 2).toUpperCase()}
+        </span>
+      ) : (
+        <img
+          src={`/logos/${marca.slug}.webp`}
+          alt=""
+          onError={(e) => {
+            if (marca.logo && e.currentTarget.src !== marca.logo.url) e.currentTarget.src = marca.logo.url;
+            else setSemLogo(true);
+          }}
+          className="size-full object-contain p-1"
+        />
+      )}
+    </span>
+  );
 }
 
 export function MarcasNaDobra({ className }: { className?: string }) {
@@ -31,69 +57,33 @@ export function MarcasNaDobra({ className }: { className?: string }) {
   const lista = assentada ? brands.slice(0, 4) : [];
 
   return (
-    /*
-     * Empilhadas em repouso, e abrem de lado com o mouse em cima ou o foco dentro.
-     * Cada marca tem a vaga dela já reservada: o que anda é só `transform`, então abrir
-     * não refaz o layout. Em repouso a faixa não pega ponteiro: só as amostras pegam.
-     */
     <div
       role="group"
       aria-label="Vestir a vitrine com uma marca"
       data-marcas-na-dobra=""
-      className={cn(
-        "group/marcas flex h-11 w-fit max-w-full items-center gap-1 pointer-coarse:-ml-1.5 pointer-fine:gap-0",
-        "pointer-fine:pointer-events-none pointer-fine:hover:pointer-events-auto pointer-fine:has-[:focus-visible]:pointer-events-auto",
-        className,
-      )}
+      className={cn("-ml-1.5 flex h-11 w-fit max-w-full items-center gap-1", className)}
     >
-      {lista.map((marca, i) => {
+      {lista.map((marca) => {
         const ativa = active?.slug === marca.slug;
         return (
-          <div
+          <button
             key={marca.slug}
-            style={{ zIndex: ativa ? lista.length : lista.length - i, "--i": i } as React.CSSProperties}
+            type="button"
+            aria-pressed={ativa}
+            aria-label={marca.name}
+            onClick={() => void setBrand(marca.slug)}
             className={cn(
-              "relative shrink-0 pointer-coarse:w-11 pointer-fine:w-[7.5rem]",
-              "transition-transform [transition-duration:var(--dur-base)] [transition-timing-function:var(--ease-out)]",
-              "pointer-fine:[transform:translateX(calc(var(--i)*-6.5rem))] pointer-fine:group-hover/marcas:[transform:none] pointer-fine:group-has-[:focus-visible]/marcas:[transform:none]",
+              "flex h-11 shrink-0 cursor-pointer items-center gap-2 rounded-control px-1.5 text-casa-sm outline-none sm:pr-3",
+              "transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] focus-visible:[box-shadow:var(--focus)]",
+              ativa ? "bg-casa-tile-2 text-casa-fg" : "text-casa-fg-2 hover:text-casa-fg",
             )}
           >
-            <button
-              type="button"
-              aria-pressed={ativa}
-              aria-label={marca.name}
-              title={marca.name}
-              onClick={() => void setBrand(marca.slug)}
-              className={cn(
-                "group/marca pointer-events-auto flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-control pointer-fine:justify-start outline-none transition-colors [transition-duration:var(--dur-fast)] focus-visible:[box-shadow:var(--focus)] pointer-fine:w-8",
-                ativa ? "text-casa-fg" : "text-casa-fg-2 hover:text-casa-fg",
-              )}
-            >
-              <span
-                aria-hidden
-                className={cn(
-                  "flex h-6 w-8 shrink-0 overflow-hidden rounded-[6px] outline outline-2 transition-[outline-color,outline-offset] [transition-duration:var(--dur-fast)]",
-                  ativa ? "outline-offset-1 outline-casa-fg" : "outline-casa-bg group-hover/marca:outline-casa-fg-3",
-                )}
-              >
-                {amostras(marca).map((cor) => (
-                  <span key={cor.hex} className="h-full min-w-0 flex-1" style={{ backgroundColor: cor.hex }} />
-                ))}
-              </span>
-              <span
-                className={cn(
-                  "hidden whitespace-nowrap text-casa-sm opacity-0 transition-opacity [transition-duration:var(--dur-base)] [transition-timing-function:var(--ease-out)] pointer-fine:inline",
-                  // Invisível, o nome passa por cima da amostra seguinte: em repouso ele não pega clique.
-                  "pointer-fine:pointer-events-none pointer-fine:group-hover/marcas:pointer-events-auto",
-                  "pointer-fine:group-hover/marcas:opacity-100 pointer-fine:group-has-[:focus-visible]/marcas:opacity-100",
-                )}
-              >
-                {marca.name}
-              </span>
-            </button>
-          </div>
+            <Miniatura marca={marca} />
+            <span className="hidden whitespace-nowrap sm:inline">{marca.name}</span>
+          </button>
         );
       })}
+      {active && lista.length ? <span className="ml-1.5 truncate text-casa-sm text-casa-fg-2 sm:hidden">{active.name}</span> : null}
     </div>
   );
 }

@@ -23,8 +23,15 @@
  */
 
 import * as React from "react";
+import { entrarNaCuradoria, sairDaCuradoria } from "./curadoria";
 
 const API = "https://api.visantlabs.com";
+/*
+ * O CORS da API só aceita as portas locais que ela lista, e a 5182 desta vitrine não está lá: o
+ * `POST /oauth/token` voltava 500 sem cabeçalho. No dev os pedidos passam pelo proxy do
+ * `vite.config.ts`. A página de autorizar é navegação, então continua indo direto.
+ */
+const API_FETCH = import.meta.env.DEV ? "" : API;
 const CLIENT_ID = "f5bc2d56-34b4-4c26-9a65-202b0a5e695e";
 const ESCOPO = "read";
 
@@ -87,7 +94,7 @@ export function VisantAuthProvider({ children }: { children: React.ReactNode }) 
   const [carregandoMarcas, setCarregandoMarcas] = React.useState(false);
 
   const trocar = React.useCallback(async (corpo: Record<string, string>) => {
-    const res = await fetch(`${API}/oauth/token`, {
+    const res = await fetch(`${API_FETCH}/oauth/token`, {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ client_id: CLIENT_ID, ...corpo }),
@@ -98,6 +105,7 @@ export function VisantAuthProvider({ children }: { children: React.ReactNode }) 
     // O refresh é o que faz um F5 não expulsar a pessoa. Fica separado do acesso.
     if (json.refresh_token) localStorage.setItem(CHAVE_REFRESH, json.refresh_token);
     setEstado("dentro");
+    void entrarNaCuradoria(json.access_token);
   }, []);
 
   /*
@@ -180,13 +188,14 @@ export function VisantAuthProvider({ children }: { children: React.ReactNode }) 
     localStorage.removeItem(CHAVE_REFRESH);
     setMarcas(null);
     setEstado("fora");
+    sairDaCuradoria();
   }, []);
 
   const buscarMarcas = React.useCallback(async () => {
     if (!token.current) return;
     setCarregandoMarcas(true);
     try {
-      const res = await fetch(`${API}/api/brand-guidelines?limit=100`, {
+      const res = await fetch(`${API_FETCH}/api/brand-guidelines?limit=100`, {
         headers: { Authorization: `Bearer ${token.current}`, Accept: "application/json" },
       });
       if (!res.ok) throw new Error(`brand-guidelines: HTTP ${res.status}`);

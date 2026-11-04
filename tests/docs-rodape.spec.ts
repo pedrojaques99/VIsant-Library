@@ -120,9 +120,6 @@ test.describe("ficha, catálogo e títulos", () => {
     const linha = page.locator("[data-marcas-na-dobra] button");
     await expect(linha).toHaveCount(4);
     const antes = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--brand"));
-    // Empilhadas em repouso: com o cursor em cima elas abrem de lado, e só então se escolhe.
-    await linha.first().hover();
-    await page.waitForTimeout(500);
     await linha.nth(3).click();
     await expect(linha.nth(3)).toHaveAttribute("aria-pressed", "true");
     await expect
@@ -130,13 +127,13 @@ test.describe("ficha, catálogo e títulos", () => {
       .not.toBe(antes);
   });
 
-  test("a pilha de marcas começa na margem do título", async ({ page }) => {
+  test("as marcas começam na margem do título", async ({ page }) => {
     await page.goto("/");
     const amostra = page.locator("[data-marcas-na-dobra] button > span").first();
     await expect(amostra).toBeVisible();
     const x = (await amostra.boundingBox())!.x;
     const titulo = (await page.locator("h1").first().boundingBox())!.x;
-    expect(Math.abs(x - titulo), "o nome oculto empurrava a amostra pra fora da janela").toBeLessThan(2);
+    expect(Math.abs(x - titulo), "a miniatura saiu da margem do título").toBeLessThan(2);
   });
 
   test("a etiqueta do card mora abaixo do palco", async ({ page }) => {

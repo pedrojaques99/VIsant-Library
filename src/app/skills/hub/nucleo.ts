@@ -25,6 +25,33 @@ export function useLargo() {
   return largo;
 }
 
+/** Pede menos movimento? Lido no efeito, porque a página é hidratada no cliente. */
+export function useMenosMovimento() {
+  const [menos, setMenos] = React.useState(false);
+  React.useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setMenos(mq.matches);
+    const ouvir = () => setMenos(mq.matches);
+    mq.addEventListener("change", ouvir);
+    return () => mq.removeEventListener("change", ouvir);
+  }, []);
+  return menos;
+}
+
+/** Está na tela agora? As demos que giram sozinhas só giram enquanto vistas. */
+export function useNaTela<T extends Element>(limiar = 0.4) {
+  const ref = React.useRef<T>(null);
+  const [naTela, setNaTela] = React.useState(false);
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setNaTela(e.isIntersecting), { threshold: limiar });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [limiar]);
+  return [ref, naTela] as const;
+}
+
 export const PaginaCtx = React.createContext<{
   aberta: string | null;
   setAberta: (n: string | null) => void;

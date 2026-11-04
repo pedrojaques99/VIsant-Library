@@ -313,6 +313,7 @@ export function PalcoFixo({
   ratio = 4 / 3,
   active = true,
   tinta,
+  sangra = false,
   className,
   style,
   children,
@@ -323,6 +324,8 @@ export function PalcoFixo({
   tinta?: readonly number[];
   /** Largura ÷ altura da moldura. Igual para todos os cards da grade. */
   ratio?: number;
+  /** Sem escala nem proporção: preenche o pai posicionado, e quem manda no tamanho é ele. */
+  sangra?: boolean;
   active?: boolean;
   className?: string;
   style?: React.CSSProperties;
@@ -346,6 +349,16 @@ export function PalcoFixo({
           ),
         )
       : cabe;
+
+  if (sangra) {
+    return (
+      <div data-palco="" data-sangra="" className={className} style={{ touchAction: GESTO_DO_PALCO, ...style, position: "absolute", inset: 0, overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, ...CAIXA_DO_PALCO }}>
+          <StageActiveCtx.Provider value={active && pageVisible}>{children}</StageActiveCtx.Provider>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

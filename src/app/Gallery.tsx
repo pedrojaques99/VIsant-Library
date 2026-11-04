@@ -41,6 +41,7 @@ import {
   stageSurfaceOf,
   type CatalogItem,
   type Family,
+  sangra,
 } from "./catalog";
 import { installCommand } from "./registry-meta";
 import { CopyCommand, useCopy } from "./copy-command";
@@ -57,7 +58,7 @@ import { Miniatura } from "./miniatura";
 import { nivelDoAparelho, pediuEconomia, pesoGpu, useVaga } from "./aparelho";
 import DESTAQUES from "../../curadoria/destaques.json";
 import { BugButton } from "./bug-report";
-import { CURADORIA_ATIVA, arquivada, useNotas, type Notas } from "./curadoria";
+import { arquivada, curadoriaAtiva, useNotas, type Notas } from "./curadoria";
 import LANG from "./lang.generated.json";
 import { siClaude, siCursor, siOpenai } from "simple-icons";
 import { useDobraAssentada } from "@/lib/rede";
@@ -286,6 +287,7 @@ const Ladrilho = React.memo(function Ladrilho({
   }, [viva]);
 
   const fotoVisivel = comFoto && !(viva && pronto);
+  const cheia = sangra(item);
   /*
    * Foto de fora da tela só desce depois da primeira dobra. Em rede lenta o navegador amplia a
    * margem do `loading="lazy"` para 2500px, e dez fotos dividiam a banda com as três que a pessoa
@@ -325,10 +327,13 @@ const Ladrilho = React.memo(function Ladrilho({
           continua sendo o botão que sempre abre.
         */
         <div onClick={fotoVisivel ? tocarNaFoto : undefined} className={fotoVisivel ? "cursor-pointer" : undefined}>
+          {/* O fundo cobre o ladrilho todo: este vão só segura a altura igual à dos vizinhos. */}
+          {cheia ? <div aria-hidden style={{ aspectRatio: "16 / 10" }} /> : null}
           <PalcoFixo
             w={w}
             h={h}
             ratio={16 / 10}
+            sangra={cheia}
             active={active}
             tinta={(TINTA as Record<string, number[]>)[item.name]}
             style={stageSurfaceOf(item)}
@@ -353,7 +358,10 @@ const Ladrilho = React.memo(function Ladrilho({
                 decoding="async"
                 draggable={false}
                 onError={() => setSemFoto(true)}
-                className="pointer-events-none absolute inset-0 h-full w-full transition-opacity [transition-duration:var(--dur-base)] [transition-timing-function:var(--ease-out)]"
+                className={cn(
+                  "pointer-events-none absolute inset-0 h-full w-full transition-opacity [transition-duration:var(--dur-base)] [transition-timing-function:var(--ease-out)]",
+                  cheia && "object-cover",
+                )}
                 style={{ opacity: fotoVisivel ? 1 : 0 }}
               />
             ) : null}
@@ -389,7 +397,7 @@ const Ladrilho = React.memo(function Ladrilho({
         precisa abrir a ficha. Os dois aparecem com o cursor no ladrilho e ficam
         fixos no toque (`no-hover`).
       */}
-      <div className="casa no-hover flex items-center justify-between gap-2 px-2 pb-2 pt-1.5 pointer-coarse:px-3 pointer-coarse:pb-3 pointer-coarse:pt-2">
+      <div className={cn("casa no-hover flex items-center justify-between gap-2 px-2 pb-2 pt-1.5 pointer-coarse:px-3 pointer-coarse:pb-3 pointer-coarse:pt-2", cheia && "relative z-10 !bg-transparent [&>button]:bg-casa-bg [&>span]:bg-casa-bg")}>
         <button
           type="button"
           data-card-index={index}
@@ -867,7 +875,7 @@ export function Gallery({ onFocus, familia = null, onFamilia }: GalleryProps) {
             </div>
 
             {/* Só pra quem cura o acervo (dev): a pilha das arquivadas. */}
-            {CURADORIA_ATIVA ? (
+            {curadoriaAtiva() ? (
               <div className="flex items-center gap-4">
                 <span className="w-16 shrink-0 text-casa-sm text-casa-fg-3">Curadoria</span>
                 <Aba ativa={verArquivadas} onClick={() => setVerArquivadas((v) => !v)} count={qtdArquivadas}>
@@ -908,7 +916,7 @@ export function Gallery({ onFocus, familia = null, onFamilia }: GalleryProps) {
                       item={item}
                       index={i}
                       foto={!familia}
-                      nota={CURADORIA_ATIVA ? notas[item.name]?.nota : undefined}
+                      nota={curadoriaAtiva() ? notas[item.name]?.nota : undefined}
                       onOpen={() => onFocus(item.name)}
                     />
                   ))}

@@ -5,6 +5,7 @@
  *   npm run curadoria                          # placar: notas, arquivadas, sem nota
  *   npm run curadoria -- --excluir             # mostra o que SERIA apagado (seco)
  *   npm run curadoria -- --excluir --confirmo  # apaga de verdade
+ *   npm run curadoria -- --sync                # traz pro repo o que os admins gravaram em produção
  *
  * Excluir apaga a peça do repo inteiro: os arquivos do item no registry, a
  * demo, a entrada do catálogo, o item do `registry.json`, as fotos e o
@@ -25,6 +26,24 @@ const registry = JSON.parse(readFileSync(join(ROOT, "registry.json"), "utf8"));
 const catPath = join(ROOT, "src", "app", "catalog.tsx");
 let cat = readFileSync(catPath, "utf8");
 const doCatalogo = [...cat.slice(cat.indexOf("export const CATALOG")).matchAll(/^\s{4}name: "([^"]+)"/gm)].map((m) => m[1]);
+
+if (args.includes("--sync")) {
+  /* Sem rede ou sem tabela não trava publicação: fica o que está no repo. */
+  try {
+    const r = await fetch("https://ui.visantlabs.com/api/curadoria", { signal: AbortSignal.timeout(10_000) });
+    const { notas: remotas = {} } = r.ok ? await r.json() : {};
+    const novas = Object.entries(remotas).filter(([item, n]) => !notas[item]?.data || new Date(n.data) > new Date(notas[item].data));
+    for (const [item, n] of novas) notas[item] = n;
+    if (novas.length) {
+      writeFileSync(join(ROOT, "curadoria", "notas.json"), `${JSON.stringify(notas, null, 2)}\n`);
+      writeFileSync(join(ROOT, "curadoria", "CURADORIA.md"), renderMarkdown(notas));
+    }
+    console.log(`curadoria: ${novas.length} nota(s) vinda(s) de produção`);
+  } catch (e) {
+    console.warn(`curadoria: sem sincronizar (${e.message})`);
+  }
+  process.exit(0);
+}
 
 if (!args.includes("--excluir")) {
   const avaliadas = Object.keys(notas);

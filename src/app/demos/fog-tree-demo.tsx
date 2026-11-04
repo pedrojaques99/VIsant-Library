@@ -20,7 +20,7 @@ export default function FogTreeDemo({ props }: DemoProps) {
   return (
     <FogTree
       // min-h: na rota solo o palco não tem altura, e com min-h-0 a cena virava uma faixa achatada
-      className="h-full min-h-[400px]"
+      className="h-full"
       progress={0.35}
       draggable
       ink="color-mix(in oklch, var(--brand, var(--foreground)) 75%, var(--foreground))"

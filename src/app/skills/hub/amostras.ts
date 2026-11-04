@@ -391,7 +391,94 @@ export const LENTO_MS = 700;
 export const ESCALA_ERRADA = "scale(0)";
 export const TRANSICAO_ERRADA = `all ${LENTO_MS}ms ${CURVA_ERRADA.css}`;
 
+/** Transição errada num só atributo: as cenas que empurram layout de verdade. */
+export const erradaEm = (prop: string) => `${prop} ${LENTO_MS}ms ${CURVA_ERRADA.css}`;
+
+export const CURVA_GAVETA = { css: "var(--ease-drawer)", p: [0.32, 0.72, 0, 1] as const, nome: "--ease-drawer" };
+
+export type DadosCena = {
+  nome: string;
+  codigoErrado: string;
+  /** Saída real do motion-lint sobre `codigoErrado`. Vazia: o erro é de comportamento, e o regex não enxerga. */
+  lint: string[];
+  codigoCerto: string;
+  ms: number;
+  /** Duração do lado errado. 0 é troca seca, e aí não há curva para desenhar. */
+  msErrado: number;
+  curvaCerta: { p: readonly [number, number, number, number] };
+  /** Quando cada passo da cena dispara, em ms depois do começo. */
+  tempos: number[];
+  legenda: { errado: string; certo: string };
+};
+
 export const CENAS_MOTION = {
+  gaveta: {
+    nome: "Gaveta",
+    // motion-lint-disable-next-line ease-in-on-ui  demonstração do erro, nada disto é animação do site
+    // motion-lint-disable-next-line slow-ui-duration  demonstração do erro, nada disto é animação do site
+    // motion-lint-disable-next-line layout-property-animation  demonstração do erro, nada disto é animação do site
+    codigoErrado: 'className="transition-[width] duration-700 ease-in w-0 data-[open]:w-1/2"',
+    lint: ["HIGH  ease-in-on-ui", "HIGH  slow-ui-duration", "HIGH  layout-property-animation"],
+    codigoCerto: 'className="[transition-duration:var(--dur-slow)] [transition-timing-function:var(--ease-drawer)] translate-x-full"',
+    ms: 300,
+    msErrado: LENTO_MS,
+    curvaCerta: CURVA_GAVETA,
+    tempos: [0],
+    legenda: { errado: "Espreme a lista", certo: "Lista fica parada" },
+  },
+  lista: {
+    nome: "Lista",
+    codigoErrado: "itens.filter((i) => i.id !== id).map((i) => <Linha key={i.id} />)",
+    lint: [],
+    codigoCerto: '<motion.li layout exit={{ opacity: 0 }} transition={{ duration: DUR.base, ease: EASE_OUT }} />',
+    ms: 200,
+    msErrado: 0,
+    curvaCerta: CURVA_CERTA,
+    tempos: [0, 450],
+    legenda: { errado: "Abre buraco e salta", certo: "Os de baixo deslizam" },
+  },
+  espera: {
+    nome: "Espera",
+    // motion-lint-disable-next-line loader-without-guard  demonstração do erro, nada disto é animação do site
+    codigoErrado: "isLoading ? <Spinner /> : <Lista />",
+    lint: ["MEDIUM  loader-without-guard"],
+    codigoCerto: 'className="[transition-duration:var(--dur-base)] [transition-timing-function:var(--ease-out)] skeleton h-11"',
+    ms: 200,
+    msErrado: 0,
+    curvaCerta: CURVA_CERTA,
+    tempos: [0, 1000],
+    legenda: { errado: "Some tudo e salta", certo: "Espera com a mesma forma" },
+  },
+  avisos: {
+    nome: "Avisos",
+    // motion-lint-disable-next-line ease-in-on-ui  demonstração do erro, nada disto é animação do site
+    // motion-lint-disable-next-line slow-ui-duration  demonstração do erro, nada disto é animação do site
+    codigoErrado: 'className="transition-[top] duration-700 ease-in"',
+    lint: ["HIGH  ease-in-on-ui", "HIGH  slow-ui-duration"],
+    codigoCerto: 'className="[transition-duration:var(--dur-base)] [transition-timing-function:var(--ease-out)] -translate-y-3 scale-95"',
+    ms: 200,
+    msErrado: LENTO_MS,
+    curvaCerta: CURVA_CERTA,
+    tempos: [0, 650, 1300],
+    legenda: { errado: "Novo empurra os antigos", certo: "Novo vai à frente" },
+  },
+  cartaz: {
+    nome: "Cartaz",
+    // motion-lint-disable-next-line ease-in-on-ui  demonstração do erro, nada disto é animação do site
+    // motion-lint-disable-next-line scale-zero  demonstração do erro, nada disto é animação do site
+    // motion-lint-disable-next-line slow-ui-duration  demonstração do erro, nada disto é animação do site
+    // motion-lint-disable-next-line transition-all  demonstração do erro, nada disto é animação do site
+    codigoErrado: 'className="transition-all duration-700 ease-in origin-center scale-0"',
+    // motion-lint-disable-next-line transition-all  demonstração do erro, nada disto é animação do site
+    lint: ["HIGH  ease-in-on-ui", "HIGH  scale-zero", "HIGH  slow-ui-duration", "MEDIUM  transition-all"],
+    codigoCerto: 'className="[transition-duration:var(--dur-slow)] [transition-timing-function:var(--ease-out)] origin-top-left scale-50"',
+    ms: 300,
+    msErrado: LENTO_MS,
+    curvaCerta: CURVA_CERTA,
+    tempos: [0],
+    legenda: { errado: "Nasce do centro", certo: "Cresce de onde tocou" },
+  },
+
   menu: {
     nome: "Menu",
     // motion-lint-disable-next-line ease-in-on-ui  demonstração do erro, nada disto é animação do site
@@ -403,7 +490,10 @@ export const CENAS_MOTION = {
     lint: ["HIGH  ease-in-on-ui", "HIGH  scale-zero", "HIGH  slow-ui-duration", "MEDIUM  transition-all"],
     codigoCerto: 'className="[transition-duration:var(--dur-base)] [transition-timing-function:var(--ease-out)] scale-95"',
     ms: 200,
-    token: "--dur-base",
+    msErrado: LENTO_MS,
+    curvaCerta: CURVA_CERTA,
+tempos: [0],
+    legenda: { errado: "Nasce do nada, demora", certo: "Sai do botão, na hora" },
   },
   modal: {
     nome: "Modal",
@@ -416,7 +506,10 @@ export const CENAS_MOTION = {
     lint: ["HIGH  ease-in-on-ui", "HIGH  scale-zero", "HIGH  slow-ui-duration", "MEDIUM  transition-all"],
     codigoCerto: 'className="[transition-duration:var(--dur-slow)] [transition-timing-function:var(--ease-out)] scale-95"',
     ms: 300,
-    token: "--dur-slow",
+    msErrado: LENTO_MS,
+    curvaCerta: CURVA_CERTA,
+tempos: [0],
+    legenda: { errado: "Nasce do nada, demora", certo: "Assenta no centro" },
   },
   botao: {
     nome: "Botão",
@@ -428,9 +521,12 @@ export const CENAS_MOTION = {
     lint: ["HIGH  ease-in-on-ui", "HIGH  slow-ui-duration", "MEDIUM  transition-all"],
     codigoCerto: 'className="[transition-duration:var(--dur-press)] [transition-timing-function:var(--ease-out)] active:scale-[0.97]"',
     ms: 120,
-    token: "--dur-press",
+    msErrado: LENTO_MS,
+    curvaCerta: CURVA_CERTA,
+tempos: [0, 240, 820],
+    legenda: { errado: "Afunda devagar", certo: "Responde no toque" },
   },
-};
+} satisfies Record<string, DadosCena>;
 
 /* ---- refine ---- */
 

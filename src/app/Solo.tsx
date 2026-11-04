@@ -29,7 +29,7 @@
  */
 
 import * as React from "react";
-import { CATALOG, previewOf } from "./catalog";
+import { CATALOG, previewOf, sangra } from "./catalog";
 import { CAIXA_DO_PALCO } from "./stage";
 
 /** O pai escuta por este nome; mudar aqui quebra a medição do iframe. */
@@ -154,7 +154,7 @@ export function Solo({
   return (
     // `overflow-x-clip`: o viewport do preset nunca rola de lado, mesmo com peça que
     // sangra de propósito (a fita do marquee).
-    <div ref={ref} className="overflow-x-clip p-4">
+    <div ref={ref} className={sangra(item!) ? "h-svh overflow-hidden" : "flex min-h-svh flex-col justify-center overflow-x-clip p-4"}>
       {/* A demo é um `React.lazy`. Sem esta fronteira o documento do iframe
           suspende inteiro e o pai mede altura zero. */}
       <React.Suspense fallback={<div className="h-40 w-full animate-pulse bg-muted/40" />}>

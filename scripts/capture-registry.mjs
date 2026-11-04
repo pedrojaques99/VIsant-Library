@@ -23,7 +23,7 @@
  *
  * Bandeiras:
  *     --force          reescreve tudo (o padrão é pular o que já existe)
- *     --only <nome>    refaz uma peça só
+ *     --only <a,b,c>   refaz só essas peças
  *     --png            não converte para webp; grava PNG
  */
 
@@ -203,7 +203,7 @@ async function codificar(encoder, pngBase64, comoPng, qualidade = 0.9) {
 
 mkdirSync(DESTINO, { recursive: true });
 
-const alvos = PECAS.filter((p) => p.temDemo).filter((p) => !SOMENTE || p.nome === SOMENTE);
+const alvos = PECAS.filter((p) => p.temDemo).filter((p) => !SOMENTE || SOMENTE.split(",").includes(p.nome));
 if (SOMENTE && !alvos.length) {
   console.error(`--only ${SOMENTE}: não existe no catálogo, ou não tem demo.`);
   process.exit(1);

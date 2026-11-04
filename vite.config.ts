@@ -49,7 +49,21 @@ export default defineConfig({
    * strictPort porque cair pra 5183 em silêncio traria o problema de volta pela
    * porta dos fundos: o endereço que você tem aberto deixaria de ser este app.
    */
-  server: { port: 5182, strictPort: true },
+  server: {
+    port: 5182,
+    strictPort: true,
+    /* Entrar com Visant Labs no dev: ver `API_FETCH` em visant-auth.tsx. */
+    proxy: Object.fromEntries(
+      ['/oauth/token', '/api/brand-guidelines'].map((rota) => [
+        rota,
+        {
+          target: 'https://api.visantlabs.com',
+          changeOrigin: true,
+          configure: (proxy) => proxy.on('proxyReq', (req) => req.removeHeader('origin')),
+        },
+      ]),
+    ),
+  },
   preview: { port: 5182, strictPort: true },
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.

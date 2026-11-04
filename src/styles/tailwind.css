@@ -238,6 +238,12 @@
   --marca-depois: #52ddeb;
   --marca-texto: #0a0a0a;
 }
+@keyframes foto-entra {
+  from {
+    opacity: 0;
+  }
+}
+
 @keyframes marca-entra {
   from {
     opacity: 0;

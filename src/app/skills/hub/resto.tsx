@@ -16,10 +16,7 @@ import { Telas } from "./telas";
 import { TELAS as TELAS_DESIGN } from "./telas-design";
 import { TELAS as TELAS_FRONTEND } from "./telas-frontend";
 import { TELAS as TELAS_COPY } from "./telas-copy";
-import { TELAS as TELAS_MOTION } from "./telas-motion";
 import { TELAS as TELAS_REFINE } from "./telas-refine";
-
-const PECAS = ["photo-compare", "segmented-control", "sim-slider", "count-up"];
 
 export function Resto({ instalando, setInstalando }: { instalando: boolean; setInstalando: (v: boolean) => void }) {
   return (
@@ -33,7 +30,6 @@ export function Resto({ instalando, setInstalando }: { instalando: boolean; setI
         <DemoCopy />
         <Telas telas={TELAS_COPY} skill="visant-copy" />
         <DemoMotion />
-        <Telas telas={TELAS_MOTION} faixa skill="visant-motion" />
         <DemoRefine />
         <Telas telas={TELAS_REFINE} skill="visant-refine" />
 
@@ -54,17 +50,9 @@ export function Resto({ instalando, setInstalando }: { instalando: boolean; setI
               </a>
             </div>
           </div>
-          <div className="min-w-0">
-            <Video nome="library" proporcao="16 / 9" alt="Filme do catálogo @visant/ui com peças de dados e shaders" />
-            <ul className="mt-3 flex flex-wrap gap-x-4">
-              {PECAS.map((nome) => (
-                <li key={nome}>
-                  <a href={`/c/${nome}`} className="inline-flex min-h-11 items-center font-casa-mono text-casa-sm text-casa-fg-2 underline underline-offset-2 outline-none focus-visible:[box-shadow:var(--focus)]">
-                    {nome}
-                  </a>
-                </li>
-              ))}
-            </ul>
+          {/* O reel é o que a seção promete: uma tela passando pelas skills, cada passo com o nome da que agiu. */}
+          <div className="min-w-0 lg:ml-auto lg:w-full lg:max-w-[calc(100svh-12rem)]">
+            <Video nome="reel" alt="Uma tela de painel com cara de IA passando pelas skills, uma correção por vez, até ficar limpa" />
           </div>
         </section>
 

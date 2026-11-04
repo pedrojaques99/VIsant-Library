@@ -113,14 +113,16 @@ export function ShaderLab({ itens, onFocus }: { itens: CatalogItem[]; onFocus: (
       <div className={cn("z-20 min-w-0 bg-casa-bg pb-2 lg:relative lg:pb-0", GRUDA_NO_CELULAR)}>
         <div className={cn("relative", PALCO_NO_CELULAR)}>
         <div
-          className="palco grid size-full grid-cols-[minmax(0,1fr)] place-items-center overflow-hidden rounded-tile p-3 lg:p-6 [--shader-w:min(100%,calc(max(12rem,32svh)-1.5rem))] lg:[--shader-w:min(100%,calc(100dvh-20rem))]"
+          className="palco relative size-full overflow-hidden rounded-tile"
         >
-          <SemSeletorDeImagem>
-            <React.Suspense fallback={null}>
-              {/* `key`: cada filtro tem o próprio contexto WebGL; trocar solta o anterior. */}
-              <Demo key={item.name} />
-            </React.Suspense>
-          </SemSeletorDeImagem>
+          <div className="absolute inset-0">
+            <SemSeletorDeImagem>
+              <React.Suspense fallback={null}>
+                {/* `key`: cada filtro tem o próprio contexto WebGL; trocar solta o anterior. */}
+                <Demo key={item.name} />
+              </React.Suspense>
+            </SemSeletorDeImagem>
+          </div>
         </div>
 
         <div className="casa absolute left-3 top-3 flex max-w-[calc(100%-1.5rem)] items-start gap-2">

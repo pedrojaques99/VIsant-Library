@@ -92,6 +92,12 @@ export const listVeredictos = () => rpc<Veredicto[]>("lab_veredictos");
 export const putVeredicto = (id: string, status: Veredicto["status"], reason: string, motivos: string[], by: string) =>
   rpc<Veredicto>("lab_veredicto_put", { p_id: id, p_status: status, p_reason: reason, p_by: by, p_motivos: motivos });
 
+/** A curadoria do catálogo: as notas dos admins. Tabela em `curadoria/supabase.sql`. */
+export type NotaDaCuradoria = { item: string; nota: number; comentario: string; excluir: boolean; data: string };
+export const listNotas = () => rpc<NotaDaCuradoria[]>("curadoria_notas");
+export const putNota = (item: string, nota: number, comentario: string, excluir: boolean, por: string) =>
+  rpc<unknown>("curadoria_nota_put", { p_item: item, p_nota: nota, p_comentario: comentario, p_excluir: excluir, p_por: por });
+
 export const redirect = (to: string, headers: Headers) => {
   headers.set("location", to);
   headers.set("cache-control", "no-store");

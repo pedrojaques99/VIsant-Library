@@ -15,8 +15,8 @@ import { redeLenta } from "@/lib/rede";
 import skills from "../skills.generated.json";
 
 import { FUNCAO } from "../filme/roteiro";
-export { ALTURA_DOBRA, ALTURA_LARGA, PaginaCtx, useLargo } from "./nucleo";
-import { ALTURA_LARGA, PaginaCtx } from "./nucleo";
+export { ALTURA_DOBRA, ALTURA_LARGA, PaginaCtx, useLargo, useMenosMovimento, useNaTela } from "./nucleo";
+import { ALTURA_LARGA, PaginaCtx, useMenosMovimento, useNaTela } from "./nucleo";
 
 export { FUNCAO };
 export const SKILLS = skills as { nome: string; instalar: string }[];
@@ -40,19 +40,6 @@ export const ANIMA_OPACIDADE =
 export const DUR = { base: 0.2 };
 export const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 
-/** Pede menos movimento? Lido no efeito, porque a página é hidratada no cliente. */
-export function useMenosMovimento() {
-  const [menos, setMenos] = React.useState(false);
-  React.useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setMenos(mq.matches);
-    const ouvir = () => setMenos(mq.matches);
-    mq.addEventListener("change", ouvir);
-    return () => mq.removeEventListener("change", ouvir);
-  }, []);
-  return menos;
-}
-
 /** Timers de uma sequência de demo: morrem junto com a demo ou com a próxima rodada. */
 export function useSequencia() {
   const timers = React.useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -65,20 +52,6 @@ export function useSequencia() {
     timers.current.push(setTimeout(fn, ms));
   }, []);
   return React.useMemo(() => ({ depois, limpar }), [depois, limpar]);
-}
-
-/** Está na tela agora? As demos que giram sozinhas só giram enquanto vistas. */
-export function useNaTela<T extends Element>(limiar = 0.4) {
-  const ref = React.useRef<T>(null);
-  const [naTela, setNaTela] = React.useState(false);
-  React.useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([e]) => setNaTela(e.isIntersecting), { threshold: limiar });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [limiar]);
-  return [ref, naTela] as const;
 }
 
 /** Roda uma vez, na primeira vez que a demo entra em vista. */

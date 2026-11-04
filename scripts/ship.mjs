@@ -124,6 +124,9 @@ ok(`${registry.items.length} itens, todos os arquivos no lugar`);
 say("Portão de privacidade");
 run("node scripts/privacy-check.mjs");
 
+// O que os admins arquivaram ou comentaram em produção entra neste build.
+run("node scripts/curadoria.mjs --sync");
+
 // ── Portão 2: componente não tem cor própria ─────────────────────────────────
 say("Portão de hex em registry/visant/");
 const HEX = /#[0-9a-fA-F]{6}\b/;

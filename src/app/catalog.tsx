@@ -230,6 +230,13 @@ export const previewOf = (item: CatalogItem) => item.preview ?? DEFAULT_PREVIEW;
  * O resto do registry é o contrário: lê o token da marca e tem de aparecer
  * exatamente sobre o fundo do projeto de quem instala. Esse é o palco neutro.
  */
+/**
+ * Peça que é fundo: textura, shader, campo de partículas. Ocupa o palco inteiro, de borda a
+ * borda, porque recortada numa caixinha no meio ela lê como miniatura de si mesma.
+ */
+const FUNDOS = new Set(["spring-dots", "grid-dots", "fog-tree", "fog-garden"]);
+export const sangra = (item: Pick<CatalogItem, "name">) => /^(shader|textura)-/.test(item.name) || FUNDOS.has(item.name);
+
 export const stageSurfaceOf = (item: CatalogItem) =>
   item.estilo?.includes("vintage")
     ? { backgroundImage: "var(--palco-vintage)" }
@@ -1410,7 +1417,7 @@ export const CATALOG: CatalogItem[] = [
     description:
       "Malha de pontos com mola: o ponteiro empurra, o atrito segura, e quem sai de casa acende na cor da marca.",
     tags: ["fundo", "canvas", "ponteiro", "física", "mola"],
-    demo: () => <SpringDots className="h-full w-full rounded-[var(--r-surface)]" />,
+    demo: () => <SpringDots className="h-full w-full" />,
     preview: { w: 520, h: 260 },
   },
   {

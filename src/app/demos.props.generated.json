@@ -170,7 +170,7 @@
     "tracking": -0.02
   },
   "fog-tree": {
-    "className": "h-full min-h-[400px]",
+    "className": "h-full",
     "progress": 0.35,
     "draggable": true,
     "ink": "color-mix(in oklch, var(--brand, var(--foreground)) 75%, var(--foreground))"
@@ -370,104 +370,104 @@
     "label": "Cartões da Marina"
   },
   "shader-ascii": {
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-halftone": {
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-neon": {
-    "className": "w-[560px] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-riso": {
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-tunnel": {
-    "className": "w-[560px] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-voronoi": {
-    "className": "w-[560px] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-chromatic-aberration": {
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-crt": {
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-dither": {
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-duotone": {
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-edge-detect": {
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-film-grain": {
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-glitch": {
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-matrix-dither": {
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-pixelate": {
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-posterize": {
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-upscale": {
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "shader-vhs": {
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "textura-beam": {
-    "className": "w-[560px] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "textura-current": {
-    "className": "w-[560px] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "textura-curtain": {
-    "className": "w-[560px] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "textura-gaze": {
-    "className": "w-[560px] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "textura-glow": {
-    "className": "w-[560px] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "textura-magnet": {
-    "className": "w-[560px] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "textura-pillars": {
-    "className": "w-[560px] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "textura-pinch": {
     "resting": true,
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "textura-settle": {
-    "className": "w-[560px] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "textura-sphere": {
     "resting": true,
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "textura-tiles": {
     "resting": true,
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "textura-twist": {
     "resting": true,
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "textura-warp": {
     "strength": 26,
-    "className": "w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   },
   "textura-watch": {
-    "className": "w-[560px] max-w-full rounded-[var(--r-surface)]"
+    "className": "h-full min-h-0 w-full"
   }
 }

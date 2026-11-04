@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils";
 import { CATALOG, FAMILIES, TYPE_LABEL, fold, haystack, matches, type CatalogItem } from "./catalog";
 import { ehNovo } from "./novidades";
 import { Miniatura } from "./miniatura";
-import { CURADORIA_ATIVA, arquivada, useNotas } from "./curadoria";
+import { arquivada, curadoriaAtiva, useNotas } from "./curadoria";
 
 /** O índice, montado uma vez: `haystack` normaliza texto de 81 itens. */
 const INDICE = CATALOG.filter((i) => i.family !== "fundacao" && i.demo).map((item) => ({ item, texto: haystack(item) }));
@@ -84,7 +84,7 @@ export function Busca({
   const notas = useNotas();
   const resultados = React.useMemo(() => {
     return INDICE.map((e) => ({ ...e, n: nota(e, termo) }))
-      .filter((e) => e.n >= 0 && (CURADORIA_ATIVA || !arquivada(notas[e.item.name])))
+      .filter((e) => e.n >= 0 && (curadoriaAtiva() || !arquivada(notas[e.item.name])))
       .sort((a, b) => b.n - a.n || a.item.name.localeCompare(b.item.name));
   }, [termo, notas]);
 

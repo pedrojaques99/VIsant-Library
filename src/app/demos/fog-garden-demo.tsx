@@ -70,7 +70,7 @@ export default function FogGardenDemo({ props }: DemoProps) {
   // max-h: na rota solo o palco não tem altura, e sem teto o contêiner de rolagem
   // crescia até o conteúdo (canvas de 2240px, capa em branco).
   return (
-    <div className="relative h-[min(400px,100%)] min-h-[360px] w-full overflow-hidden">
+    <div className="relative h-full w-full overflow-hidden">
       <div ref={scrollerRef} className="absolute inset-0 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <FogGarden
           container={scrollerRef}

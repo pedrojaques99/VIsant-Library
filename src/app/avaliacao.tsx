@@ -3,8 +3,8 @@
 /**
  * Avaliar a peça: nota de 1 a 5, comentário e "excluir de vez".
  *
- * Mora no painel da ficha e só existe com o dev server de pé
- * (`CURADORIA_ATIVA`): é a ferramenta do dono pra separar o que é forte do que
+ * Mora no painel da ficha e só existe no dev server ou para admin do Visant Labs
+ * (`curadoriaAtiva`): é a ferramenta do dono pra separar o que é forte do que
  * só ocupa lugar. Nota 2 ou menos arquiva — a peça sai da grade e da busca até
  * a nota subir. "Excluir de vez" é outra coisa: marca pra remoção, que só
  * acontece quando alguém roda `npm run curadoria -- --excluir`.
@@ -13,7 +13,7 @@
 import * as React from "react";
 import { Check, Loader2, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CURADORIA_ATIVA, NOTA_DE_CORTE, arquivada, avaliar, useNotas } from "./curadoria";
+import { NOTA_DE_CORTE, curadoriaAtiva, arquivada, avaliar, useNotas } from "./curadoria";
 
 export function Avaliacao({ item }: { item: string }) {
   const notas = useNotas();
@@ -31,7 +31,7 @@ export function Avaliacao({ item }: { item: string }) {
     setEstado("parado");
   }, [item, atual?.nota, atual?.comentario, atual?.excluir]);
 
-  if (!CURADORIA_ATIVA) return null;
+  if (!curadoriaAtiva()) return null;
 
   const sujo =
     nota !== (atual?.nota ?? 0) ||

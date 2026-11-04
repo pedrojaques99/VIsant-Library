@@ -15,7 +15,7 @@ export default function TexturaSphereDemo({ props }: DemoProps) {
       <TexturaSphere
         alt={imagem.alt}
         resting
-        className="w-[var(--shader-w,360px)] max-w-full rounded-[var(--r-surface)]"
+        className="h-full min-h-0 w-full"
         {...props}
         src={imagem.src}
       />

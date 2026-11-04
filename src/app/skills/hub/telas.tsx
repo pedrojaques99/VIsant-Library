@@ -3,9 +3,7 @@
 /**
  * Os cenários de uma skill: antes e depois na mesma cortina, com o seletor embaixo.
  *
- * Foto é o padrão. `video` é para o que só existe em movimento: as duas tomadas tocam
- * juntas atrás da mesma cortina. Só o cenário escolhido monta, então o peso de quem nunca
- * abriu os outros não chega.
+ * Só o cenário escolhido monta, então o peso de quem nunca abriu os outros não chega.
  *
  * O modo Analisar desenha caixa e legenda sobre os elementos, como nos filmes. As marcas
  * moram dentro de cada camada: a cortina recorta a marca junto com a foto, e o que se lê
@@ -15,7 +13,7 @@
 import * as React from "react";
 import { ScanSearch } from "lucide-react";
 import { PhotoCompare } from "../../../../registry/visant/ui/photo-compare";
-import { ALTURA_LARGA, ANIMA_COR, ANIMA_OPACIDADE, cx, useMenosMovimento } from "./base";
+import { ALTURA_LARGA, ANIMA_COR, ANIMA_OPACIDADE, cx } from "./base";
 import { foto, miniatura } from "./fotos";
 
 /** Em % do quadro. Sai medido do HTML da tela, nunca no olho. */
@@ -24,8 +22,6 @@ export type Marca = { x: number; y: number; w: number; h: number; t: string };
 export type Tela = {
   id: string;
   nome: string;
-  /** Caminhos em `public/`, mp4 H.264 sem áudio, mesma duração e mesmo enquadramento. */
-  video?: { antes: string; depois: string };
   marcas?: { antes: Marca[]; depois: Marca[] };
 };
 
@@ -33,11 +29,6 @@ const TAMANHOS = "(min-width: 1024px) 896px, 100vw";
 
 /* As cores dos filmes, em tailwind.css: elas vão sobre a foto do produto, e não sobre a casca. */
 const COR = { antes: "var(--marca-antes)", depois: "var(--marca-depois)" } as const;
-
-function Tomada({ src, poster }: { src: string; poster: string }) {
-  const menos = useMenosMovimento();
-  return <video src={src} poster={poster} muted loop playsInline autoPlay={!menos} preload="metadata" aria-hidden="true" />;
-}
 
 function Marcas({ marcas, lado }: { marcas: Marca[]; lado: "antes" | "depois" }) {
   return (
@@ -82,7 +73,8 @@ function Marcas({ marcas, lado }: { marcas: Marca[]; lado: "antes" | "depois" })
 
 export function Telas({ telas, faixa, skill }: { telas: Tela[]; faixa?: boolean; skill: string }) {
   const [id, setId] = React.useState(telas[0]?.id);
-  const [analisando, setAnalisando] = React.useState(false);
+  /* Nasce ligado: a foto já chega dizendo o que olhar. */
+  const [analisando, setAnalisando] = React.useState(true);
   const t = telas.find((x) => x.id === id) ?? telas[0];
   if (!t) return null;
 
@@ -90,11 +82,7 @@ export function Telas({ telas, faixa, skill }: { telas: Tela[]; faixa?: boolean;
     const sufixo = lado === "antes" ? "a" : "d";
     return (
       <>
-        {t.video ? (
-          <Tomada src={t.video[lado]} poster={foto(`${t.id}-${sufixo}`).src} />
-        ) : (
-          <img {...foto(`${t.id}-${sufixo}`)} sizes={TAMANHOS} alt="" loading="lazy" decoding="async" />
-        )}
+        <img {...foto(`${t.id}-${sufixo}`)} sizes={TAMANHOS} alt="" loading="lazy" decoding="async" />
         {analisando && t.marcas ? <Marcas marcas={t.marcas[lado]} lado={lado} /> : null}
       </>
     );

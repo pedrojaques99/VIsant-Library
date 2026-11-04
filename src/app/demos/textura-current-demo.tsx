@@ -11,7 +11,7 @@ import type { DemoProps } from "../catalog";
 export default function TexturaCurrentDemo({ props }: DemoProps) {
   return (
     <div className="flex h-full w-full items-center justify-center">
-      <TexturaCurrent className="w-[560px] max-w-full rounded-[var(--r-surface)]" {...props} />
+      <TexturaCurrent className="h-full min-h-0 w-full" {...props} />
     </div>
   );
 }
