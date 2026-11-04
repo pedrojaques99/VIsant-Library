@@ -65,7 +65,7 @@ export function MarcasNaDobra({ className }: { className?: string }) {
               title={marca.name}
               onClick={() => void setBrand(marca.slug)}
               className={cn(
-                "group/marca pointer-events-auto flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-control outline-none transition-colors [transition-duration:var(--dur-fast)] focus-visible:[box-shadow:var(--focus)] pointer-fine:w-8",
+                "group/marca pointer-events-auto flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-control pointer-fine:justify-start outline-none transition-colors [transition-duration:var(--dur-fast)] focus-visible:[box-shadow:var(--focus)] pointer-fine:w-8",
                 ativa ? "text-casa-fg" : "text-casa-fg-2 hover:text-casa-fg",
               )}
             >

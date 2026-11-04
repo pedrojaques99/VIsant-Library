@@ -246,6 +246,7 @@ export const ScrubInput = React.memo<ScrubInputProps>(function ScrubInput({
         // campo faz tempo).
         "data-[scrubbing]:border-[var(--brand)]",
         disabled && "pointer-events-none opacity-50",
+        !editing && "cursor-ew-resize touch-pan-y select-none",
         layout === "row"
           ? "flex items-center justify-between gap-3"
           : "flex flex-col gap-1.5",
@@ -253,6 +254,11 @@ export const ScrubInput = React.memo<ScrubInputProps>(function ScrubInput({
       )}
       onWheel={disabled ? undefined : onWheel}
       onKeyDown={onKeyDown}
+      // O campo inteiro arrasta: o valor e o rótulo são alvos pequenos demais pro dedo.
+      onPointerDown={(e) => {
+        if (editing || disabled || (e.target as Element).closest("button, input")) return;
+        onScrubDown(e);
+      }}
       // tabIndex sai do container enquanto edita: o foco pertence ao input.
       tabIndex={editing || disabled ? -1 : 0}
       role="spinbutton"
@@ -266,10 +272,9 @@ export const ScrubInput = React.memo<ScrubInputProps>(function ScrubInput({
     >
       <span
         className={cn(
-          "cursor-ew-resize touch-pan-y select-none truncate font-mono text-[10px] uppercase leading-none tracking-widest text-muted-foreground",
+          "truncate font-mono text-[10px] uppercase leading-none tracking-widest text-muted-foreground",
           layout === "row" && "min-w-0 flex-1",
         )}
-        onPointerDown={onScrubDown}
       >
         {icon && <span className="mr-1 inline-flex align-middle opacity-70">{icon}</span>}
         {label}
@@ -300,8 +305,7 @@ export const ScrubInput = React.memo<ScrubInputProps>(function ScrubInput({
           />
         ) : (
           <span
-            className="cursor-ew-resize touch-pan-y select-none font-mono text-[12px] leading-none tabular-nums text-foreground"
-            onPointerDown={onScrubDown}
+            className="font-mono text-[12px] leading-none tabular-nums text-foreground"
             onDoubleClick={startEdit}
           >
             {display}

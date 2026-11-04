@@ -250,7 +250,7 @@ function Escolha({
       value={valor}
       onChange={(e) => onChange(e.target.value)}
       aria-label={controle.prop}
-      className="h-8 min-w-0 max-w-[60%] rounded-control bg-casa-tile-2 px-2.5 text-casa-sm text-casa-fg pointer-coarse:h-11"
+      className="h-8 min-w-24 max-w-[60%] rounded-control bg-casa-tile-2 px-2.5 text-casa-sm text-casa-fg pointer-coarse:h-11"
     >
       {valores.map((v) => (
         <option key={v} value={v}>

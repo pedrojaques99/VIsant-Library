@@ -130,6 +130,15 @@ test.describe("ficha, catálogo e títulos", () => {
       .not.toBe(antes);
   });
 
+  test("a pilha de marcas começa na margem do título", async ({ page }) => {
+    await page.goto("/");
+    const amostra = page.locator("[data-marcas-na-dobra] button > span").first();
+    await expect(amostra).toBeVisible();
+    const x = (await amostra.boundingBox())!.x;
+    const titulo = (await page.locator("h1").first().boundingBox())!.x;
+    expect(Math.abs(x - titulo), "o nome oculto empurrava a amostra pra fora da janela").toBeLessThan(2);
+  });
+
   test("a etiqueta do card mora abaixo do palco", async ({ page }) => {
     await page.goto("/");
     const card = page.locator('article[data-name="fog-hero"]');
