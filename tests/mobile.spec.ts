@@ -356,6 +356,40 @@ test.describe("gesto no dedo", () => {
     expect(await cortina(), "e a cortina não foi até o dedo").toBeCloseTo(25, 0);
   });
 
+  test("scrub-input: o campo todo arrasta, e rolar com o dedo torto não muda o valor", async ({ page }) => {
+    await abrir(page, "/c/scrub-input");
+    await page.waitForTimeout(800);
+    const campo = page.locator('[role="spinbutton"]').first();
+    const b = (await campo.boundingBox())!;
+    const valor = async () => Number(await campo.getAttribute("aria-valuenow"));
+    const d = await dedo(page);
+    const cx = b.x + b.width * 0.7;
+    const cy = b.y + b.height / 2;
+
+    const antes = await valor();
+    await d.arrastar(cx, cy + 4, cx + 8, cy - 120);
+    expect(await valor(), "em pé, mesmo com desvio, é rolagem").toBe(antes);
+
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(300);
+    const q = (await campo.boundingBox())!;
+    await d.arrastar(q.x + q.width * 0.7, q.y + q.height / 2, q.x + q.width * 0.7 + 60, q.y + q.height / 2);
+    expect(await valor(), "de lado, do meio do campo, muda").toBeGreaterThan(antes);
+  });
+
+  test("scrub-input na ficha: seta e Esc ficam no campo", async ({ page }) => {
+    await abrir(page, "/c/scrub-input");
+    await page.waitForTimeout(800);
+    const campo = page.locator('[role="spinbutton"]').first();
+    await campo.focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(page).toHaveURL(/scrub-input/);
+    await campo.locator("span.tabular-nums").first().dblclick();
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(200);
+    await expect(page).toHaveURL(/scrub-input/);
+  });
+
   test("knob: o gesto gira e a página não anda, nem começando de lado", async ({ page }) => {
     await abrir(page, "/c/vintage-large-knob");
     await page.waitForTimeout(800);

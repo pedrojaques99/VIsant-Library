@@ -144,10 +144,25 @@ export const ScrubInput = React.memo<ScrubInputProps>(function ScrubInput({
       e.preventDefault();
       setScrubbing(true);
       scrub.current = { startX: e.clientX, startValue: value };
+      const inicio = { x: e.clientX, y: e.clientY };
+      // No dedo o número espera o eixo: quem só está rolando a página não muda o valor.
+      let decidido = e.pointerType === "mouse";
       const sensitivity = (max - min) / 300;
 
       const onMove = (me: PointerEvent) => {
         if (!scrub.current) return;
+        if (!decidido) {
+          const lado = Math.abs(me.clientX - inicio.x);
+          const pe = Math.abs(me.clientY - inicio.y);
+          if (Math.max(lado, pe) < 6) return;
+          if (pe >= lado) {
+            onUp();
+            return;
+          }
+          decidido = true;
+          // Conta a partir daqui: os pixels da decisão não pulam o valor.
+          scrub.current.startX = me.clientX;
+        }
         const dx = me.clientX - scrub.current.startX;
         onChange(
           clamp(scrub.current.startValue + dx * sensitivity * (me.shiftKey ? 0.1 : 1)),
@@ -200,7 +215,12 @@ export const ScrubInput = React.memo<ScrubInputProps>(function ScrubInput({
     (e: React.KeyboardEvent) => {
       if (editing) {
         if (e.key === "Enter") commitEdit();
-        if (e.key === "Escape") setEditing(false);
+        if (e.key === "Escape") {
+          // Quem cancela a edição não fecha também o que está em volta.
+          e.preventDefault();
+          e.stopPropagation();
+          setEditing(false);
+        }
         return;
       }
       if (disabled) return;
@@ -256,7 +276,11 @@ export const ScrubInput = React.memo<ScrubInputProps>(function ScrubInput({
       onKeyDown={onKeyDown}
       // O campo inteiro arrasta: o valor e o rótulo são alvos pequenos demais pro dedo.
       onPointerDown={(e) => {
-        if (editing || disabled || (e.target as Element).closest("button, input")) return;
+        // No mouse o botão de passo é só botão. No dedo o arrasto vale nele também: a área
+        // de toque dele toma a lateral do campo, e o toque sem arrasto segue sendo clique.
+        const alvo = e.target as Element;
+        if (editing || disabled || alvo.closest("input")) return;
+        if (e.pointerType === "mouse" && alvo.closest("button")) return;
         onScrubDown(e);
       }}
       // tabIndex sai do container enquanto edita: o foco pertence ao input.

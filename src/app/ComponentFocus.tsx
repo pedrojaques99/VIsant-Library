@@ -429,6 +429,8 @@ export function ComponentFocus({
   // várias peças aqui têm input, e roubar a seta do cursor seria hostil.
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // A peça já usou a tecla (`preventDefault`): seta e Esc são dela, não da ficha.
+      if (e.defaultPrevented) return;
       // Arrasto por teclado em andamento: seta move o cartão e Esc cancela, ambos dele.
       if (document.querySelector("[data-kanban-dragging]")) return;
       const el = document.activeElement;

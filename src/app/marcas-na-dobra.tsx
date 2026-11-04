@@ -41,7 +41,7 @@ export function MarcasNaDobra({ className }: { className?: string }) {
       aria-label="Vestir a vitrine com uma marca"
       data-marcas-na-dobra=""
       className={cn(
-        "group/marcas flex h-11 w-fit max-w-full items-center gap-1 pointer-fine:gap-0",
+        "group/marcas flex h-11 w-fit max-w-full items-center gap-1 pointer-coarse:-ml-1.5 pointer-fine:gap-0",
         "pointer-fine:pointer-events-none pointer-fine:hover:pointer-events-auto pointer-fine:has-[:focus-visible]:pointer-events-auto",
         className,
       )}
