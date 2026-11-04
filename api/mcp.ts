@@ -141,6 +141,9 @@ const fichaSkill = (s: Skill, detalhe?: boolean) =>
 /* Palavra de ligação não escolhe skill. Duas letras contam: "ui", "ux" e "ia" são o assunto inteiro. */
 const VAZIAS = new Set("uma uns umas com que para pra por de da do das dos em no na nos nas os as um ao the and for with this that use on to of in my me eu meu minha quero preciso tem esta essa esse isso mais".split(" "));
 
+const PORTAS_DA_TELA = new Set(["visant-design", "visant-killer"]);
+const SOBRE_TELA = /\b(telas?|screens?|interface|ui|ux|layout|dashboard|landing|pagina|page)\b/;
+
 function pontuarSkill(s: Skill, pedido: string) {
   const dobrado = fold(pedido);
   const termos = dobrado.split(/[^a-z0-9]+/).filter((t) => t.length > 1 && !VAZIAS.has(t)).map(raiz);
@@ -155,6 +158,8 @@ function pontuarSkill(s: Skill, pedido: string) {
     if (dosGatilhos.includes(t)) p += 2;
     else if (doResto.includes(t)) p += 1;
   }
+  /* Pedido que fala de tela é de interface: "cara de IA" também é gatilho da copy, e empatava. */
+  if (PORTAS_DA_TELA.has(s.nome) && SOBRE_TELA.test(dobrado)) p += 3;
   return p;
 }
 

@@ -163,6 +163,8 @@ function Painel({
       if (!g) return;
       const r = g.getBoundingClientRect();
       const alto = caixa.current?.offsetHeight ?? 0;
+      // A largura entra na conta: gatilho longe da borda no celular abria o painel para fora da tela.
+      const largura = caixa.current?.offsetWidth ?? 264;
       const vao = 6;
       const cabeEmbaixo = window.innerHeight - r.bottom - vao >= alto;
       const cabeEmCima = r.top - vao >= alto;
@@ -171,9 +173,7 @@ function Painel({
       setPos({
         position: "fixed",
         ...(l === "bottom" ? { top: r.bottom + vao } : { bottom: window.innerHeight - r.top + vao }),
-        ...(align === "end"
-          ? { right: Math.max(12, window.innerWidth - r.right) }
-          : { left: Math.max(12, r.left) }),
+        left: Math.max(12, Math.min(align === "end" ? r.right - largura : r.left, window.innerWidth - largura - 12)),
       });
     };
     medir();

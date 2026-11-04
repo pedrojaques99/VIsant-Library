@@ -541,7 +541,9 @@ async function medir(job, nav, comparar) {
       ponto: alvoV.nome,
     };
     // A página não rolou: a peça é de arrasto vertical? O gesto vale nos dois sentidos.
-    if (Math.abs(r.V.dy) < 40 && !r.V.abriu) {
+    // Quem puxa pra baixo (pull-to-refresh) rola a página pra cima: o gesto dele é o outro sentido.
+    if ((Math.abs(r.V.dy) < 40 || SEGURA_VERTICAL[r.nome]) && !r.V.abriu) {
+      if (Math.abs(r.V.dy) >= 40) await zerar();
       const dep = await foto(iV.palco);
       const inter = await d.arrastar(alvoV.x, alvoV.y, alvoV.x, Math.min(TELA.height - 10, alvoV.y + 160), () => foto(iV.palco));
       await p.waitForTimeout(350);

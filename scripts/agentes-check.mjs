@@ -240,6 +240,8 @@ if (!MCP) {
     conferir(/visant-design/.test(textoDe(await chamar("listar_skills", {}))), "listar_skills devolve as skills");
     const rec = textoDe(await chamar("recomendar_skill", { pedido: "tirar a cara de IA da tela" }));
     conferir(/^- visant-(killer|design)/.test(rec), `recomendar_skill: ${rec.split("\n")[0].slice(0, 60)}`);
+    const rec2 = textoDe(await chamar("recomendar_skill", { pedido: "reescrever o texto da landing" }));
+    conferir(/^- visant-copy/.test(rec2), `recomendar_skill, copy: ${rec2.split("\n")[0].slice(0, 60)}`);
     conferir(/theme-visant/.test(textoDe(await chamar("tema_da_marca", { marca: "visant" }))), "tema_da_marca devolve o tema público");
     const privada = textoDe(await chamar("tema_da_marca", { marca: "marca-que-nao-existe" }));
     conferir(/não é uma marca pública/.test(privada), "marca fora da lista é recusada");

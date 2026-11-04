@@ -364,6 +364,18 @@ function Frame({ children, className = "" }: { children: React.ReactNode; classN
   return <div className={`${SURFACE} ${className}`}>{children}</div>;
 }
 
+/** Os dois botões ligam e desligam de verdade: demo com estado fixo parecia peça quebrada. */
+function VintageButtonDemo() {
+  const [power, setPower] = React.useState(true);
+  const [mute, setMute] = React.useState(false);
+  return (
+    <Frame className="gap-2">
+      <VintageButton label="POWER" active={power} onClick={() => setPower((v) => !v)} />
+      <VintageButton label="MUTE" active={mute} onClick={() => setMute((v) => !v)} />
+    </Frame>
+  );
+}
+
 /**
  * Relógio das demos animadas. Para quando o palco sai da tela ou a aba é
  * escondida: com uma dúzia de demos em loop, deixar todas correndo o tempo todo
@@ -1087,12 +1099,7 @@ export const CATALOG: CatalogItem[] = [
     estilo: ["vintage"],
     description: "Botão de painel que afunda no clique.",
     tags: ["áudio", "botão"],
-    demo: () => (
-      <Frame className="gap-2">
-        <VintageButton label="POWER" active onClick={() => {}} />
-        <VintageButton label="MUTE" onClick={() => {}} />
-      </Frame>
-    ),
+    demo: VintageButtonDemo,
     preview: { w: 440, h: 210 },
   },
   {

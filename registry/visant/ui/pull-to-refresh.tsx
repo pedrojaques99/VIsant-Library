@@ -238,7 +238,7 @@ export function PullToRefresh({
       onPointerCancel={soltar}
       onLostPointerCapture={soltar}
       className={cn(
-        "relative flex select-none flex-col overflow-hidden rounded-[var(--r-surface)] border border-border bg-card text-card-foreground outline-none [box-shadow:var(--e-raised)] [touch-action:pan-x] focus-visible:[box-shadow:var(--focus)]",
+        "relative flex select-none flex-col overflow-hidden rounded-[var(--r-surface)] border border-border bg-card text-card-foreground outline-none [box-shadow:var(--e-raised)] [touch-action:pan-x] supports-[touch-action:pan-down]:[touch-action:pan-x_pan-down] focus-visible:[box-shadow:var(--focus)]",
         disabled && "opacity-60",
         className,
       )}
