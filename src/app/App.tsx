@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { BrandThemeProvider } from "@/lib/brand-theme";
 import { redeLenta, useDobraAssentada } from "@/lib/rede";
 import { BotaoDeBusca, useAtalhoDeBusca } from "./busca-gatilho";
+import { REPO_DAS_SKILLS } from "./skills/hub/nucleo";
 
 /*
  * Studio e bancada chegam quando alguém abre a aba.
@@ -542,6 +543,7 @@ function Shell() {
           <Rodape
             atual={route.view}
             onPorta={setView}
+            repo={route.view === "skills" ? REPO_DAS_SKILLS : undefined}
             className={cn(
               /* O dock de /skills é fixo: fica acima dele no celular e abaixo do flutuante na tela larga. */
               route.view === "skills" && !route.kit

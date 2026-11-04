@@ -10,10 +10,12 @@
 import * as React from "react";
 import { motion } from "motion/react";
 import { Check, Copy, X } from "lucide-react";
+import { siGithub } from "simple-icons";
+import { LogoAgente } from "../../conectar-sinal";
 import { useCopy } from "../../copy-command";
 import { ANIMA_COR, cx, DUR, EASE_OUT, useMenosMovimento, useSequencia } from "./base";
 import { PedirEmail, useLiberado } from "./interesse";
-import { BASE_DO_COMANDO as BASE, COMANDO_COMPLETO, INDICE } from "./nucleo";
+import { BASE_DO_COMANDO as BASE, COMANDO_COMPLETO, INDICE, REPO_DAS_SKILLS } from "./nucleo";
 
 export { COMANDO_COMPLETO, INDICE };
 
@@ -81,6 +83,17 @@ export function Dock({ onInstalar }: { onInstalar: () => void }) {
         ))}
       </div>
       </div>
+      <a
+        href={REPO_DAS_SKILLS}
+        target="_blank"
+        rel="noreferrer"
+        data-repo
+        aria-label="Repositório das skills no GitHub"
+        title="Repositório das skills no GitHub"
+        className={cx("grid size-11 shrink-0 place-items-center rounded-control text-casa-fg-2 outline-none hover:text-casa-fg focus-visible:[box-shadow:var(--focus)]", ANIMA_COR)}
+      >
+        <LogoAgente icone={siGithub} className="size-4" />
+      </a>
       <button
         type="button"
         data-instalar

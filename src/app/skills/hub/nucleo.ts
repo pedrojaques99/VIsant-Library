@@ -16,6 +16,7 @@ export const INDICE = [
 ];
 
 /* Sempre com `--skill`: sem ele o comando instala também as de vídeo e projeto, que a página não mostra. */
+export const REPO_DAS_SKILLS = "https://github.com/pedrojaques99/visant-skills-public";
 export const BASE_DO_COMANDO = "npx skills add pedrojaques99/visant-skills-public";
 export const COMANDO_COMPLETO = `${BASE_DO_COMANDO} --skill ${INDICE.map((s) => s.id).join(" ")}`;
 

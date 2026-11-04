@@ -3,7 +3,8 @@
  *
  * Com `onAbrir`, são dois gestos num corpo só: o texto abre o painel e o ícone do fim copia
  * direto, pra quem já sabe o que quer. São dois botões irmãos, não um dentro do outro.
- * Sem `onAbrir`, a pílula inteira copia: um toque e está pronto pra colar.
+ * Sem `onAbrir`, a pílula inteira copia: um toque e está pronto pra colar. Quem precisa de um passo
+ * antes de copiar passa `onToque` e `feito`, e a cópia fica por conta de quem chamou.
  */
 
 import { Check, Copy } from "lucide-react";
@@ -39,14 +40,20 @@ export function PilulaAgente({
   rotulo,
   copiado = "Copiado",
   onAbrir,
+  onToque,
+  feito,
 }: {
   comando: string;
   rotulo: string;
   /** O que a pílula diz depois do toque, quando ela inteira copia. */
   copiado?: string;
   onAbrir?: () => void;
+  onToque?: () => void;
+  feito?: boolean;
 }) {
-  const { done, copy } = useCopy(comando);
+  const proprio = useCopy(comando);
+  const done = feito ?? proprio.done;
+  const copy = proprio.copy;
   const Icon = done ? Check : Copy;
 
   if (!onAbrir) {
@@ -54,7 +61,7 @@ export function PilulaAgente({
       <button
         type="button"
         data-copiar-agente
-        onClick={copy}
+        onClick={onToque ?? copy}
         title={comando}
         // casa-lint/pilula: a pílula é o pedido do dono (referência de onboarding de agente), não chip genérico
         className={cn("inline-flex h-11 w-fit shrink-0 items-center gap-2.5 rounded-full bg-casa-cta pl-2 pr-4 text-casa-base font-medium text-casa-cta-fg hover:opacity-90", FOCO)}

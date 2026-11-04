@@ -12,8 +12,13 @@
 
 import * as React from "react";
 import { Check } from "lucide-react";
+import { PilulaAgente } from "../../pilula-agente";
+import { useCopy } from "../../copy-command";
 
 const CHAVE = "visant:skills-liberado";
+/* A pílula, o instalador e o como usar pedem o mesmo e-mail: respondeu num, vale para os outros na hora. */
+const EVENTO = "visant:skills-liberou";
+const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
 
 const lerLiberado = () => {
   try {
@@ -34,6 +39,11 @@ const BOTAO =
 /** Lido no efeito: a página é hidratada no cliente. */
 export function useLiberado() {
   const [liberado, setLiberado] = React.useState(false);
+  React.useEffect(() => {
+    const ouvir = () => setLiberado(true);
+    window.addEventListener(EVENTO, ouvir);
+    return () => window.removeEventListener(EVENTO, ouvir);
+  }, []);
   React.useEffect(() => {
     if (lerLiberado()) {
       setLiberado(true);
@@ -56,9 +66,94 @@ export function useLiberado() {
     } catch {
       /* Sem armazenamento: pede de novo na próxima visita. */
     }
-    setLiberado(true);
+    window.dispatchEvent(new Event(EVENTO));
   }, []);
   return [liberado, liberar] as const;
+}
+
+/**
+ * A ação da abertura. Quem ainda não deixou o e-mail toca na pílula e ela vira o campo ali mesmo,
+ * sem janela e sem sair da página. Confirmar copia na hora: o envio vai por trás, porque o navegador
+ * só libera a área de transferência no gesto, e a rede fora não segura ninguém.
+ */
+export function CopiarParaAgente({ mensagem, origem, rotulo, copiado, depois }: { mensagem: string; origem: string; rotulo: string; copiado: string; depois: React.ReactNode }) {
+  const [liberado, liberar] = useLiberado();
+  const [pedindo, setPedindo] = React.useState(false);
+  const [erro, setErro] = React.useState(false);
+  const { done, copy } = useCopy(mensagem);
+  const isca = React.useRef<HTMLInputElement>(null);
+  const raiz = React.useRef<HTMLDivElement>(null);
+  const devolverFoco = React.useRef(false);
+
+  /* O campo some ao fechar: sem isto, o foco de quem usa teclado cairia no começo da página. */
+  React.useEffect(() => {
+    if (pedindo || !devolverFoco.current) return;
+    devolverFoco.current = false;
+    raiz.current?.querySelector<HTMLElement>("[data-copiar-agente]")?.focus();
+  }, [pedindo]);
+
+  const fechar = () => {
+    devolverFoco.current = true;
+    setPedindo(false);
+  };
+
+  if (!pedindo) {
+    return (
+      <div ref={raiz} className="flex flex-wrap items-center gap-x-4 gap-y-1">
+        <PilulaAgente comando={mensagem} rotulo={rotulo} copiado={copiado} feito={done} onToque={liberado ? copy : () => setPedindo(true)} />
+        {depois}
+      </div>
+    );
+  }
+
+  return (
+    <form
+      data-pedir-email-pilula
+      noValidate
+      onKeyDown={(e) => {
+        if (e.key === "Escape") fechar();
+      }}
+      onSubmit={(e) => {
+        e.preventDefault();
+        const email = String(new FormData(e.currentTarget).get("email") ?? "").trim();
+        if (!EMAIL.test(email)) return setErro(true);
+        copy();
+        void enviar({ email, origem, site: isca.current?.value }).catch(() => {});
+        liberar();
+        fechar();
+      }}
+    >
+      {/* casa-lint/pilula: é a mesma pílula, agora com o campo dentro */}
+      <div className="flex h-11 w-full max-w-sm items-center overflow-hidden rounded-full bg-casa-tile-2 focus-within:[box-shadow:var(--focus)]">
+        <label className="min-w-0 flex-1">
+          <span className="sr-only">Seu e-mail</span>
+          <input
+            autoFocus
+            type="email"
+            name="email"
+            required
+            autoComplete="email"
+            inputMode="email"
+            placeholder="seu@email.com"
+            aria-invalid={erro}
+            onChange={() => setErro(false)}
+            className="h-11 w-full min-w-0 bg-transparent pl-4 pr-2 text-casa-base text-casa-fg outline-none placeholder:text-casa-fg-3"
+          />
+        </label>
+        <input ref={isca} name="site" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
+        {/* casa-lint/pilula: o botão acompanha a curva da pílula */}
+        <button type="submit" className="h-11 shrink-0 rounded-full bg-casa-cta px-5 text-casa-base font-medium text-casa-cta-fg outline-none focus-visible:[box-shadow:var(--focus)]">
+          Copiar
+        </button>
+      </div>
+      <p className="mt-1 text-casa-sm text-casa-fg-2">
+        {erro ? "Confira o e-mail: esse não parece completo." : "Usamos só para falar com você sobre as skills."}{" "}
+        <a href="/skills/como-usar?sair=1" className="inline-flex min-h-6 items-center underline underline-offset-2 outline-none focus-visible:[box-shadow:var(--focus)] pointer-coarse:min-h-11">
+          Sair da lista
+        </a>
+      </p>
+    </form>
+  );
 }
 
 export function PedirEmail({ origem, onLiberar }: { origem: string; onLiberar: () => void }) {

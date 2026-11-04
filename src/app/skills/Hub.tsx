@@ -12,7 +12,7 @@
 import * as React from "react";
 import { useDobraAssentada } from "@/lib/rede";
 import { ALTURA_DOBRA, MENSAGEM_AGENTE, PaginaCtx } from "./hub/nucleo";
-import { PilulaAgente } from "../pilula-agente";
+import { CopiarParaAgente } from "./hub/interesse";
 import { Gleam } from "../../../registry/visant/ui/gleam";
 import { Video } from "./hub/video";
 
@@ -39,15 +39,22 @@ export function Hub() {
             <p className="mt-2 text-casa-base text-casa-fg-2 [text-wrap:pretty] lg:mt-4 lg:text-casa-lg">
               Seis skills pro Claude Code que auditam tela, texto e animação.
             </p>
-            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 lg:mt-6">
-              <PilulaAgente comando={MENSAGEM_AGENTE} rotulo="Copiar para o agente" copiado="Agora cole no agente" />
-              <a
-                href="/skills/como-usar"
-                data-como-usar-link
-                className="inline-flex h-11 items-center rounded-control text-casa-base text-casa-fg-2 outline-none hover:text-casa-fg focus-visible:[box-shadow:var(--focus)]"
-              >
-                Como usar
-              </a>
+            <div className="mt-4 lg:mt-6">
+              <CopiarParaAgente
+                mensagem={MENSAGEM_AGENTE}
+                origem="abertura"
+                rotulo="Copiar para o agente"
+                copiado="Agora cole no agente"
+                depois={
+                  <a
+                    href="/skills/como-usar"
+                    data-como-usar-link
+                    className="inline-flex h-11 items-center rounded-control text-casa-base text-casa-fg-2 outline-none hover:text-casa-fg focus-visible:[box-shadow:var(--focus)]"
+                  >
+                    Como usar
+                  </a>
+                }
+              />
             </div>
           </div>
           {/* O reel mostra o que a frase promete: uma tela passando pelas skills. Luz neutra: a casa não fala com a cor da marca. */}

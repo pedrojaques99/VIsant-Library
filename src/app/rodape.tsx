@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 export type PortaDoRodape = "catalogo" | "skills" | "marca" | "docs";
 
 const PERFIL = "https://x.com/pejaques_";
+const REPO_DA_LIBRARY = "https://github.com/pedrojaques99/Vintageuiuxlibrary";
 
 const PORTAS: { view: PortaDoRodape; rotulo: string; href: string }[] = [
   { view: "catalogo", rotulo: "Catálogo", href: "/" },
@@ -35,10 +36,13 @@ const PORTA = `${LINK} pointer-coarse:min-w-11 pointer-coarse:justify-center poi
 export function Rodape({
   atual,
   onPorta,
+  repo = REPO_DA_LIBRARY,
   className,
 }: {
   atual: string;
   onPorta: (view: PortaDoRodape) => void;
+  /** O repositório de quem está na tela: as skills têm o delas. */
+  repo?: string;
   className?: string;
 }) {
   return (
@@ -88,7 +92,7 @@ export function Rodape({
           <a href="/llms.txt" className={PORTA}>
             llms.txt
           </a>
-          <a href="https://github.com/pedrojaques99/Vintageuiuxlibrary" className={PORTA}>
+          <a href={repo} data-repo-rodape className={PORTA}>
             GitHub
           </a>
         </nav>

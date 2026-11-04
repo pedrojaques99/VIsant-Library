@@ -27,19 +27,78 @@ for (const { rota, titulo } of PAGINAS) {
   }
 }
 
-test("a abertura copia a mensagem pro agente num toque, sem pedir nada antes", async ({ page, context }) => {
+test("a pílula pede o e-mail ali mesmo, copia ao confirmar e não pede de novo", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  const enviados: { email?: string; origem?: string }[] = [];
+  await page.route("**/api/interesse", (r) => {
+    if (r.request().method() === "GET") return r.fulfill({ json: { contagens: true, interesse: true } });
+    enviados.push(r.request().postDataJSON());
+    return r.fulfill({ status: 204 });
+  });
   for (const width of [360, 390, 1440]) {
     await page.setViewportSize({ width, height: 844 });
-    await page.goto("/skills");
+    await page.goto("/skills", { waitUntil: "networkidle" });
+    await page.evaluate(() => localStorage.removeItem("visant:skills-liberado"));
+    await page.reload();
     const pilula = page.locator("[data-copiar-agente]");
     await expect(pilula).toBeInViewport({ ratio: 1 });
+    await page.evaluate(() => navigator.clipboard.writeText("nada"));
     await pilula.click();
+
+    const campo = page.locator("[data-pedir-email-pilula] input[type=email]");
+    await expect(campo).toBeFocused();
+    await campo.fill("sem-arroba");
+    await page.keyboard.press("Enter");
+    await expect(page.locator("[data-pedir-email-pilula]")).toContainText("Confira o e-mail");
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("nada");
+
+    await campo.fill("pessoa@exemplo.com");
+    await page.keyboard.press("Enter");
     await expect(pilula).toHaveText("Agora cole no agente");
+    await expect(pilula).toBeFocused();
     const colado = await page.evaluate(() => navigator.clipboard.readText());
     expect(colado).toContain("npx skills add pedrojaques99/visant-skills-public --skill visant-killer");
     expect(colado).toContain("llms.txt");
+    await expect.poll(() => enviados.at(-1)).toMatchObject({ email: "pessoa@exemplo.com", origem: "abertura" });
+
+    // Na volta não pede mais: um toque copia.
+    await page.reload();
+    await page.evaluate(() => navigator.clipboard.writeText("nada"));
+    await pilula.click();
+    await expect(pilula).toHaveText("Agora cole no agente");
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("npx skills add");
   }
+});
+
+test("Esc fecha o campo sem copiar; sem a tabela, a pílula copia direto", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  let tabela = true;
+  await page.route("**/api/interesse", (r) => r.fulfill({ json: { contagens: true, interesse: tabela } }));
+  await page.goto("/skills");
+  const pilula = page.locator("[data-copiar-agente]");
+  await pilula.click();
+  await page.keyboard.press("Escape");
+  await expect(pilula).toHaveText(/Copiar para o agente/);
+  await expect(pilula).toBeFocused();
+
+  tabela = false;
+  await page.reload();
+  await page.waitForResponse("**/api/interesse").catch(() => {});
+  await page.waitForTimeout(200);
+  await pilula.click();
+  await expect(page.locator("[data-pedir-email-pilula]")).toHaveCount(0);
+  await expect(pilula).toHaveText("Agora cole no agente");
+});
+
+test("o GitHub de /skills é o das skills, na barra e no rodapé; fora dela, o da library", async ({ page }) => {
+  await page.goto("/skills");
+  const skills = "https://github.com/pedrojaques99/visant-skills-public";
+  await expect(page.locator("[data-dock] [data-repo]")).toHaveAttribute("href", skills);
+  await expect(page.locator("[data-repo-rodape]")).toHaveAttribute("href", skills);
+  await page.goto("/skills/como-usar");
+  await expect(page.locator("[data-repo-rodape]")).toHaveAttribute("href", skills);
+  await page.goto("/marca");
+  await expect(page.locator("[data-repo-rodape]")).toHaveAttribute("href", /Vintageuiuxlibrary$/);
 });
 
 test("como usar: um passo por tela, do botão de /skills até o fim", async ({ page }) => {
