@@ -244,6 +244,11 @@ const SECOES = [
     descricao: "O que cada skill da Visant faz, em filme: telas fictícias, montadas para mostrar cada passada.",
   },
   {
+    slug: "skills/como-usar",
+    titulo: "Como usar as skills / Visant",
+    descricao: "Do zero ao primeiro pedido, um passo por tela, para quem nunca abriu um terminal.",
+  },
+  {
     slug: "skills/killer",
     titulo: "visant-killer e visant-design / Visant",
     descricao: "A auditoria que reprova tela com cara de IA e a porta que leva a tela até o fim.",

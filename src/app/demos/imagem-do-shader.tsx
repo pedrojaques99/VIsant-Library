@@ -96,7 +96,7 @@ export function PalcoDoShader({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className="flex h-full w-full flex-col items-center justify-center gap-2"
+      className="relative h-full w-full"
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
         e.preventDefault();
@@ -104,7 +104,8 @@ export function PalcoDoShader({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
-      <div className="flex items-center gap-0.5 pointer-coarse:gap-4 text-muted-foreground">
+      {/* Por cima, e só no palco da ficha: em coluna ele tirava uma faixa da peça, e no card era ruído. */}
+      <div className="casa absolute bottom-3 left-1/2 z-10 hidden -translate-x-1/2 items-center gap-0.5 rounded-[12px] bg-casa-bg px-1 text-muted-foreground pointer-coarse:gap-4 [[data-palco-cheio]_&]:flex">
         <Trocador nome={atual.nome} onPasso={passar} rotulo="imagem" />
         <button
           type="button"

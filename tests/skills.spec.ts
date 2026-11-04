@@ -27,6 +27,23 @@ for (const { rota, titulo } of PAGINAS) {
   }
 }
 
+test("como usar: um passo por tela, do botão de /skills até o fim", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/skills");
+  await page.locator("[data-como-usar-link]").click();
+  await expect(page).toHaveURL(/\/skills\/como-usar$/);
+  await expect(page.locator("h1")).toHaveText("Instale o Node.js.");
+  for (let i = 0; i < 6; i++) {
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+    await expect(page.locator("h1")).toHaveCount(1);
+    await page.locator("[data-continuar]").click();
+    await page.waitForTimeout(350);
+  }
+  await expect(page.locator("h1")).toHaveText("Pronto.");
+  await page.getByRole("button", { name: "Voltar" }).click();
+  await expect(page.locator("h1")).toHaveText("Peça do seu jeito.");
+});
+
 test("endereço que não existe mostra 404, e a volta do OAuth não", async ({ page }) => {
   for (const rota of ["/skills/nada", "/nada-aqui"]) {
     await page.goto(rota);

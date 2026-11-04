@@ -196,7 +196,8 @@ export function ShaderLab({ itens, onFocus }: { itens: CatalogItem[]; onFocus: (
           ))}
         </div>
 
-        <div className="hidden shrink-0 flex-col gap-2 border-t border-casa-line pt-3 lg:flex">
+        {/* Um ícone só: o comando branco roubava a cena do filtro. */}
+        <div className="hidden shrink-0 items-center justify-between gap-2 border-t border-casa-line pt-3 lg:flex">
           <button
             type="button"
             onClick={() => onFocus(item.name)}
@@ -208,7 +209,7 @@ export function ShaderLab({ itens, onFocus }: { itens: CatalogItem[]; onFocus: (
             {item.title}
             <ArrowUpRight className="size-3.5" aria-hidden />
           </button>
-          <CopyCommand variant="cta" text={installCommand(item.name)} />
+          <CopyCommand variant="chip" text={installCommand(item.name)} className="size-11 bg-casa-tile-2" />
         </div>
       </aside>
     </div>

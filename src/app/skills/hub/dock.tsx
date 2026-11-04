@@ -23,6 +23,8 @@ export const INDICE = [
 ];
 
 const BASE = "npx skills add pedrojaques99/visant-skills-public";
+/* Sempre com `--skill`: sem ele o comando instala também as de vídeo e projeto, que a página não mostra. */
+export const COMANDO_COMPLETO = `${BASE} --skill ${INDICE.map((s) => s.id).join(" ")}`;
 
 export function Dock({ onInstalar }: { onInstalar: () => void }) {
   const [ativo, setAtivo] = React.useState<string | null>(null);
@@ -108,6 +110,7 @@ export function Instalador({ aberto, onFechar }: { aberto: boolean; onFechar: ()
   const toque = React.useRef<{ y: number; t: number; arrastou: boolean } | null>(null);
   const seq = useSequencia();
   const [marcadas, setMarcadas] = React.useState<Set<string>>(new Set(INDICE.map((s) => s.id)));
+  const [customizando, setCustomizando] = React.useState(false);
 
   /* showModal prende o foco e o Esc. O resto é nosso: travar o fundo e devolver o foco. */
   React.useEffect(() => {
@@ -167,7 +170,6 @@ export function Instalador({ aberto, onFechar }: { aberto: boolean; onFechar: ()
     }
   };
 
-  const todas = marcadas.size === INDICE.length;
   /* Sempre com `--skill`: sem ele o comando instala também as de vídeo e projeto, que esta página não mostra. */
   const comando = `${BASE} --skill ${INDICE.filter((s) => marcadas.has(s.id)).map((s) => s.id).join(" ")}`;
   const { done, copy } = useCopy(comando);
@@ -210,17 +212,23 @@ export function Instalador({ aberto, onFechar }: { aberto: boolean; onFechar: ()
             <div className="flex min-w-0 flex-wrap gap-1">
               <button
                 type="button"
-                aria-pressed={todas}
-                onClick={() => setMarcadas(new Set(INDICE.map((s) => s.id)))}
-                className={cx("h-11 rounded-control px-3 text-casa-base outline-none focus-visible:[box-shadow:var(--focus)]", todas ? "bg-casa-tile-2" : "text-casa-fg-2")}
+                data-customizar
+                aria-expanded={customizando}
+                onClick={() => {
+                  /* Fechar a lista volta a instalar todas: o comando sempre diz o que a tela mostra. */
+                  if (customizando) setMarcadas(new Set(INDICE.map((s) => s.id)));
+                  setCustomizando(!customizando);
+                }}
+                className={cx("h-11 rounded-control px-3 text-casa-base outline-none focus-visible:[box-shadow:var(--focus)]", ANIMA_COR, customizando ? "bg-casa-tile-2 text-casa-fg" : "text-casa-fg-2 hover:text-casa-fg")}
               >
-                Todas
+                Customizar
               </button>
             </div>
             <button type="button" aria-label="Fechar" onClick={onFechar} className="grid size-11 shrink-0 place-items-center rounded-control text-casa-fg-2 outline-none focus-visible:[box-shadow:var(--focus)]">
               <X className="size-4" />
             </button>
           </div>
+          {customizando ? (
           <ul className="mt-2 grid grid-cols-2 gap-x-2">
             {INDICE.map((s) => (
               <li key={s.id}>
@@ -244,6 +252,7 @@ export function Instalador({ aberto, onFechar }: { aberto: boolean; onFechar: ()
               </li>
             ))}
           </ul>
+          ) : null}
           <button
             type="button"
             data-copiar
@@ -254,7 +263,6 @@ export function Instalador({ aberto, onFechar }: { aberto: boolean; onFechar: ()
             <code className="min-w-0 flex-1 font-casa-mono text-casa-sm [overflow-wrap:anywhere]">{comando}</code>
             <Icone className="size-4 shrink-0" aria-label={done ? "Copiado" : "Copiar"} />
           </button>
-          <p className="mt-3 text-casa-sm text-casa-fg-2">A gente só testou no Claude Code.</p>
           </div>
         </motion.div>
       ) : null}

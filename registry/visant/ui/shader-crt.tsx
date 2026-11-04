@@ -50,7 +50,7 @@ void main(){
   su+=cc*dot(cc,cc)*uCurva;
   if(su.x<0.||su.y<0.||su.x>1.||su.y>1.){gl_FragColor=vec4(uPapel,1.);return;}
   vec2 px=su*uRes;
-  float s=min(uRes.x/uImg.x,uRes.y/uImg.y);
+  float s=max(uRes.x/uImg.x,uRes.y/uImg.y);
   vec2 tam=uImg*s;
   vec2 uv=(px-(uRes-tam)*.5)/tam;
   vec3 c=uPapel;

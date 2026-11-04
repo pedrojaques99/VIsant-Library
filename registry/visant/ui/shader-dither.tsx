@@ -72,7 +72,7 @@ void main(){
   vec2 px=vec2(gl_FragCoord.x,uRes.y-gl_FragCoord.y);
   vec2 cel=floor(px/uPonto);
   vec2 centro=(cel+.5)*uPonto;
-  float s=min(uRes.x/uImg.x,uRes.y/uImg.y);
+  float s=max(uRes.x/uImg.x,uRes.y/uImg.y);
   vec2 tam=uImg*s;
   vec2 uv=(centro-(uRes-tam)*.5)/tam;
   float lum=1.;

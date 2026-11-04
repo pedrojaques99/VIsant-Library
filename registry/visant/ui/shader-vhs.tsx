@@ -82,7 +82,7 @@ float noise(vec2 v){
 
 void main(){
   vec2 px=vec2(gl_FragCoord.x,uRes.y-gl_FragCoord.y);
-  float s=min(uRes.x/uImg.x,uRes.y/uImg.y);
+  float s=max(uRes.x/uImg.x,uRes.y/uImg.y);
   vec2 tam=uImg*s;
   vec2 uv=(px-(uRes-tam)*.5)/tam;
   vec2 uvn=uv;

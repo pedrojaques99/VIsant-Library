@@ -38,6 +38,13 @@ export function Hub() {
             <p className="mt-2 text-casa-base text-casa-fg-2 [text-wrap:pretty] lg:mt-4 lg:text-casa-lg">
               Seis skills pro Claude Code que auditam tela, texto e animação.
             </p>
+            <a
+              href="/skills/como-usar"
+              data-como-usar-link
+              className="mt-4 inline-flex h-11 items-center rounded-control bg-casa-tile-2 px-5 text-casa-base font-medium text-casa-fg outline-none focus-visible:[box-shadow:var(--focus)] lg:mt-6"
+            >
+              Como usar
+            </a>
           </div>
           <FotoDaAbertura largo={largo} assentada={assentada} />
         </section>

@@ -47,7 +47,7 @@ uniform vec3 uLuz;
 
 void main(){
   vec2 px=vec2(gl_FragCoord.x,uRes.y-gl_FragCoord.y);
-  float s=min(uRes.x/uImg.x,uRes.y/uImg.y);
+  float s=max(uRes.x/uImg.x,uRes.y/uImg.y);
   vec2 tam=uImg*s;
   vec2 uv=(px-(uRes-tam)*.5)/tam;
   if(uv.x<0.||uv.y<0.||uv.x>1.||uv.y>1.){gl_FragColor=vec4(uPapel,1.);return;}

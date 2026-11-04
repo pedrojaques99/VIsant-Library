@@ -53,7 +53,7 @@ uniform vec3 uTinta;
 uniform vec3 uDestaque;
 
 float cobertura(vec2 px,float ganho){
-  float s=min(uRes.x/uImg.x,uRes.y/uImg.y);
+  float s=max(uRes.x/uImg.x,uRes.y/uImg.y);
   vec2 tam=uImg*s;
   vec2 uv=(px-(uRes-tam)*.5)/tam;
   if(uv.x<0.||uv.y<0.||uv.x>1.||uv.y>1.)return 0.;

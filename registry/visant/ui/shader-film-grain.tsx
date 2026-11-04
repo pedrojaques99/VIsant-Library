@@ -52,7 +52,7 @@ float hash(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
 
 void main(){
   vec2 px=vec2(gl_FragCoord.x,uRes.y-gl_FragCoord.y);
-  float s=min(uRes.x/uImg.x,uRes.y/uImg.y);
+  float s=max(uRes.x/uImg.x,uRes.y/uImg.y);
   vec2 tam=uImg*s;
   vec2 uv=(px-(uRes-tam)*.5)/tam;
   vec3 cor=uPapel;

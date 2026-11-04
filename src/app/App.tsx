@@ -89,6 +89,7 @@ const Docs = React.lazy(() => import("./Docs").then((m) => ({ default: m.Docs })
 const SkillsHub = React.lazy(() => import("./skills/Hub").then((m) => ({ default: m.Hub })));
 const SkillsFilme = React.lazy(() => import("./skills/Filme").then((m) => ({ default: m.Filme })));
 const SkillsCarroChefe = React.lazy(() => import("./skills/CarroChefe").then((m) => ({ default: m.CarroChefe })));
+const SkillsComoUsar = React.lazy(() => import("./skills/ComoUsar").then((m) => ({ default: m.ComoUsar })));
 import { FAMILIA_DA_PECA } from "./rota-familia";
 import { DEFAULT_BRAND, REGISTRY_URL } from "./registry-meta";
 import { VisantAuthProvider } from "./visant-auth";
@@ -139,7 +140,7 @@ const VIEWS: { value: View; label: string }[] = [
 /* Kits saíram do cabeçalho em 2026-11-03: as salas seguem abrindo por link, sem
    porta na navegação e com noindex no prerender. */
 const ROTAS_SEM_PORTA: View[] = ["kits", "docs"];
-const SUBPAGINAS_DE_SKILLS = ["filme", "killer"];
+const SUBPAGINAS_DE_SKILLS = ["filme", "killer", "como-usar"];
 /* `callback` é a volta do OAuth (`visant-auth.tsx`), que cai no catálogo. */
 const ROTAS_CONHECIDAS = ["catalogo", "marca", "skills", "kits", "kit", "c", "rig", "lab", "docs", "callback"];
 
@@ -496,7 +497,7 @@ function Shell() {
           </main>
         )}
         {route.view === "skills" &&
-          (route.kit === "filme" ? <SkillsFilme /> : route.kit === "killer" ? <SkillsCarroChefe /> : <SkillsHub />)}
+          (route.kit === "filme" ? <SkillsFilme /> : route.kit === "killer" ? <SkillsCarroChefe /> : route.kit === "como-usar" ? <SkillsComoUsar /> : <SkillsHub />)}
       </React.Suspense>
 
       {dobraAssentada ? (
