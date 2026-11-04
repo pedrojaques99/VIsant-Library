@@ -41,10 +41,12 @@ export function RotaCatalogo({
   React.useEffect(() => {
     document.title = peca
       ? `${peca.title} / @visant/ui`
-      : familia
+      : focus
+        ? "Peça não encontrada / @visant/ui"
+        : familia
         ? `${familyLabel(familia)} / catálogo @visant/ui`
         : "A library da Visant / @visant/ui";
-  }, [peca, familia]);
+  }, [peca, familia, focus]);
 
   /*
    * A vizinhança da peça em foco: a família dela, na ordem do catálogo.

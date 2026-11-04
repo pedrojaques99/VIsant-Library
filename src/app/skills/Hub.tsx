@@ -47,7 +47,7 @@ export function Hub() {
             <h1 className="text-[clamp(2.5rem,6.5vw,5.5rem)] font-medium leading-[1.08] tracking-[-0.03em]">
               Tire a cara de IA da sua interface.
             </h1>
-            <p className="mt-2 text-casa-base text-casa-fg-2 lg:mt-4 lg:text-casa-lg">
+            <p className="mt-2 text-casa-base text-casa-fg-2 [text-wrap:pretty] lg:mt-4 lg:text-casa-lg">
               Doze skills pro Claude Code que auditam tela, texto, animação e vídeo. A gente só testou lá.
             </p>
           </div>

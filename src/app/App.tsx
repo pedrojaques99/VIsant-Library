@@ -219,6 +219,13 @@ function parseLegacyHash(hash: string): Route {
   return { view: view?.value ?? "catalogo", focus: null, kit: null, familia };
 }
 
+/* Link de verdade: Cmd+clique abre outra aba, e só o clique simples fica dentro do app. */
+function navegarSemRecarregar(e: React.MouseEvent<HTMLAnchorElement>, navegar: () => void) {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+  e.preventDefault();
+  navegar();
+}
+
 function formatPath({ view, focus, kit, familia }: Route): string {
   if (focus) return `/c/${encodeURIComponent(focus)}`;
   if (view === "skills") return kit ? `/skills/${kit}` : "/skills";
@@ -384,16 +391,22 @@ function Shell() {
        * promete a quem gruda embaixo dele (a barra de filtro, a sala, o palco).
        * No celular as seções ficam na linha de baixo, fora do que gruda.
        */}
+      <a
+        href="#conteudo"
+        className="casa sr-only z-50 rounded-control bg-casa-cta px-3 py-2 text-casa-cta-fg focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+      >
+        Pular para o conteúdo
+      </a>
       <header className="casa sticky top-0 z-40 bg-casa-bg">
         <div className="shell flex h-[var(--shell-header-h)] items-center gap-2 sm:gap-6">
-          <button
-            type="button"
-            onClick={() => setView("catalogo")}
+          <a
+            href="/"
+            onClick={(e) => navegarSemRecarregar(e, () => setView("catalogo"))}
             className="alvo-toque flex shrink-0 items-center gap-2 rounded-control text-casa-base font-medium"
           >
             <span className="h-4 w-4 rounded-[5px] bg-casa-fg" aria-hidden />
             <span className="max-[359px]:sr-only">visant/ui</span>
-          </button>
+          </a>
 
           {/*
             As três portas, em texto: Catálogo primeiro (é a home), Kits (as
@@ -434,6 +447,7 @@ function Shell() {
           </div>
         </div>
       </header>
+      <span id="conteudo" tabIndex={-1} className="block outline-none" />
 
       {/* No celular as seções descem para uma linha própria, que rola com a página. */}
       <div className="casa shell sm:hidden">
@@ -545,10 +559,10 @@ function Secoes({
   return (
     <nav aria-label="Seção" className={cn("flex items-center gap-5", className)}>
       {VIEWS.map((v) => (
-        <button
+        <a
           key={v.value}
-          type="button"
-          onClick={() => onView(v.value)}
+          href={formatPath({ view: v.value, focus: null, kit: null, familia: null })}
+          onClick={(e) => navegarSemRecarregar(e, () => onView(v.value))}
           aria-current={view === v.value ? "page" : undefined}
           className={cn(
             "alvo-toque rounded-control text-casa-base transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] focus-visible:[box-shadow:var(--focus)]",
@@ -556,7 +570,7 @@ function Secoes({
           )}
         >
           {v.label}
-        </button>
+        </a>
       ))}
     </nav>
   );

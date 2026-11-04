@@ -452,7 +452,7 @@ export function PageCurl({
           <div
             aria-hidden
             data-page-curl-pega
-            className="absolute -bottom-4 -right-4 z-10 size-20 cursor-grab touch-none active:cursor-grabbing"
+            className="absolute -bottom-4 -right-4 z-10 size-20 cursor-grab touch-pan-y active:cursor-grabbing"
           />
         )}
         {/* O miolo: as folhas de baixo aparecendo na borda, como num caderno

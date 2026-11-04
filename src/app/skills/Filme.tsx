@@ -39,6 +39,9 @@ const carregarGsap = () =>
 
 /* O filme é dirigido pela rolagem: o `duration` do GSAP aqui é trecho da linha do
    tempo, medido em vh rolados. Não são segundos, então os tokens de DUR não se aplicam. */
+/* A diferença entre o `bottom` de `.filme-palavra` e o de `.filme-legenda`, em filme.css. */
+const FOLGA_DA_LEGENDA = 56;
+
 const VH = {
   fio: 1,
   letra: 0.5,
@@ -285,7 +288,8 @@ function FilmeRolado({ vertical }: { vertical: boolean }) {
         );
         const escala = fonteBarra / parseFloat(getComputedStyle(palavra).fontSize);
         recorte(imagem, [100, 0, 0, 0], [0, 0, 0, 0], 30, "expo.inOut", t + 44);
-        tl.to(palavra, { scale: escala, duration: VH.palavra, ease: "expo.inOut" }, t + 44);
+        /* Grande, a palavra fica acima da legenda; encolhida, ela desce e assenta na barra. */
+        tl.to(palavra, { scale: escala, y: vertical ? 0 : FOLGA_DA_LEGENDA, duration: VH.palavra, ease: "expo.inOut" }, t + 44);
 
         const lado = vertical ? "v-" : "h-";
         const trilha = trilhaVideo(

@@ -187,9 +187,9 @@ export function SpringDots({
         ctx!.fillStyle =
           desl > 0.02
             ? `rgba(${aceso[0]},${aceso[1]},${aceso[2]},${0.1 + desl * 0.5})`
-            : `rgba(${parado[0]},${parado[1]},${parado[2]},0.15)`;
+            : `rgba(${parado[0]},${parado[1]},${parado[2]},0.45)`;
         ctx!.beginPath();
-        ctx!.arc(pt.x, pt.y, 1 + desl * 1.4, 0, 6.2832);
+        ctx!.arc(pt.x, pt.y, 1.25 + desl * 1.4, 0, 6.2832);
         ctx!.fill();
       }
       if (rodando) raf = requestAnimationFrame(quadro);
