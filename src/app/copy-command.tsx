@@ -10,6 +10,7 @@
  */
 
 import * as React from "react";
+import { contarCopia } from "./metricas";
 import { Check, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ export function useCopy(text: string) {
 
   const copy = React.useCallback(() => {
     void navigator.clipboard.writeText(text);
+    contarCopia(text);
     setDone(true);
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setDone(false), CONFIRM_MS);

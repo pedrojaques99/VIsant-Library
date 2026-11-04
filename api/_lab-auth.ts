@@ -106,6 +106,12 @@ export const listVotos = () => rpc<VotoDaBurilacao[]>("burilacao_votos");
 export const putVoto = (duelo: string, por: string, escolha: string, motivos: string[], escrita: string) =>
   rpc<unknown>("burilacao_voto_put", { p_duelo: duelo, p_por: por, p_escolha: escolha, p_motivos: motivos, p_escrita: escrita });
 
+/** As contagens do painel /admin: só tipo, item, dia e total. Tabela em `admin/supabase.sql`. */
+export type LinhaDeContagem = { tipo: string; item: string };
+export const contar = (linhas: LinhaDeContagem[]) => rpc<unknown>("contagem_somar", { p_linhas: linhas });
+export const listContagens = (dias: number) =>
+  rpc<{ tipo: string; item: string; dia: string; n: number }[]>("contagem_lista", { p_dias: dias });
+
 export const redirect = (to: string, headers: Headers) => {
   headers.set("location", to);
   headers.set("cache-control", "no-store");
