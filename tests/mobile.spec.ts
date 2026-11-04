@@ -211,6 +211,20 @@ test.describe("iPhone 13", () => {
   });
 });
 
+/*
+ * Sem `isMobile`: com ele o navegador alarga a janela até caber o conteúdo, `innerWidth` acompanha,
+ * e a comparação dá igual mesmo com a página estourando. Foi assim que o menu passou 20 px em 360.
+ */
+test("em 360 de verdade, o menu cabe e a página não estoura", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  for (const rota of ["/skills", "/docs"]) {
+    await page.goto(rota);
+    await expect(page.getByRole("navigation", { name: "Seção" }).first()).toBeVisible({ timeout: 20_000 });
+    const largura = await page.evaluate(() => document.documentElement.scrollWidth);
+    expect(largura, rota).toBeLessThanOrEqual(360);
+  }
+});
+
 test.describe("360 com marca de nome longo", () => {
   test.use(PEQUENO);
 
