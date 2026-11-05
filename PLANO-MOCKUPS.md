@@ -24,6 +24,18 @@ Portão: 4/4 detectores em zero, `motion-lint` limpo, `casa-lint` limpo, `tsc` s
 
 "3d como opção, mas eu curto 2d minimalista, até uma versão outline seria foda". Entrou Realista, Plano e Contorno na aba Aparelho, com traço de cor automática e tela Vazia. Painéis flutuam com margem mínima e raio em todas as superfícies. O 3D vira quarta opção, sem substituir nada, e continua pendente de modelo e licença.
 
+### Rodada da referência (análise do vídeo do Rotato, em áudio do dono)
+
+"Movimentou a câmera e adicionou como uma nova cena", "uma coisa por vez", "exportar tanto mídia animada quanto estática".
+
+| Meta | Como ficou |
+|---|---|
+| Animação por cenas marcadas | Movimento "Cenas": gira, marca (K ou +), e a animação passa só por elas. Cena aberta é editável |
+| Exportação estática | Botão de imagem ao lado do vídeo, sempre do quadro na tela |
+| Pedido na própria tela | "Solte sua tela aqui" dentro do aparelho; nada flutua sobre a obra |
+| Zoom | Roda e pinça no ponteiro, dois dedos, + e −, 0 e duplo clique enquadram, controle à vista |
+| Arrastar para fora | Só no "Baixar de novo", no Chrome, e **sem teste de arrasto real até o sistema**. Arrastar a cena direto exige renderizar antes de soltar |
+
 ### Ainda em aberto
 
 - **3D como opção:** nada migrou. Falta modelo com licença comercial e iluminação; o comparativo mostrou borda melhor e sombra pior que o CSS.

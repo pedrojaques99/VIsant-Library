@@ -8,7 +8,7 @@
 
 /** `cheio` não tem medida própria: o quadro é o palco, então acompanha a tela de quem está usando. */
 export type Proporcao = "cheio" | "9:16" | "4:5" | "1:1" | "16:9";
-export type TipoMovimento = "parado" | "flutuar" | "balancar" | "pendulo" | "aproximar" | "entrada" | "varredura" | "close";
+export type TipoMovimento = "parado" | "cenas" | "flutuar" | "balancar" | "pendulo" | "aproximar" | "entrada" | "varredura" | "close";
 export type ModoFundo = "cor" | "degrade" | "foto" | "nenhum";
 export type FormatoImagem = "png" | "webp";
 export type FormatoVideo = "mp4" | "webm" | "gif";
@@ -22,8 +22,8 @@ export type Modelo = keyof typeof MODELOS;
 
 export interface Tela {
   id: string;
-  /** `vivo` é a peça React rodando dentro do aparelho. */
-  tipo: "vivo" | "imagem" | "video";
+  /** `vivo` é a peça React rodando dentro do aparelho; `convite` é a tela que pede a tela da pessoa. */
+  tipo: "vivo" | "convite" | "imagem" | "video";
   url?: string;
   /** A mesma tela em versão larga, para tablet e notebook. */
   largo?: string;
@@ -31,6 +31,13 @@ export interface Tela {
   deitada?: string;
   poster?: string;
   nome: string;
+}
+
+/** Uma cena marcada: o que muda de uma para a outra quando a animação é feita à mão. */
+export interface Chave {
+  rot: { x: number; y: number; z: number };
+  pos: { x: number; y: number };
+  tamanho: number;
 }
 
 export interface Cena {
@@ -56,6 +63,7 @@ export interface Cena {
   fundo: { modo: ModoFundo; cor: string; a: string; b: string; angulo: number; foto: string; desfoque: number };
   proporcao: Proporcao;
   movimento: { tipo: TipoMovimento; duracao: number; intensidade: number };
+  chaves: Chave[];
   saida: { largura: 1080 | 1440 | 2160; fps: 30 | 60; imagem: FormatoImagem; video: FormatoVideo };
 }
 
@@ -80,7 +88,7 @@ export const ACABAMENTOS = {
 
 export const PADRAO: Cena = {
   modelo: "phone",
-  telaId: "pagina",
+  telaId: "convite",
   ajuste: "cover",
   orientacao: "retrato",
   rot: { x: 14, y: -12, z: 6 },
@@ -98,10 +106,12 @@ export const PADRAO: Cena = {
   fundo: { modo: "degrade", cor: "#16181D", a: "#3B3F49", b: "#14151A", angulo: 160, foto: "/media/textura-neon.webp", desfoque: 0 },
   proporcao: "cheio",
   movimento: { tipo: "parado", duracao: 6, intensidade: 50 },
+  chaves: [],
   saida: { largura: 1080, fps: 30, imagem: "png", video: "mp4" },
 };
 
 export const TELAS: Tela[] = [
+  { id: "convite", tipo: "convite", nome: "Convite" },
   { id: "pagina", tipo: "imagem", url: "/media/telas/pagina-retrato.webp", largo: "/media/telas/pagina-largo.webp", deitada: "/media/telas/pagina-deitado.webp", nome: "Site" },
   { id: "mesa", tipo: "imagem", url: "/media/telas/mesa-retrato.webp", largo: "/media/telas/mesa-largo.webp", deitada: "/media/telas/mesa-deitado.webp", nome: "App" },
   { id: "marca", tipo: "imagem", url: "/media/telas/marca-retrato.webp", largo: "/media/telas/marca-largo.webp", deitada: "/media/telas/marca-deitado.webp", nome: "Marca" },
@@ -137,6 +147,7 @@ export const heroiDe = (m: Modelo) => posesDe(m)[1].rot;
 
 export const MOVIMENTOS: { id: TipoMovimento; nome: string; emLoop: boolean }[] = [
   { id: "parado", nome: "Parado", emLoop: false },
+  { id: "cenas", nome: "Cenas", emLoop: false },
   { id: "flutuar", nome: "Flutuar", emLoop: true },
   { id: "balancar", nome: "Balançar", emLoop: true },
   { id: "pendulo", nome: "Pêndulo", emLoop: true },
@@ -178,6 +189,9 @@ const NATURAL: Record<Modelo, Orientacao> = { phone: "retrato", tablet: "paisage
 export const orientacaoNatural = (m: Modelo) => NATURAL[m];
 /** Sensor é peça de celular em pé, e notebook não deita. */
 export const podeGirar = (c: Pick<Cena, "modelo" | "telaId">) => c.modelo !== "laptop" && c.telaId !== "sensor";
+/** O zoom é o tamanho do aparelho no quadro: passa de 100% para o close de um detalhe, e o arquivo sai como se vê. */
+export const ZOOM = { min: 20, max: 300 };
+export const poseDe = (c: Pick<Cena, "rot" | "pos" | "tamanho">): Chave => ({ rot: c.rot, pos: c.pos, tamanho: c.tamanho });
 export const girada = (c: Cena) => podeGirar(c) && c.orientacao !== NATURAL[c.modelo];
 /** O quarto de volta do aparelho deitado. A tela gira o mesmo ao contrário, então o conteúdo fica de pé. */
 export const giroDaOrientacao = (c: Cena) => (girada(c) ? 90 : 0);
@@ -192,8 +206,25 @@ const saida = (t: number) => 1 - (1 - t) ** 3;
 export function movimentoEm(c: Cena, t: number) {
   const i = c.movimento.intensidade / 50;
   const o = t * Math.PI * 2;
-  const m = { x: 0, y: 0, z: 0, dy: 0, escala: 1, opacidade: 1, foco: 1 };
+  const m = { x: 0, y: 0, z: 0, dy: 0, px: 0, py: 0, escala: 1, opacidade: 1, foco: 1 };
   switch (c.movimento.tipo) {
+    case "cenas": {
+      // De cena em cena, com repouso em cada uma: é o que faz parecer câmera, e não interpolação.
+      const k = c.chaves;
+      if (k.length < 2) break;
+      const lugar = Math.min(1, t) * (k.length - 1);
+      const i = Math.min(Math.floor(lugar), k.length - 2);
+      const s = suave(lugar - i);
+      const entre = (a: number, b: number) => a + (b - a) * s;
+      const [a, b] = [k[i], k[i + 1]];
+      m.x = entre(a.rot.x, b.rot.x) - c.rot.x;
+      m.y = entre(a.rot.y, b.rot.y) - c.rot.y;
+      m.z = entre(a.rot.z, b.rot.z) - c.rot.z;
+      m.px = entre(a.pos.x, b.pos.x) - c.pos.x;
+      m.py = entre(a.pos.y, b.pos.y) - c.pos.y;
+      m.escala = entre(a.tamanho, b.tamanho) / c.tamanho;
+      break;
+    }
     case "flutuar":
       m.x = Math.sin(o) * 3 * i;
       m.y = Math.cos(o) * 5 * i;
@@ -261,8 +292,8 @@ export function pontoDeFoco(c: Cena, t: number, baseW: number, baseH: number) {
   const z3 = y1 * Math.sin(a) + z2 * Math.cos(a);
   const k = perspectiva / (perspectiva - z3);
   return {
-    x: (baseW * (50 + c.pos.x / 2)) / 100 + m.escala * x2 * k,
-    y: (baseH * (50 + c.pos.y / 2)) / 100 - subida + (m.dy / 100) * h + m.escala * y3 * k,
+    x: (baseW * (50 + (c.pos.x + m.px) / 2)) / 100 + m.escala * x2 * k,
+    y: (baseH * (50 + (c.pos.y + m.py) / 2)) / 100 - subida + (m.dy / 100) * h + m.escala * y3 * k,
   };
 }
 

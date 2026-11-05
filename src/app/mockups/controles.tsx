@@ -314,7 +314,7 @@ export function Alvo({
         onChange(prende(x + seta[0]), prende(y + seta[1]));
       }}
     >
-      {arte ? <img src={arte} alt="" className="mk-arte-img" draggable={false} /> : <span className="mk-arte-sensor" />}
+      {arte ? <img src={arte} alt="" className="mk-arte-img" draggable={false} /> : null}
       <span className="mk-alvo-ponto" style={{ left: `${x}%`, top: `${y}%`, width: `${raio * 200}%` }} aria-hidden />
     </div>
   );

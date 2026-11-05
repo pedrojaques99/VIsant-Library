@@ -204,3 +204,67 @@ test("contorno tira o volume, o traço acompanha o fundo e o arquivo sai", async
   await page.locator(".mk-exportar").click();
   expect((await baixou).suggestedFilename()).toBe("mockup-1920x1080.png");
 });
+
+test("primeira visita: o aparelho pede a tela, sem nada flutuando sobre a obra", async ({ page }) => {
+  await abrir(page);
+  await expect(page.locator(".mk-tela-convite").last()).toContainText("Solte sua tela aqui");
+  await page.setInputFiles("input[type=file]", { name: "minha.png", mimeType: "image/png", buffer: PNG_1X1 });
+  await expect(page.locator(".mk-tela-convite")).toHaveCount(0);
+});
+
+test("imagem estática com movimento ligado sai do quadro que está na tela", async ({ page }) => {
+  await abrir(page, { telaId: "pagina", movimento: { tipo: "flutuar", duracao: 2, intensidade: 50 } });
+  await expect(page.locator(".mk-exportar")).toContainText("Exportar vídeo");
+  const baixou = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Exportar este quadro em PNG" }).click();
+  expect((await baixou).suggestedFilename()).toBe("mockup-1920x1080.png");
+});
+
+test("zoom: botões, teclas, roda e enquadrar falam do mesmo número", async ({ page }) => {
+  await abrir(page, { telaId: "pagina", tamanho: 50 });
+  const valor = page.locator(".mk-zoom-valor");
+  await expect(valor).toHaveText("50%");
+  await page.getByRole("button", { name: "Aumentar o zoom" }).click();
+  await expect(valor).toHaveText("55%");
+  await page.locator("body").press("+");
+  await expect(valor).toHaveText("61%");
+  await page.locator("body").press("-");
+  await expect(valor).toHaveText("55%");
+  const palco = (await page.locator(".mk-palco").boundingBox())!;
+  await page.mouse.move(palco.x + palco.width / 2, palco.y + palco.height / 2);
+  await page.mouse.wheel(0, -300);
+  await expect.poll(async () => parseInt((await valor.textContent())!)).toBeGreaterThan(70);
+  await page.locator("body").press("0");
+  await expect(valor).toHaveText("76%");
+  await page.locator(".mk-palco").dblclick({ position: { x: 10, y: 200 } });
+  await expect(valor).toHaveText("76%");
+});
+
+test("cenas: marcar, girar, marcar, e a animação passa pelas duas", async ({ page }) => {
+  await abrir(page, { telaId: "pagina", rot: { x: 0, y: 0, z: 0 } });
+  await aba(page, "Movimento");
+  await page.locator('.mk-mini[aria-label="Cenas"]').click();
+  await expect(page.getByRole("button", { name: "Cena 1" })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Marcar cena" }).click();
+  await expect(page.getByRole("button", { name: "Cena 2" })).toHaveAttribute("aria-pressed", "true");
+
+  const palco = (await page.locator(".mk-palco").boundingBox())!;
+  await page.mouse.move(palco.x + 60, palco.y + palco.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(palco.x + 160, palco.y + palco.height / 2, { steps: 4 });
+  await page.mouse.up();
+  await page.waitForTimeout(450);
+  const salva = () => page.evaluate(() => JSON.parse(localStorage.getItem("visant:mockup:3")!).chaves);
+  await expect.poll(async () => (await salva())[1].rot.y).toBe(40);
+  expect((await salva())[0].rot.y).toBe(0);
+
+  const corpo = page.locator(".mk-camada .device-frame-corpo").last();
+  const giro = () => corpo.evaluate((e) => (e as HTMLElement).style.transform);
+  await page.getByRole("button", { name: "Cena 1" }).click();
+  await expect.poll(giro).not.toContain("rotateY(40deg)");
+  await page.getByRole("button", { name: "Cena 2" }).click();
+  await expect.poll(giro).toContain("rotateY(40deg)");
+
+  await page.getByRole("button", { name: "Apagar esta cena" }).click();
+  await expect(page.getByRole("button", { name: "Cena 2" })).toHaveCount(0);
+});
