@@ -25,7 +25,7 @@ export const meta: LabComponentMeta = {
   hintTouch: "arraste pra fechar parte",
   formula: "P&L = (bid − entry) · lots · p · snap 25/50/75/100 ±3",
   rules: ["mono-labels", "formula", "born-in-best-state", "no-new-deps", "tokens", "reduced-motion", "touch", "only-transform", "mobile-hint", "mobile-idle", "mobile-tilt", "mobile-perf"],
-  status: "candidate",
+  status: "kept",
   tags: { input: "drag", family: "light", intensity: "medium", response: "snap" },
   rationale: "componente: primeiro do trilho Behance (fora do lab:next)",
   source: {

@@ -32,7 +32,7 @@ export const meta: LabMeta = {
     "small",
     "only-transform",
   ],
-  status: "candidate",
+  status: "kept",
   tags: { input: "scroll", family: "mechanical", intensity: "medium", response: "snap" },
   rationale: "backfill: anterior ao lab:next",
 };

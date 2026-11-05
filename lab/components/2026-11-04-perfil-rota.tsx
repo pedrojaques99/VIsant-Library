@@ -24,7 +24,7 @@ export const meta: LabComponentMeta = {
   hintTouch: "arraste ou incline o celular",
   formula: "θ = atan(Δalt/Δkm) · 4 · a = γ/30 · v·0.94 · k 120 · c 9",
   rules: ["one-metaphor", "mono-labels", "formula", "born-in-best-state", "no-new-deps", "tokens", "reduced-motion", "touch", "only-transform", "mobile-hint", "mobile-idle", "mobile-tilt", "mobile-perf"],
-  status: "candidate",
+  status: "kept",
   tags: { input: "tilt", family: "mechanical", intensity: "medium", response: "inertia" },
   rationale: "componente: trilho Behance (fora do lab:next), único do quadro com inclinação como entrada",
   source: {

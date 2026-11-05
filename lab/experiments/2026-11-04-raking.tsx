@@ -22,7 +22,7 @@ export const meta: LabMeta = {
   hintTouch: "arraste pra mover a luz",
   formula: "shadow = −L · 6px · highlight = +L · 2px · k 120 · c 20",
   rules: ["one-input", "one-metaphor", "mono-labels", "formula", "born-in-best-state", "no-new-deps", "tokens", "reduced-motion", "touch", "small", "only-transform", "mobile-hint", "mobile-no-hover", "mobile-idle", "mobile-perf"],
-  status: "candidate",
+  status: "kept",
   tags: { input: "pointer", family: "light", intensity: "subtle", response: "spring" },
   rationale: "exploração: pointer, light, subtle, spring nunca testados",
 };

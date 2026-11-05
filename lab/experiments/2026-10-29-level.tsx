@@ -37,7 +37,7 @@ export const meta: LabMeta = {
     "small",
     "only-transform",
   ],
-  status: "candidate",
+  status: "kept",
   tags: { input: "drag", family: "fluid", intensity: "medium", response: "spring" },
   rationale: "backfill: anterior ao lab:next",
 };

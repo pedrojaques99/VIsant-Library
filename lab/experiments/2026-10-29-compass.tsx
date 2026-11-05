@@ -37,7 +37,7 @@ export const meta: LabMeta = {
     "small",
     "only-transform",
   ],
-  status: "candidate",
+  status: "kept",
   tags: { input: "pointer", family: "mechanical", intensity: "subtle", response: "spring" },
   rationale: "backfill: anterior ao lab:next",
 };

@@ -1,83 +1,286 @@
 {
-  "updated": "2026-11-04",
-  "n": 0,
-  "kept": 0,
-  "decisions": [],
+  "updated": "2026-11-05",
+  "n": 12,
+  "kept": 7,
+  "decisions": [
+    {
+      "id": "2026-11-01-herbario",
+      "kind": "component",
+      "title": "Herbário",
+      "metaphor": "HERBARIUM: a scrolling tray of pressed specimens. Anything outside the reading\n band is only grain; what you stop on resolves into a drawing, and one tap pins\n it to your collection.",
+      "tags": {
+        "input": "scroll",
+        "family": "typography",
+        "intensity": "medium",
+        "response": "snap"
+      },
+      "gallery": "ui-ux",
+      "source": "https://www.behance.net/gallery/255666935/Wildtrace-Discover-Insects-Map-Their-World",
+      "status": "discarded",
+      "motivos": [],
+      "reason": "mt slop de ia, mt informação inútil",
+      "at": "2026-11-04"
+    },
+    {
+      "id": "2026-11-01-fechar-posicao",
+      "kind": "component",
+      "title": "Fechar posição",
+      "metaphor": "POSITION: close part of a trading position by dragging, and watch the result\n roll into place before you commit.",
+      "tags": {
+        "input": "drag",
+        "family": "light",
+        "intensity": "medium",
+        "response": "snap"
+      },
+      "gallery": "ui-ux",
+      "source": "https://www.behance.net/gallery/239914091/CFI",
+      "status": "kept",
+      "motivos": [],
+      "reason": "bom mas o fundo ficou ruim, e ta um colorido feio, conseguimos melhorar e limpar?",
+      "at": "2026-11-04"
+    },
+    {
+      "id": "2026-11-01-trilha",
+      "kind": "component",
+      "title": "Trilha",
+      "metaphor": "TRAIL: a step-by-step flow where only one step is open at a time, finished\n steps slide aside like abacus beads, and nothing is ever lost.",
+      "tags": {
+        "input": "press",
+        "family": "material",
+        "intensity": "medium",
+        "response": "spring"
+      },
+      "gallery": "ui-ux",
+      "source": "https://www.behance.net/gallery/256834293/Neobank-web-mobile-app-UXUI-design-Emerald24",
+      "status": "discarded",
+      "motivos": [],
+      "reason": "inútil e mt slop de ia, não serve pro catálogo",
+      "at": "2026-11-04"
+    },
+    {
+      "id": "2026-11-01-arranjo",
+      "kind": "component",
+      "title": "Arranjo",
+      "metaphor": "ARRANGE: one word, five arrangements, turned like a kaleidoscope barrel.",
+      "tags": {
+        "input": "pointer",
+        "family": "typography",
+        "intensity": "subtle",
+        "response": "spring"
+      },
+      "gallery": "graphic-design",
+      "source": "https://www.behance.net/gallery/248693823/AYNI-Andean-Boutique-Hotel",
+      "status": "kept",
+      "motivos": [],
+      "reason": "a ideia é legla, mas as cores são slop, e poderia ter uma forma menos blocada pra apenas 4 caracters? tenta escrever visant e faça ser nível visant",
+      "at": "2026-11-04"
+    },
+    {
+      "id": "2026-11-04-perfil-rota",
+      "kind": "component",
+      "title": "Perfil de rota",
+      "metaphor": "PROFILE: read a route off the shape of its terrain, with a clinometer that\n hangs from the cursor and swings to the grade under it.",
+      "tags": {
+        "input": "tilt",
+        "family": "mechanical",
+        "intensity": "medium",
+        "response": "inertia"
+      },
+      "gallery": "ui-ux",
+      "source": "https://www.behance.net/gallery/236308597/TheTrail-App-Travel-Dashboard-UX-UI-Design",
+      "status": "kept",
+      "motivos": [],
+      "reason": "tem mt label aparecendo , limpar",
+      "at": "2026-11-04"
+    },
+    {
+      "id": "2026-10-29-compass",
+      "kind": "experiment",
+      "title": "Compass",
+      "metaphor": "COMPASS: a needle that swings toward the pointer, the way a real one swings\n toward north: past it, then back, then still.",
+      "tags": {
+        "input": "pointer",
+        "family": "mechanical",
+        "intensity": "subtle",
+        "response": "spring"
+      },
+      "status": "kept",
+      "motivos": [],
+      "reason": "poderia ser com efeitos de profundidado ou perspectiva interativar com hover, pra dar um movimento e profundidade pro componente",
+      "at": "2026-11-04"
+    },
+    {
+      "id": "2026-10-29-loupe",
+      "kind": "experiment",
+      "title": "Loupe",
+      "metaphor": "LOUPE: a magnifier over print too small to read.",
+      "tags": {
+        "input": "pointer",
+        "family": "optics",
+        "intensity": "subtle",
+        "response": "direct"
+      },
+      "status": "discarded",
+      "motivos": [],
+      "reason": "mt obvio",
+      "at": "2026-11-04"
+    },
+    {
+      "id": "2026-10-29-level",
+      "kind": "experiment",
+      "title": "Level",
+      "metaphor": "LEVEL: a word filled with liquid that stays level while the word tilts.",
+      "tags": {
+        "input": "drag",
+        "family": "fluid",
+        "intensity": "medium",
+        "response": "spring"
+      },
+      "status": "kept",
+      "motivos": [],
+      "reason": "cópia descancarada, pense numa forma mais shader fluida drip de fazer isso, minimal e elegante",
+      "at": "2026-11-04"
+    },
+    {
+      "id": "2026-10-30-ratchet",
+      "kind": "experiment",
+      "title": "Ratchet",
+      "metaphor": "RATCHET: scrolling winds a toothed wheel that only turns one way, the pawl\n riding up each tooth's slope and falling off its steep face.",
+      "tags": {
+        "input": "scroll",
+        "family": "mechanical",
+        "intensity": "medium",
+        "response": "snap"
+      },
+      "status": "kept",
+      "motivos": [],
+      "reason": "dahora, mas faltou ivda, tem como ser mais metálico a saw? ou dar mais vida ao vetor",
+      "at": "2026-11-04"
+    },
+    {
+      "id": "2026-10-31-stamp",
+      "kind": "experiment",
+      "title": "Stamp",
+      "metaphor": "STAMP: a rubber stamp. Holding it down soaks the pad, letting go leaves the\n impression, and the longer the hold, the darker the ink.",
+      "tags": {
+        "input": "press",
+        "family": "ink-print",
+        "intensity": "bold",
+        "response": "spring"
+      },
+      "status": "discarded",
+      "motivos": [],
+      "reason": "paia",
+      "at": "2026-11-04"
+    },
+    {
+      "id": "2026-11-01-shutter",
+      "kind": "experiment",
+      "title": "Shutter",
+      "metaphor": "SHUTTER: a lens iris. Pressing snaps the blades shut; letting go opens them one\n stop tighter than before, and the light behind pays for it.",
+      "tags": {
+        "input": "press",
+        "family": "optics",
+        "intensity": "bold",
+        "response": "snap"
+      },
+      "status": "discarded",
+      "motivos": [],
+      "reason": "paia",
+      "at": "2026-11-04"
+    },
+    {
+      "id": "2026-11-04-raking",
+      "kind": "experiment",
+      "title": "Raking light",
+      "metaphor": "RAKE: a lamp held low over blind-embossed paper, where a raised word is only\n ever visible as the shadow and the highlight the light gives it.",
+      "tags": {
+        "input": "pointer",
+        "family": "light",
+        "intensity": "subtle",
+        "response": "spring"
+      },
+      "status": "kept",
+      "motivos": [],
+      "reason": "esse ficou foda, add mais textura, grain etc, pra dar mais vida e organicidade",
+      "at": "2026-11-04"
+    }
+  ],
   "board": {
     "input": {
       "drag": {
-        "kept": 0,
+        "kept": 2,
         "discarded": 0,
-        "n": 0,
-        "rate": 0.5
+        "n": 2,
+        "rate": 0.75
       },
       "tilt": {
-        "kept": 0,
+        "kept": 1,
         "discarded": 0,
-        "n": 0,
-        "rate": 0.5
+        "n": 1,
+        "rate": 0.6666666666666666
       },
       "scroll": {
-        "kept": 0,
-        "discarded": 0,
-        "n": 0,
+        "kept": 1,
+        "discarded": 1,
+        "n": 2,
         "rate": 0.5
       },
       "pointer": {
-        "kept": 0,
-        "discarded": 0,
-        "n": 0,
-        "rate": 0.5
+        "kept": 3,
+        "discarded": 1,
+        "n": 4,
+        "rate": 0.6666666666666666
       },
       "press": {
         "kept": 0,
-        "discarded": 0,
-        "n": 0,
-        "rate": 0.5
+        "discarded": 3,
+        "n": 3,
+        "rate": 0.2
       }
     },
     "family": {
       "mechanical": {
-        "kept": 0,
+        "kept": 3,
         "discarded": 0,
-        "n": 0,
-        "rate": 0.5
+        "n": 3,
+        "rate": 0.8
       },
       "ink-print": {
         "kept": 0,
-        "discarded": 0,
-        "n": 0,
-        "rate": 0.5
+        "discarded": 1,
+        "n": 1,
+        "rate": 0.3333333333333333
       },
       "fluid": {
-        "kept": 0,
+        "kept": 1,
         "discarded": 0,
-        "n": 0,
-        "rate": 0.5
+        "n": 1,
+        "rate": 0.6666666666666666
       },
       "optics": {
         "kept": 0,
-        "discarded": 0,
-        "n": 0,
-        "rate": 0.5
+        "discarded": 2,
+        "n": 2,
+        "rate": 0.25
       },
       "typography": {
-        "kept": 0,
-        "discarded": 0,
-        "n": 0,
+        "kept": 1,
+        "discarded": 1,
+        "n": 2,
         "rate": 0.5
       },
       "light": {
-        "kept": 0,
+        "kept": 2,
         "discarded": 0,
-        "n": 0,
-        "rate": 0.5
+        "n": 2,
+        "rate": 0.75
       },
       "material": {
         "kept": 0,
-        "discarded": 0,
-        "n": 0,
-        "rate": 0.5
+        "discarded": 1,
+        "n": 1,
+        "rate": 0.3333333333333333
       },
       "other": {
         "kept": 0,
@@ -88,48 +291,48 @@
     },
     "intensity": {
       "subtle": {
-        "kept": 0,
-        "discarded": 0,
-        "n": 0,
-        "rate": 0.5
+        "kept": 3,
+        "discarded": 1,
+        "n": 4,
+        "rate": 0.6666666666666666
       },
       "medium": {
-        "kept": 0,
-        "discarded": 0,
-        "n": 0,
-        "rate": 0.5
+        "kept": 4,
+        "discarded": 2,
+        "n": 6,
+        "rate": 0.625
       },
       "bold": {
         "kept": 0,
-        "discarded": 0,
-        "n": 0,
-        "rate": 0.5
+        "discarded": 2,
+        "n": 2,
+        "rate": 0.25
       }
     },
     "response": {
       "snap": {
-        "kept": 0,
-        "discarded": 0,
-        "n": 0,
+        "kept": 2,
+        "discarded": 2,
+        "n": 4,
         "rate": 0.5
       },
       "spring": {
-        "kept": 0,
-        "discarded": 0,
-        "n": 0,
-        "rate": 0.5
+        "kept": 4,
+        "discarded": 2,
+        "n": 6,
+        "rate": 0.625
       },
       "inertia": {
-        "kept": 0,
+        "kept": 1,
         "discarded": 0,
-        "n": 0,
-        "rate": 0.5
+        "n": 1,
+        "rate": 0.6666666666666666
       },
       "direct": {
         "kept": 0,
-        "discarded": 0,
-        "n": 0,
-        "rate": 0.5
+        "discarded": 1,
+        "n": 1,
+        "rate": 0.3333333333333333
       }
     }
   },
@@ -137,5 +340,24 @@
     "kept": {},
     "discarded": {}
   },
-  "sources": {}
+  "sources": {
+    "behance/ui-ux": {
+      "kept": 2,
+      "discarded": 2,
+      "n": 4,
+      "rate": 0.5
+    },
+    "behance/graphic-design": {
+      "kept": 1,
+      "discarded": 0,
+      "n": 1,
+      "rate": 0.6666666666666666
+    },
+    "lab": {
+      "kept": 4,
+      "discarded": 3,
+      "n": 7,
+      "rate": 0.5555555555555556
+    }
+  }
 }

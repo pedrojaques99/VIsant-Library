@@ -26,7 +26,7 @@ export const meta: LabComponentMeta = {
   hintTouch: "gire ou toque",
   formula: "layout = round(θ / 72°) mod 5 · lean = (θ − 72k) · 0.25",
   rules: ["one-metaphor", "mono-labels", "formula", "born-in-best-state", "no-new-deps", "tokens", "reduced-motion", "touch", "only-transform", "mobile-hint", "mobile-idle", "mobile-perf"],
-  status: "candidate",
+  status: "kept",
   tags: { input: "pointer", family: "typography", intensity: "subtle", response: "spring" },
   rationale: "componente: trilho Behance, segundo do teste (fora do lab:next)",
   source: {
