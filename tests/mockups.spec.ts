@@ -268,3 +268,70 @@ test("cenas: marcar, girar, marcar, e a animação passa pelas duas", async ({ p
   await page.getByRole("button", { name: "Apagar esta cena" }).click();
   await expect(page.getByRole("button", { name: "Cena 2" })).toHaveCount(0);
 });
+
+test("rolagem: arquivo comprido desce na tela, por controle e teclado, e cada ponto sai num arquivo diferente", async ({ page }) => {
+  await abrir(page, { telaId: "pagina" });
+  const rolagem = page.getByRole("slider", { name: "Rolagem" });
+  await expect(rolagem).toBeVisible();
+  const posicao = () => page.locator(".mk-camada .mk-tela-midia").last().evaluate((e) => getComputedStyle(e).objectPosition);
+  expect(await posicao()).toContain("0%");
+
+  await rolagem.focus();
+  await page.keyboard.press("End");
+  await expect(rolagem).toHaveAttribute("aria-valuenow", "100");
+  await expect.poll(posicao).toContain("100%");
+
+  const baixar = async () => {
+    const baixou = page.waitForEvent("download");
+    await page.locator(".mk-exportar").click();
+    const d = await baixou;
+    const fs = await import("node:fs/promises");
+    await page.getByRole("button", { name: "Fechar" }).click();
+    return (await fs.readFile((await d.path())!)).toString("base64");
+  };
+  const fim = await baixar();
+  await rolagem.focus();
+  await page.keyboard.press("Home");
+  await expect.poll(posicao).toContain("0%");
+  expect(await baixar()).not.toBe(fim);
+
+  await page.locator(".mk-pasta-titulo").first().focus();
+  await page.keyboard.press("PageDown");
+  await expect(rolagem).toHaveAttribute("aria-valuenow", "15");
+});
+
+test("rolagem some quando o arquivo cabe na tela e em Caber", async ({ page }) => {
+  await abrir(page, { telaId: "mesa" });
+  await expect(page.getByRole("slider", { name: "Rolagem" })).toHaveCount(0);
+  await abrir(page, { telaId: "pagina", ajuste: "contain" });
+  await expect(page.getByRole("slider", { name: "Rolagem" })).toHaveCount(0);
+});
+
+test("cada cena guarda a sua rolagem, e o movimento Rolar desce sozinho", async ({ page }) => {
+  await abrir(page, { telaId: "pagina" });
+  await aba(page, "Movimento");
+  await page.locator('.mk-mini[aria-label="Cenas"]').click();
+  await page.keyboard.press("k");
+  await aba(page, "Tela");
+  await page.getByRole("slider", { name: "Rolagem" }).focus();
+  await page.keyboard.press("End");
+  await page.waitForTimeout(450);
+  const chaves = await page.evaluate(() => JSON.parse(localStorage.getItem("visant:mockup:3")!).chaves.map((k) => k.rolagem));
+  expect(chaves).toEqual([0, 100]);
+
+  await abrir(page, { telaId: "pagina", movimento: { tipo: "rolar", duracao: 1, intensidade: 50 } });
+  const posicao = () => page.locator(".mk-camada .mk-tela-midia").last().evaluate((e) => parseFloat(getComputedStyle(e).objectPosition.split(" ")[1]));
+  await expect.poll(posicao, { timeout: 4000 }).toBeGreaterThan(40);
+});
+
+test("Ctrl + S exporta, e o PNG pronto vai para a área de transferência", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await abrir(page, { telaId: "pagina" });
+  const baixou = page.waitForEvent("download");
+  await page.keyboard.press("Control+s");
+  await baixou;
+  await page.getByRole("button", { name: "Copiar imagem" }).click();
+  await expect(page.getByRole("button", { name: "Imagem copiada" })).toBeVisible();
+  const tipos = await page.evaluate(async () => (await navigator.clipboard.read())[0].types);
+  expect(tipos).toContain("image/png");
+});

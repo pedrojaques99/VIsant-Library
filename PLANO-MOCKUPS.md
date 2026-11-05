@@ -36,6 +36,24 @@ Portão: 4/4 detectores em zero, `motion-lint` limpo, `casa-lint` limpo, `tsc` s
 | Zoom | Roda e pinça no ponteiro, dois dedos, + e −, 0 e duplo clique enquadram, controle à vista |
 | Arrastar para fora | Só no "Baixar de novo", no Chrome, e **sem teste de arrasto real até o sistema**. Arrastar a cena direto exige renderizar antes de soltar |
 
+### Rolagem, e a captura própria que vem depois
+
+Pronto: `rolagem` (0 a 100) na cena e em cada cena marcada, movimento Rolar, mapa da página, Shift + roda e teclas. Vale para qualquer imagem ou vídeo mais comprido que a tela, sem servidor. Decisão do dono: **sem API externa**; a captura será própria.
+
+Contrato para quando ela existir, sem mudar o estúdio:
+
+| Parte | Como |
+|---|---|
+| Entrada | `POST /api/captura` com `{ url, largura }`, onde a largura vem do aparelho: 430 no celular, 1440 no notebook |
+| Saída | Imagem da página inteira. O estúdio chama `receber(blob)`, a mesma porta do arquivo solto |
+| Antes da foto | Descer a página até o fim, para o carregamento tardio entrar, e voltar ao topo. `scripts/build-telas-mockup.mjs` já faz isso e esconde o que gruda |
+| Segurança | Só http e https, recusar IP privado e metadados de nuvem, limite de uso por IP, teto de altura de 16.000 px |
+| Cache | Por URL e largura, com validade curta |
+| Aviso na tela | O endereço passa por um servidor; o arquivo enviado continua sem passar |
+| Limites conhecidos | Cabeçalho fixo só aparece no topo, página com login não abre, animação fica congelada |
+
+Motor provável: `puppeteer-core` com `@sparticuz/chromium` numa função da Vercel. Ainda não testado.
+
 ### Ainda em aberto
 
 - **3D como opção:** nada migrou. Falta modelo com licença comercial e iluminação; o comparativo mostrou borda melhor e sombra pior que o CSS.

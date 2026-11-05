@@ -15,13 +15,13 @@ import { useMotionValue, useMotionValueEvent, useTransform, motion } from "motio
 import * as Tabs from "@radix-ui/react-tabs";
 import * as Popover from "@radix-ui/react-popover";
 import * as Tooltip from "@radix-ui/react-tooltip";
-import { ChevronUp, Crosshair, Download, Film, Focus, Image as ImagemIcone, Keyboard, MoveHorizontal, MoveVertical, Minus, Pause, Play, Plus, Redo2, RotateCcw, RotateCw, ScanLine, Square, Undo2, Upload, X, ZoomIn } from "lucide-react";
+import { ArrowDownUp, Check, ChevronUp, Copy, Crosshair, Download, Film, Focus, Image as ImagemIcone, Keyboard, MoveHorizontal, MoveVertical, Minus, Pause, Play, Plus, Redo2, RotateCcw, RotateCw, ScanLine, Square, Undo2, Upload, X, ZoomIn } from "lucide-react";
 
 import { DeviceFrame } from "../../../registry/visant/ui/device-frame";
 import { SensorDial } from "../../../registry/visant/ui/sensor-dial";
 import { contarEstudio } from "../metricas";
 import { guardarArquivo, lerArquivos } from "./arquivos";
-import { Alvo, Amostras, CampoCor, Dica, FoneMini, Miniatura, Miniaturas, Pasta, Segmentos, Slider, Vetor, numero } from "./controles";
+import { Alvo, Amostras, CampoCor, Dica, FoneMini, MapaDaPagina, Miniatura, Miniaturas, Pasta, Segmentos, Slider, Vetor, numero } from "./controles";
 import { baixar, codecDisponivel, exportarImagem, exportarVideo } from "./exportar";
 import {
   ACABAMENTOS,
@@ -53,6 +53,7 @@ import {
   podeGirar,
   poseDe,
   posesDe,
+  razaoDaTela,
   type Acabamento,
   type Cena,
   type EstiloAparelho,
@@ -214,7 +215,7 @@ function urlDoGrao() {
   return graoEmCache;
 }
 
-type Pronto = { url: string; nome: string; bytes: number; w: number; h: number };
+type Pronto = { url: string; nome: string; bytes: number; w: number; h: number; blob: Blob };
 type Aba = "tela" | "cena" | "aparelho" | "movimento";
 const ABAS: { id: Aba; nome: string }[] = [
   { id: "tela", nome: "Tela" },
@@ -225,6 +226,7 @@ const ABAS: { id: Aba; nome: string }[] = [
 const ICONE_DO_MOVIMENTO: Record<TipoMovimento, typeof Square> = {
   parado: Square,
   cenas: Film,
+  rolar: ArrowDownUp,
   flutuar: MoveVertical,
   balancar: MoveHorizontal,
   pendulo: RotateCw,
@@ -240,6 +242,10 @@ const ATALHOS: [string, string][] = [
   ["+ e −", "Zoom"],
   ["0 ou duplo clique no palco", "Enquadrar"],
   ["K", "Marcar cena"],
+  ["Ctrl + S", "Exportar"],
+  ["Ctrl + Shift + S", "Só este quadro"],
+  ["Shift + roda", "Rolar a tela"],
+  ["Setas, Page Up e Page Down", "Rolar a tela"],
   ["Ctrl + V", "Colar a tela"],
   ["Ctrl + Z", "Desfazer"],
   ["Ctrl + Shift + Z", "Refazer"],
@@ -258,7 +264,7 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
     setCenaBase((c) => {
       const n = f(c);
       const i = abertaRef.current;
-      if (n.movimento.tipo !== "cenas" || i === null || !n.chaves[i] || (n.rot === c.rot && n.pos === c.pos && n.tamanho === c.tamanho)) return n;
+      if (n.movimento.tipo !== "cenas" || i === null || !n.chaves[i] || (n.rot === c.rot && n.pos === c.pos && n.tamanho === c.tamanho && n.rolagem === c.rolagem)) return n;
       return { ...n, chaves: n.chaves.map((k, j) => (j === i ? poseDe(n) : k)) };
     });
   }, [setCenaBase]);
@@ -269,6 +275,7 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
   const [estado, setEstado] = React.useState<{ feito: number; total: number; resta: number | null } | null>(null);
   const [aviso, setAviso] = React.useState<string | null>(null);
   const [pronto, setPronto] = React.useState<Pronto | null>(null);
+  const [copiado, setCopiado] = React.useState(false);
   const [semMp4, setSemMp4] = React.useState(false);
   const [aba, setAba] = React.useState<Aba>("tela");
   const [opcoesAbertas, setOpcoesAbertas] = React.useState(false);
@@ -373,6 +380,7 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
   const camZoom = useMotionValue(1);
   const filtro = useMotionValue("blur(0px)");
   const mascara = useMotionValue("none");
+  const rolagemMV = useMotionValue(`50% ${cena.rolagem}%`);
 
   const aplicar = React.useCallback(
     (c: Cena, t: number) => {
@@ -384,6 +392,7 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
       dy.set(m.py ? `calc(${m.dy}% + ${((m.py / 200) * baseH).toFixed(2)}px)` : `${m.dy}%`);
       escala.set(m.escala);
       opacidade.set(m.opacidade);
+      rolagemMV.set(`50% ${m.rolagem.toFixed(3)}%`);
       const cam = cameraEm(c, t, baseW, baseH);
       camX.set(cam.x);
       camY.set(cam.y);
@@ -391,7 +400,7 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
       filtro.set(`blur(${cam.desfoque.toFixed(2)}px)`);
       mascara.set(cam.mascara);
     },
-    [rotX, rotY, rotZ, dx, dy, escala, opacidade, camX, camY, camZoom, filtro, mascara, baseW, baseH],
+    [rotX, rotY, rotZ, dx, dy, escala, opacidade, camX, camY, camZoom, filtro, mascara, rolagemMV, baseW, baseH],
   );
   const cenaAtual = React.useRef(cena);
   cenaAtual.current = cena;
@@ -437,6 +446,15 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
     ro.observe(el);
     return () => ro.disconnect();
   }, [exportando]);
+
+  /* ── Rolagem: a tela desce por dentro do aparelho ───────────────────── */
+  const rolavelRef = React.useRef(false);
+  const rolarPor = React.useCallback((d: number) => {
+    setCena((c) => {
+      const novo = Math.round(Math.max(0, Math.min(100, c.rolagem + d)) * 10) / 10;
+      return novo === c.rolagem ? c : { ...c, rolagem: novo };
+    });
+  }, [setCena]);
 
   /* ── Zoom: uma conta só para roda, pinça, teclas e botões ────────────── */
   const prenderZoom = (v: number) => Math.max(ZOOM.min, Math.min(ZOOM.max, Math.round(v * 10) / 10));
@@ -554,20 +572,34 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
     if (!el) return;
     const roda = (e: WheelEvent) => {
       e.preventDefault();
+      if (e.shiftKey) {
+        if (rolavelRef.current) rolarPor((e.deltaY || e.deltaX) * 0.04);
+        return;
+      }
       // A pinça chega como Ctrl + roda, em passos bem menores que os de um mouse.
       const fator = Math.exp(-e.deltaY * (e.ctrlKey || e.metaKey ? 0.01 : 0.0015));
       zoomPara((v) => v * fator, pontoNoQuadro(e.clientX, e.clientY));
     };
     el.addEventListener("wheel", roda, { passive: false });
     return () => el.removeEventListener("wheel", roda);
-  }, [zoomPara, pontoNoQuadro]);
+  }, [zoomPara, pontoNoQuadro, rolarPor]);
+
+  const exportarRef = React.useRef<(modo?: "video" | "imagem") => Promise<void>>(async () => {});
 
   /* ── Teclado ────────────────────────────────────────────────────────── */
   React.useEffect(() => {
     const on = (e: KeyboardEvent) => {
       const alvo = e.target as HTMLElement;
       if (alvo.closest("input, textarea, [role=slider]")) return;
-      if (e.key === "+" || e.key === "=") {
+      const passoDeRolagem = ({ ArrowDown: 3, ArrowUp: -3, PageDown: 15, PageUp: -15, Home: -100, End: 100 } as Record<string, number>)[e.key];
+      // Seta em aba ou em lista de escolha já tem dono: só no resto da tela ela rola.
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        void exportarRef.current(e.shiftKey ? "imagem" : undefined);
+      } else if (passoDeRolagem && rolavelRef.current && !alvo.closest('[role="tablist"], [role="radiogroup"]')) {
+        e.preventDefault();
+        rolarPor(passoDeRolagem);
+      } else if (e.key === "+" || e.key === "=") {
         e.preventDefault();
         zoomPara((v) => v * 1.1);
       } else if (e.key === "-" || e.key === "_") {
@@ -600,13 +632,17 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
 
   /* ── Envio de arquivo ───────────────────────────────────────────────── */
   const seletor = React.useRef<HTMLInputElement>(null);
-  const receber = async (f: File | undefined) => {
+  /**
+   * A porta única de entrada de tela: arquivo solto, colado ou escolhido. A captura de site, quando
+   * existir, entrega aqui uma imagem da página inteira, e rolagem, cenas e export já valem para ela.
+   */
+  const receber = async (f: (Blob & { name?: string }) | undefined) => {
     if (!f) return;
     const video = f.type.startsWith("video/");
     if (!video && !f.type.startsWith("image/")) return setAviso("Envie uma imagem ou um vídeo.");
     const url = URL.createObjectURL(f);
     const id = `arquivo-${Date.now()}`;
-    const nome = f.name.replace(/\.\w+$/, "").slice(0, 14) || "Arquivo";
+    const nome = (f.name ?? "").replace(/\.\w+$/, "").slice(0, 14) || "Arquivo";
     setAviso(null);
     let medidas: { w: number; h: number; duracao?: number };
     try {
@@ -621,6 +657,7 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
     setCena((c) => ({
       ...c,
       telaId: id,
+      rolagem: 0,
       // A forma do arquivo decide a da tela, e o aparelho deita sozinho.
       orientacao: medidas.w > medidas.h * 1.05 ? "paisagem" : "retrato",
       // Vídeo já é movimento: a cena sobe junto, com a duração dele.
@@ -732,7 +769,8 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
         const arquivo = `mockup-${arqW}x${arqH}.${extensao}`;
         baixar(url, arquivo);
         cenaDoPronto.current = cenaDoArquivo;
-        setPronto({ url, nome: arquivo, bytes: blob.size, w: arqW, h: arqH });
+        setPronto({ url, nome: arquivo, bytes: blob.size, w: arqW, h: arqH, blob });
+        setCopiado(false);
         contarEstudio(`exportou-${extensao}`);
       }
     } catch (e) {
@@ -741,6 +779,17 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
       tempo.set(antes);
       cancelar.current = null;
       setEstado(null);
+    }
+  };
+  exportarRef.current = exportar;
+  // Só PNG vai para a área de transferência: é o único formato de imagem que todo navegador aceita ali.
+  const copiarImagem = async () => {
+    if (!pronto) return;
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ [pronto.blob.type]: pronto.blob })]);
+      setCopiado(true);
+    } catch {
+      setAviso("O navegador não deixou copiar. Use Baixar de novo.");
     }
   };
   // Com a medida do arquivo já no quadro, a câmera do foco refaz a conta nela.
@@ -787,6 +836,20 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
       : { ...c, aparelhoEstilo: e, rot: { x: 0, y: 0, z: 0 }, sombra: 0 }));
   const telaLarga = modelo === "laptop" || cena.orientacao === "paisagem";
   const urlDaTela = tela.tipo === "vivo" ? undefined : telaLarga ? (modelo === "phone" ? tela.deitada : tela.largo) ?? tela.url : tela.url;
+  // Rola quem é mais comprido que a tela do aparelho. A medida vem do arquivo, seja ele qual for.
+  const [razaoDoArquivo, setRazaoDoArquivo] = React.useState<number | null>(null);
+  const ehVideo = tela.tipo === "video";
+  React.useEffect(() => {
+    if (!urlDaTela) return setRazaoDoArquivo(null);
+    let vivo = true;
+    medirArquivo(urlDaTela, ehVideo).then((m) => vivo && setRazaoDoArquivo(m.h / m.w), () => vivo && setRazaoDoArquivo(null));
+    return () => {
+      vivo = false;
+    };
+  }, [urlDaTela, ehVideo]);
+  const telaDoAparelho = razaoDaTela(cena);
+  const rolavel = cena.ajuste === "cover" && razaoDoArquivo !== null && razaoDoArquivo > telaDoAparelho * 1.02;
+  rolavelRef.current = rolavel;
   const focoArte = tela.tipo === "vivo" ? undefined : tela.poster ?? urlDaTela;
   const arteDoFone = tela.tipo === "vivo" ? undefined : tela.poster ?? tela.url;
   const { w: larguraAparelho, h: alturaAparelho } = medidasDoAparelho(cena, baseW, baseH);
@@ -796,7 +859,7 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
   const grao = fundo.modo === "degrade" ? <span className="mk-grao" style={{ backgroundImage: `url(${urlDoGrao()})` }} aria-hidden /> : null;
   const escolherArquivo = React.useCallback(() => seletor.current?.click(), []);
   const composicao = (
-    <Composicao cena={cena} tela={tela} urlDaTela={urlDaTela} baseW={baseW} baseH={baseH} rotX={rotX} rotY={rotY} rotZ={rotZ} dx={dx} dy={dy} escala={escala} opacidade={opacidade} onEscolher={escolherArquivo} />
+    <Composicao cena={cena} tela={tela} urlDaTela={urlDaTela} baseW={baseW} baseH={baseH} rotX={rotX} rotY={rotY} rotZ={rotZ} dx={dx} dy={dy} escala={escala} opacidade={opacidade} rolagem={rolagemMV} onEscolher={escolherArquivo} />
   );
   const temTelaPropria = cena.telaId.startsWith("arquivo-") || enviadas.length > 0;
   // Até ter a tela da pessoa, é a própria tela do aparelho que pede: nada flutua sobre a obra.
@@ -924,7 +987,7 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
                     <Dica texto="Marcar cena" tecla="K">
                       <button type="button" className="mk-cena-nova" aria-label="Marcar cena" onClick={marcarCena}>
                         <Plus size={14} aria-hidden />
-                        {cena.chaves.length < 2 ? "Gire o aparelho e marque a próxima cena" : null}
+                        {cena.chaves.length < 2 ? <><span className="mk-so-mouse">Gire o aparelho e marque a próxima cena</span><span className="mk-so-toque">Gire e marque</span></> : null}
                       </button>
                     </Dica>
                     {cenaAberta !== null && cena.chaves.length > 1 ? (
@@ -948,14 +1011,14 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
 
               <div className="mk-rolagem">
                 <Tabs.Content value="tela" forceMount hidden={aba !== "tela"} className="mk-aba-corpo">
-                  <Pasta titulo="Escolha a tela" sujo={cena.telaId !== PADRAO.telaId} onReset={() => edita("telaId", PADRAO.telaId)}>
+                  <Pasta titulo="Escolha a tela" sujo={cena.telaId !== PADRAO.telaId} onReset={() => setCena((c) => ({ ...c, telaId: PADRAO.telaId, rolagem: 0 }))}>
                     <Miniaturas rotulo="Tela do aparelho" colunas={4}>
                       <button type="button" className="mk-mini mk-enviar" data-destaque={pedindoTela || undefined} onClick={escolherArquivo}>
                         <span className="mk-mini-arte"><Plus size={16} aria-hidden /></span>
                         <span className="mk-mini-nome">Sua tela</span>
                       </button>
                       {telas.filter((t) => t.tipo !== "convite").map((t) => (
-                        <Miniatura key={t.id} nome={t.nome} ativa={tela.id === t.id} onClick={() => edita("telaId", t.id)}>
+                        <Miniatura key={t.id} nome={t.nome} ativa={tela.id === t.id} onClick={() => setCena((c) => (c.telaId === t.id ? c : { ...c, telaId: t.id, rolagem: 0 }))}>
                           {t.tipo === "vivo" ? (
                             <span className="mk-arte-sensor" />
                           ) : t.id === "vazia" ? (
@@ -968,6 +1031,17 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
                         </Miniatura>
                       ))}
                     </Miniaturas>
+                    {rolavel ? (
+                      <div className="mk-rolagem-tela">
+                        {tela.tipo === "imagem" && urlDaTela ? (
+                          <MapaDaPagina arte={urlDaTela} visivel={telaDoAparelho / razaoDoArquivo!} valor={cena.rolagem} onChange={(v) => edita("rolagem", v)} />
+                        ) : null}
+                        <div>
+                          <Slider rotulo="Rolagem" valor={cena.rolagem} min={0} max={100} padrao={0} unidade="%" onChange={(v) => edita("rolagem", v)} />
+                          <p className="mk-nota mk-so-mouse">Shift + roda também rola.</p>
+                        </div>
+                      </div>
+                    ) : null}
                     {podeGirar(cena) ? (
                       <Segmentos
                         rotulo="Orientação da tela"
@@ -1205,6 +1279,7 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
                           aspecto={estaGirada ? 1 / MODELOS[modelo].aspecto : MODELOS[modelo].aspecto}
                           raio={((cena.foco.area / 100) * Math.min(baseW, baseH)) / cena.foco.zoom / (estaGirada ? alturaAparelho : larguraAparelho)}
                           arte={focoArte}
+                          rolagem={cena.rolagem}
                           onChange={(x, y) => edita("foco", (f) => ({ ...f, x, y }))}
                         />
                         <Slider rotulo="Close" valor={cena.foco.zoom} min={1} max={4} passo={0.1} padrao={PADRAO.foco.zoom} unidade="×" casas={1} onChange={(v) => edita("foco", (f) => ({ ...f, zoom: v }))} />
@@ -1277,6 +1352,13 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
                 <div className="mk-pronto" role="status">
                   <p>Pronto: {pronto.nome.split(".").pop()!.toUpperCase()}, {pronto.w}×{pronto.h}<br />{bytesFalados(pronto.bytes)}</p>
                   <div>
+                    {pronto.blob.type === "image/png" && typeof ClipboardItem !== "undefined" ? (
+                      <Dica texto={copiado ? "Copiada" : "Copiar imagem"}>
+                        <button type="button" className="mk-icone" aria-label={copiado ? "Imagem copiada" : "Copiar imagem"} onClick={() => void copiarImagem()}>
+                          {copiado ? <Check size={14} /> : <Copy size={14} />}
+                        </button>
+                      </Dica>
+                    ) : null}
                     <button
                       type="button"
                       className="mk-secundario"
@@ -1389,6 +1471,7 @@ const Composicao = React.memo(function Composicao({
   dy,
   escala,
   opacidade,
+  rolagem,
   onEscolher,
 }: {
   cena: Cena;
@@ -1403,6 +1486,7 @@ const Composicao = React.memo(function Composicao({
   dy: ReturnType<typeof useMotionValue<string>>;
   escala: MV;
   opacidade: MV;
+  rolagem: ReturnType<typeof useMotionValue<string>>;
   onEscolher: () => void;
 }) {
   const { w: larguraFone, h: alturaFone, subida, perspectiva } = medidasDoAparelho(cena, baseW, baseH);
@@ -1465,7 +1549,7 @@ const Composicao = React.memo(function Composicao({
       >
         <div className={estaGirada ? "mk-tela-rotor" : "mk-tela-reta"}>
           <div className={estaGirada ? "mk-tela-girada" : "mk-tela-reta"}>
-            <ConteudoDaTela tela={tela} url={urlDaTela} ajuste={cena.ajuste} onEscolher={onEscolher} />
+            <ConteudoDaTela tela={tela} url={urlDaTela} ajuste={cena.ajuste} rolagem={rolagem} onEscolher={onEscolher} />
           </div>
         </div>
         {cena.aparelhoEstilo === "real" && cena.reflexoEstilo !== "nenhum" && cena.reflexo > 0 ? (
@@ -1476,7 +1560,7 @@ const Composicao = React.memo(function Composicao({
   );
 });
 
-function ConteudoDaTela({ tela, url, ajuste, onEscolher }: { tela: Tela; url?: string; ajuste: Cena["ajuste"]; onEscolher: () => void }) {
+function ConteudoDaTela({ tela, url, ajuste, rolagem, onEscolher }: { tela: Tela; url?: string; ajuste: Cena["ajuste"]; rolagem: ReturnType<typeof useMotionValue<string>>; onEscolher: () => void }) {
   if (tela.tipo === "convite") {
     return (
       <button type="button" className="mk-tela-convite" onClick={onEscolher}>
@@ -1496,10 +1580,11 @@ function ConteudoDaTela({ tela, url, ajuste, onEscolher }: { tela: Tela; url?: s
     );
   }
   if (tela.tipo === "video") {
-    return <video key={url} src={url} autoPlay muted loop playsInline className="mk-tela-midia" style={{ objectFit: ajuste }} />;
+    return <motion.video key={url} src={url} autoPlay muted loop playsInline className="mk-tela-midia" style={{ objectFit: ajuste, objectPosition: rolagem }} />;
   }
   if (!url) return <div className="mk-tela-midia" />;
-  return <img src={url} alt="" className="mk-tela-midia" style={{ objectFit: ajuste, objectPosition: "top" }} />;
+  // Em `cover`, a posição em % percorre exatamente o que sobra do arquivo: é a rolagem, sem medir nada.
+  return <motion.img src={url} alt="" className="mk-tela-midia" style={{ objectFit: ajuste, objectPosition: rolagem }} />;
 }
 
 /* ── A linha do tempo ─────────────────────────────────────────────────── */

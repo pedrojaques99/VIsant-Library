@@ -272,6 +272,7 @@ export function Alvo({
   aspecto,
   raio,
   arte,
+  rolagem = 0,
   onChange,
 }: {
   rotulo: string;
@@ -280,6 +281,8 @@ export function Alvo({
   aspecto: number;
   raio: number;
   arte?: string;
+  /** A miniatura mostra o trecho do arquivo que está na tela: o foco é escolhido no que se vê. */
+  rolagem?: number;
   onChange: (x: number, y: number) => void;
 }) {
   const prende = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
@@ -314,8 +317,33 @@ export function Alvo({
         onChange(prende(x + seta[0]), prende(y + seta[1]));
       }}
     >
-      {arte ? <img src={arte} alt="" className="mk-arte-img" draggable={false} /> : null}
+      {arte ? <img src={arte} alt="" className="mk-arte-img" style={{ objectPosition: `50% ${rolagem}%` }} draggable={false} /> : null}
       <span className="mk-alvo-ponto" style={{ left: `${x}%`, top: `${y}%`, width: `${raio * 200}%` }} aria-hidden />
+    </div>
+  );
+}
+
+/** A página inteira em miniatura, com a janela do que está na tela. A forma do dado: posição numa coluna. */
+export function MapaDaPagina({ arte, visivel, valor, onChange }: { arte: string; visivel: number; valor: number; onChange: (v: number) => void }) {
+  const seguir = (e: React.PointerEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    const v = ((e.clientY - r.top) / r.height - visivel / 2) / Math.max(0.001, 1 - visivel);
+    onChange(Math.round(Math.max(0, Math.min(1, v)) * 1000) / 10);
+  };
+  return (
+    <div
+      className="mk-mapa"
+      aria-hidden
+      onPointerDown={(e) => {
+        e.currentTarget.setPointerCapture(e.pointerId);
+        seguir(e);
+      }}
+      onPointerMove={(e) => {
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) seguir(e);
+      }}
+    >
+      <img src={arte} alt="" draggable={false} />
+      <span style={{ top: `${(valor / 100) * (1 - visivel) * 100}%`, height: `${visivel * 100}%` }} />
     </div>
   );
 }

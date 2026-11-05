@@ -227,6 +227,7 @@ export function Admin() {
       origens: ranking("origem"),
       paises: ranking("pais"),
       aparelhos: ranking("aparelho"),
+      estudio: ranking("estudio"),
       pecas: [...pecas].sort((a, b) => b.downloads + b.copias + b.aberturas - (a.downloads + a.copias + a.aberturas)),
       skills,
       instalacoes: skills.reduce((s, x) => s + x.instalacoes, 0),
@@ -356,6 +357,9 @@ export function Admin() {
         </Secao>
         <Secao titulo="Aparelhos" className="min-w-0">
           <Ranking linhas={painel.aparelhos} vazio="Sem aparelhos contados neste período." />
+        </Secao>
+        <Secao titulo="Estúdio de mockups" className="min-w-0">
+          <Ranking linhas={painel.estudio} vazio="Sem uso do estúdio neste período." />
         </Secao>
         <Secao titulo="Curadoria" className="min-w-0">
           <div className="grid grid-cols-2 gap-2">

@@ -8,7 +8,7 @@
 
 /** `cheio` não tem medida própria: o quadro é o palco, então acompanha a tela de quem está usando. */
 export type Proporcao = "cheio" | "9:16" | "4:5" | "1:1" | "16:9";
-export type TipoMovimento = "parado" | "cenas" | "flutuar" | "balancar" | "pendulo" | "aproximar" | "entrada" | "varredura" | "close";
+export type TipoMovimento = "parado" | "cenas" | "rolar" | "flutuar" | "balancar" | "pendulo" | "aproximar" | "entrada" | "varredura" | "close";
 export type ModoFundo = "cor" | "degrade" | "foto" | "nenhum";
 export type FormatoImagem = "png" | "webp";
 export type FormatoVideo = "mp4" | "webm" | "gif";
@@ -38,6 +38,7 @@ export interface Chave {
   rot: { x: number; y: number; z: number };
   pos: { x: number; y: number };
   tamanho: number;
+  rolagem: number;
 }
 
 export interface Cena {
@@ -46,6 +47,8 @@ export interface Cena {
   ajuste: "cover" | "contain";
   /** A forma da tela, não a do aparelho: um celular em `paisagem` deita, um tablet em `paisagem` fica como nasceu. */
   orientacao: Orientacao;
+  /** Até onde a tela desceu: 0 é o topo do arquivo, 100 é o fim. Só faz efeito em arquivo mais comprido que a tela. */
+  rolagem: number;
   rot: { x: number; y: number; z: number };
   tamanho: number;
   pos: { x: number; y: number };
@@ -91,6 +94,7 @@ export const PADRAO: Cena = {
   telaId: "convite",
   ajuste: "cover",
   orientacao: "retrato",
+  rolagem: 0,
   rot: { x: 14, y: -12, z: 6 },
   tamanho: 76,
   pos: { x: 0, y: 0 },
@@ -112,9 +116,9 @@ export const PADRAO: Cena = {
 
 export const TELAS: Tela[] = [
   { id: "convite", tipo: "convite", nome: "Convite" },
-  { id: "pagina", tipo: "imagem", url: "/media/telas/pagina-retrato.webp", largo: "/media/telas/pagina-largo.webp", deitada: "/media/telas/pagina-deitado.webp", nome: "Site" },
+  { id: "pagina", tipo: "imagem", url: "/media/telas/pagina-longa.webp", largo: "/media/telas/pagina-largo.webp", deitada: "/media/telas/pagina-deitado.webp", nome: "Site" },
   { id: "mesa", tipo: "imagem", url: "/media/telas/mesa-retrato.webp", largo: "/media/telas/mesa-largo.webp", deitada: "/media/telas/mesa-deitado.webp", nome: "App" },
-  { id: "marca", tipo: "imagem", url: "/media/telas/marca-retrato.webp", largo: "/media/telas/marca-largo.webp", deitada: "/media/telas/marca-deitado.webp", nome: "Marca" },
+  { id: "marca", tipo: "imagem", url: "/media/telas/marca-longa.webp", largo: "/media/telas/marca-largo.webp", deitada: "/media/telas/marca-deitado.webp", nome: "Marca" },
   { id: "sensor", tipo: "vivo", nome: "Sensor" },
   { id: "vazia", tipo: "imagem", nome: "Vazia" },
   { id: "composicao", tipo: "video", url: "/media/video-composicao.mp4", poster: "/media/video-composicao.webp", nome: "Vídeo" },
@@ -148,6 +152,7 @@ export const heroiDe = (m: Modelo) => posesDe(m)[1].rot;
 export const MOVIMENTOS: { id: TipoMovimento; nome: string; emLoop: boolean }[] = [
   { id: "parado", nome: "Parado", emLoop: false },
   { id: "cenas", nome: "Cenas", emLoop: false },
+  { id: "rolar", nome: "Rolar", emLoop: false },
   { id: "flutuar", nome: "Flutuar", emLoop: true },
   { id: "balancar", nome: "Balançar", emLoop: true },
   { id: "pendulo", nome: "Pêndulo", emLoop: true },
@@ -191,7 +196,14 @@ export const orientacaoNatural = (m: Modelo) => NATURAL[m];
 export const podeGirar = (c: Pick<Cena, "modelo" | "telaId">) => c.modelo !== "laptop" && c.telaId !== "sensor";
 /** O zoom é o tamanho do aparelho no quadro: passa de 100% para o close de um detalhe, e o arquivo sai como se vê. */
 export const ZOOM = { min: 20, max: 300 };
-export const poseDe = (c: Pick<Cena, "rot" | "pos" | "tamanho">): Chave => ({ rot: c.rot, pos: c.pos, tamanho: c.tamanho });
+export const poseDe = (c: Pick<Cena, "rot" | "pos" | "tamanho" | "rolagem">): Chave => ({ rot: c.rot, pos: c.pos, tamanho: c.tamanho, rolagem: c.rolagem });
+/** Altura sobre largura da tela do aparelho, como ela é vista: é com isso que se sabe se um arquivo tem o que rolar. */
+export function razaoDaTela(c: Cena) {
+  const { aspecto, moldura } = MODELOS[c.modelo];
+  const w = 1 - moldura * 2;
+  const h = 1 / aspecto - moldura * 2;
+  return girada(c) ? w / h : h / w;
+}
 export const girada = (c: Cena) => podeGirar(c) && c.orientacao !== NATURAL[c.modelo];
 /** O quarto de volta do aparelho deitado. A tela gira o mesmo ao contrário, então o conteúdo fica de pé. */
 export const giroDaOrientacao = (c: Cena) => (girada(c) ? 90 : 0);
@@ -206,7 +218,7 @@ const saida = (t: number) => 1 - (1 - t) ** 3;
 export function movimentoEm(c: Cena, t: number) {
   const i = c.movimento.intensidade / 50;
   const o = t * Math.PI * 2;
-  const m = { x: 0, y: 0, z: 0, dy: 0, px: 0, py: 0, escala: 1, opacidade: 1, foco: 1 };
+  const m = { x: 0, y: 0, z: 0, dy: 0, px: 0, py: 0, escala: 1, opacidade: 1, foco: 1, rolagem: c.rolagem };
   switch (c.movimento.tipo) {
     case "cenas": {
       // De cena em cena, com repouso em cada uma: é o que faz parecer câmera, e não interpolação.
@@ -223,8 +235,13 @@ export function movimentoEm(c: Cena, t: number) {
       m.px = entre(a.pos.x, b.pos.x) - c.pos.x;
       m.py = entre(a.pos.y, b.pos.y) - c.pos.y;
       m.escala = entre(a.tamanho, b.tamanho) / c.tamanho;
+      m.rolagem = entre(a.rolagem ?? 0, b.rolagem ?? 0);
       break;
     }
+    case "rolar":
+      // Desce a partir de onde a pessoa deixou: a intensidade em 50 percorre a página até o fim.
+      m.rolagem = Math.min(100, c.rolagem + suave(Math.min(1, t)) * c.movimento.intensidade * 2);
+      break;
     case "flutuar":
       m.x = Math.sin(o) * 3 * i;
       m.y = Math.cos(o) * 5 * i;
