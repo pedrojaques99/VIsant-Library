@@ -122,6 +122,34 @@ test("link com ?brand= vale mais que a marca guardada", async ({ page }) => {
   await expect(gatilho(page)).toContainText("Norte Verde");
 });
 
+test("marca antiga do vault, com fontFamily, abre a lista e aplica", async ({ page }) => {
+  const erros: string[] = [];
+  page.on("pageerror", (e) => erros.push(e.message));
+  await entrarDeMentira(page);
+  await page.route("**/api/brand-guidelines**", (route) =>
+    route.fulfill({
+      json: {
+        guidelines: [
+          {
+            id: "legado1",
+            name: "Marca Antiga",
+            colors: GUIDELINES.guidelines[0].colors,
+            typography: [{ fontFamily: "Barlow", name: "Display", fontSize: 48, fontStyle: "Bold" }],
+          },
+        ],
+      },
+    }),
+  );
+  await page.goto("/");
+  await expect(gatilho(page)).toBeEnabled();
+  await gatilho(page).click();
+
+  await page.getByPlaceholder("Buscar marca…").fill("Barlow");
+  await page.getByRole("option", { name: /Marca Antiga/ }).click();
+  await expect.poll(() => pintada(page)).toBe("conta:legado1");
+  expect(erros).toEqual([]);
+});
+
 test("vault fora do ar não vira pedido em loop", async ({ page }) => {
   await entrarDeMentira(page);
   let pedidos = 0;

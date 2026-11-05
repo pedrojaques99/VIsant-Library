@@ -211,10 +211,16 @@ export function VisantAuthProvider({ children }: { children: React.ReactNode }) 
             role: c.role ?? null,
             name: c.name ?? null,
           })),
-          typography: (g.typography ?? []).map((t: Record<string, any>) => ({
-            family: t.family,
-            role: t.role ?? null,
-          })),
+          // Marcas antigas do vault vêm como `{fontFamily, name}`: mesma leitura de scripts/brands-sync.mjs.
+          typography: (g.typography ?? [])
+            .map((t: Record<string, any>) => {
+              const papel = t?.role ?? t?.name;
+              return {
+                family: typeof t?.family === "string" ? t.family : t?.fontFamily,
+                role: papel ? String(papel).toLowerCase() : null,
+              };
+            })
+            .filter((t: { family: unknown }) => typeof t.family === "string" && t.family),
           completeness: g.extraction?.completeness ?? null,
           updatedAt: g.updatedAt ?? null,
         })),
