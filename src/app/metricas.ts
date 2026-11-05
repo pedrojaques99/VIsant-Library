@@ -41,6 +41,11 @@ export function contarPagina(caminho: string) {
 }
 
 /** O comando copiado: a peça do `shadcn add`, ou `skills` para o instalador das skills. */
+/** O que mede o estúdio: quem pôs a própria tela e quem levou um arquivo. */
+export function contarEstudio(acao: string) {
+  enviar([{ tipo: "estudio", item: acao.slice(0, 80) }]);
+}
+
 export function contarCopia(texto: string) {
   const peca = /@visant\/([a-z0-9-]+)/.exec(texto)?.[1];
   const item = peca ?? (/skills add/.test(texto) ? "skills" : null);

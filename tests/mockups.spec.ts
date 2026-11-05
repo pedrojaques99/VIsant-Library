@@ -3,22 +3,37 @@ import { expect, test } from "@playwright/test";
 /*
  * O close centra o ponto de foco fazendo a conta da projeção à mão (`pontoDeFoco`), sem medir a
  * tela: se a conta divergir do CSS, o foco cai no lugar errado e nada quebra. E o quadro do ponto
- * já nasceu com largura zero dentro do painel, sem erro nenhum. É isso que esta suíte prende.
+ * já nasceu com largura zero dentro do painel, sem erro nenhum. O resto prende o que a auditoria
+ * achou: arquivo com medida certa, desfazer de um passo, tela que sobrevive a recarregar e zoom
+ * do navegador que não vem junto.
  */
 
-const cena = (modelo: string, rot: object, foco: object) => ({
+const CHAVE = "visant:mockup:3";
+
+const cena = (modelo: string, rot: object, foco: object, extra: object = {}) => ({
   modelo,
   rot,
-  telaId: "neon",
+  telaId: "pagina",
   foco: { ativo: true, zoom: 1.6, area: 45, desfoque: 10, ...foco },
+  ...extra,
 });
 
-const abrir = async (page, c: object) => {
-  await page.goto("/mockups", { waitUntil: "domcontentloaded" });
-  await page.evaluate((v) => localStorage.setItem("visant:mockup:2", JSON.stringify(v)), c);
-  await page.reload({ waitUntil: "networkidle" });
+/*
+ * A cena entra por uma página sem o app: com o estúdio montado, o salvamento de saída
+ * (`pagehide`) gravaria a cena dele por cima da do teste, e a suíte falharia de vez em quando.
+ */
+const abrir = async (page, c?: object) => {
+  await page.route("**/__semente", (r) => r.fulfill({ contentType: "text/html", body: "<!doctype html>" }));
+  await page.goto("/__semente");
+  await page.evaluate(([k, v]) => (v ? localStorage.setItem(k as string, JSON.stringify(v)) : localStorage.removeItem(k as string)), [CHAVE, c ?? null]);
+  await page.goto("/mockups", { waitUntil: "networkidle" });
   await page.waitForSelector(".mk-camada .device-frame");
+  // A câmera pinta no quadro seguinte ao efeito que a calcula.
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 };
+
+const aba = (page, nome: string) => page.getByRole("tab", { name: nome }).click();
+const PNG_1X1 = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAEBgIApD5fRAAAAABJRU5ErkJggg==", "base64");
 
 for (const [modelo, rot] of [
   ["phone", { x: 14, y: -12, z: 6 }],
@@ -26,7 +41,7 @@ for (const [modelo, rot] of [
   ["laptop", { x: -14, y: -22, z: 0 }],
 ] as const) {
   test(`${modelo}: o close põe o ponto escolhido no centro do quadro`, async ({ page }) => {
-    await abrir(page, cena(modelo, rot, { x: 45, y: 45 }));
+    await abrir(page, cena(modelo, rot, { x: 45, y: 45 }, { orientacao: modelo === "phone" ? "retrato" : "paisagem" }));
     const erro = await page.evaluate(() => {
       const m = document.createElement("span");
       m.style.cssText = "position:absolute;left:45%;top:45%;width:0;height:0";
@@ -40,10 +55,27 @@ for (const [modelo, rot] of [
   });
 }
 
+test("celular deitado: o close acerta o ponto da tela como ela é vista", async ({ page }) => {
+  await abrir(page, cena("phone", { x: 14, y: -12, z: 6 }, { x: 40, y: 60 }, { orientacao: "paisagem" }));
+  const erro = await page.evaluate(() => {
+    const m = document.createElement("span");
+    m.style.cssText = "position:absolute;left:40%;top:60%;width:0;height:0";
+    document.querySelector(".mk-camada:not(.mk-camada-copia) .mk-tela-girada")!.appendChild(m);
+    const r = m.getBoundingClientRect();
+    const q = document.querySelector(".mk-quadro")!.getBoundingClientRect();
+    m.remove();
+    return Math.hypot(r.left - (q.left + q.width / 2), r.top - (q.top + q.height / 2));
+  });
+  expect(erro).toBeLessThan(1);
+});
+
 test("o ponto de foco tem tamanho e segue o arrasto", async ({ page }) => {
   await abrir(page, cena("laptop", { x: -14, y: -22, z: 0 }, { x: 50, y: 50 }));
+  await aba(page, "Movimento");
   const alvo = page.getByRole("slider", { name: "Área em foco" });
   await alvo.scrollIntoViewIfNeeded();
+  // A seção abre animando: medir no meio dela faria o arrasto começar fora do alvo.
+  await page.waitForTimeout(350);
   const c = (await alvo.boundingBox())!;
   expect(c.width).toBeGreaterThan(80);
   await page.mouse.move(c.x + c.width / 2, c.y + c.height / 2);
@@ -54,16 +86,121 @@ test("o ponto de foco tem tamanho e segue o arrasto", async ({ page }) => {
 });
 
 test("sem foco não existe cópia; o notebook troca de pose e o Sensor sai da lista", async ({ page }) => {
-  await page.goto("/mockups", { waitUntil: "networkidle" });
-  await page.waitForSelector(".device-frame");
+  await abrir(page);
   await expect(page.locator(".mk-camada-copia")).toHaveCount(0);
   await expect(page.getByRole("radio", { name: "Sensor" })).toHaveCount(1);
 
+  await aba(page, "Aparelho");
   await page.getByRole("radio", { name: "MacBook" }).click();
+  await page.getByRole("button", { name: "Ajuste fino" }).click();
   await expect(page.getByRole("textbox", { name: "Rotação X" })).toHaveValue("-14°");
-  await expect(page.getByRole("radio", { name: "Sensor" })).toHaveCount(0);
+  await expect(page.locator('.mk-mini[aria-label="Sensor"]')).toHaveCount(0);
 
+  await aba(page, "Movimento");
   await page.getByRole("radio", { name: "Close", exact: true }).click();
   await expect(page.locator(".mk-camada-copia")).toHaveCount(1);
   await expect(page.getByRole("radio", { name: "Com foco" })).toHaveAttribute("aria-checked", "true");
+});
+
+test("a rota é só a ferramenta: sem menu nem rodapé do site, com caminho de volta", async ({ page }) => {
+  await abrir(page);
+  await expect(page.getByRole("navigation", { name: "Seção" })).toHaveCount(0);
+  const fora = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight);
+  expect(fora).toBeLessThanOrEqual(0);
+  await page.getByRole("link", { name: "visant/ui" }).click();
+  await expect(page.getByRole("navigation", { name: "Seção" }).first()).toBeVisible();
+});
+
+test("o arquivo sai em 1920×1080 em qualquer janela, e o fim diz o que saiu", async ({ page }) => {
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 1100, height: 700 }]) {
+    await page.setViewportSize(viewport);
+    await abrir(page);
+    await expect(page.locator(".mk-saida-resumo")).toContainText("1920×1080");
+  }
+  const baixou = page.waitForEvent("download");
+  await page.locator(".mk-exportar").click();
+  const arquivo = await baixou;
+  expect(arquivo.suggestedFilename()).toBe("mockup-1920x1080.png");
+  await expect(page.locator(".mk-pronto")).toContainText("PNG, 1920×1080");
+  await expect(page.getByRole("button", { name: "Baixar de novo" })).toBeVisible();
+});
+
+test("desfazer logo depois de editar volta um passo, e refazer vem de volta", async ({ page }) => {
+  await abrir(page);
+  await aba(page, "Aparelho");
+  const sombra = page.getByRole("slider", { name: "Sombra", exact: true });
+  await sombra.focus();
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowRight");
+  await page.waitForTimeout(500);
+  await expect(sombra).toHaveAttribute("aria-valuenow", "57");
+
+  const prata = page.getByRole("radio", { name: "Prata" });
+  await prata.click();
+  await page.keyboard.press("Control+z");
+  await expect(prata).toHaveAttribute("aria-checked", "false");
+  await expect(sombra).toHaveAttribute("aria-valuenow", "57");
+
+  await page.waitForTimeout(500);
+  await page.keyboard.press("Control+Shift+z");
+  await expect(prata).toHaveAttribute("aria-checked", "true");
+});
+
+test("a tela enviada sobrevive a recarregar", async ({ page }) => {
+  await abrir(page);
+  await page.setInputFiles("input[type=file]", { name: "minha-tela.png", mimeType: "image/png", buffer: PNG_1X1 });
+  await expect(page.getByRole("radio", { name: "minha-tela" })).toHaveAttribute("aria-checked", "true");
+  await expect(page.locator(".mk-convite")).toHaveCount(0);
+  await page.waitForTimeout(600);
+  await page.reload({ waitUntil: "networkidle" });
+  await expect(page.getByRole("radio", { name: "minha-tela" })).toHaveAttribute("aria-checked", "true");
+});
+
+test("colar da área de transferência põe a tela no aparelho", async ({ page }) => {
+  await abrir(page);
+  await page.evaluate((b64) => {
+    const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    const dt = new DataTransfer();
+    dt.items.add(new File([bytes], "colada.png", { type: "image/png" }));
+    window.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true, cancelable: true }));
+  }, PNG_1X1.toString("base64"));
+  await expect(page.getByRole("radio", { name: "colada" })).toHaveAttribute("aria-checked", "true");
+});
+
+test("Ctrl + roda muda o tamanho sem dar zoom na página", async ({ page }) => {
+  await abrir(page);
+  const impedido = await page.evaluate(() => {
+    const el = document.querySelector(".mk-palco")!;
+    const e = new WheelEvent("wheel", { deltaY: -100, ctrlKey: true, bubbles: true, cancelable: true });
+    el.dispatchEvent(e);
+    return e.defaultPrevented;
+  });
+  expect(impedido).toBe(true);
+});
+
+test("cena pronta marca qual está valendo", async ({ page }) => {
+  await abrir(page);
+  await aba(page, "Cena");
+  const papel = page.locator('.mk-mini[aria-label="Papel"]');
+  await expect(papel).toHaveAttribute("aria-checked", "false");
+  await papel.click();
+  await expect(papel).toHaveAttribute("aria-checked", "true");
+});
+
+test("contorno tira o volume, o traço acompanha o fundo e o arquivo sai", async ({ page }) => {
+  await abrir(page);
+  await aba(page, "Aparelho");
+  await page.getByRole("radio", { name: "Contorno" }).click();
+  await expect(page.locator(".mk-pose")).toHaveAttribute("data-traco", "contorno");
+  await expect(page.locator(".device-frame-camada").first()).toBeHidden();
+  await expect(page.getByRole("textbox", { name: "Traço em hexadecimal" })).toHaveValue("#FFFFFF");
+
+  await aba(page, "Cena");
+  await page.locator('.mk-mini[aria-label="Contorno"]').click();
+  await aba(page, "Aparelho");
+  await expect(page.getByRole("textbox", { name: "Traço em hexadecimal" })).toHaveValue("#111114");
+
+  const baixou = page.waitForEvent("download");
+  await page.locator(".mk-exportar").click();
+  expect((await baixou).suggestedFilename()).toBe("mockup-1920x1080.png");
 });

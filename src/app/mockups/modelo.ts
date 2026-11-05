@@ -12,6 +12,11 @@ export type TipoMovimento = "parado" | "flutuar" | "balancar" | "pendulo" | "apr
 export type ModoFundo = "cor" | "degrade" | "foto" | "nenhum";
 export type FormatoImagem = "png" | "webp";
 export type FormatoVideo = "mp4" | "webm" | "gif";
+export type Orientacao = "retrato" | "paisagem";
+/** `real` tem volume e reflexo; `plano` é chapado; `contorno` é só o traço. */
+export type EstiloAparelho = "real" | "plano" | "contorno";
+export type EstiloSombra = "suave" | "longa";
+export type EstiloReflexo = "nenhum" | "janela" | "estudio" | "faixa";
 export type Acabamento = keyof typeof ACABAMENTOS;
 export type Modelo = keyof typeof MODELOS;
 
@@ -20,6 +25,10 @@ export interface Tela {
   /** `vivo` é a peça React rodando dentro do aparelho. */
   tipo: "vivo" | "imagem" | "video";
   url?: string;
+  /** A mesma tela em versão larga, para tablet e notebook. */
+  largo?: string;
+  /** Na largura de um celular deitado: a versão de desktop ali viraria texto de poucos pixels. */
+  deitada?: string;
   poster?: string;
   nome: string;
 }
@@ -28,13 +37,20 @@ export interface Cena {
   modelo: Modelo;
   telaId: string;
   ajuste: "cover" | "contain";
+  /** A forma da tela, não a do aparelho: um celular em `paisagem` deita, um tablet em `paisagem` fica como nasceu. */
+  orientacao: Orientacao;
   rot: { x: number; y: number; z: number };
   tamanho: number;
   pos: { x: number; y: number };
   lente: number;
   acabamento: Acabamento;
+  aparelhoEstilo: EstiloAparelho;
+  /** `cor` nula acompanha o fundo. A espessura é em px do quadro, então vale igual nos três aparelhos. */
+  traco: { cor: string | null; espessura: number };
   reflexo: number;
+  reflexoEstilo: EstiloReflexo;
   sombra: number;
+  sombraEstilo: EstiloSombra;
   /** `x` e `y` em % da tela do aparelho; `area` em % do lado menor do quadro, como se vê no close. */
   foco: { ativo: boolean; x: number; y: number; zoom: number; area: number; desfoque: number };
   fundo: { modo: ModoFundo; cor: string; a: string; b: string; angulo: number; foto: string; desfoque: number };
@@ -64,28 +80,34 @@ export const ACABAMENTOS = {
 
 export const PADRAO: Cena = {
   modelo: "phone",
-  telaId: "sensor",
+  telaId: "pagina",
   ajuste: "cover",
+  orientacao: "retrato",
   rot: { x: 14, y: -12, z: 6 },
-  tamanho: 62,
+  tamanho: 76,
   pos: { x: 0, y: 0 },
   lente: 50,
   acabamento: "grafite",
-  reflexo: 7,
+  aparelhoEstilo: "real",
+  traco: { cor: null, espessura: 6 },
+  reflexo: 22,
+  reflexoEstilo: "janela",
   sombra: 55,
+  sombraEstilo: "suave",
   foco: { ativo: false, x: 50, y: 50, zoom: 1.6, area: 45, desfoque: 10 },
-  fundo: { modo: "degrade", cor: "#16181D", a: "#20242C", b: "#6A4A3A", angulo: 160, foto: "/media/textura-neon.webp", desfoque: 0 },
+  fundo: { modo: "degrade", cor: "#16181D", a: "#3B3F49", b: "#14151A", angulo: 160, foto: "/media/textura-neon.webp", desfoque: 0 },
   proporcao: "cheio",
   movimento: { tipo: "parado", duracao: 6, intensidade: 50 },
   saida: { largura: 1080, fps: 30, imagem: "png", video: "mp4" },
 };
 
 export const TELAS: Tela[] = [
+  { id: "pagina", tipo: "imagem", url: "/media/telas/pagina-retrato.webp", largo: "/media/telas/pagina-largo.webp", deitada: "/media/telas/pagina-deitado.webp", nome: "Site" },
+  { id: "mesa", tipo: "imagem", url: "/media/telas/mesa-retrato.webp", largo: "/media/telas/mesa-largo.webp", deitada: "/media/telas/mesa-deitado.webp", nome: "App" },
+  { id: "marca", tipo: "imagem", url: "/media/telas/marca-retrato.webp", largo: "/media/telas/marca-largo.webp", deitada: "/media/telas/marca-deitado.webp", nome: "Marca" },
   { id: "sensor", tipo: "vivo", nome: "Sensor" },
-  { id: "loop3d", tipo: "video", url: "/media/video-loop3d.mp4", poster: "/media/video-loop3d.webp", nome: "Loop 3D" },
-  { id: "composicao", tipo: "video", url: "/media/video-composicao.mp4", poster: "/media/video-composicao.webp", nome: "Composição" },
-  { id: "neon", tipo: "imagem", url: "/media/textura-neon.webp", nome: "Neon" },
-  { id: "produto", tipo: "imagem", url: "/media/cena-produto.webp", nome: "Produto" },
+  { id: "vazia", tipo: "imagem", nome: "Vazia" },
+  { id: "composicao", tipo: "video", url: "/media/video-composicao.mp4", poster: "/media/video-composicao.webp", nome: "Vídeo" },
 ];
 
 export const FOTOS_DE_FUNDO = ["/media/textura-neon.webp", "/media/textura-bruma.webp", "/media/efeito-gradiente.webp", "/media/textura-papel.webp"];
@@ -126,10 +148,12 @@ export const MOVIMENTOS: { id: TipoMovimento; nome: string; emLoop: boolean }[] 
 
 /** Pontos de partida inteiros: trocam a cena, mas nunca a tela nem a saída de quem já escolheu. */
 export const PRESETS: { id: string; nome: string; rotNotebook: Cena["rot"]; aplica: Partial<Cena> }[] = [
-  { id: "estudio", nome: "Estúdio", rotNotebook: POSES_NOTEBOOK[1].rot, aplica: { rot: { x: 14, y: -12, z: 6 }, tamanho: 62, acabamento: "grafite", sombra: 55, fundo: { ...PADRAO.fundo, modo: "degrade", a: "#20242C", b: "#6A4A3A", angulo: 160 } } },
-  { id: "papel", nome: "Papel", rotNotebook: POSES_NOTEBOOK[0].rot, aplica: { rot: { x: 0, y: 0, z: 0 }, tamanho: 70, acabamento: "prata", sombra: 30, fundo: { ...PADRAO.fundo, modo: "cor", cor: "#F4F3F0" } } },
-  { id: "noite", nome: "Noite", rotNotebook: POSES_NOTEBOOK[4].rot, aplica: { rot: { x: 54, y: 0, z: -24 }, tamanho: 64, acabamento: "noite", sombra: 80, fundo: { ...PADRAO.fundo, modo: "cor", cor: "#0B0B0D" } } },
-  { id: "foto", nome: "Foto", rotNotebook: POSES_NOTEBOOK[2].rot, aplica: { rot: { x: 6, y: 28, z: -3 }, tamanho: 58, acabamento: "titanio", sombra: 70, fundo: { ...PADRAO.fundo, modo: "foto", foto: "/media/textura-neon.webp", desfoque: 12 } } },
+  { id: "estudio", nome: "Estúdio", rotNotebook: POSES_NOTEBOOK[1].rot, aplica: { aparelhoEstilo: "real", rot: { x: 14, y: -12, z: 6 }, tamanho: 76, acabamento: "grafite", sombra: 55, sombraEstilo: "suave", reflexo: 22, reflexoEstilo: "janela", fundo: { ...PADRAO.fundo, modo: "degrade", a: "#3B3F49", b: "#14151A", angulo: 160 } } },
+  { id: "papel", nome: "Papel", rotNotebook: POSES_NOTEBOOK[0].rot, aplica: { aparelhoEstilo: "real", rot: { x: 0, y: 0, z: 0 }, tamanho: 78, acabamento: "grafite", sombra: 30, sombraEstilo: "longa", reflexo: 0, reflexoEstilo: "nenhum", fundo: { ...PADRAO.fundo, modo: "cor", cor: "#F4F3F0" } } },
+  { id: "noite", nome: "Noite", rotNotebook: POSES_NOTEBOOK[4].rot, aplica: { aparelhoEstilo: "real", rot: { x: 54, y: 0, z: -24 }, tamanho: 82, acabamento: "noite", sombra: 80, sombraEstilo: "suave", reflexo: 40, reflexoEstilo: "estudio", fundo: { ...PADRAO.fundo, modo: "cor", cor: "#0B0B0D" } } },
+  { id: "foto", nome: "Foto", rotNotebook: POSES_NOTEBOOK[2].rot, aplica: { aparelhoEstilo: "real", rot: { x: 6, y: 28, z: -3 }, tamanho: 76, acabamento: "titanio", sombra: 70, sombraEstilo: "suave", reflexo: 25, reflexoEstilo: "janela", fundo: { ...PADRAO.fundo, modo: "foto", foto: "/media/textura-neon.webp", desfoque: 12 } } },
+  { id: "plano", nome: "Plano", rotNotebook: { x: 0, y: 0, z: 0 }, aplica: { aparelhoEstilo: "plano", rot: { x: 0, y: 0, z: 0 }, tamanho: 78, acabamento: "grafite", sombra: 0, sombraEstilo: "suave", fundo: { ...PADRAO.fundo, modo: "cor", cor: "#E9DDD0" } } },
+  { id: "contorno", nome: "Contorno", rotNotebook: { x: 0, y: 0, z: 0 }, aplica: { aparelhoEstilo: "contorno", rot: { x: 0, y: 0, z: 0 }, tamanho: 78, sombra: 0, sombraEstilo: "suave", fundo: { ...PADRAO.fundo, modo: "cor", cor: "#F4F3F0" } } },
 ];
 
 export const ASPECTO: Record<Exclude<Proporcao, "cheio">, number> = { "9:16": 9 / 16, "4:5": 4 / 5, "1:1": 1, "16:9": 16 / 9 };
@@ -146,6 +170,17 @@ export function dimensoesGif(a: number) {
   const par = (n: number) => Math.round(n / 2) * 2;
   return a < 1 ? { w: par(GIF.maiorLado * a), h: GIF.maiorLado } : { w: GIF.maiorLado, h: par(GIF.maiorLado / a) };
 }
+
+/** O quadro `cheio` acompanha o palco na tela, mas o arquivo sai numa medida que serve em qualquer lugar. */
+export const ASPECTO_DO_ARQUIVO_CHEIO = 16 / 9;
+
+const NATURAL: Record<Modelo, Orientacao> = { phone: "retrato", tablet: "paisagem", laptop: "paisagem" };
+export const orientacaoNatural = (m: Modelo) => NATURAL[m];
+/** Sensor é peça de celular em pé, e notebook não deita. */
+export const podeGirar = (c: Pick<Cena, "modelo" | "telaId">) => c.modelo !== "laptop" && c.telaId !== "sensor";
+export const girada = (c: Cena) => podeGirar(c) && c.orientacao !== NATURAL[c.modelo];
+/** O quarto de volta do aparelho deitado. A tela gira o mesmo ao contrário, então o conteúdo fica de pé. */
+export const giroDaOrientacao = (c: Cena) => (girada(c) ? 90 : 0);
 
 export const animado = (c: Cena) => c.movimento.tipo !== "parado";
 export const emLoop = (c: Cena) => MOVIMENTOS.find((m) => m.id === c.movimento.tipo)?.emLoop ?? false;
@@ -196,7 +231,9 @@ export function movimentoEm(c: Cena, t: number) {
 /** O tamanho do aparelho: `tamanho` é a altura sobre o lado disponível, então 62% quer dizer o mesmo em todo quadro. */
 export function medidasDoAparelho(c: Cena, baseW: number, baseH: number) {
   const { aspecto, escala, subida, distancia } = MODELOS[c.modelo];
-  const h = (Math.min(baseH, (baseW / aspecto) * 0.8683) * c.tamanho * escala) / 100;
+  // Deitado, o lado comprido do aparelho é a largura do quadro: quem limita troca de eixo.
+  const limite = girada(c) ? Math.min(baseW * 0.8683, baseH / aspecto) : Math.min(baseH, (baseW / aspecto) * 0.8683);
+  const h = (limite * c.tamanho * escala) / 100;
   const w = h * aspecto;
   return { w, h, subida: h * subida, perspectiva: w * (c.lente / 50) * distancia };
 }
@@ -209,10 +246,13 @@ export function pontoDeFoco(c: Cena, t: number, baseW: number, baseH: number) {
   const m = movimentoEm(c, t);
   const { w, h, subida, perspectiva } = medidasDoAparelho(c, baseW, baseH);
   const borda = MODELOS[c.modelo].moldura * w;
-  const lx = (c.foco.x / 100 - 0.5) * (w - borda * 2);
-  const ly = (c.foco.y / 100 - 0.5) * (h - borda * 2);
+  const u = c.foco.x / 100 - 0.5;
+  const v = c.foco.y / 100 - 0.5;
+  // Deitado, x e y do foco falam da tela como ela é vista: viram eixos trocados no corpo do aparelho.
+  const lx = girada(c) ? v * (w - borda * 2) : u * (w - borda * 2);
+  const ly = girada(c) ? -u * (h - borda * 2) : v * (h - borda * 2);
   const rad = (g: number) => (g * Math.PI) / 180;
-  const [a, b, g] = [rad(c.rot.x + m.x), rad(c.rot.y + m.y), rad(c.rot.z + m.z)];
+  const [a, b, g] = [rad(c.rot.x + m.x), rad(c.rot.y + m.y), rad(c.rot.z + m.z + giroDaOrientacao(c))];
   const x1 = lx * Math.cos(g) - ly * Math.sin(g);
   const y1 = lx * Math.sin(g) + ly * Math.cos(g);
   const x2 = x1 * Math.cos(b);
@@ -243,6 +283,20 @@ export function cameraEm(c: Cena, t: number, baseW: number, baseH: number) {
     desfoque: (c.foco.desfoque * f) / zoom,
     mascara: `radial-gradient(circle ${raio.toFixed(1)}px at ${alvo.x.toFixed(1)}px ${alvo.y.toFixed(1)}px, black 62%, transparent 100%)`,
   };
+}
+
+const luz = (hex: string) => {
+  const n = parseInt(hex.replace("#", ""), 16);
+  return (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+};
+/** A cor do traço: a que escolheram ou, sem escolha, a que aparece sobre este fundo. */
+export function corDoTraco(c: Cena) {
+  if (c.traco.cor) return c.traco.cor;
+  const f = c.fundo;
+  if (f.modo === "foto") return "#FFFFFF";
+  if (f.modo === "nenhum") return "#111114";
+  const claro = f.modo === "cor" ? luz(f.cor) : (luz(f.a) + luz(f.b)) / 2;
+  return claro > 0.5 ? "#111114" : "#FFFFFF";
 }
 
 export const fundoCss = (f: Cena["fundo"]) =>

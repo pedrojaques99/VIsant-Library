@@ -7,9 +7,28 @@
  */
 
 import * as React from "react";
+import * as Tooltip from "@radix-ui/react-tooltip";
 import { ChevronRight, RotateCcw } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+
+/** Número em português: vírgula na tela, seja no tempo, seja no slider. */
+export const numero = (n: number, casas = 0) => n.toFixed(casas).replace(".", ",");
+
+/** O nome e o atalho de um botão de ícone. No toque não aparece: lá o `aria-label` e o desenho bastam. */
+export function Dica({ texto, tecla, children }: { texto: string; tecla?: string; children: React.ReactNode }) {
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild>{children}</Tooltip.Trigger>
+      <Tooltip.Portal>
+        <Tooltip.Content className="mk-dica casa" sideOffset={6}>
+          {texto}
+          {tecla ? <kbd>{tecla}</kbd> : null}
+        </Tooltip.Content>
+      </Tooltip.Portal>
+    </Tooltip.Root>
+  );
+}
 
 /* ── Pasta ─────────────────────────────────────────────────────────────── */
 
@@ -28,6 +47,10 @@ export function Pasta({
   children: React.ReactNode;
 }) {
   const [aberta, setAberta] = React.useState(abertaDeInicio);
+  // Campo opcional que ganhou conteúdo abre sozinho: escolher Close liga o foco, e o foco precisa aparecer.
+  React.useEffect(() => {
+    if (abertaDeInicio) setAberta(true);
+  }, [abertaDeInicio]);
   return (
     <section className="mk-pasta" data-aberta={aberta || undefined}>
       <header className="mk-pasta-topo">
@@ -36,9 +59,11 @@ export function Pasta({
           {titulo}
         </button>
         {sujo && onReset ? (
-          <button type="button" className="mk-reset" aria-label={`Restaurar ${titulo}`} onClick={onReset}>
-            <RotateCcw size={12} />
-          </button>
+          <Dica texto={`Restaurar ${titulo}`}>
+            <button type="button" className="mk-reset" aria-label={`Restaurar ${titulo}`} onClick={onReset}>
+              <RotateCcw size={12} />
+            </button>
+          </Dica>
         ) : null}
       </header>
       <div className="mk-pasta-corpo">
@@ -84,7 +109,7 @@ export function Slider({
   // Faixa que cruza o zero enche a partir do zero: enchido da esquerda, -50 leria como um quarto de algo.
   const origem = min < 0 && max > 0 ? pct(0) : 0;
   const atual = pct(valor);
-  const texto = valor.toFixed(casas);
+  const texto = numero(valor, casas);
 
   const confirmar = () => {
     const n = Number(rascunho.replace(",", "."));
@@ -223,13 +248,17 @@ export function Miniatura({ nome, ativa, onClick, children }: { nome: string; at
 }
 
 /** O aparelho em miniatura: a pose se lê sem ler o nome. */
-export function FoneMini({ rot, classe, modelo = "phone" }: { rot?: { x: number; y: number; z: number }; classe?: string; modelo?: "phone" | "tablet" | "laptop" }) {
+export function FoneMini({ rot, classe, modelo = "phone", arte }: { rot?: { x: number; y: number; z: number }; classe?: string; modelo?: "phone" | "tablet" | "laptop"; arte?: string }) {
   return (
     <span className="mk-fone-palco" aria-hidden>
       <span
         className={cn("mk-fone", classe)}
         data-modelo={modelo}
-        style={rot ? { transform: `rotateX(${rot.x}deg) rotateY(${rot.y}deg) rotateZ(${rot.z}deg)` } : undefined}
+        data-com-arte={arte ? true : undefined}
+        style={{
+          transform: rot ? `rotateX(${rot.x}deg) rotateY(${rot.y}deg) rotateZ(${rot.z}deg)` : undefined,
+          backgroundImage: arte ? `url(${arte})` : undefined,
+        }}
       />
     </span>
   );

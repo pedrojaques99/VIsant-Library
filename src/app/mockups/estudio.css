@@ -6,9 +6,14 @@
 
 .mk-estudio {
   --mk-linha: 2rem;
+  /* Toda superfície flutua: margem mínima na janela e o mesmo raio em todas. */
+  --mk-vao: 0.375rem;
+  --mk-raio: 14px;
   display: flex;
   flex-direction: column;
-  height: calc(100dvh - var(--shell-header-h) - 2.75rem);
+  gap: var(--mk-vao);
+  padding: var(--mk-vao);
+  height: 100dvh;
   overflow: hidden;
   background: var(--casa-bg);
   color: var(--casa-fg);
@@ -17,19 +22,42 @@
   -webkit-font-smoothing: antialiased;
 }
 
-@media (min-width: 768px) {
-  .mk-estudio { height: calc(100dvh - var(--shell-header-h)); }
+/* A barra da ferramenta: uma linha, com o caminho de volta e o que vale em qualquer aba. */
+.mk-barra { flex: none; display: flex; align-items: center; gap: 0.75rem; height: 2.75rem; padding: 0 0.375rem 0 0.75rem; border-radius: var(--mk-raio); box-shadow: inset 0 0 0 1px var(--casa-line); }
+.mk-marca { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.375rem; margin-left: -0.375rem; border-radius: 8px; color: var(--casa-fg-2); font-weight: 500; text-decoration: none; transition: color var(--dur-fast, 160ms) var(--ease-out); }
+.mk-marca:hover { color: var(--casa-fg); }
+.mk-marca-ponto { width: 0.875rem; height: 0.875rem; border-radius: 4px; background: var(--casa-fg); }
+.mk-barra-nome { font-weight: 500; }
+.mk-barra-nome i { margin-left: 0.25rem; color: var(--casa-fg-3); font-style: normal; font-size: 0.6875rem; font-weight: 400; }
+.mk-barra-acoes { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+.mk-icone { display: grid; place-items: center; flex: none; width: 2rem; height: 2rem; border: 0; border-radius: 8px; background: none; color: var(--casa-fg-2); cursor: pointer; transition: background-color var(--dur-fast, 160ms) var(--ease-out), color var(--dur-fast, 160ms) var(--ease-out); }
+.mk-icone:hover:not(:disabled) { background: var(--casa-tile); color: var(--casa-fg); }
+.mk-icone:disabled { color: var(--casa-fg-3); opacity: 0.45; cursor: default; }
+.mk-so-toque { display: none; }
+@media (pointer: coarse) {
+  .mk-so-mouse { display: none; }
+  .mk-so-toque { display: inline; }
+  .mk-icone { width: 2.75rem; height: 2.75rem; }
 }
 
+.mk-corpo { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--mk-vao); }
 @media (min-width: 900px) {
-  .mk-estudio { flex-direction: row; }
+  .mk-corpo { flex-direction: row; }
 }
+
+.mk-dica { display: flex; align-items: center; gap: 0.5rem; padding: 0.3125rem 0.5rem; border-radius: 8px; background: var(--casa-fg); color: var(--casa-bg); font-size: 0.75rem; line-height: 1; z-index: 60; }
+.mk-dica kbd { font: inherit; opacity: 0.6; }
+.mk-atalhos { width: 17rem; padding: 0.5rem 0.75rem; border-radius: var(--radius-control, 10px); background: var(--casa-bg); box-shadow: var(--casa-shadow), 0 0 0 1px var(--casa-line); color: var(--casa-fg); font-size: 0.75rem; z-index: 60; }
+.mk-atalhos dl { margin: 0; }
+.mk-atalhos dl > div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.3125rem 0; }
+.mk-atalhos dt { color: var(--casa-fg-2); }
+.mk-atalhos dd { margin: 0; }
 
 /* ── O palco ─────────────────────────────────────────────────────────── */
-.mk-area { position: relative; display: flex; flex-direction: column; flex: 0 0 44%; min-width: 0; min-height: 0; }
+.mk-area { position: relative; display: flex; flex-direction: column; flex: 0 0 46%; min-width: 0; min-height: 0; }
 @media (min-width: 900px) { .mk-area { flex: 1 1 0; } }
 
-.mk-palco { position: relative; flex: 1; min-height: 0; display: grid; place-items: center; overflow: hidden; background: var(--casa-tile); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.mk-palco { position: relative; flex: 1; min-height: 0; border-radius: var(--mk-raio); display: grid; place-items: center; overflow: hidden; background: var(--casa-tile); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
 .mk-palco:active { cursor: grabbing; }
 .mk-palco[data-transparente] { background: repeating-conic-gradient(var(--casa-tile) 0 25%, var(--casa-tile-2) 0 50%) 0 0 / 20px 20px; }
 /* Absoluto: o quadro tem 1080px de layout, e no fluxo do grid estouraria o palco antes da escala. */
@@ -44,6 +72,7 @@
 /* Sem preserve-3d aqui: sombra e aparelho no mesmo contexto 3D se interceptam, e a sombra corta a tela na diagonal. */
 .mk-pose { position: absolute; }
 .mk-sombra { position: absolute; inset: 2%; border-radius: 12%/6%; background: black; pointer-events: none; }
+.mk-sombra[data-estilo="longa"] { inset: 1%; }
 .mk-sombra[data-modelo="tablet"] { border-radius: 4%/5%; }
 .mk-sombra[data-modelo="laptop"] { inset: 6% 0 -30%; border-radius: 3%/4%; }
 
@@ -52,27 +81,85 @@
 .mk-tela-camera { position: absolute; inset: 0 0 60%; filter: blur(14px); background: radial-gradient(60% 90% at 26% 8%, oklch(0.56 0.07 85), transparent), radial-gradient(70% 90% at 76% 28%, oklch(0.5 0.07 320), transparent), oklch(0.56 0.03 165); }
 .mk-tela-folha { position: absolute; inset: 9% 0 0; overflow: hidden; border-radius: 9cqw 9cqw 0 0; --sensor-sheet: oklch(0.72 0.05 165); --sensor-hit: oklch(0.92 0.17 110); --sensor-title: white; }
 
-.mk-historico { position: absolute; top: 0.75rem; left: 0.75rem; display: flex; gap: 2px; padding: 2px; border-radius: var(--radius-control, 10px); background: var(--casa-bg); box-shadow: var(--casa-shadow); }
-.mk-historico button { display: grid; place-items: center; width: 2rem; height: 2rem; border: 0; border-radius: 8px; background: none; color: var(--casa-fg); cursor: pointer; }
-.mk-historico button:hover:not(:disabled) { background: var(--casa-tile); }
-.mk-historico button:disabled { color: var(--casa-fg-3); opacity: 0.45; cursor: default; }
+/* O grão quebra as faixas que o degradê escuro ganha em 8 bits e o vídeo piora. */
+.mk-grao { position: absolute; inset: 0; opacity: 0.045; mix-blend-mode: overlay; pointer-events: none; }
+
+/* O convite fica no alto, longe da base do aparelho, e some no primeiro gesto. No toque, o destaque é o "Sua tela" do painel. */
+.mk-convite { position: absolute; left: 50%; top: 0.75rem; translate: -50% 0; display: flex; align-items: center; gap: 0.5rem; height: 2.25rem; padding: 0 0.875rem; border: 0; border-radius: var(--radius-control, 10px); background: var(--casa-cta); color: var(--casa-cta-fg); box-shadow: var(--casa-shadow); font: inherit; font-weight: 500; white-space: nowrap; cursor: pointer; transition: opacity var(--dur-fast, 160ms) var(--ease-out); }
+.mk-convite svg { flex: none; }
+.mk-convite:hover { opacity: 0.92; }
+@media (pointer: coarse), (max-width: 899px) { .mk-convite { display: none; } }
+.mk-enviar[data-destaque] .mk-mini-arte { background: var(--casa-cta); color: var(--casa-cta-fg); box-shadow: none; }
+.mk-enviar[data-destaque] { color: var(--casa-fg); }
+
+/* Onde o arquivo termina quando o palco é mais largo que 16:9. */
+.mk-guia { position: absolute; top: 0; bottom: 0; left: 50%; translate: -50% 0; box-shadow: 0 0 0 100vw oklch(0 0 0 / 0.22), 0 0 0 1px oklch(1 0 0 / 0.14); pointer-events: none; }
+
+.mk-soltar { position: absolute; inset: 0.75rem; display: grid; place-items: center; border-radius: var(--radius-control, 10px); background: oklch(0 0 0 / 0.55); box-shadow: inset 0 0 0 1.5px oklch(1 0 0 / 0.85); color: white; font-weight: 500; pointer-events: none; }
+.mk-soltar span { padding: 0.5rem 0.875rem; border-radius: 8px; background: oklch(0 0 0 / 0.55); }
+
+/* O aparelho em 2D. A peça do registry fica como é: aqui só se tira o volume e se troca a tinta. */
+.mk-pose[data-traco] .device-frame-camada,
+.mk-pose[data-traco="plano"] .device-frame-botao { display: none; }
+.mk-pose[data-traco] .device-frame-corpo { will-change: auto; }
+.mk-pose[data-traco="plano"] .device-frame .device-frame-frente { background: var(--device-body); box-shadow: none; }
+.mk-pose[data-traco="plano"] .device-frame-deck,
+.mk-pose[data-traco="plano"] .device-frame-trackpad { box-shadow: none; }
+.mk-pose[data-traco="plano"] .device-frame-tela { background: color-mix(in oklab, var(--device-body), white 88%); }
+.mk-pose[data-traco] .mk-tela-midia { background: none; }
+.mk-pose[data-traco="contorno"] .device-frame .device-frame-frente { background: none; box-shadow: inset 0 0 0 var(--mk-traco-w) var(--mk-traco); }
+.mk-pose[data-traco="contorno"] .device-frame-tela { background: none; }
+.mk-pose[data-traco="contorno"] .device-frame-ilha,
+.mk-pose[data-traco="contorno"] .device-frame-camera { background: var(--mk-traco); }
+.mk-pose[data-traco="contorno"] .device-frame .device-frame-botao { background: var(--mk-traco); transform: none; }
+.mk-pose[data-traco="contorno"] .device-frame-deck { background: none; box-shadow: inset 0 0 0 var(--mk-traco-w) var(--mk-traco); }
+.mk-pose[data-traco="contorno"] .device-frame-teclado { background: none; box-shadow: inset 0 0 0 calc(var(--mk-traco-w) * 0.6) var(--mk-traco); }
+.mk-pose[data-traco="contorno"] .device-frame-trackpad { background: none; box-shadow: inset 0 0 0 calc(var(--mk-traco-w) * 0.6) var(--mk-traco); }
+
+/* A tela deitada: o aparelho gira um quarto de volta, e a tela gira o mesmo ao contrário. */
+.mk-tela-reta { position: absolute; inset: 0; }
+.mk-tela-rotor { position: absolute; inset: 0; overflow: hidden; container-type: size; }
+.mk-tela-girada { position: absolute; left: 50%; top: 50%; width: 100cqh; height: 100cqw; transform: translate(-50%, -50%) rotate(-90deg); }
+
+/* O reflexo no vidro: escolha de luz, não uma faixa só. Fica sobre a tela e anda ao contrário do giro. */
+.mk-reflexo { position: absolute; inset: 0 -40%; pointer-events: none; }
+.mk-reflexo[data-estilo="faixa"] { background: linear-gradient(112deg, transparent 34%, oklch(1 0 0 / 0.22) 48%, transparent 60%); }
+.mk-reflexo[data-estilo="janela"] {
+  background:
+    linear-gradient(118deg, transparent 18%, oklch(1 0 0 / 0.26) 19.5% 30%, transparent 31.5% 33%, oklch(1 0 0 / 0.26) 34.5% 45%, transparent 46.5%);
+  -webkit-mask-image: linear-gradient(170deg, black 0%, transparent 34%);
+  mask-image: linear-gradient(170deg, black 0%, transparent 34%);
+  filter: blur(2.5px);
+}
+.mk-reflexo[data-estilo="estudio"] { background: radial-gradient(52% 34% at 38% 6%, oklch(1 0 0 / 0.36), transparent 72%), radial-gradient(40% 24% at 66% 96%, oklch(1 0 0 / 0.1), transparent 72%); }
 
 /* ── A linha do tempo ────────────────────────────────────────────────── */
-.mk-linha-tempo { display: flex; align-items: center; gap: 0.625rem; height: 3rem; padding: 0 0.75rem; border-top: 1px solid var(--casa-line); }
-.mk-linha-tempo > button { display: grid; place-items: center; flex: none; width: 2rem; height: 2rem; border: 0; border-radius: 8px; background: none; color: var(--casa-fg); cursor: pointer; }
-.mk-linha-tempo > button:hover { background: var(--casa-tile); }
+/* Flutua sobre o palco: ligar o movimento não muda o tamanho do palco nem o do arquivo. */
+.mk-linha-tempo { position: absolute; left: 50%; bottom: 0.75rem; translate: -50% 0; display: flex; align-items: center; gap: 0.625rem; width: min(40rem, calc(100% - 1.5rem)); height: 2.75rem; padding: 0 0.75rem 0 0.375rem; border-radius: var(--mk-raio); background: var(--casa-bg); box-shadow: var(--casa-shadow), 0 0 0 1px var(--casa-line); }
 .mk-trilha { position: relative; flex: 1; height: 2rem; cursor: pointer; touch-action: none; border-radius: 4px; }
 .mk-trilha::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; border-radius: 2px; background: var(--casa-tile-2); }
 .mk-trilha span { position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; border-radius: 2px; background: var(--casa-fg); transform-origin: left; transform: scaleX(0); }
-.mk-tempo { flex: none; margin: 0; font-variant-numeric: tabular-nums; }
+.mk-tempo { flex: none; display: flex; align-items: center; gap: 0.25rem; margin: 0; font-variant-numeric: tabular-nums; }
+.mk-tempo svg { color: var(--casa-fg-3); }
 .mk-tempo i { font-style: normal; color: var(--casa-fg-3); }
 
 /* ── O painel ────────────────────────────────────────────────────────── */
-.mk-painel { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0; border-top: 1px solid var(--casa-line); background: var(--casa-bg); }
-@media (min-width: 900px) { .mk-painel { flex: 0 0 19.5rem; border-top: 0; border-left: 1px solid var(--casa-line); } }
-.mk-rolagem { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.mk-painel { display: flex; flex-direction: column; gap: var(--mk-vao); flex: 1 1 0; min-height: 0; }
+@media (min-width: 900px) { .mk-painel { flex: 0 0 19.5rem; } }
+.mk-abas-raiz { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; border-radius: var(--mk-raio); background: var(--casa-bg); box-shadow: inset 0 0 0 1px var(--casa-line); }
+.mk-abas { flex: none; display: flex; gap: 0.125rem; padding: 0.375rem 0.5rem; border-bottom: 1px solid var(--casa-line); overflow-x: auto; scrollbar-width: none; }
+.mk-abas::-webkit-scrollbar { display: none; }
+.mk-aba { flex: 1 0 auto; height: 2rem; padding: 0 0.625rem; border: 0; border-radius: 8px; background: none; color: var(--casa-fg-2); font: inherit; cursor: pointer; transition: color var(--dur-fast, 160ms) var(--ease-out), background-color var(--dur-fast, 160ms) var(--ease-out); }
+.mk-aba:hover { color: var(--casa-fg); }
+.mk-aba[data-state="active"] { background: var(--casa-tile); color: var(--casa-fg); font-weight: 500; }
+@media (pointer: coarse) { .mk-aba { height: 2.75rem; } }
+.mk-rolagem { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.mk-rolagem::-webkit-scrollbar { width: 6px; }
+.mk-rolagem::-webkit-scrollbar-thumb { border-radius: 3px; background: var(--casa-tile-2); }
+.mk-aba-corpo[hidden] { display: none; }
+.mk-nota { margin: 0.125rem 0 0; color: var(--casa-fg-3); font-size: 0.75rem; line-height: 1rem; }
 
-.mk-pasta { border-bottom: 1px solid var(--casa-line); }
+.mk-pasta + .mk-pasta { border-top: 1px solid var(--casa-line); }
 .mk-pasta-topo { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; height: 2.5rem; padding: 0 0.5rem 0 0.75rem; background: var(--casa-bg); }
 .mk-pasta-titulo { display: flex; align-items: center; gap: 0.375rem; flex: 1; height: 100%; border: 0; background: none; color: var(--casa-fg); font: inherit; font-weight: 500; text-align: left; cursor: pointer; }
 .mk-pasta-titulo svg { color: var(--casa-fg-3); transition: transform var(--dur-fast, 160ms) var(--ease-out); }
@@ -84,8 +171,6 @@
 .mk-pasta[data-aberta] .mk-pasta-corpo { grid-template-rows: 1fr; }
 .mk-pasta-corpo > div { min-height: 0; overflow: hidden; visibility: hidden; transition: visibility var(--dur-base, 200ms); }
 .mk-pasta[data-aberta] .mk-pasta-corpo > div { display: flex; flex-direction: column; gap: 0.375rem; padding: 0 0.75rem 0.875rem; visibility: visible; }
-.mk-dependente { display: flex; flex-direction: column; gap: 0.375rem; }
-.mk-dependente[hidden] { display: none; }
 
 .mk-rotulo { color: var(--casa-fg-2); }
 .mk-valor { color: var(--casa-fg); font-variant-numeric: tabular-nums; }
@@ -99,7 +184,7 @@
 .mk-slider { position: relative; display: flex; align-items: center; justify-content: space-between; height: var(--mk-linha); padding: 0 0.625rem; overflow: hidden; border-radius: 8px; background: var(--casa-tile); cursor: ew-resize; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 .mk-slider:hover .mk-rotulo { color: var(--casa-fg); }
 .mk-slider > span:not(.mk-slider-cheio, .mk-slider-marca), .mk-slider-campo { position: relative; }
-.mk-slider-cheio { position: absolute; top: 0; bottom: 0; background: var(--casa-tile-2); }
+.mk-slider-cheio { position: absolute; top: 0; bottom: 0; background: color-mix(in oklab, var(--casa-tile-2), var(--casa-fg) 12%); }
 .mk-slider-marca { position: absolute; top: 25%; bottom: 25%; width: 1px; background: var(--casa-fg-3); opacity: 0.6; }
 .mk-slider-campo { width: 4rem; border: 0; outline: 0; background: none; color: var(--casa-fg); font: inherit; font-size: 16px; text-align: right; font-variant-numeric: tabular-nums; }
 @media (pointer: fine) { .mk-slider-campo { font-size: inherit; } }
@@ -107,8 +192,6 @@
 /* Poucas opções: todas à vista, e a luz desliza. */
 .mk-seg { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; height: var(--mk-linha); padding: 2px; border-radius: 8px; background: var(--casa-tile); }
 .mk-seg-luz { position: absolute; top: 2px; bottom: 2px; left: 2px; width: calc((100% - 4px) / var(--n)); border-radius: 6px; background: var(--casa-bg); box-shadow: 0 1px 2px oklch(0 0 0 / 0.12), 0 0 0 0.5px var(--casa-line); transform: translateX(calc(var(--i) * 100%)); transition: transform var(--dur-base, 200ms) var(--ease-out); }
-.mk-saida-par { display: grid; grid-template-columns: 1fr 1fr; gap: 0.375rem; }
-.mk-seg-fixo { display: grid; place-items: center; color: var(--casa-fg-2); font-variant-numeric: tabular-nums; }
 .mk-seg button { position: relative; border: 0; border-radius: 6px; background: none; color: var(--casa-fg-2); font: inherit; cursor: pointer; transition: color var(--dur-fast, 160ms) var(--ease-out); }
 .mk-seg button[aria-checked="true"] { color: var(--casa-fg); font-weight: 500; }
 .mk-seg button:disabled { opacity: 0.4; cursor: default; }
@@ -119,11 +202,11 @@
 .mk-mini-arte { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 1; overflow: hidden; border-radius: 8px; background: var(--casa-tile); box-shadow: inset 0 0 0 1px transparent; transition: box-shadow var(--dur-fast, 160ms) var(--ease-out); }
 .mk-mini:hover .mk-mini-arte { box-shadow: inset 0 0 0 1px var(--casa-fg-3); }
 .mk-mini[aria-checked="true"] { color: var(--casa-fg); }
-.mk-mini[aria-checked="true"] .mk-mini-arte { box-shadow: 0 0 0 1.5px var(--casa-fg); }
+.mk-mini[aria-checked="true"] .mk-mini-arte { box-shadow: 0 0 0 2px var(--casa-bg), 0 0 0 3.5px var(--casa-fg); }
 .mk-mini-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
 .mk-enviar .mk-mini-arte { color: var(--casa-fg-2); box-shadow: inset 0 0 0 1px var(--casa-line); }
 .mk-arte-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.mk-arte-fundo { position: absolute; inset: 0; background-size: cover; background-position: center; }
+.mk-arte-fundo { position: absolute; inset: 0; background-size: cover; background-position: center; box-shadow: inset 0 0 0 1px var(--casa-line); border-radius: inherit; }
 .mk-arte-sensor { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, oklch(0.97 0 0) 0 14%, oklch(0.16 0.02 260) 15% 44%, oklch(0.72 0.05 165) 72%); }
 .mk-arte-proporcao { display: block; height: 62%; max-width: 72%; border-radius: 3px; box-shadow: inset 0 0 0 1.5px var(--casa-fg-2); }
 .mk-mini[aria-checked="true"] .mk-arte-proporcao { box-shadow: inset 0 0 0 1.5px var(--casa-fg); }
@@ -134,7 +217,9 @@
 .mk-fone[data-modelo="tablet"] { width: 62%; aspect-ratio: 4 / 3; border-radius: 9%/12%; }
 .mk-fone[data-modelo="laptop"] { width: 66%; aspect-ratio: 16 / 10; border-radius: 6%/9%; }
 .mk-fone[data-modelo="laptop"]::after { content: ""; position: absolute; top: 104%; left: -8%; right: -8%; height: 12%; border-radius: 0 0 40% 40%/0 0 100% 100%; background: inherit; }
-.mk-fone-claro { background: oklch(0.86 0.004 250); box-shadow: 0 0 0 0.5px oklch(0 0 0 / 0.2); }
+.mk-fone.mk-fone-contorno { background: none; box-shadow: inset 0 0 0 1.5px var(--casa-fg); }
+.mk-fone-claro { box-shadow: 0 0 0 0.5px oklch(0 0 0 / 0.2), 3px 4px 6px oklch(0 0 0 / 0.25); }
+.mk-fone[data-com-arte] { background-size: cover; background-position: top; background-color: oklch(0.2 0 0); box-shadow: 0 0 0 1.5px oklch(0.2 0 0), 0 2px 6px oklch(0 0 0 / 0.35); }
 
 /* Em repouso, cada movimento já tem o seu desenho: tampe os nomes e ainda dá para distinguir. */
 .mk-anima-flutuar { transform: translateY(-8%) rotateY(14deg); }
@@ -165,7 +250,7 @@
 
 /* No celular o painel divide a tela com o palco: miniaturas numa fileira que corre de lado. */
 @media (max-width: 899px) {
-  .mk-minis { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 4.25rem; overflow-x: auto; margin: 0 -0.75rem; padding: 2px 0.75rem; scroll-padding: 0.75rem; scrollbar-width: none; }
+  .mk-minis { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 4.25rem; overflow-x: auto; margin: -4px -0.75rem; padding: 4px 0.75rem; scroll-padding: 0.75rem; scrollbar-width: none; }
   .mk-minis::-webkit-scrollbar { display: none; }
 }
 
@@ -184,7 +269,7 @@
 @media (pointer: fine) { .mk-cor-hex { font-size: inherit; } }
 .mk-cor-poco { position: relative; flex: none; width: 1.5rem; height: 1.5rem; overflow: hidden; border-radius: 6px; box-shadow: inset 0 0 0 1px oklch(0.5 0 0 / 0.25); cursor: pointer; }
 .mk-cor-poco input { position: absolute; inset: -4px; width: 200%; height: 200%; opacity: 0; cursor: pointer; }
-.mk-barra { height: 1.25rem; border-radius: 6px; box-shadow: inset 0 0 0 1px oklch(0.5 0 0 / 0.2); }
+.mk-barra-cor { height: 1.25rem; border-radius: 6px; box-shadow: inset 0 0 0 1px oklch(0.5 0 0 / 0.2); }
 .mk-sugestao { display: flex; align-items: center; gap: 0.5rem; height: var(--mk-linha); padding: 0 0.625rem; border: 0; border-radius: 8px; background: none; color: var(--casa-fg-2); font: inherit; cursor: pointer; }
 .mk-sugestao:hover { background: var(--casa-tile); color: var(--casa-fg); }
 .mk-sugestao span { flex: none; width: 1.75rem; height: 0.75rem; border-radius: 3px; }
@@ -197,22 +282,35 @@
 @media (pointer: fine) { .mk-parte input { font-size: inherit; } }
 .mk-parte:focus-within { box-shadow: inset 0 0 0 1px var(--casa-fg-3); }
 
-/* A saída: sempre à vista, porque é para ela que o resto existe. */
-.mk-saida { flex: none; display: flex; flex-direction: column; gap: 0.375rem; padding: 0.75rem; border-top: 1px solid var(--casa-line); }
-.mk-resumo { min-height: 1rem; margin: 0.125rem 0; color: var(--casa-fg-2); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
-.mk-exportar { display: flex; align-items: center; justify-content: center; gap: 0.5rem; height: 2.75rem; border: 0; border-radius: var(--radius-control, 10px); background: var(--casa-cta); color: var(--casa-cta-fg); font: inherit; font-weight: 500; cursor: pointer; transition: transform var(--dur-press, 120ms) var(--ease-out); }
+/* A saída: uma linha sempre à vista, porque é para ela que o resto existe. O detalhe abre sob demanda. */
+.mk-saida { flex: none; display: flex; flex-direction: column; gap: 0.375rem; padding: 0.375rem 0.375rem 0.375rem 0.5rem; margin-bottom: env(safe-area-inset-bottom); border-radius: var(--mk-raio); background: var(--casa-bg); box-shadow: inset 0 0 0 1px var(--casa-line); }
+.mk-saida-opcoes { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--dur-base, 200ms) var(--ease-out); }
+.mk-saida-opcoes[data-aberta] { grid-template-rows: 1fr; }
+.mk-saida-opcoes > div { display: flex; flex-direction: column; gap: 0.375rem; min-height: 0; overflow: hidden; visibility: hidden; transition: visibility var(--dur-base, 200ms); }
+.mk-saida-opcoes[data-aberta] > div { padding-bottom: 0.25rem; visibility: visible; }
+.mk-saida-linha { display: flex; align-items: center; gap: 0.5rem; }
+.mk-saida-resumo { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0 0.375rem; min-height: 2.75rem; padding: 0 0.375rem; border: 0; border-radius: 8px; background: none; color: var(--casa-fg-2); font: inherit; font-size: 0.75rem; font-variant-numeric: tabular-nums; text-align: left; cursor: pointer; transition: color var(--dur-fast, 160ms) var(--ease-out); }
+.mk-saida-resumo:hover { color: var(--casa-fg); }
+.mk-saida-resumo i { flex-basis: 100%; order: 3; color: var(--casa-fg-3); font-style: normal; }
+.mk-saida-resumo svg { flex: none; color: var(--casa-fg-3); transition: transform var(--dur-fast, 160ms) var(--ease-out); }
+.mk-saida-resumo[aria-expanded="true"] svg { transform: rotate(180deg); }
+.mk-exportar { flex: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem; height: 2.75rem; padding: 0 1rem; border: 0; border-radius: 10px; background: var(--casa-cta); color: var(--casa-cta-fg); font: inherit; font-weight: 500; cursor: pointer; transition: transform var(--dur-press, 120ms) var(--ease-out), background-color var(--dur-fast, 160ms) var(--ease-out), color var(--dur-fast, 160ms) var(--ease-out); }
+.mk-exportar[data-quieto] { background: var(--casa-tile); color: var(--casa-fg); }
 .mk-exportar:active { transform: scale(0.985); }
 .mk-exportar:disabled { opacity: 0.6; cursor: default; }
-.mk-beta { margin: 0; color: var(--casa-fg-3); font-size: 0.75rem; line-height: 1rem; text-align: center; }
+.mk-aviso { margin: 0; color: var(--casa-fg); font-size: 0.75rem; line-height: 1rem; }
+.mk-pronto { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; min-height: 2.75rem; }
+.mk-pronto p { min-width: 0; margin: 0; font-size: 0.75rem; line-height: 1rem; font-variant-numeric: tabular-nums; }
+.mk-saida-opcoes .mk-sugestao { justify-content: flex-start; padding: 0 0.25rem; }
+.mk-pronto > div { flex: none; display: flex; align-items: center; gap: 0.125rem; }
+.mk-secundario { height: 2rem; padding: 0 0.625rem; border: 0; border-radius: 8px; background: var(--casa-tile); color: var(--casa-fg); font: inherit; font-size: 0.75rem; cursor: pointer; transition: background-color var(--dur-fast, 160ms) var(--ease-out); }
+.mk-secundario:hover { background: var(--casa-tile-2); }
 .mk-progresso > div { height: 4px; overflow: hidden; border-radius: 2px; background: var(--casa-tile-2); }
 .mk-progresso > div span { display: block; height: 100%; background: var(--casa-fg); transform-origin: left; transition: transform var(--dur-fast, 160ms) linear; }
 .mk-progresso p { display: flex; align-items: center; justify-content: space-between; height: 2.25rem; margin: 0; color: var(--casa-fg-2); font-variant-numeric: tabular-nums; }
 .mk-progresso button { display: grid; place-items: center; width: 2rem; height: 2rem; border: 0; border-radius: 8px; background: none; color: var(--casa-fg); cursor: pointer; }
 .mk-progresso button:hover { background: var(--casa-tile); }
 
-@media (max-height: 760px) and (min-width: 900px) {
-  .mk-saida { gap: 0.25rem; padding: 0.5rem 0.75rem; }
-}
 @media (prefers-reduced-motion: reduce) {
-  .mk-pasta-corpo, .mk-pasta-corpo > div, .mk-seg-luz, .mk-exportar, .mk-mini-arte, .mk-pasta-titulo svg { transition: none; }
+  .mk-pasta-corpo, .mk-pasta-corpo > div, .mk-seg-luz, .mk-exportar, .mk-mini-arte, .mk-pasta-titulo svg, .mk-saida-opcoes, .mk-saida-opcoes > div, .mk-saida-resumo svg { transition: none; }
 }

@@ -403,6 +403,15 @@ function Shell() {
     [setFocus],
   );
 
+  /* O estúdio é uma ferramenta de tela inteira: nem o cabeçalho nem o rodapé do site entram. */
+  if (route.view === "mockups") {
+    return (
+      <React.Suspense fallback={<div className="casa h-dvh bg-casa-bg" />}>
+        <Estudio onSair={(e) => navegarSemRecarregar(e, () => setView("catalogo"))} />
+      </React.Suspense>
+    );
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-casa-bg text-casa-fg">
       {/*
@@ -504,11 +513,6 @@ function Shell() {
           e voltar a crescer, e a abertura segura o título que o HTML já pintou. */}
       <React.Suspense fallback={<EsperaDaRota />}>
         {route.view === "marca" && <BrandStudioBody />}
-        {route.view === "mockups" && (
-          <React.Suspense fallback={<EsperaDaRota />}>
-            <Estudio />
-          </React.Suspense>
-        )}
         {route.view === "lab" && <Lab />}
         {route.view === "burilar" && <Burilar />}
         {route.view === "admin" && <Admin />}
@@ -530,7 +534,7 @@ function Shell() {
       </React.Suspense>
 
       {/* Estúdio é ferramenta de tela cheia: rodapé nenhum embaixo do painel. */}
-      {dobraAssentada && route.view !== "mockups" ? (
+      {dobraAssentada ? (
         <React.Suspense fallback={null}>
           <Rodape
             atual={route.view}

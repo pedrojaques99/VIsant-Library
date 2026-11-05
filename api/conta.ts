@@ -10,7 +10,7 @@
 
 import { contar, storeReady, type LinhaDeContagem } from "./_lab-auth.js";
 
-const TIPOS = new Set(["visita", "pagina", "peca", "origem", "copia"]);
+const TIPOS = new Set(["visita", "pagina", "peca", "origem", "copia", "estudio"]);
 const ITEM = /^[\w./@:-]{1,80}$/;
 const ROBO = /bot|crawl|spider|slurp|preview|monitor/i;
 

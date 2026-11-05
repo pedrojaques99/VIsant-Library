@@ -10,13 +10,14 @@
  * alguém para um servidor: por ora esse caso recebe um aviso claro, e não um upload.
  */
 
+import { frameData, frameSteps } from "motion/react";
 import { createContext, destroyContext, domToCanvas } from "modern-screenshot";
 import {
   BufferTarget,
   CanvasSource,
   Mp4OutputFormat,
   Output,
-  QUALITY_HIGH,
+  QUALITY_VERY_HIGH,
   WebMOutputFormat,
   getFirstEncodableVideoCodec,
 } from "mediabunny";
@@ -29,15 +30,25 @@ export interface Quadro {
   h: number;
 }
 
+/**
+ * Pinta os valores de movimento sem esperar o próximo quadro da tela. Com a aba escondida o
+ * navegador quase para o `requestAnimationFrame`: esperar por ele derrubava o export para um
+ * quadro por segundo. A captura lê o estilo, e o estilo já está certo aqui.
+ */
+function pintarAgora() {
+  for (const passo of ["read", "resolveKeyframes", "preUpdate", "update", "preRender", "render", "postRender"] as const) {
+    frameSteps[passo].process(frameData);
+  }
+}
+
 const capturar = ({ el, w, h }: Quadro, saidaW: number) =>
   domToCanvas(el, { width: w, height: h, scale: saidaW / w, backgroundColor: null });
 
-const baixar = (blob: Blob, nome: string) => {
+export const baixar = (url: string, nome: string) => {
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
+  a.href = url;
   a.download = nome;
   a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 30_000);
 };
 
 /**
@@ -55,13 +66,13 @@ function conferirQuadro(c: HTMLCanvasElement) {
   throw new Error("O navegador entregou um quadro vazio. Tente o Chrome ou uma resolução menor.");
 }
 
-export async function exportarImagem(q: Quadro, saidaW: number, formato: "png" | "webp", nome: string) {
+export async function exportarImagem(q: Quadro, saidaW: number, formato: "png" | "webp") {
+  pintarAgora();
   const c = await capturar(q, saidaW);
   conferirQuadro(c);
   const blob = await new Promise<Blob | null>((r) => c.toBlob(r, `image/${formato}`, 0.95));
   if (!blob) throw new Error("O navegador não gerou a imagem.");
-  baixar(blob, `${nome}.${formato}`);
-  return blob.size;
+  return blob;
 }
 
 /** MP4 precisa de H.264 ou similar no navegador; sem ele, a interface oferece só o que existe. */
@@ -70,23 +81,42 @@ export async function codecDisponivel(formato: "mp4" | "webm", w: number, h: num
   return getFirstEncodableVideoCodec(f.getSupportedVideoCodecs(), { width: w, height: h }).catch(() => null);
 }
 
-const proximoPaint = () => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+/** Devolve a vez à tela para o progresso pintar. `setTimeout` cairia para um por segundo em segundo plano. */
+const cederAVez = () =>
+  new Promise<void>((r) => {
+    const canal = new MessageChannel();
+    canal.port1.onmessage = () => {
+      canal.port1.close();
+      r();
+    };
+    canal.port2.postMessage(0);
+  });
 
-/** O vídeo dentro da tela anda junto do tempo da cena, senão ele sairia congelado no quadro atual. */
+function buscarUmVideo(v: HTMLVideoElement, alvo: number) {
+  return new Promise<boolean>((r) => {
+    const fim = (ok: boolean) => {
+      window.clearTimeout(relogio);
+      v.removeEventListener("seeked", achou);
+      r(ok);
+    };
+    const achou = () => fim(true);
+    const relogio = window.setTimeout(() => fim(false), 2000);
+    v.addEventListener("seeked", achou, { once: true });
+    v.currentTime = alvo;
+  });
+}
+
+/** O vídeo dentro da tela anda junto do tempo da cena. Quadro que não chega vira erro: repetir em silêncio sujaria o arquivo. */
 async function buscarVideos(el: HTMLElement, segundos: number) {
   await Promise.all(
-    [...el.querySelectorAll("video")].map(
-      (v) =>
-        new Promise<void>((r) => {
-          if (!v.duration) return r();
-          const alvo = segundos % v.duration;
-          if (Math.abs(v.currentTime - alvo) < 0.001) return r();
-          const fim = () => r();
-          v.addEventListener("seeked", fim, { once: true });
-          v.currentTime = alvo;
-          setTimeout(fim, 1500);
-        }),
-    ),
+    [...el.querySelectorAll("video")].map(async (v) => {
+      if (!v.duration) return;
+      const alvo = segundos % v.duration;
+      if (Math.abs(v.currentTime - alvo) < 0.001) return;
+      if (!(await buscarUmVideo(v, alvo)) && !(await buscarUmVideo(v, alvo))) {
+        throw new Error("Não consegui ler um quadro do vídeo da tela. Tente de novo.");
+      }
+    }),
   );
 }
 
@@ -97,13 +127,14 @@ export async function exportarVideo(opts: {
   duracao: number;
   fps: number;
   formato: "mp4" | "webm" | "gif";
-  nome: string;
+  /** Só WebM guarda transparência em vídeo. */
+  transparente?: boolean;
   /** Põe a cena no tempo `t` (0 a 1). */
   irPara: (t: number) => void;
   onProgresso: (feito: number, total: number, restanteS: number) => void;
   sinal: AbortSignal;
 }) {
-  const { quadro, saidaW, saidaH, duracao, fps, formato, nome, irPara, onProgresso, sinal } = opts;
+  const { quadro, saidaW, saidaH, duracao, fps, formato, transparente = false, irPara, onProgresso, sinal } = opts;
   const codec = formato === "gif" ? null : await codecDisponivel(formato, saidaW, saidaH);
   if (formato !== "gif" && !codec) throw new Error(`Este navegador não codifica ${formato.toUpperCase()}. Tente GIF ou o Chrome.`);
 
@@ -115,7 +146,8 @@ export async function exportarVideo(opts: {
 
   const target = new BufferTarget();
   const output = codec ? new Output({ format: formato === "mp4" ? new Mp4OutputFormat() : new WebMOutputFormat(), target }) : null;
-  const fonte = codec ? new CanvasSource(alvo, { codec, bitrate: QUALITY_HIGH }) : null;
+  // Transparência precisa de VP9: o WebM guarda o alfa à parte, e o `mediabunny` cuida disso.
+  const fonte = codec ? new CanvasSource(alvo, { codec, bitrate: QUALITY_VERY_HIGH, ...(transparente ? { alpha: "keep" as const } : {}) }) : null;
   if (output && fonte) {
     output.addVideoTrack(fonte, { frameRate: fps });
     await output.start();
@@ -136,7 +168,7 @@ export async function exportarVideo(opts: {
       }
       irPara(i / total);
       await buscarVideos(quadro.el, i / fps);
-      await proximoPaint();
+      pintarAgora();
       const c = await domToCanvas(contexto);
       ctx.clearRect(0, 0, saidaW, saidaH);
       if (i === 0) conferirQuadro(c);
@@ -145,11 +177,10 @@ export async function exportarVideo(opts: {
         const { data } = ctx.getImageData(0, 0, saidaW, saidaH);
         const paleta = quantize(data, 256);
         gif.writeFrame(applyPalette(data, paleta), saidaW, saidaH, { palette: paleta, delay: 1000 / fps, repeat: 0 });
-        // Devolve o controle à tela: a paleta é conta pesada e o progresso precisa pintar.
-        await new Promise((r) => setTimeout(r));
       } else if (fonte) {
         await fonte.add(i / fps, 1 / fps);
       }
+      await cederAVez();
       const porQuadro = (performance.now() - t0) / (i + 1);
       onProgresso(i + 1, total, (porQuadro * (total - i - 1)) / 1000);
     }
@@ -160,12 +191,9 @@ export async function exportarVideo(opts: {
   }
   if (gif) {
     gif.finish();
-    const bytes = gif.bytes();
-    baixar(new Blob([bytes.slice()], { type: "image/gif" }), `${nome}.gif`);
-    return bytes.byteLength;
+    return new Blob([gif.bytes().slice()], { type: "image/gif" });
   }
   const buffer = target.buffer;
   if (!buffer) throw new Error("O vídeo saiu vazio.");
-  baixar(new Blob([buffer], { type: `video/${formato}` }), `${nome}.${formato}`);
-  return buffer.byteLength;
+  return new Blob([buffer], { type: `video/${formato}` });
 }
