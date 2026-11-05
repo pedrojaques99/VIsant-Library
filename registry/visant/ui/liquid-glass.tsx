@@ -152,6 +152,8 @@ function createFilterSVG(id: string) {
   return { svg, feImage, red, green, blue, blur: blurEl, filter };
 }
 function applyConfig(c: Config, refs: FilterRefs) {
+  /* Peça ainda sem tamanho (oculta ou antes do layout): medir aqui daria x="-Infinity%" no filtro. */
+  if (c.width <= 0 || c.height <= 0) return;
   const uri = buildDisplacementMap(c);
   const maxD = Math.max(Math.abs(c.scale) * 0.5, 20);
   const pctX = Math.ceil(maxD / c.width * 100);
