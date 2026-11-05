@@ -200,9 +200,7 @@
     "celular",
     "aparelho",
     "3d",
-    "tela",
-    "tablet",
-    "notebook"
+    "tela"
   ],
   "type": "registry:ui"
 }

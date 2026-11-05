@@ -7909,8 +7909,17 @@
         "controles",
         "cor",
         "seletor",
+        "hex",
+        "conta-gotas",
+        "paleta",
         "editor"
-      ]
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Escolher uma cor livre num editor, tema ou painel de marca",
+          "evite": "Escolher entre poucas cores fixas: chip; ajustar um número: scrub-input"
+        }
+      }
     },
     {
       "name": "sensor-dial",
@@ -8108,9 +8117,7 @@
         "celular",
         "aparelho",
         "3d",
-        "tela",
-        "tablet",
-        "notebook"
+        "tela"
       ],
       "meta": {
         "uso": {
@@ -8287,6 +8294,305 @@
           "border-radius": "1cqw",
           "background": "color-mix(in srgb, white 5%, var(--device-body))",
           "box-shadow": "inset 0 0 0 0.12cqw var(--device-edge)"
+        }
+      }
+    },
+    {
+      "name": "use-idle",
+      "type": "registry:hook",
+      "title": "useIdle",
+      "description": "Chama uma função enquanto a peça está na tela e ninguém mexe nela, e cala com movimento reduzido. Vem com useInView.",
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/hooks/use-idle.ts",
+          "type": "registry:hook",
+          "target": "@hooks/use-idle.ts"
+        }
+      ],
+      "categories": [
+        "fundacao",
+        "hook",
+        "gesto",
+        "toque"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Peça com gesto que precisa parecer viva no celular, onde não existe hover",
+          "evite": "Animação contínua: requestAnimationFrame no próprio componente"
+        }
+      }
+    },
+    {
+      "name": "use-tilt",
+      "type": "registry:hook",
+      "title": "useTilt",
+      "description": "A inclinação lateral do celular, com o pedido de permissão do iOS dentro do gesto. Sem sensor, nada acontece.",
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "dependencies": [
+        "react"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/hooks/use-tilt.ts",
+          "type": "registry:hook",
+          "target": "@hooks/use-tilt.ts"
+        }
+      ],
+      "categories": [
+        "fundacao",
+        "hook",
+        "giroscopio",
+        "toque"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Deixar a inclinação do aparelho pilotar uma peça que já funciona por arrasto",
+          "evite": "Como única entrada: boa parte dos aparelhos não concede o sensor"
+        }
+      }
+    },
+    {
+      "name": "compass",
+      "type": "registry:ui",
+      "title": "Compass",
+      "description": "Bússola em camadas: a agulha vai até o ponteiro, passa e volta, e o mostrador inclina em direção à mão.",
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [
+        "utils",
+        "@visant/use-idle"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/ui/compass.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "categories": [
+        "controles",
+        "bussola",
+        "mostrador",
+        "3d",
+        "mola",
+        "direcao"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Mostrar ou escolher uma direção, ou dar um objeto vivo a uma página que fala de rumo",
+          "evite": "Alinhar com um alvo: sensor-dial; escolher uma hora: time-dial"
+        }
+      }
+    },
+    {
+      "name": "drip-word",
+      "type": "registry:ui",
+      "title": "Drip Word",
+      "description": "Uma palavra de tinta viscosa em shader: dos pés das letras descem fios que soltam a gota, e arrastar de lado inclina a gravidade.",
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [
+        "utils",
+        "@visant/css-color",
+        "@visant/use-tilt"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/ui/drip-word.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "categories": [
+        "texto",
+        "shader",
+        "webgl",
+        "liquido",
+        "gota",
+        "palavra",
+        "tipografia"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Uma palavra de abertura com presença, em dobra de marca ou tela de entrada",
+          "evite": "Texto que derrete sob o cursor: heat-word; texto corrido ou título longo: line-reveal"
+        }
+      }
+    },
+    {
+      "name": "ratchet",
+      "type": "registry:ui",
+      "title": "Ratchet",
+      "description": "Catraca de aço: o gesto dá corda numa roda que só gira para um lado, com a lingueta caindo a cada dente.",
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [
+        "utils",
+        "@visant/use-idle"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/ui/ratchet.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "categories": [
+        "controles",
+        "catraca",
+        "engrenagem",
+        "metal",
+        "gesto",
+        "clique"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Um gesto de dar corda: contar passos para a frente, avançar sem poder voltar",
+          "evite": "Ajustar um número nos dois sentidos: scrub-input; girar para os dois lados: vintage-knob"
+        }
+      }
+    },
+    {
+      "name": "raking-light",
+      "type": "registry:ui",
+      "title": "Raking Light",
+      "description": "Relevo seco em papel com fibra: a palavra só existe na sombra e no brilho de uma lâmpada baixa que passeia sobre a folha.",
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [
+        "utils",
+        "@visant/use-idle"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/ui/raking-light.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "categories": [
+        "texto",
+        "relevo",
+        "papel",
+        "luz",
+        "textura",
+        "grao",
+        "tipografia"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Uma palavra ou nome com tato de papel, em abertura de marca ou capa",
+          "evite": "Palavra que precisa ser lida de imediato ou em texto pequeno: line-reveal"
+        }
+      }
+    },
+    {
+      "name": "word-dial",
+      "type": "registry:ui",
+      "title": "Word Dial",
+      "description": "Um anel que reordena as letras de uma palavra em linha, onda, anel, escada e espelho, com paradas como um tambor de caleidoscópio.",
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [
+        "utils",
+        "@visant/use-idle"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/ui/word-dial.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "categories": [
+        "texto",
+        "palavra",
+        "tipografia",
+        "marca",
+        "anel",
+        "arranjo"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Mostrar uma marca ou palavra-chave que muda de arranjo sem deixar de ser ela",
+          "evite": "Trocar uma palavra por outra: text-morph; escolher entre opções de verdade: segmented-control"
+        }
+      }
+    },
+    {
+      "name": "detent-slider",
+      "type": "registry:ui",
+      "title": "Detent Slider",
+      "description": "Slider com paradas que agarram e a consequência em letra grande, com dígitos que rolam antes de confirmar.",
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/ui/detent-slider.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "categories": [
+        "controles",
+        "slider",
+        "paradas",
+        "percentual",
+        "formulario",
+        "digitos"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Escolher quanto de algo, vendo o resultado antes de confirmar: fechar parte, dividir, repartir",
+          "evite": "Simular um cenário com vários valores: sim-slider; ajustar sem consequência a mostrar: elastic-slider"
+        }
+      }
+    },
+    {
+      "name": "route-profile",
+      "type": "registry:ui",
+      "title": "Route Profile",
+      "description": "Perfil de terreno que se lê arrastando: a altitude e a rampa sob o cursor, e um clinômetro cuja agulha balança com a inclinação.",
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [
+        "utils",
+        "@visant/use-idle",
+        "@visant/use-tilt"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/ui/route-profile.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "categories": [
+        "conteudo",
+        "rota",
+        "grafico",
+        "altitude",
+        "terreno",
+        "clinometro"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Mostrar uma rota, trilha ou prova pelo relevo, com leitura ponto a ponto",
+          "evite": "Uma série de números sem terreno: streamgraph; só um nível, sem percurso: gauge"
         }
       }
     }

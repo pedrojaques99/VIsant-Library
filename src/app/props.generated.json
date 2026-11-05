@@ -15561,5 +15561,415 @@
         }
       ]
     }
+  ],
+  "use-idle": [
+    {
+      "nome": "useInView",
+      "descricao": "A peça está na tela? Laço e sensor só rodam enquanto alguém pode ver.",
+      "props": []
+    },
+    {
+      "nome": "useIdle",
+      "descricao": "Chama `fn` a cada `ms` enquanto a peça está na tela e ninguém mexe nela.\n\nCelular não tem hover: peça que só acorda com o ponteiro fica morta no toque. Três coisas calam o laço: sair da tela, `prefers-reduced-motion`, e o `poke()` devolvido, que toda entrada chama para o movimento sozinho não brigar com a mão.",
+      "props": []
+    }
+  ],
+  "use-tilt": [
+    {
+      "nome": "useTilt",
+      "descricao": "A inclinação lateral do celular (`gamma`, em graus), depois de `enable()`.\n\nO iOS só concede o sensor dentro de um gesto, então `enable` tem de rodar num `pointerdown`. Recusou ou não existe sensor: nada acontece, e o arrasto da peça continua sendo o caminho. Nunca é a única entrada.",
+      "props": []
+    }
+  ],
+  "compass": [
+    {
+      "nome": "Compass",
+      "descricao": "Bússola: a agulha vai até o ponteiro como uma de verdade vai ao norte, passa, volta e para. O mostrador inclina em direção à mão, e a distância entre as camadas é que dá a profundidade.\n\n- **Ângulo desenrolado.** O alvo é a menor volta a partir de onde a agulha está. Sem isso, cruzar de 179° para -179° dá uma volta inteira para trás.\n- **Mola subamortecida de propósito.** A passada do ponto é o magnetismo.\n- **Camadas de verdade em `preserve-3d`.** Sombra, base, marcas, agulha, eixo e vidro ficam em alturas diferentes e se deslocam entre si ao inclinar. Por isso a peça nasce inclinada: profundidade não pode depender de hover.\n- **`touch-none` só no mostrador.** Gesto circular não tem eixo para ceder à rolagem; a página continua rolando pelo resto da peça. O mouse segue a peça inteira.\n- **Movimento reduzido:** a agulha só aponta, e a inclinação fica na pose de nascença.\n- **Marca em forma, nunca em texto.** A marca vai no eixo; a letra usa `--foreground`.",
+      "props": [
+        {
+          "nome": "bearing",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Para onde a agulha aponta, em graus (0 = norte, sentido horário). Passando esta prop, quem manda é você."
+        },
+        {
+          "nome": "defaultBearing",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "-62",
+          "descricao": "Onde a agulha nasce quando a peça é livre."
+        },
+        {
+          "nome": "depth",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "18",
+          "descricao": "Quanto o mostrador inclina em direção ao ponteiro, em graus.",
+          "faixa": {
+            "min": 0,
+            "max": 30,
+            "step": 1
+          }
+        },
+        {
+          "nome": "idle",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "true",
+          "descricao": "Sozinha na tela, a agulha procura o norte de tempos em tempos."
+        },
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Direção",
+          "descricao": "Nome do controle para leitor de tela."
+        },
+        {
+          "nome": "north",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "N",
+          "descricao": "A letra do topo do mostrador."
+        },
+        {
+          "nome": "onBearingChange",
+          "tipo": "(bearing: number) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    }
+  ],
+  "drip-word": [
+    {
+      "nome": "DripWord",
+      "descricao": "Drip Word: a palavra é tinta viscosa. Dos pés das letras nascem fios que descem, afinam no pescoço, soltam a gota e recolhem, e arrastar de lado inclina a gravidade.\n\n- **Shader, não contorno animado.** A palavra vira um campo de distância, calculado uma vez por tamanho, e o desenho é esse campo cortado num limiar. Os fios entram no mesmo campo com união suave, então a raiz funde com a letra sem emenda nenhuma. É isso que lê como líquido.\n- **Os fios nascem onde há tinta.** A máscara é lida uma vez e os pés saem da linha de base de verdade: funciona com qualquer palavra e qualquer fonte.\n- **Minimal de propósito.** Uma tinta só, e um brilho curto na borda misturando a tinta com o fundo, sem cor nova. O brilho vem de `fwidth`, sem amostrar o campo três vezes, para caber no celular. A troca de tema relê os tokens em vez de repintar por quadro.\n- **Um contexto só, e devolvido.** Canvas criado no efeito, contexto perdido de propósito no unmount, laço parado fora da tela. Sem WebGL, a palavra aparece em texto.\n- **`pan-y`.** Arrastar de lado inclina; rolar em pé é da página. No celular, o primeiro toque pede o giroscópio, e inclinar o aparelho vira a gravidade.\n- **Movimento reduzido:** um quadro parado com os fios já descidos, sem laço. O arrasto ainda inclina, sem balanço.",
+      "props": [
+        {
+          "nome": "drips",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "6",
+          "descricao": "Quantos fios escorrem.",
+          "faixa": {
+            "min": 0,
+            "max": 7,
+            "step": 1
+          }
+        },
+        {
+          "nome": "ink",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "var(--foreground)",
+          "descricao": "A tinta. Qualquer cor CSS ou token."
+        },
+        {
+          "nome": "speed",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "40",
+          "descricao": "Velocidade da gota.",
+          "faixa": {
+            "min": 0,
+            "max": 100,
+            "step": 1
+          }
+        },
+        {
+          "nome": "word",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "fluxo",
+          "descricao": "A palavra que escorre. Curta: é desenhada grande."
+        }
+      ]
+    }
+  ],
+  "ratchet": [
+    {
+      "nome": "Ratchet",
+      "descricao": "Catraca: o gesto dá corda numa roda dentada que só gira para um lado, com a lingueta subindo a rampa de cada dente e caindo da face íngreme.\n\n- **Só o curso para a frente conta.** Voltar deixa a roda onde está, então dar corda é descer, voltar e descer de novo, como uma chave de catraca.\n- **Metal é luz que não gira.** O reflexo do aço torneado fica parado enquanto o recorte da roda gira: a roda vai num sentido e o gradiente, dentro dela, no sentido contrário. Tudo em `transform`, sem repintar por quadro. Um desvio pequeno faz o reflexo cintilar.\n- **O clique tem três partes:** a lingueta quica (mola subamortecida), a roda recua um fio e o ponto de contato brilha. É isso que dá vida ao desenho.\n- **Arrasto em pé, com `pan-x`.** Um rolador nativo, a primeira versão, prendia a página no celular enquanto o curso não acabasse. A roda do mouse é ouvida sem `preventDefault`: dá corda e a página rola junto, sem armadilha.\n- **Movimento reduzido:** a lingueta só pousa, sem quique, sem recuo e sem brilho.",
+      "props": [
+        {
+          "nome": "idle",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "true",
+          "descricao": "Sozinha na tela, a catraca dá um clique de tempos em tempos."
+        },
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Catraca",
+          "descricao": "Nome do controle para leitor de tela."
+        },
+        {
+          "nome": "onWind",
+          "tipo": "(clicks: number) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Avisa a cada dente que passa, com o total desde que a peça montou."
+        },
+        {
+          "nome": "pitch",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "40",
+          "descricao": "Curso do gesto por dente, em px.",
+          "faixa": {
+            "min": 16,
+            "max": 120,
+            "step": 4
+          }
+        },
+        {
+          "nome": "teeth",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "16",
+          "descricao": "Dentes da catraca.",
+          "faixa": {
+            "min": 8,
+            "max": 32,
+            "step": 1
+          }
+        }
+      ]
+    }
+  ],
+  "raking-light": [
+    {
+      "nome": "RakingLight",
+      "descricao": "Luz rasante: uma lâmpada baixa sobre papel com relevo seco, onde a palavra só existe na sombra e no brilho que a luz dá a ela.\n\n- **A palavra tem a cor do papel.** Atrás dela, uma cópia de sombra foge da lâmpada e uma de brilho vai na direção dela. O relevo inteiro é uma posição de lâmpada numa mola.\n- **A fibra é iluminada de verdade, uma vez só.** Quatro camadas do mesmo ruído, cada uma acesa de um lado por `feDiffuseLighting`, e a lâmpada só troca a opacidade delas. Reacender a cada quadro travaria no celular; cruzar quatro pinturas prontas não custa.\n- **Borda orgânica.** `feDisplacementMap` rói a borda das letras: papel prensado não tem contorno de vetor.\n- **Sombra é sempre preta e brilho é sempre branco,** misturados ao `--card`. A luz é física, então não inverte no tema escuro como um token inverteria.\n- **`pan-y`, não `touch-none`.** A peça pode ocupar a tela inteira de um celular: o dedo leva a lâmpada de lado e a rolagem em pé continua da página. O toque também posiciona a lâmpada na altura.\n- **Movimento reduzido:** a lâmpada vai direto, sem mola e sem passeio.",
+      "props": [
+        {
+          "nome": "grain",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "60",
+          "descricao": "Quanto a fibra do papel aparece.",
+          "faixa": {
+            "min": 0,
+            "max": 100,
+            "step": 1
+          }
+        },
+        {
+          "nome": "idle",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "true",
+          "descricao": "Sozinha na tela, a lâmpada passeia."
+        },
+        {
+          "nome": "relief",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "60",
+          "descricao": "Comprimento da sombra.",
+          "faixa": {
+            "min": 0,
+            "max": 100,
+            "step": 1
+          }
+        },
+        {
+          "nome": "word",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "relevo",
+          "descricao": "A palavra em relevo seco. Curta: é desenhada grande."
+        }
+      ]
+    }
+  ],
+  "word-dial": [
+    {
+      "nome": "WordDial",
+      "descricao": "Word Dial: uma palavra e cinco arranjos, girados como o tambor de um caleidoscópio. As mesmas letras se reordenam em linha, onda, anel, escada e espelho. A marca continua ela mesma enquanto o arranjo muda.\n\n- **Serve para qualquer palavra.** A primeira versão tinha quatro letras cravadas numa grade e virava bloco. Aqui cada letra é medida no navegador e o corpo se ajusta para a linha caber, então o I estreito e o M largo ficam com o espaçamento certo.\n- **Só a tinta do tema.** Nada de foil: `--foreground` nas letras e `--border` no anel. Quem dá presença é a forma.\n- **Detentes de verdade.** Tocar dá um passo; girar assenta no arranjo mais próximo, com a figura inclinando um pouco no caminho.\n- **`touch-none` no anel.** Gesto circular não tem eixo para ceder à rolagem; a peça não ocupa mais que o próprio anel.\n- **Movimento reduzido:** as letras pousam, sem mola e sem passo sozinho.",
+      "props": [
+        {
+          "nome": "idle",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "true",
+          "descricao": "Sozinho na tela, o anel dá um passo de tempos em tempos."
+        },
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Arranjo da palavra",
+          "descricao": "Nome do controle para leitor de tela."
+        },
+        {
+          "nome": "onArrange",
+          "tipo": "(index: number) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Avisa o arranjo novo, de 0 a 4 (linha, onda, anel, escada, espelho)."
+        },
+        {
+          "nome": "word",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "VISANT",
+          "descricao": "A palavra. Funciona de 2 a 12 letras: as posições saem da largura de cada letra."
+        }
+      ]
+    }
+  ],
+  "detent-slider": [
+    {
+      "nome": "DetentSlider",
+      "descricao": "Slider com paradas: mostra a consequência exata em letra grande, antes de confirmar. O polegar agarra nas paradas com um pulso no ponto e uma vibração onde o aparelho deixa.\n\n- **O valor é sempre 1 a 100, e a consequência vem de fora.** O número grande sai de `format`, então a peça serve para fechar parte de uma posição, repartir uma conta ou dividir um orçamento, sem saber de nada disso.\n- **Dígitos que rolam, não que trocam.** O olho acompanha a mudança, e a coluna fixa à direita evita que o número dance.\n- **Sem cor própria.** A versão do laboratório tinha um brilho iridescente e verde e vermelho no resultado; caiu tudo. O sinal do número já diz se é ganho ou perda.\n- **`pan-y`.** O gesto é de lado: rolar a página em pé continua funcionando por cima.\n- **Movimento reduzido:** o número e o polegar pousam, sem rolar e sem pulso.",
+      "props": [
+        {
+          "nome": "action",
+          "tipo": "string | ((value: number) => string)",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "O botão de confirmar. Sem ele, a peça é só o controle."
+        },
+        {
+          "nome": "caption",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "O nome do que o número grande mede, em uma linha acima dele."
+        },
+        {
+          "nome": "defaultValue",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "50",
+          "descricao": "Onde a peça nasce quando é livre.",
+          "faixa": {
+            "min": 1,
+            "max": 100,
+            "step": 1
+          }
+        },
+        {
+          "nome": "format",
+          "tipo": "(value: number) => string",
+          "obrigatoria": false,
+          "padrao": "(v) => `${v}%`",
+          "descricao": "A consequência do valor, em letra grande. Os dígitos rolam."
+        },
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Valor",
+          "descricao": "Nome do controle para leitor de tela."
+        },
+        {
+          "nome": "magnet",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "3",
+          "descricao": "A que distância uma parada agarra.",
+          "faixa": {
+            "min": 0,
+            "max": 10,
+            "step": 1
+          }
+        },
+        {
+          "nome": "onAction",
+          "tipo": "(value: number) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onValueChange",
+          "tipo": "(value: number) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "stops",
+          "tipo": "number[]",
+          "obrigatoria": false,
+          "padrao": "[25, 50, 75, 100]",
+          "descricao": "As paradas que puxam o polegar."
+        },
+        {
+          "nome": "value",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Valor controlado, de 1 a 100."
+        }
+      ]
+    }
+  ],
+  "route-profile": [
+    {
+      "nome": "RouteProfile",
+      "descricao": "Perfil de rota: leia o caminho pela forma do terreno, com um clinômetro que balança até a inclinação sob o cursor.\n\n- **O relevo é a interface.** Da versão do laboratório saíram paradas nomeadas, a linha de quilômetro e a de subida restante: rótulo demais. Ficaram a altitude, a rampa e a agulha, e o resto se lê no desenho.\n- **A agulha pendura por gravidade.** Mola subamortecida: a rampa se sente antes de se ler.\n- **Inclinar também anda.** O primeiro toque pede o giroscópio, e inclinar o celular rola o cursor com inércia. Arrasto e teclado continuam sempre lá.\n- **O passeio sozinho para de vez** quando alguém pega no cursor, para nunca tirar a pessoa do ponto que ela escolheu.\n- **`pan-y` no terreno.** Arrasto de lado é da peça, rolar em pé é da página.\n- **Movimento reduzido:** cursor e agulha pousam, sem mola nem passeio.",
+      "props": [
+        {
+          "nome": "altitudes",
+          "tipo": "number[]",
+          "obrigatoria": false,
+          "padrao": "Array.from({ length: 121 }, (_, i) => {\n  const t = i / 120;\n  return 620 + 1040 * (0.72 * Math.sin(Math.PI * t) ** 1.4 + (0.16 * (1 + Math.sin(t * 13))) / 2 + (0.1 * (1 + Math.sin(t * 29 + 1))) / 2);\n})",
+          "descricao": "As altitudes da rota, em metros, igualmente espaçadas."
+        },
+        {
+          "nome": "defaultPosition",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "0.2",
+          "descricao": "Onde o cursor nasce, de 0 a 1.",
+          "faixa": {
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          }
+        },
+        {
+          "nome": "distance",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "18",
+          "descricao": "Distância total, em km.",
+          "faixa": {
+            "min": 1,
+            "max": 200,
+            "step": 1
+          }
+        },
+        {
+          "nome": "idle",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "true",
+          "descricao": "Sozinho na tela, o cursor passeia até alguém pegar nele."
+        },
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Posição na rota",
+          "descricao": "Nome do controle para leitor de tela."
+        },
+        {
+          "nome": "onPositionChange",
+          "tipo": "(position: number) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    }
   ]
 }

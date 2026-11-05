@@ -1,0 +1,31 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "use-idle",
+  "title": "useIdle",
+  "author": "Visant Labs <visantsupply@gmail.com>",
+  "description": "Chama uma função enquanto a peça está na tela e ninguém mexe nela, e cala com movimento reduzido. Vem com useInView.",
+  "dependencies": [
+    "motion"
+  ],
+  "files": [
+    {
+      "path": "registry/visant/hooks/use-idle.ts",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { useReducedMotion } from \"motion/react\";\n\n/** A peça está na tela? Laço e sensor só rodam enquanto alguém pode ver. */\nexport function useInView(ref: React.RefObject<Element | null>) {\n  const [visivel, setVisivel] = React.useState(false);\n  React.useEffect(() => {\n    const el = ref.current;\n    if (!el || typeof IntersectionObserver === \"undefined\") return;\n    const io = new IntersectionObserver(([e]) => setVisivel(e.isIntersecting), { threshold: 0.2 });\n    io.observe(el);\n    return () => io.disconnect();\n  }, [ref]);\n  return visivel;\n}\n\n/**\n * Chama `fn` a cada `ms` enquanto a peça está na tela e ninguém mexe nela.\n *\n * Celular não tem hover: peça que só acorda com o ponteiro fica morta no toque.\n * Três coisas calam o laço: sair da tela, `prefers-reduced-motion`, e o `poke()`\n * devolvido, que toda entrada chama para o movimento sozinho não brigar com a mão.\n */\nexport function useIdle(ref: React.RefObject<Element | null>, fn: () => void, ms = 2600, ligado = true) {\n  const visivel = useInView(ref);\n  const reduz = useReducedMotion();\n  const ultimo = React.useRef(0);\n  const eco = React.useRef(fn);\n  eco.current = fn;\n  React.useEffect(() => {\n    if (!ligado || !visivel || reduz) return;\n    const t = window.setInterval(() => {\n      if (performance.now() - ultimo.current > ms) eco.current();\n    }, ms);\n    return () => window.clearInterval(t);\n  }, [ligado, visivel, reduz, ms]);\n  return React.useCallback(() => {\n    ultimo.current = performance.now();\n  }, []);\n}\n",
+      "type": "registry:hook",
+      "target": "@hooks/use-idle.ts"
+    }
+  ],
+  "meta": {
+    "uso": {
+      "quando": "Peça com gesto que precisa parecer viva no celular, onde não existe hover",
+      "evite": "Animação contínua: requestAnimationFrame no próprio componente"
+    }
+  },
+  "categories": [
+    "fundacao",
+    "hook",
+    "gesto",
+    "toque"
+  ],
+  "type": "registry:hook"
+}

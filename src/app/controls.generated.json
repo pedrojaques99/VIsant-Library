@@ -9120,6 +9120,17 @@
     "componentes": {
       "DeviceFrame": [
         {
+          "prop": "device",
+          "tipo": "escolha",
+          "valores": [
+            "phone",
+            "tablet",
+            "laptop"
+          ],
+          "padrao": "phone",
+          "resumo": "O notebook tem base articulada: fica melhor visto de cima, com `rotation` e X negativo."
+        },
+        {
           "prop": "finish",
           "tipo": "escolha",
           "valores": [
@@ -9159,6 +9170,196 @@
           "tipo": "chave",
           "padrao": true,
           "resumo": "Entra girando até a pose. Com movimento reduzido, já nasce nela."
+        }
+      ]
+    }
+  },
+  "compass": {
+    "componentes": {
+      "Compass": [
+        {
+          "prop": "idle",
+          "tipo": "chave",
+          "padrao": true,
+          "resumo": "Sozinha na tela, a agulha procura o norte de tempos em tempos."
+        },
+        {
+          "prop": "depth",
+          "tipo": "numero",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "padrao": 18,
+          "resumo": "Quanto o mostrador inclina em direção ao ponteiro, em graus."
+        },
+        {
+          "prop": "north",
+          "tipo": "texto",
+          "padrao": "N",
+          "resumo": "A letra do topo do mostrador."
+        }
+      ]
+    }
+  },
+  "drip-word": {
+    "componentes": {
+      "DripWord": [
+        {
+          "prop": "drips",
+          "tipo": "numero",
+          "min": 0,
+          "max": 7,
+          "step": 1,
+          "padrao": 6,
+          "resumo": "Quantos fios escorrem."
+        },
+        {
+          "prop": "speed",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": 40,
+          "resumo": "Velocidade da gota."
+        },
+        {
+          "prop": "ink",
+          "tipo": "texto",
+          "padrao": "var(--foreground)",
+          "resumo": "A tinta. Qualquer cor CSS ou token."
+        },
+        {
+          "prop": "word",
+          "tipo": "texto",
+          "padrao": "fluxo",
+          "resumo": "A palavra que escorre. Curta: é desenhada grande."
+        }
+      ]
+    }
+  },
+  "ratchet": {
+    "componentes": {
+      "Ratchet": [
+        {
+          "prop": "idle",
+          "tipo": "chave",
+          "padrao": true,
+          "resumo": "Sozinha na tela, a catraca dá um clique de tempos em tempos."
+        },
+        {
+          "prop": "pitch",
+          "tipo": "numero",
+          "min": 16,
+          "max": 120,
+          "step": 4,
+          "padrao": 40,
+          "resumo": "Curso do gesto por dente, em px."
+        },
+        {
+          "prop": "teeth",
+          "tipo": "numero",
+          "min": 8,
+          "max": 32,
+          "step": 1,
+          "padrao": 16,
+          "resumo": "Dentes da catraca."
+        }
+      ]
+    }
+  },
+  "raking-light": {
+    "componentes": {
+      "RakingLight": [
+        {
+          "prop": "idle",
+          "tipo": "chave",
+          "padrao": true,
+          "resumo": "Sozinha na tela, a lâmpada passeia."
+        },
+        {
+          "prop": "grain",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": 60,
+          "resumo": "Quanto a fibra do papel aparece."
+        },
+        {
+          "prop": "relief",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": 60,
+          "resumo": "Comprimento da sombra."
+        },
+        {
+          "prop": "word",
+          "tipo": "texto",
+          "padrao": "relevo",
+          "resumo": "A palavra em relevo seco. Curta: é desenhada grande."
+        }
+      ]
+    }
+  },
+  "word-dial": {
+    "componentes": {
+      "WordDial": [
+        {
+          "prop": "idle",
+          "tipo": "chave",
+          "padrao": true,
+          "resumo": "Sozinho na tela, o anel dá um passo de tempos em tempos."
+        },
+        {
+          "prop": "word",
+          "tipo": "texto",
+          "padrao": "VISANT",
+          "resumo": "A palavra. Funciona de 2 a 12 letras: as posições saem da largura de cada letra."
+        }
+      ]
+    }
+  },
+  "detent-slider": {
+    "componentes": {
+      "DetentSlider": [
+        {
+          "prop": "magnet",
+          "tipo": "numero",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "padrao": 3,
+          "resumo": "A que distância uma parada agarra."
+        },
+        {
+          "prop": "caption",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "O nome do que o número grande mede, em uma linha acima dele.",
+          "inicial": "Resultado ao fechar"
+        }
+      ]
+    }
+  },
+  "route-profile": {
+    "componentes": {
+      "RouteProfile": [
+        {
+          "prop": "idle",
+          "tipo": "chave",
+          "padrao": true,
+          "resumo": "Sozinho na tela, o cursor passeia até alguém pegar nele."
+        },
+        {
+          "prop": "distance",
+          "tipo": "numero",
+          "min": 1,
+          "max": 200,
+          "step": 1,
+          "padrao": 18,
+          "resumo": "Distância total, em km."
         }
       ]
     }

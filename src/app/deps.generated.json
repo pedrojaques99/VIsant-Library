@@ -371,5 +371,34 @@
   ],
   "device-frame": [
     "motion"
+  ],
+  "use-idle": [
+    "motion"
+  ],
+  "use-tilt": [
+    "react"
+  ],
+  "compass": [
+    "motion"
+  ],
+  "drip-word": [
+    "motion",
+    "react"
+  ],
+  "ratchet": [
+    "motion"
+  ],
+  "raking-light": [
+    "motion"
+  ],
+  "word-dial": [
+    "motion"
+  ],
+  "detent-slider": [
+    "motion"
+  ],
+  "route-profile": [
+    "motion",
+    "react"
   ]
 }

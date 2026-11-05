@@ -469,5 +469,12 @@
   },
   "textura-watch": {
     "className": "h-full min-h-0 w-full"
+  },
+  "raking-light": {
+    "className": "h-full w-full rounded-none"
+  },
+  "detent-slider": {
+    "caption": "Resultado ao fechar",
+    "label": "Quanto fechar"
   }
 }

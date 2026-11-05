@@ -1,5 +1,10 @@
 {
   "//": "Ajuste manual dos knobs derivados por scripts/controls.mjs. Só o que o automático errou — nunca a lista inteira, senão volta a envelhecer a cada prop nova. Chaves: esconder [prop], ordem [prop], ajustes {prop: {min,max,step,valores,rotulo}}, presets [{nome, props}]. O padrão de uma prop NUNCA vem daqui: vem do código. Preset diz só o que MUDA — o que ele omite fica no valor que a demo tem no palco.",
+  "compass": { "esconder": ["defaultBearing", "bearing", "label"] },
+  "ratchet": { "esconder": ["label"] },
+  "word-dial": { "esconder": ["label"] },
+  "detent-slider": { "esconder": ["value", "defaultValue", "label"] },
+  "route-profile": { "esconder": ["defaultPosition", "label"] },
   "auth-button": {
     "presets": [
       {

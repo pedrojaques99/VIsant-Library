@@ -1,0 +1,31 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "use-tilt",
+  "title": "useTilt",
+  "author": "Visant Labs <visantsupply@gmail.com>",
+  "description": "A inclinação lateral do celular, com o pedido de permissão do iOS dentro do gesto. Sem sensor, nada acontece.",
+  "dependencies": [
+    "react"
+  ],
+  "files": [
+    {
+      "path": "registry/visant/hooks/use-tilt.ts",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\n\ntype ComPermissao = { requestPermission?: () => Promise<\"granted\" | \"denied\"> };\n\n/**\n * A inclinação lateral do celular (`gamma`, em graus), depois de `enable()`.\n *\n * O iOS só concede o sensor dentro de um gesto, então `enable` tem de rodar num\n * `pointerdown`. Recusou ou não existe sensor: nada acontece, e o arrasto da peça\n * continua sendo o caminho. Nunca é a única entrada.\n */\nexport function useTilt(fn: (gamma: number) => void) {\n  const [on, setOn] = React.useState(false);\n  const eco = React.useRef(fn);\n  eco.current = fn;\n  React.useEffect(() => {\n    if (!on) return;\n    const ouvir = (e: DeviceOrientationEvent) => {\n      if (e.gamma !== null) eco.current(e.gamma);\n    };\n    window.addEventListener(\"deviceorientation\", ouvir);\n    return () => window.removeEventListener(\"deviceorientation\", ouvir);\n  }, [on]);\n  const enable = React.useCallback(() => {\n    if (on || typeof DeviceOrientationEvent === \"undefined\") return;\n    const pedir = (DeviceOrientationEvent as unknown as ComPermissao).requestPermission;\n    if (!pedir) return setOn(true);\n    pedir().then(\n      (r) => {\n        if (r === \"granted\") setOn(true);\n      },\n      () => {},\n    );\n  }, [on]);\n  return { on, enable };\n}\n",
+      "type": "registry:hook",
+      "target": "@hooks/use-tilt.ts"
+    }
+  ],
+  "meta": {
+    "uso": {
+      "quando": "Deixar a inclinação do aparelho pilotar uma peça que já funciona por arrasto",
+      "evite": "Como única entrada: boa parte dos aparelhos não concede o sensor"
+    }
+  },
+  "categories": [
+    "fundacao",
+    "hook",
+    "giroscopio",
+    "toque"
+  ],
+  "type": "registry:hook"
+}

@@ -193,5 +193,14 @@
   "glass-board": "react",
   "color-picker": "react",
   "sensor-dial": "react",
-  "device-frame": "react"
+  "device-frame": "react",
+  "use-idle": "react",
+  "use-tilt": "react",
+  "compass": "react",
+  "drip-word": "react",
+  "ratchet": "react",
+  "raking-light": "react",
+  "word-dial": "react",
+  "detent-slider": "react",
+  "route-profile": "react"
 }

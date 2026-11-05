@@ -118,3 +118,15 @@ The MIT license (LICENSE) covers the source code. Photos, videos and other media
 ## Liquid Glass
 
 - `liquid-glass`: miolo copiado de [rizroze/liquid-glass](https://github.com/rizroze/liquid-glass) (MIT, Copyright (c) 2026 Riz Roze), com as cores do mapa de deslocamento escritas em `rgb()`. A licença completa vai no cabeçalho do arquivo.
+
+<!-- lab-promovidas -->
+
+## Promovidas do laboratório (2026-11)
+
+Código próprio. A referência foi só visual e deu o princípio; nenhum layout, imagem, código ou texto da fonte foi copiado:
+
+- `word-dial`: inspirado no princípio de "AYNI Andean Boutique Hotel", Katherine Dodds (https://www.behance.net/gallery/248693823/AYNI-Andean-Boutique-Hotel)
+- `detent-slider`: inspirado no princípio de "CFI", Fireart Studio (https://www.behance.net/gallery/239914091/CFI)
+- `route-profile`: inspirado no princípio de "TheTrail App – Travel Dashboard & UX UI Design", Rondesignlab (https://www.behance.net/gallery/236308597/TheTrail-App-Travel-Dashboard-UX-UI-Design)
+
+Sem fonte de terceiros no `meta` do experimento: `compass`, `drip-word`, `ratchet`, `raking-light`.

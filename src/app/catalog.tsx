@@ -255,6 +255,8 @@ const FUNDOS = new Set([
   "glass-tabs",
   "glass-switch",
   "glass-board",
+  // O papel é a peça: a lâmpada anda pela folha inteira, até a borda do palco.
+  "raking-light",
 ]);
 export const sangra = (item: Pick<CatalogItem, "name">) => /^(shader|textura)-/.test(item.name) || FUNDOS.has(item.name);
 
@@ -569,6 +571,13 @@ const GlassTabsVidroDemo = React.lazy(() => import("./demos/glass-tabs-demo"));
 const GlassSwitchVidroDemo = React.lazy(() => import("./demos/glass-switch-demo"));
 const GlassBoardVidroDemo = React.lazy(() => import("./demos/glass-board-demo"));
 const SensorDialVidroDemo = React.lazy(() => import("./demos/sensor-dial-demo"));
+const CompassLabDemo = React.lazy(() => import("./demos/compass-demo"));
+const DripWordLabDemo = React.lazy(() => import("./demos/drip-word-demo"));
+const RatchetLabDemo = React.lazy(() => import("./demos/ratchet-demo"));
+const RakingLightLabDemo = React.lazy(() => import("./demos/raking-light-demo"));
+const WordDialLabDemo = React.lazy(() => import("./demos/word-dial-demo"));
+const DetentSliderLabDemo = React.lazy(() => import("./demos/detent-slider-demo"));
+const RouteProfileLabDemo = React.lazy(() => import("./demos/route-profile-demo"));
 const ColorPickerDemo = React.lazy(() => import("./demos/color-picker-demo"));
 const DeviceFrameVidroDemo = React.lazy(() => import("./demos/device-frame-demo"));
 const TexturaTilesColheitaDemo = React.lazy(() => import("./demos/textura-tiles-demo"));
@@ -2947,10 +2956,113 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "conteudo",
     description:
-      "Aparelho em CSS 3D com a tela viva dentro: cinco poses, entrada animada e balanço por ponteiro, flutuação ou rolagem.",
+      "Aparelho em CSS 3D com a tela viva dentro: celular, tablet ou notebook, cinco poses, entrada animada e balanço por ponteiro, flutuação ou rolagem.",
     tags: ["mockup","celular","aparelho","3d","tela"],
     demo: DeviceFrameVidroDemo,
     preview: { w: 420, h: 640 },
+  },
+  {
+    name: "use-idle",
+    title: "useIdle",
+    type: "hook",
+    family: "fundacao",
+    description:
+      "Chama uma função enquanto a peça está na tela e ninguém mexe nela, e cala com movimento reduzido. Vem com useInView.",
+    tags: ["hook","gesto","toque"],
+  },
+  {
+    name: "use-tilt",
+    title: "useTilt",
+    type: "hook",
+    family: "fundacao",
+    description:
+      "A inclinação lateral do celular, com o pedido de permissão do iOS dentro do gesto. Sem sensor, nada acontece.",
+    tags: ["hook","giroscópio","toque"],
+  },
+  {
+    name: "word-dial",
+    title: "Word Dial",
+    type: "ui",
+    family: "texto",
+    description:
+      "Um anel que reordena as letras de uma palavra em linha, onda, anel, escada e espelho, com paradas como um tambor de caleidoscópio.",
+    tags: ["palavra","tipografia","marca","anel","arranjo"],
+    demo: WordDialLabDemo,
+    knobs: "WordDial",
+    preview: { w: 420, h: 420 },
+  },
+  {
+    name: "compass",
+    title: "Compass",
+    type: "ui",
+    family: "controles",
+    description:
+      "Bússola em camadas: a agulha vai até o ponteiro, passa e volta, e o mostrador inclina em direção à mão.",
+    tags: ["bússola","mostrador","3d","mola","direção"],
+    demo: CompassLabDemo,
+    knobs: "Compass",
+    preview: { w: 400, h: 400 },
+  },
+  {
+    name: "drip-word",
+    title: "Drip Word",
+    type: "ui",
+    family: "texto",
+    description:
+      "Uma palavra de tinta viscosa em shader: dos pés das letras descem fios que soltam a gota, e arrastar de lado inclina a gravidade.",
+    tags: ["shader","webgl","líquido","gota","palavra","tipografia"],
+    demo: DripWordLabDemo,
+    knobs: "DripWord",
+    preview: { w: 560, h: 380 },
+  },
+  {
+    name: "ratchet",
+    title: "Ratchet",
+    type: "ui",
+    family: "controles",
+    description:
+      "Catraca de aço: o gesto dá corda numa roda que só gira para um lado, com a lingueta caindo a cada dente.",
+    tags: ["catraca","engrenagem","metal","gesto","clique"],
+    demo: RatchetLabDemo,
+    knobs: "Ratchet",
+    preview: { w: 360, h: 360 },
+  },
+  {
+    name: "raking-light",
+    // palco-check: é fundo e sangra: no ladrilho e na ficha preenche o palco, a caixa do preview não vale
+    title: "Raking Light",
+    type: "ui",
+    family: "texto",
+    description:
+      "Relevo seco em papel com fibra: a palavra só existe na sombra e no brilho de uma lâmpada baixa que passeia sobre a folha.",
+    tags: ["relevo","papel","luz","textura","grão","tipografia"],
+    demo: RakingLightLabDemo,
+    knobs: "RakingLight",
+    preview: { w: 560, h: 340 },
+  },
+  {
+    name: "detent-slider",
+    title: "Detent Slider",
+    type: "ui",
+    family: "controles",
+    description:
+      "Slider com paradas que agarram e a consequência em letra grande, com dígitos que rolam antes de confirmar.",
+    tags: ["slider","paradas","percentual","formulário","dígitos"],
+    demo: DetentSliderLabDemo,
+    knobs: "DetentSlider",
+    preview: { w: 400, h: 300 },
+  },
+  {
+    name: "route-profile",
+    title: "Route Profile",
+    type: "ui",
+    family: "conteudo",
+    description:
+      "Perfil de terreno que se lê arrastando: a altitude e a rampa sob o cursor, e um clinômetro cuja agulha balança com a inclinação.",
+    tags: ["rota","gráfico","altitude","terreno","clinômetro"],
+    demo: RouteProfileLabDemo,
+    knobs: "RouteProfile",
+    preview: { w: 440, h: 300 },
   },
 ];
 
