@@ -730,5 +730,41 @@
   "color-picker": {
     "quando": "Escolher uma cor livre num editor, tema ou painel de marca",
     "evite": "Escolher entre poucas cores fixas: chip; ajustar um número: scrub-input"
+  },
+  "compass": {
+    "quando": "Mostrar ou escolher uma direção, ou dar um objeto vivo a uma página que fala de rumo",
+    "evite": "Alinhar com um alvo: sensor-dial; escolher uma hora: time-dial"
+  },
+  "drip-word": {
+    "quando": "Uma palavra de abertura com presença, em dobra de marca ou tela de entrada",
+    "evite": "Texto que derrete sob o cursor: heat-word; texto corrido ou título longo: line-reveal"
+  },
+  "ratchet": {
+    "quando": "Um gesto de dar corda: contar passos para a frente, avançar sem poder voltar",
+    "evite": "Ajustar um número nos dois sentidos: scrub-input; girar para os dois lados: vintage-knob"
+  },
+  "raking-light": {
+    "quando": "Uma palavra ou nome com tato de papel, em abertura de marca ou capa",
+    "evite": "Palavra que precisa ser lida de imediato ou em texto pequeno: line-reveal"
+  },
+  "word-dial": {
+    "quando": "Mostrar uma marca ou palavra-chave que muda de arranjo sem deixar de ser ela",
+    "evite": "Trocar uma palavra por outra: text-morph; escolher entre opções de verdade: segmented-control"
+  },
+  "detent-slider": {
+    "quando": "Escolher quanto de algo, vendo o resultado antes de confirmar: fechar parte, dividir, repartir",
+    "evite": "Simular um cenário com vários valores: sim-slider; ajustar sem consequência a mostrar: elastic-slider"
+  },
+  "route-profile": {
+    "quando": "Mostrar uma rota, trilha ou prova pelo relevo, com leitura ponto a ponto",
+    "evite": "Uma série de números sem terreno: streamgraph; só um nível, sem percurso: gauge"
+  },
+  "use-idle": {
+    "quando": "Peça com gesto que precisa parecer viva no celular, onde não existe hover",
+    "evite": "Animação contínua: requestAnimationFrame no próprio componente"
+  },
+  "use-tilt": {
+    "quando": "Deixar a inclinação do aparelho pilotar uma peça que já funciona por arrasto",
+    "evite": "Como única entrada: boa parte dos aparelhos não concede o sensor"
   }
 }

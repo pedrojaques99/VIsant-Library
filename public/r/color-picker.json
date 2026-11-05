@@ -18,10 +18,19 @@
       "type": "registry:ui"
     }
   ],
+  "meta": {
+    "uso": {
+      "quando": "Escolher uma cor livre num editor, tema ou painel de marca",
+      "evite": "Escolher entre poucas cores fixas: chip; ajustar um número: scrub-input"
+    }
+  },
   "categories": [
     "controles",
     "cor",
     "seletor",
+    "hex",
+    "conta-gotas",
+    "paleta",
     "editor"
   ],
   "type": "registry:ui"

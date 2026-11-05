@@ -162,5 +162,9 @@
   "textura-pillars": {
     "contextos": 1,
     "pesada": false
+  },
+  "drip-word": {
+    "contextos": 1,
+    "pesada": false
   }
 }

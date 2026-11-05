@@ -232,6 +232,14 @@ for (const nome of ITENS) {
          */
         if (el.closest("[disabled],[aria-disabled='true']")) continue;
 
+        /*
+         * Relevo seco (`raking-light`): a palavra tem a cor do papel por desenho e só
+         * existe na sombra e no brilho, então a cor computada dá 1:1 sempre. O nome
+         * chega ao leitor de tela pelo `aria-label`, e o `uso` da peça manda não usar
+         * onde a palavra precisa ser lida de imediato.
+         */
+        if (el.closest("[data-relevo]")) continue;
+
         const [cr, cg, cb, ca] = parse(cs.color);
         const fundo = fundoEfetivo(el);
         // A opacidade do próprio elemento entra na conta: `opacity-70` num
