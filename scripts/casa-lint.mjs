@@ -40,7 +40,7 @@ export const CASCA = [
   "src/app/copy-command.tsx",
   "src/app/bug-report.tsx",
   "src/app/media.tsx",
-  "src/app/MinhasMarcas.tsx",
+  "src/app/MarcaDaCasa.tsx",
   "src/app/dep-badges.tsx",
   "src/app/controls.tsx",
   "src/app/ItemDocs.tsx",

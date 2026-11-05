@@ -96,6 +96,8 @@ test.describe("catálogo — índice de categorias", () => {
   test("o índice lista o acervo inteiro e só monta o que está perto da tela", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(INDICE);
+    // Espera a grade, não o relógio: com o servidor frio, 800ms contava zero cards.
+    await page.locator(PECA).first().waitFor();
     await page.waitForTimeout(800);
 
     const total = await page.locator(PECA).count();

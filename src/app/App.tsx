@@ -57,9 +57,7 @@ const KitRoom = React.lazy(() =>
   })),
 );
 /* Só a marca do cabeçalho pedia cmdk, Radix e o logo: chegam depois da primeira dobra. */
-const BrandSelector = React.lazy(() =>
-  import("../../registry/visant/ui/brand-selector").then((m) => ({ default: m.BrandSelector })),
-);
+const MarcaDaCasa = React.lazy(() => import("./MarcaDaCasa").then((m) => ({ default: m.MarcaDaCasa })));
 const Conectar = React.lazy(() => import("./conectar").then((m) => ({ default: m.Conectar })));
 /* O rodapé nunca está na primeira dobra de quem chega: fora da entrada, ele não pesa em /skills. */
 const Rodape = React.lazy(() => import("./rodape").then((m) => ({ default: m.Rodape })));
@@ -99,8 +97,7 @@ const SkillsCarroChefe = React.lazy(() => import("./skills/CarroChefe").then((m)
 const SkillsComoUsar = React.lazy(() => import("./skills/ComoUsar").then((m) => ({ default: m.ComoUsar })));
 import { FAMILIA_DA_PECA } from "./rota-familia";
 import { DEFAULT_BRAND, REGISTRY_URL } from "./registry-meta";
-import { VisantAuthProvider } from "./visant-auth";
-import { MinhasMarcas } from "./MinhasMarcas";
+import { VisantAuthProvider, useVisantAuth } from "./visant-auth";
 import { contarPagina } from "./metricas";
 
 type View = "kits" | "catalogo" | "marca" | "mockups" | "lab" | "burilar" | "admin" | "docs" | "skills" | "404";
@@ -462,17 +459,12 @@ function Shell() {
             >
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
-            {/*
-              O seletor do registry, em versão de cabeçalho: a marca e o nome.
-              A fonte, a versão, as amostras e o atalho continuam lá dentro do
-              diálogo, que é onde se escolhe; no gatilho eram ruído. O atalho
-              segue valendo, só não é anunciado.
-            */}
+            {/* Um botão para toda marca: as de demonstração e as da conta. O atalho vale, só não é anunciado. */}
             {/* O vão espera do tamanho do gatilho: a marca chegar não empurra o resto da linha. */}
             <React.Suspense fallback={<span aria-hidden className={VAO_DA_MARCA} />}>
-              {dobraAssentada ? <BrandSelector className={GATILHO_DE_MARCA} /> : <span aria-hidden className={VAO_DA_MARCA} />}
+              {dobraAssentada ? <MarcaDaCasa /> : <span aria-hidden className={VAO_DA_MARCA} />}
             </React.Suspense>
-            <MinhasMarcas />
+            <BotaoEntrar />
           </div>
         </div>
       </header>
@@ -565,28 +557,23 @@ function Shell() {
   );
 }
 
-/*
- * O gatilho do seletor de marca, enxuto por fora.
- *
- * O `BrandSelector` é peça publicada: clientes instalam aquele botão com nome,
- * fonte, versão, amostras e atalho, e está certo para um painel de produto. No
- * cabeçalho de uma vitrine ele era o controle mais barulhento da tela. Em vez de
- * editar a peça (o que mudaria o que o `add` entrega), a casa esconde por fora o
- * que não decide nada aqui: a linha de fonte e versão, as amostras e a tecla.
- */
-// casa-lint/vidro: aqui o blur é DESLIGADO — a peça publicada traz o vidro de fábrica
 const VAO_DA_MARCA = "h-8 w-[5.5rem] shrink-0 max-[479px]:w-11 pointer-coarse:h-11";
 
-const GATILHO_DE_MARCA = [
-  /* O nome da marca é o que menos cabe: no celular fica o ícone, e o nome segue para leitor de tela. */
-  "max-[479px]:[&>span:nth-child(2)]:sr-only max-[479px]:!pr-1 max-w-48 pointer-coarse:!h-11 pointer-coarse:min-w-11 pointer-coarse:justify-center",
-  // casa-lint/vidro: aqui o blur é DESLIGADO — a peça publicada traz o vidro de fábrica
-  "h-8 gap-2 !rounded-control !border-0 !bg-transparent !py-0 !pl-1 !pr-2.5 !backdrop-blur-none",
-  "hover:!bg-casa-tile hover:![box-shadow:none] active:!scale-100",
-  "[&>span:first-child]:!h-5 [&>span:first-child]:!w-5 [&>span:first-child]:!rounded-[6px] [&>span:first-child]:!border-0",
-  "[&>span:nth-child(2)>span:last-child]:hidden [&>span:nth-child(2)>span:first-child]:!text-casa-base [&>span:nth-child(2)>span:first-child]:!font-normal",
-  "[&>span:nth-child(3)]:!hidden [&>kbd]:!hidden",
-].join(" ");
+/** Fora da conta é uma ação à parte; depois de entrar, tudo mora no botão da marca. */
+function BotaoEntrar() {
+  const { estado, entrar } = useVisantAuth();
+  if (estado === "carregando") return <div className="h-8 w-8" aria-hidden />;
+  if (estado === "dentro") return null;
+  return (
+    <button
+      type="button"
+      onClick={() => void entrar()}
+      className="alvo-toque flex h-8 shrink-0 items-center whitespace-nowrap rounded-control px-2.5 text-casa-base text-casa-fg-2 transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-out)] hover:bg-casa-tile hover:text-casa-fg"
+    >
+      Entrar
+    </button>
+  );
+}
 
 /**
  * As portas da casa, em texto: a ativa em tom cheio, as outras no tom de

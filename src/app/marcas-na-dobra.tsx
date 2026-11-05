@@ -15,6 +15,7 @@
 
 import * as React from "react";
 import { useBrandTheme, type BrandSummary } from "@/lib/brand-theme";
+import { PREFIXO_DA_CONTA, useMarcaPintada } from "@/lib/marca-pintada";
 import { useDobraAssentada } from "@/lib/rede";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +56,8 @@ export function MarcasNaDobra({ className }: { className?: string }) {
   const { brands, active, setBrand } = useBrandTheme();
   const assentada = useDobraAssentada();
   const lista = assentada ? brands.slice(0, 4) : [];
+  /* Com marca da conta na tela, nenhuma destas está vestida: marcar uma seria mentira. */
+  const daConta = useMarcaPintada()?.startsWith(PREFIXO_DA_CONTA);
 
   return (
     <div
@@ -64,7 +67,7 @@ export function MarcasNaDobra({ className }: { className?: string }) {
       className={cn("-ml-1.5 flex h-11 w-fit max-w-full items-center gap-1", className)}
     >
       {lista.map((marca) => {
-        const ativa = active?.slug === marca.slug;
+        const ativa = !daConta && active?.slug === marca.slug;
         return (
           <button
             key={marca.slug}
@@ -83,7 +86,7 @@ export function MarcasNaDobra({ className }: { className?: string }) {
           </button>
         );
       })}
-      {active && lista.length ? <span className="ml-1.5 truncate text-casa-sm text-casa-fg-2 sm:hidden">{active.name}</span> : null}
+      {active && !daConta && lista.length ? <span className="ml-1.5 truncate text-casa-sm text-casa-fg-2 sm:hidden">{active.name}</span> : null}
     </div>
   );
 }
