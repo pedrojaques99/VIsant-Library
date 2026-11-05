@@ -342,16 +342,19 @@ export function DripWord({ word = "fluxo", ink = "var(--foreground)", drips = 6,
       pes.forEach((pe, i) => {
         const semente = fracao(Math.sin((i + 1) * 12.9898) * 43758.5453);
         const periodo = 8 + semente * 7;
-        const fase = fracao(t / periodo + semente);
+        // Movimento reduzido: um quadro só, sempre com a gota ainda presa ao fio.
+        const ciclo = fracao(t / periodo + semente);
+        const fase = reduz ? Math.max(0.3, Math.min(ciclo, 0.62)) : ciclo;
         const alcance = 0.1 + semente * 0.24;
         const cresce = liso(0, 0.68, fase) * alcance;
         const solta = Math.max(0, fase - 0.68) / 0.32;
         const queda = solta * solta * 1.1;
-        const raiz = pe.y + solta * cresce;
         const ponta = pe.y + cresce + queda;
+        // Solta o fio depressa: a raiz corre atrás da gota, ou a queda esticaria uma linha até o chão.
+        const raiz = solta > 0 ? ponta - Math.max(cresce * (1 - liso(0, 0.22, solta)), 0.012) : pe.y;
         const x = pe.x * asp;
         fios[i * 4] = x;
-        fios[i * 4 + 1] = Math.min(raiz, ponta - 0.001);
+        fios[i * 4 + 1] = raiz;
         fios[i * 4 + 2] = x + inclina * 0.5 * (ponta - pe.y);
         fios[i * 4 + 3] = ponta;
         const nasce = liso(0, 0.1, fase);
