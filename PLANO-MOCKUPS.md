@@ -2,7 +2,7 @@
 
 ## Situação em 2026-11-05 (depois do "corrija todos")
 
-Feito no working tree, **sem commit e sem deploy**. Etapas 1 e 2 prontas, os 15 defeitos corrigidos, e a etapa 3 parada no portão visual, à espera do dono.
+No ar desde 2026-11-05 (14a8fb6). Etapas 1 e 2 prontas, os 15 defeitos corrigidos. O 3D fica como opção futura; o dono prefere 2D minimalista e contorno.
 
 | Antes | Agora |
 |---|---|
@@ -44,9 +44,13 @@ Conceitos, nunca imagem nem marca deles.
 | Export para scroll (sequência de quadros) | Médio | O laço de export já produz cada quadro |
 | Lente real com profundidade | Depende do 3D | Hoje o foco é máscara e desfoque |
 
+## Conferência em produção
+
+PNG e MP4 exportados em 1920×1080 (MP4 a 149 ms por quadro, H.264, 30 quadros), sem erro de console nem resposta 4xx/5xx, e o caminho de volta ao site funciona. Uma captura mostrou a aba Aparelho acesa com o conteúdo de Tela; cinco repetições da mesma sequência não reproduziram, com estado e pixels certos. Fica registrado como não reproduzido.
+
 ## Não verificado nesta rodada
 
-Safari, Firefox e iPhone real. Máquina fraca. Export em 4K, WebM comum e GIF. Sessão logada. Arrasto real de arquivo do sistema sobre o palco (colar e seletor foram testados; soltar só pelo código).
+Safari, Firefox e iPhone real. Máquina fraca. Export em 4K, WebM comum e GIF. Sessão logada. Contagem `estudio` chegando ao banco (a conferência rodou como admin, que não conta). Arrasto real de arquivo do sistema sobre o palco (colar e seletor foram testados; soltar só pelo código).
 
 ---
 
