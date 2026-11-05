@@ -36,12 +36,12 @@ const LETRA = "col-start-1 row-start-1 leading-none";
 function FibraDeLuz({ id, azimute }: { id: string; azimute: number }) {
   return (
     <filter id={id} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.7 1.05" numOctaves={3} seed={7} result="fibra" />
-      <feDiffuseLighting in="fibra" surfaceScale={0.55} lightingColor="white" result="luz">
+      <feTurbulence type="fractalNoise" baseFrequency="0.95 1.3" numOctaves={2} seed={7} result="fibra" />
+      <feDiffuseLighting in="fibra" surfaceScale={0.4} lightingColor="white" result="luz">
         <feDistantLight azimuth={azimute} elevation={48} />
       </feDiffuseLighting>
-      <feColorMatrix in="luz" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.4 0 0 0 1.784" result="vale" />
-      <feColorMatrix in="luz" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  2.4 0 0 0 -1.784" result="crista" />
+      <feColorMatrix in="luz" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -1.5 0 0 0 1.115" result="vale" />
+      <feColorMatrix in="luz" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  1.5 0 0 0 -1.115" result="crista" />
       <feMerge>
         <feMergeNode in="vale" />
         <feMergeNode in="crista" />
@@ -68,7 +68,7 @@ function FibraDeLuz({ id, azimute }: { id: string; azimute: number }) {
  *   posiciona a lâmpada na altura.
  * - **Movimento reduzido:** a lâmpada vai direto, sem mola e sem passeio.
  */
-export function RakingLight({ word = "relevo", relief = 60, grain = 60, idle = true, className, ...rest }: RakingLightProps) {
+export function RakingLight({ word = "relevo", relief = 70, grain = 45, idle = true, className, ...rest }: RakingLightProps) {
   const reduz = useReducedMotion();
   const uid = React.useId().replace(/[^a-zA-Z0-9]/g, "");
   const caixa = React.useRef<HTMLDivElement>(null);
@@ -80,7 +80,7 @@ export function RakingLight({ word = "relevo", relief = 60, grain = 60, idle = t
   const lx = reduz ? tx : sx;
   const ly = reduz ? ty : sy;
 
-  const emSombra = relief / 1000;
+  const emSombra = relief / 800;
   const longeX = useTransform(lx, (v) => `${-v * emSombra}em`);
   const longeY = useTransform(ly, (v) => `${-v * emSombra}em`);
   const pertoX = useTransform(lx, (v) => `${(-v * emSombra) / 2}em`);
@@ -150,10 +150,6 @@ export function RakingLight({ word = "relevo", relief = 60, grain = 60, idle = t
             <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves={3} seed={3} result="ruido" />
             <feDisplacementMap in="SourceGraphic" in2="ruido" scale={2} />
           </filter>
-          <filter id={`${uid}m`} x="0" y="0" width="100%" height="100%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.012 0.02" numOctaves={3} seed={11} />
-            <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.1 0 0 0 -0.42" />
-          </filter>
         </defs>
       </svg>
 
@@ -162,16 +158,12 @@ export function RakingLight({ word = "relevo", relief = 60, grain = 60, idle = t
         style={{ x: pocaX, y: pocaY }}
         className="pointer-events-none absolute -inset-1/2 -z-10 [background:radial-gradient(closest-side,color-mix(in_srgb,white_34%,transparent),transparent)]"
       />
-      {/* O tom que varia devagar: papel de verdade nunca é uma cor só. */}
-      <svg aria-hidden className="pointer-events-none absolute inset-0 -z-10 size-full" style={{ opacity: forca * 0.32 }}>
-        <rect width="100%" height="100%" filter={`url(#${uid}m)`} />
-      </svg>
 
       <div aria-hidden data-relevo className="grid text-[min(23cqw,10rem)] font-medium tracking-[-0.03em] [font-family:var(--font-display,inherit)]">
-        <motion.span style={{ x: longeX, y: longeY, color: SOMBRA, filter: `url(#${uid}b) blur(3px)` }} className={cn(LETRA, "opacity-60")}>
+        <motion.span style={{ x: longeX, y: longeY, color: SOMBRA, filter: `url(#${uid}b) blur(0.025em)` }} className={cn(LETRA, "opacity-70")}>
           {word}
         </motion.span>
-        <motion.span style={{ x: pertoX, y: pertoY, color: SOMBRA, filter: `url(#${uid}b) blur(0.75px)` }} className={cn(LETRA, "opacity-80")}>
+        <motion.span style={{ x: pertoX, y: pertoY, color: SOMBRA, filter: `url(#${uid}b) blur(0.006em)` }} className={LETRA}>
           {word}
         </motion.span>
         <motion.span style={{ x: brilhoX, y: brilhoY, color: LUZ, filter: `url(#${uid}b)` }} className={LETRA}>

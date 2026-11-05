@@ -8463,7 +8463,7 @@
       "name": "raking-light",
       "type": "registry:ui",
       "title": "Raking Light",
-      "description": "Relevo seco em papel com fibra: a palavra só existe na sombra e no brilho de uma lâmpada baixa que passeia sobre a folha.",
+      "description": "Relevo seco em papel com fibra: a palavra só existe na sombra e no brilho de uma lâmpada baixa.",
       "dependencies": [
         "motion"
       ],

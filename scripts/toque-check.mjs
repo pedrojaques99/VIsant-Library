@@ -80,9 +80,9 @@ const SEGURA_VERTICAL = {
   "vintage-eq": "cada fader é vertical",
   "vintage-xy-pad": "o campo usa os dois eixos: a área é reservada",
   "vintage-parametric-eq": "as alças andam nos dois eixos",
-  compass: "a agulha segue o dedo em volta: a área é o próprio mostrador",
-  ratchet: "dar corda é arrastar em pé: a área é a própria catraca",
-  "word-dial": "girar o anel usa os dois eixos: a área é o próprio anel",
+  compass: "gesto circular só no mostrador redondo: fora dele a página rola",
+  ratchet: "gesto circular só na roda: fora dela a página rola",
+  "word-dial": "gesto circular só no anel: fora dele a página rola",
 };
 
 /** Gritos combinados: o mesmo filtro de tests/vitrine.spec.ts e do interacao-check. */

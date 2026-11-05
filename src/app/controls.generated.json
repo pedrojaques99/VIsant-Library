@@ -9253,7 +9253,7 @@
           "max": 120,
           "step": 4,
           "padrao": 40,
-          "resumo": "Curso do gesto por dente, em px."
+          "resumo": "Curso da roda do mouse por dente, em px. O arrasto não usa: uma volta do dedo é uma volta da roda."
         },
         {
           "prop": "teeth",
@@ -9282,7 +9282,7 @@
           "min": 0,
           "max": 100,
           "step": 1,
-          "padrao": 60,
+          "padrao": 45,
           "resumo": "Quanto a fibra do papel aparece."
         },
         {
@@ -9291,7 +9291,7 @@
           "min": 0,
           "max": 100,
           "step": 1,
-          "padrao": 60,
+          "padrao": 70,
           "resumo": "Comprimento da sombra."
         },
         {
@@ -9316,7 +9316,7 @@
           "prop": "word",
           "tipo": "texto",
           "padrao": "VISANT",
-          "resumo": "A palavra. Funciona de 2 a 12 letras: as posições saem da largura de cada letra."
+          "resumo": "A palavra. O corpo se ajusta para caber: as posições saem da largura de cada letra."
         }
       ]
     }

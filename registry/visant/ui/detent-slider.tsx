@@ -30,6 +30,8 @@ export interface DetentSliderProps extends Omit<React.HTMLAttributes<HTMLDivElem
   caption?: string;
   /** O botão de confirmar. Sem ele, a peça é só o controle. */
   action?: string | ((value: number) => string);
+  /** O que o botão diz por 2 segundos depois de confirmar, ou até o valor mudar. */
+  confirmedAction?: string | ((value: number) => string);
   /** Nome do controle para leitor de tela. */
   label?: string;
   onValueChange?: (value: number) => void;
@@ -89,7 +91,10 @@ function Rolante({ texto, reduz }: { texto: string; reduz: boolean | null }) {
  *   direita evita que o número dance.
  * - **Sem cor própria.** A versão do laboratório tinha um brilho iridescente e verde e
  *   vermelho no resultado; caiu tudo. O sinal do número já diz se é ganho ou perda.
- * - **`pan-y`.** O gesto é de lado: rolar a página em pé continua funcionando por cima.
+ * - **`pan-y`, e o dedo só mexe no valor depois de andar de lado.** Sem isso, o começo de
+ *   uma rolagem em pé já arrastava o polegar. Toque parado também escolhe, ao soltar.
+ * - **Confirmar responde.** O botão troca de texto e de preenchimento, e volta sozinho em
+ *   2 segundos ou quando o valor muda.
  * - **Movimento reduzido:** o número e o polegar pousam, sem rolar e sem pulso.
  */
 export function DetentSlider({
@@ -100,6 +105,7 @@ export function DetentSlider({
   format = (v) => `${v}%`,
   caption,
   action,
+  confirmedAction = "Confirmado",
   label = "Valor",
   onValueChange,
   onAction,
@@ -109,6 +115,8 @@ export function DetentSlider({
   const reduz = useReducedMotion();
   const trilho = React.useRef<HTMLDivElement>(null);
   const [interno, setInterno] = React.useState(defaultValue);
+  const [confirmado, setConfirmado] = React.useState(false);
+  const inicio = React.useRef<{ x: number; y: number; decidido: boolean } | null>(null);
   const atual = limita(value ?? interno);
   const polegar = useSpring(atual, MOLA);
   const pulso = useSpring(1, { stiffness: 600, damping: 18 });
@@ -119,6 +127,13 @@ export function DetentSlider({
     if (reduz) polegar.jump(atual);
     else polegar.set(atual);
   }, [atual, reduz, polegar]);
+
+  React.useEffect(() => setConfirmado(false), [atual]);
+  React.useEffect(() => {
+    if (!confirmado) return;
+    const t = window.setTimeout(() => setConfirmado(false), 2000);
+    return () => window.clearTimeout(t);
+  }, [confirmado]);
 
   const definir = (proximo: number, agarra = false) => {
     const alvo = agarra ? (stops.find((s) => Math.abs(s-proximo) <= magnet) ?? proximo) : proximo;
@@ -141,6 +156,7 @@ export function DetentSlider({
   };
   const resultado = format(atual);
   const rotulo = typeof action === "function" ? action(atual) : action;
+  const feito = typeof confirmedAction === "function" ? confirmedAction(atual) : confirmedAction;
 
   return (
     <div className={cn("flex w-full max-w-sm flex-col gap-5 text-foreground", className)} {...rest}>
@@ -162,11 +178,25 @@ export function DetentSlider({
         aria-valuetext={`${atual}%, ${resultado}`}
         onPointerDown={(e) => {
           e.currentTarget.setPointerCapture(e.pointerId);
-          definir(doX(e.clientX), true);
+          const dedo = e.pointerType === "touch";
+          inicio.current = { x: e.clientX, y: e.clientY, decidido: !dedo };
+          if (!dedo) definir(doX(e.clientX), true);
         }}
         onPointerMove={(e) => {
-          if (e.currentTarget.hasPointerCapture(e.pointerId)) definir(doX(e.clientX), true);
+          const i = inicio.current;
+          if (!i) return;
+          if (!i.decidido) {
+            const dx = Math.abs(e.clientX - i.x);
+            if (dx < 6 || dx < Math.abs(e.clientY - i.y)) return;
+            i.decidido = true;
+          }
+          definir(doX(e.clientX), true);
         }}
+        onPointerUp={(e) => {
+          if (inicio.current && !inicio.current.decidido) definir(doX(e.clientX), true);
+          inicio.current = null;
+        }}
+        onPointerCancel={() => (inicio.current = null)}
         onKeyDown={(e) => {
           const proxima = stops.find((s) => s > atual) ?? 100;
           const anterior = [...stops].reverse().find((s) => s < atual) ?? 1;
@@ -184,7 +214,7 @@ export function DetentSlider({
           e.preventDefault();
           definir(mapa[e.key]);
         }}
-        className="relative h-12 cursor-grab touch-pan-y select-none overflow-hidden rounded-[var(--r-control,0.5rem)] outline-none focus-visible:[box-shadow:var(--focus)] active:cursor-grabbing"
+        className="relative h-12 cursor-grab touch-pan-y select-none overflow-hidden pointer-coarse:h-13 rounded-[var(--r-control,0.5rem)] outline-none focus-visible:[box-shadow:var(--focus)] active:cursor-grabbing"
       >
         {/* `overflow-hidden` na caixa: a camada do polegar anda em `transform` e somaria largura à rolagem de quem contém a peça. */}
         <div ref={trilho} className="absolute inset-x-3 top-1/2 h-1 -translate-y-1/2 rounded-full bg-border">
@@ -206,10 +236,14 @@ export function DetentSlider({
       {rotulo ? (
         <button
           type="button"
-          onClick={() => onAction?.(atual)}
-          className="h-11 rounded-[var(--r-control,0.5rem)] bg-foreground px-4 text-sm font-medium text-background outline-none transition-transform [transition-duration:var(--dur-fast,150ms)] [transition-timing-function:var(--ease-out,ease-out)] focus-visible:[box-shadow:var(--focus)] active:scale-[0.98]"
+          data-confirmado={confirmado || undefined}
+          onClick={() => {
+            setConfirmado(true);
+            onAction?.(atual);
+          }}
+          className="h-11 rounded-[var(--r-control,0.5rem)] border border-foreground bg-foreground px-4 text-sm font-medium text-background outline-none transition-[transform,background-color,color] [transition-duration:var(--dur-fast,150ms)] [transition-timing-function:var(--ease-out,ease-out)] focus-visible:[box-shadow:var(--focus)] active:scale-[0.98] data-[confirmado]:bg-transparent data-[confirmado]:text-foreground pointer-coarse:h-13"
         >
-          {rotulo}
+          <span aria-live="polite">{confirmado ? feito : rotulo}</span>
         </button>
       ) : null}
     </div>

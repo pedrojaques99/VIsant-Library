@@ -15,6 +15,7 @@ export default function DetentSliderDemo({ props }: DemoProps) {
         label="Quanto fechar"
         format={(v) => moeda.format(12.5 * v)}
         action={(v) => `Fechar ${v}%`}
+        confirmedAction={(v) => `${v}% fechado`}
         {...props}
       />
     </div>

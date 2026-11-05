@@ -85,14 +85,14 @@ void main(){
 #ifdef GL_OES_standard_derivatives
   float aa=max(fwidth(d),1e-4);
   vec2 n=vec2(dFdx(d),dFdy(d))/aa;
-  float rim=smoothstep(-.012,0.,d);
+  float rim=smoothstep(-.01,-.002,d);
   float brilho=pow(max(dot(normalize(n+1e-5),normalize(vec2(-.55,.8))),0.),3.)*rim;
 #else
   float aa=1.5/uRes.y;
   float brilho=0.;
 #endif
   float a=1.-smoothstep(-aa,aa,d);
-  vec3 c=mix(uInk,uLuz,brilho*.42);
+  vec3 c=mix(uInk,uLuz,brilho*.2);
   gl_FragColor=vec4(c*a,a);
 }
 `;
@@ -227,7 +227,7 @@ export function DripWord({ word = "fluxo", ink = "var(--foreground)", drips = 6,
   const reduz = useReducedMotion();
   const caixa = React.useRef<HTMLDivElement>(null);
   const [semGl, setSemGl] = React.useState(false);
-  const entrada = React.useRef({ alvo: 0.28, sensor: null as number | null });
+  const entrada = React.useRef({ alvo: 0, sensor: null as number | null });
   const redesenhar = React.useRef<() => void>(() => {});
   const preso = React.useRef<{ x: number; de: number; larg: number } | null>(null);
 
@@ -308,31 +308,42 @@ export function DripWord({ word = "fluxo", ink = "var(--foreground)", drips = 6,
       asp = larg / alt;
 
       const m = document.createElement("canvas");
-      m.width = canvas.width;
-      m.height = canvas.height;
+      // Sempre o dobro do CSS: a borda do campo sai de um limiar, e em 1x ela serrilha.
+      const escala = 2;
+      m.width = Math.round(larg * escala);
+      m.height = Math.round(alt * escala);
       const c = m.getContext("2d", { willReadFrequently: true });
       if (!c) return;
-      c.scale(dpr, dpr);
+      c.scale(escala, escala);
       const estilo = getComputedStyle(host);
       const familia = estilo.getPropertyValue("--font-display").trim() || estilo.fontFamily;
+      // Letra por letra, com um fio de ar: sem isso, a ligadura e o kerning colam o "fl", e o
+      // limiar do campo transforma o encosto numa massa só.
+      const letras = [...word];
+      const AR = 0.02;
       c.font = `600 100px ${familia}`;
-      const corpo = Math.min((0.88 * larg) / (c.measureText(word).width / 100), alt * 0.5);
+      const em100 = letras.reduce((s, l) => s + c.measureText(l).width / 100 + AR, -AR);
+      const corpo = Math.min((0.88 * larg) / (em100 || 1), alt * 0.5);
       c.font = `600 ${corpo}px ${familia}`;
-      c.textAlign = "center";
+      c.textAlign = "left";
       c.textBaseline = "alphabetic";
-      c.fillText(word, larg / 2, alt * 0.5);
+      let xLetra = (larg - em100 * corpo) / 2;
+      for (const l of letras) {
+        c.fillText(l, xLetra, alt * 0.5);
+        xLetra += c.measureText(l).width + AR * corpo;
+      }
       const dado = c.getImageData(0, 0, m.width, m.height);
-      const alcance = 48 * dpr;
+      const alcance = 28 * escala; // pouco alcance dá mais degraus dos 8 bits perto da borda
       gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.ALPHA, m.width, m.height, 0, gl.ALPHA, gl.UNSIGNED_BYTE, campoDaPalavra(dado, alcance));
-      gl.uniform2f(uTexel, 1.6 / larg, 1.6 / alt);
+      gl.uniform2f(uTexel, 1.25 / larg, 1.25 / alt);
       gl.uniform1f(uAlcance, alcance / m.height); // o campo em unidades de altura, como os fios
       pes = acharPes(dado, Math.min(drips, MAX_FIOS));
     };
 
     const fios = new Float32Array(MAX_FIOS * 4);
     const raios = new Float32Array(MAX_FIOS * 2);
-    let inclina = entrada.current.alvo;
+    let inclina = 0;
     let velocidade = 0;
 
     const pintar = (t: number) => {
@@ -349,17 +360,25 @@ export function DripWord({ word = "fluxo", ink = "var(--foreground)", drips = 6,
         const cresce = liso(0, 0.68, fase) * alcance;
         const solta = Math.max(0, fase - 0.68) / 0.32;
         const queda = solta * solta * 1.1;
-        const ponta = pe.y + cresce + queda;
+        const ponta = cresce + queda;
         // Solta o fio depressa: a raiz corre atrás da gota, ou a queda esticaria uma linha até o chão.
-        const raiz = solta > 0 ? ponta - Math.max(cresce * (1 - liso(0, 0.22, solta)), 0.012) : pe.y;
+        const raiz = solta > 0 ? ponta - Math.max(cresce * (1 - liso(0, 0.22, solta)), 0.012) : 0;
+        // A gravidade é uma direção: o fio inteiro aponta para ela, em vez de só desviar a ponta.
+        const tomba = inclina * 0.72;
+        const gx = Math.sin(tomba);
+        const gy = Math.cos(tomba);
         const x = pe.x * asp;
-        fios[i * 4] = x;
-        fios[i * 4 + 1] = raiz;
-        fios[i * 4 + 2] = x + inclina * 0.5 * (ponta - pe.y);
-        fios[i * 4 + 3] = ponta;
-        const nasce = liso(0, 0.1, fase);
-        raios[i * 2] = 0.02 * (1 - solta * 0.85) * nasce;
-        raios[i * 2 + 1] = (0.013 + semente * 0.01) * nasce;
+        const yPonta = pe.y + ponta * gy;
+        fios[i * 4] = x + raiz * gx;
+        fios[i * 4 + 1] = pe.y + raiz * gy;
+        fios[i * 4 + 2] = x + ponta * gx;
+        fios[i * 4 + 3] = yPonta;
+        // Fio curto nasce fino, senão vira um toco achatado no pé da letra; perto do chão a
+        // gota some antes das bordas, para não sair cortada reta.
+        const xPonta = x + ponta * gx;
+        const corpo = liso(0, 0.035, cresce) * (1 - liso(0.84, 0.97, yPonta)) * liso(0.01, 0.06, Math.min(xPonta, asp - xPonta));
+        raios[i * 2] = 0.02 * (1 - solta * 0.85) * corpo;
+        raios[i * 2 + 1] = (0.013 + semente * 0.01) * corpo;
       });
       gl.uniform4fv(uFio, fios);
       gl.uniform2fv(uRaio, raios);
@@ -376,9 +395,9 @@ export function DripWord({ word = "fluxo", ink = "var(--foreground)", drips = 6,
       antes = agora;
       relogio += dt * taxa;
       const balanco = entrada.current.sensor === null ? Math.sin(relogio * 0.4) * 0.05 : 0;
-      velocidade += (entrada.current.alvo + balanco - inclina) * 26 * dt;
-      velocidade *= Math.exp(-3.4 * dt);
-      inclina += velocidade * dt * 4;
+      velocidade += (entrada.current.alvo + balanco - inclina) * 60 * dt;
+      velocidade *= Math.exp(-5 * dt);
+      inclina += velocidade * dt;
       pintar(relogio);
       if (rodando) raf = requestAnimationFrame(quadro);
     };
@@ -450,10 +469,14 @@ export function DripWord({ word = "fluxo", ink = "var(--foreground)", drips = 6,
       }}
       onPointerUp={() => {
         preso.current = null;
-        entrada.current.alvo = entrada.current.sensor ?? 0.28;
+        entrada.current.alvo = entrada.current.sensor ?? 0;
         redesenhar.current();
       }}
-      onPointerCancel={() => (preso.current = null)}
+      onPointerCancel={() => {
+        preso.current = null;
+        entrada.current.alvo = entrada.current.sensor ?? 0;
+        redesenhar.current();
+      }}
       className={cn("relative aspect-[3/2] w-[min(100%,36rem)] cursor-grab touch-pan-y select-none text-foreground active:cursor-grabbing", className)}
       {...rest}
     >

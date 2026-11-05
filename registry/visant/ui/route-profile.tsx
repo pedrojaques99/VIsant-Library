@@ -49,11 +49,12 @@ const anguloDe = (rampa: number) => Math.max(-62, Math.min(62, (Math.atan(rampa 
  *   de quilômetro e a de subida restante: rótulo demais. Ficaram a altitude, a rampa e a
  *   agulha, e o resto se lê no desenho.
  * - **A agulha pendura por gravidade.** Mola subamortecida: a rampa se sente antes de se ler.
- * - **Inclinar também anda.** O primeiro toque pede o giroscópio, e inclinar o celular rola
+ * - **Inclinar também anda.** O primeiro toque que termina na peça pede o giroscópio, e inclinar o celular rola
  *   o cursor com inércia. Arrasto e teclado continuam sempre lá.
  * - **O passeio sozinho para de vez** quando alguém pega no cursor, para nunca tirar a
  *   pessoa do ponto que ela escolheu.
- * - **`pan-y` no terreno.** Arrasto de lado é da peça, rolar em pé é da página.
+ * - **`pan-y` no terreno, e o dedo só mexe no cursor depois de andar de lado.** Sem isso, o
+ *   começo de uma rolagem em pé já movia a rota. Toque parado também escolhe, ao soltar.
  * - **Movimento reduzido:** cursor e agulha pousam, sem mola nem passeio.
  */
 export function RouteProfile({
@@ -92,7 +93,7 @@ export function RouteProfile({
   const [i, setI] = React.useState(() => Math.round(limita01(defaultPosition) * dados.n));
   const agulha = useSpring(anguloDe(rampaEm(i)), { stiffness: 120, damping: 9 });
   const tocado = React.useRef(false);
-  const preso = React.useRef(false);
+  const preso = React.useRef<{ x: number; y: number; decidido: boolean } | null>(null);
   const gama = React.useRef(0);
 
   const x = useTransform(p, (v) => `${v * 100}%`);
@@ -177,17 +178,36 @@ export function RouteProfile({
         aria-valuenow={Number(km.toFixed(1))}
         aria-valuetext={`km ${km.toFixed(1)}, ${inteiro.format(altitudes[i])} metros, rampa de ${inteiro.format(rampa)}%`}
         onPointerDown={(e) => {
-          if (e.pointerType === "touch") giro.enable();
-          pegar();
-          preso.current = true;
           e.currentTarget.setPointerCapture(e.pointerId);
-          doX(e);
+          const dedo = e.pointerType === "touch";
+          preso.current = { x: e.clientX, y: e.clientY, decidido: !dedo };
+          if (!dedo) {
+            pegar();
+            doX(e);
+          }
         }}
         onPointerMove={(e) => {
-          if (preso.current) doX(e);
+          const i = preso.current;
+          if (!i) return;
+          if (!i.decidido) {
+            const dx = Math.abs(e.clientX - i.x);
+            if (dx < 6 || dx < Math.abs(e.clientY - i.y)) return;
+            i.decidido = true;
+            pegar();
+          }
+          doX(e);
         }}
-        onPointerUp={() => (preso.current = false)}
-        onPointerCancel={() => (preso.current = false)}
+        onPointerUp={(e) => {
+          const i = preso.current;
+          preso.current = null;
+          if (e.pointerType !== "touch" || !i) return;
+          giro.enable(); // o iOS só concede o sensor num toque que terminou aqui
+          if (!i.decidido) {
+            pegar();
+            doX(e);
+          }
+        }}
+        onPointerCancel={() => (preso.current = null)}
         onKeyDown={(e) => {
           const agora = Math.round(bruto.get() * dados.n);
           const mapa: Record<string, number> = {

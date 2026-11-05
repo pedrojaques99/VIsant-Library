@@ -471,7 +471,7 @@
     "className": "h-full min-h-0 w-full"
   },
   "raking-light": {
-    "className": "h-full w-full rounded-none"
+    "className": "h-[19.75rem] max-w-[33.5rem]"
   },
   "detent-slider": {
     "caption": "Resultado ao fechar",

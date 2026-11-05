@@ -7,7 +7,7 @@ import { useIdle } from "@/hooks/use-idle";
 import { cn } from "@/lib/utils";
 
 export interface WordDialProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "onChange"> {
-  /** A palavra. Funciona de 2 a 12 letras: as posições saem da largura de cada letra. */
+  /** A palavra. O corpo se ajusta para caber: as posições saem da largura de cada letra. */
   word?: string;
   /** Sozinho na tela, o anel dá um passo de tempos em tempos. */
   idle?: boolean;
@@ -111,11 +111,13 @@ export function WordDial({ word = "VISANT", idle = true, label = "Arranjo da pal
     document.fonts?.ready.then(medir);
   }, [word]);
 
-  const total = larguras.reduce((s, l) => s + l, 0) || 1;
+  // A palavra pode mudar antes da medida nova: letra sem medida viraria NaN e travaria a mola.
+  const medidas = letras.map((_, i) => larguras[i] ?? 0.62);
+  const total = medidas.reduce((s, l) => s + l, 0) || 1;
   const escala = LARGURA / total; // cqw por em
   const centros: number[] = [];
   let acumulado = -total / 2;
-  for (const l of larguras) {
+  for (const l of medidas) {
     centros.push(acumulado + l / 2);
     acumulado += l;
   }
@@ -167,8 +169,8 @@ export function WordDial({ word = "VISANT", idle = true, label = "Arranjo da pal
       }}
       onPointerCancel={() => (preso.current = null)}
       onKeyDown={(e) => {
-        const dir = ({ ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 } as Record<string, number>)[e.key];
-        if (!dir) return;
+        const dir = ({ ArrowRight: 1, ArrowUp: 1, PageUp: 2, ArrowLeft: -1, ArrowDown: -1, PageDown: -2, Home: -k, End: 4 - k } as Record<string, number>)[e.key];
+        if (dir === undefined) return;
         e.preventDefault();
         poke();
         passo(dir);

@@ -20,8 +20,9 @@ export function useInView(ref: React.RefObject<Element | null>) {
  * Chama `fn` a cada `ms` enquanto a peça está na tela e ninguém mexe nela.
  *
  * Celular não tem hover: peça que só acorda com o ponteiro fica morta no toque.
- * Três coisas calam o laço: sair da tela, `prefers-reduced-motion`, e o `poke()`
- * devolvido, que toda entrada chama para o movimento sozinho não brigar com a mão.
+ * Quatro coisas calam o laço: sair da tela, `prefers-reduced-motion`, o foco dentro da
+ * peça (quem usa o teclado não pode ver o valor mudar sozinho) e o `poke()` devolvido,
+ * que toda entrada chama para o movimento sozinho não brigar com a mão.
  */
 export function useIdle(ref: React.RefObject<Element | null>, fn: () => void, ms = 2600, ligado = true) {
   const visivel = useInView(ref);
@@ -32,10 +33,11 @@ export function useIdle(ref: React.RefObject<Element | null>, fn: () => void, ms
   React.useEffect(() => {
     if (!ligado || !visivel || reduz) return;
     const t = window.setInterval(() => {
+      if (ref.current?.contains(document.activeElement)) return;
       if (performance.now() - ultimo.current > ms) eco.current();
     }, ms);
     return () => window.clearInterval(t);
-  }, [ligado, visivel, reduz, ms]);
+  }, [ref, ligado, visivel, reduz, ms]);
   return React.useCallback(() => {
     ultimo.current = performance.now();
   }, []);

@@ -15570,7 +15570,7 @@
     },
     {
       "nome": "useIdle",
-      "descricao": "Chama `fn` a cada `ms` enquanto a peça está na tela e ninguém mexe nela.\n\nCelular não tem hover: peça que só acorda com o ponteiro fica morta no toque. Três coisas calam o laço: sair da tela, `prefers-reduced-motion`, e o `poke()` devolvido, que toda entrada chama para o movimento sozinho não brigar com a mão.",
+      "descricao": "Chama `fn` a cada `ms` enquanto a peça está na tela e ninguém mexe nela.\n\nCelular não tem hover: peça que só acorda com o ponteiro fica morta no toque. Quatro coisas calam o laço: sair da tela, `prefers-reduced-motion`, o foco dentro da peça (quem usa o teclado não pode ver o valor mudar sozinho) e o `poke()` devolvido, que toda entrada chama para o movimento sozinho não brigar com a mão.",
       "props": []
     }
   ],
@@ -15584,7 +15584,7 @@
   "compass": [
     {
       "nome": "Compass",
-      "descricao": "Bússola: a agulha vai até o ponteiro como uma de verdade vai ao norte, passa, volta e para. O mostrador inclina em direção à mão, e a distância entre as camadas é que dá a profundidade.\n\n- **Ângulo desenrolado.** O alvo é a menor volta a partir de onde a agulha está. Sem isso, cruzar de 179° para -179° dá uma volta inteira para trás.\n- **Mola subamortecida de propósito.** A passada do ponto é o magnetismo.\n- **Camadas de verdade em `preserve-3d`.** Sombra, base, marcas, agulha, eixo e vidro ficam em alturas diferentes e se deslocam entre si ao inclinar. Por isso a peça nasce inclinada: profundidade não pode depender de hover.\n- **`touch-none` só no mostrador.** Gesto circular não tem eixo para ceder à rolagem; a página continua rolando pelo resto da peça. O mouse segue a peça inteira.\n- **Movimento reduzido:** a agulha só aponta, e a inclinação fica na pose de nascença.\n- **Marca em forma, nunca em texto.** A marca vai no eixo; a letra usa `--foreground`.",
+      "descricao": "Bússola: a agulha vai até o ponteiro como uma de verdade vai ao norte, passa, volta e para. O mostrador inclina em direção à mão, e a distância entre as camadas é que dá a profundidade.\n\n- **Ângulo desenrolado.** O alvo é a menor volta a partir de onde a agulha está. Sem isso, cruzar de 179° para -179° dá uma volta inteira para trás.\n- **Mola subamortecida de propósito.** A passada do ponto é o magnetismo.\n- **Camadas de verdade em `preserve-3d`.** Sombra, base, marcas, agulha, eixo e vidro ficam em alturas diferentes e se deslocam entre si ao inclinar. Por isso a peça nasce inclinada: profundidade não pode depender de hover.\n- **`touch-none` só no mostrador.** Gesto circular não tem eixo para ceder à rolagem, e as camadas não pegam ponteiro: em 3D elas passam da borda, e o dedo que começa fora do mostrador tem de rolar a página. O mouse segue a peça inteira.\n- **Movimento reduzido:** a agulha só aponta, e a inclinação fica na pose de nascença.\n- **Marca em forma, nunca em texto.** A marca vai no eixo; a letra usa `--foreground`.",
       "props": [
         {
           "nome": "bearing",
@@ -15692,7 +15692,7 @@
   "ratchet": [
     {
       "nome": "Ratchet",
-      "descricao": "Catraca: o gesto dá corda numa roda dentada que só gira para um lado, com a lingueta subindo a rampa de cada dente e caindo da face íngreme.\n\n- **Só o curso para a frente conta.** Voltar deixa a roda onde está, então dar corda é descer, voltar e descer de novo, como uma chave de catraca.\n- **Metal é luz que não gira.** O reflexo do aço torneado fica parado enquanto o recorte da roda gira: a roda vai num sentido e o gradiente, dentro dela, no sentido contrário. Tudo em `transform`, sem repintar por quadro. Um desvio pequeno faz o reflexo cintilar.\n- **O clique tem três partes:** a lingueta quica (mola subamortecida), a roda recua um fio e o ponto de contato brilha. É isso que dá vida ao desenho.\n- **Arrasto em pé, com `pan-x`.** Um rolador nativo, a primeira versão, prendia a página no celular enquanto o curso não acabasse. A roda do mouse é ouvida sem `preventDefault`: dá corda e a página rola junto, sem armadilha.\n- **Movimento reduzido:** a lingueta só pousa, sem quique, sem recuo e sem brilho.",
+      "descricao": "Catraca: girar o dedo em volta do eixo dá corda numa roda dentada que só anda no sentido horário, com a lingueta subindo a rampa de cada dente e caindo da face íngreme.\n\n- **O gesto é o ângulo, não o eixo.** Uma volta do dedo é uma volta da roda: um clique por dente. No sentido contrário a lingueta segura, e a roda fica onde está.\n- **Metal é luz que não gira.** O reflexo do aço torneado fica parado enquanto o recorte da roda gira: a roda vai num sentido e o gradiente, dentro dela, no sentido contrário. Tudo em `transform`, sem repintar por quadro. Um desvio pequeno faz o reflexo cintilar.\n- **O clique tem três partes:** a lingueta quica (mola subamortecida), a roda recua um fio e o ponto de contato brilha. É isso que dá vida ao desenho.\n- **`touch-none` só na roda.** Gesto circular não tem eixo para ceder à rolagem, e a zona é redonda: o dedo que começa fora dela rola a página. A roda do mouse é ouvida sem `preventDefault`: dá corda e a página rola junto, sem armadilha.\n- **Movimento reduzido:** a lingueta só pousa, sem quique, sem recuo e sem brilho.",
       "props": [
         {
           "nome": "idle",
@@ -15713,14 +15713,14 @@
           "tipo": "(clicks: number) => void",
           "obrigatoria": false,
           "padrao": null,
-          "descricao": "Avisa a cada dente que passa, com o total desde que a peça montou."
+          "descricao": "Avisa a cada dente que a pessoa passa, com o total desde que a peça montou. O passo sozinho não conta."
         },
         {
           "nome": "pitch",
           "tipo": "number",
           "obrigatoria": false,
           "padrao": "40",
-          "descricao": "Curso do gesto por dente, em px.",
+          "descricao": "Curso da roda do mouse por dente, em px. O arrasto não usa: uma volta do dedo é uma volta da roda.",
           "faixa": {
             "min": 16,
             "max": 120,
@@ -15751,7 +15751,7 @@
           "nome": "grain",
           "tipo": "number",
           "obrigatoria": false,
-          "padrao": "60",
+          "padrao": "45",
           "descricao": "Quanto a fibra do papel aparece.",
           "faixa": {
             "min": 0,
@@ -15770,7 +15770,7 @@
           "nome": "relief",
           "tipo": "number",
           "obrigatoria": false,
-          "padrao": "60",
+          "padrao": "70",
           "descricao": "Comprimento da sombra.",
           "faixa": {
             "min": 0,
@@ -15819,7 +15819,7 @@
           "tipo": "string",
           "obrigatoria": false,
           "padrao": "VISANT",
-          "descricao": "A palavra. Funciona de 2 a 12 letras: as posições saem da largura de cada letra."
+          "descricao": "A palavra. O corpo se ajusta para caber: as posições saem da largura de cada letra."
         }
       ]
     }
@@ -15827,7 +15827,7 @@
   "detent-slider": [
     {
       "nome": "DetentSlider",
-      "descricao": "Slider com paradas: mostra a consequência exata em letra grande, antes de confirmar. O polegar agarra nas paradas com um pulso no ponto e uma vibração onde o aparelho deixa.\n\n- **O valor é sempre 1 a 100, e a consequência vem de fora.** O número grande sai de `format`, então a peça serve para fechar parte de uma posição, repartir uma conta ou dividir um orçamento, sem saber de nada disso.\n- **Dígitos que rolam, não que trocam.** O olho acompanha a mudança, e a coluna fixa à direita evita que o número dance.\n- **Sem cor própria.** A versão do laboratório tinha um brilho iridescente e verde e vermelho no resultado; caiu tudo. O sinal do número já diz se é ganho ou perda.\n- **`pan-y`.** O gesto é de lado: rolar a página em pé continua funcionando por cima.\n- **Movimento reduzido:** o número e o polegar pousam, sem rolar e sem pulso.",
+      "descricao": "Slider com paradas: mostra a consequência exata em letra grande, antes de confirmar. O polegar agarra nas paradas com um pulso no ponto e uma vibração onde o aparelho deixa.\n\n- **O valor é sempre 1 a 100, e a consequência vem de fora.** O número grande sai de `format`, então a peça serve para fechar parte de uma posição, repartir uma conta ou dividir um orçamento, sem saber de nada disso.\n- **Dígitos que rolam, não que trocam.** O olho acompanha a mudança, e a coluna fixa à direita evita que o número dance.\n- **Sem cor própria.** A versão do laboratório tinha um brilho iridescente e verde e vermelho no resultado; caiu tudo. O sinal do número já diz se é ganho ou perda.\n- **`pan-y`, e o dedo só mexe no valor depois de andar de lado.** Sem isso, o começo de uma rolagem em pé já arrastava o polegar. Toque parado também escolhe, ao soltar.\n- **Confirmar responde.** O botão troca de texto e de preenchimento, e volta sozinho em 2 segundos ou quando o valor muda.\n- **Movimento reduzido:** o número e o polegar pousam, sem rolar e sem pulso.",
       "props": [
         {
           "nome": "action",
@@ -15842,6 +15842,13 @@
           "obrigatoria": false,
           "padrao": null,
           "descricao": "O nome do que o número grande mede, em uma linha acima dele."
+        },
+        {
+          "nome": "confirmedAction",
+          "tipo": "string | ((value: number) => string)",
+          "obrigatoria": false,
+          "padrao": "Confirmado",
+          "descricao": "O que o botão diz por 2 segundos depois de confirmar, ou até o valor mudar."
         },
         {
           "nome": "defaultValue",
@@ -15915,7 +15922,7 @@
   "route-profile": [
     {
       "nome": "RouteProfile",
-      "descricao": "Perfil de rota: leia o caminho pela forma do terreno, com um clinômetro que balança até a inclinação sob o cursor.\n\n- **O relevo é a interface.** Da versão do laboratório saíram paradas nomeadas, a linha de quilômetro e a de subida restante: rótulo demais. Ficaram a altitude, a rampa e a agulha, e o resto se lê no desenho.\n- **A agulha pendura por gravidade.** Mola subamortecida: a rampa se sente antes de se ler.\n- **Inclinar também anda.** O primeiro toque pede o giroscópio, e inclinar o celular rola o cursor com inércia. Arrasto e teclado continuam sempre lá.\n- **O passeio sozinho para de vez** quando alguém pega no cursor, para nunca tirar a pessoa do ponto que ela escolheu.\n- **`pan-y` no terreno.** Arrasto de lado é da peça, rolar em pé é da página.\n- **Movimento reduzido:** cursor e agulha pousam, sem mola nem passeio.",
+      "descricao": "Perfil de rota: leia o caminho pela forma do terreno, com um clinômetro que balança até a inclinação sob o cursor.\n\n- **O relevo é a interface.** Da versão do laboratório saíram paradas nomeadas, a linha de quilômetro e a de subida restante: rótulo demais. Ficaram a altitude, a rampa e a agulha, e o resto se lê no desenho.\n- **A agulha pendura por gravidade.** Mola subamortecida: a rampa se sente antes de se ler.\n- **Inclinar também anda.** O primeiro toque que termina na peça pede o giroscópio, e inclinar o celular rola o cursor com inércia. Arrasto e teclado continuam sempre lá.\n- **O passeio sozinho para de vez** quando alguém pega no cursor, para nunca tirar a pessoa do ponto que ela escolheu.\n- **`pan-y` no terreno, e o dedo só mexe no cursor depois de andar de lado.** Sem isso, o começo de uma rolagem em pé já movia a rota. Toque parado também escolhe, ao soltar.\n- **Movimento reduzido:** cursor e agulha pousam, sem mola nem passeio.",
       "props": [
         {
           "nome": "altitudes",

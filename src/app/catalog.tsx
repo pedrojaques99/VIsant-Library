@@ -255,8 +255,6 @@ const FUNDOS = new Set([
   "glass-tabs",
   "glass-switch",
   "glass-board",
-  // O papel é a peça: a lâmpada anda pela folha inteira, até a borda do palco.
-  "raking-light",
 ]);
 export const sangra = (item: Pick<CatalogItem, "name">) => /^(shader|textura)-/.test(item.name) || FUNDOS.has(item.name);
 
@@ -3029,12 +3027,11 @@ export const CATALOG: CatalogItem[] = [
   },
   {
     name: "raking-light",
-    // palco-check: é fundo e sangra: no ladrilho e na ficha preenche o palco, a caixa do preview não vale
     title: "Raking Light",
     type: "ui",
     family: "texto",
     description:
-      "Relevo seco em papel com fibra: a palavra só existe na sombra e no brilho de uma lâmpada baixa que passeia sobre a folha.",
+      "Relevo seco em papel com fibra: a palavra só existe na sombra e no brilho de uma lâmpada baixa.",
     tags: ["relevo","papel","luz","textura","grão","tipografia"],
     demo: RakingLightLabDemo,
     knobs: "RakingLight",

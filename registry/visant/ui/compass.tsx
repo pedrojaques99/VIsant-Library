@@ -43,8 +43,9 @@ const NASCE = { x: -0.8, y: -0.65 };
  * - **Camadas de verdade em `preserve-3d`.** Sombra, base, marcas, agulha, eixo e vidro
  *   ficam em alturas diferentes e se deslocam entre si ao inclinar. Por isso a peça nasce
  *   inclinada: profundidade não pode depender de hover.
- * - **`touch-none` só no mostrador.** Gesto circular não tem eixo para ceder à rolagem;
- *   a página continua rolando pelo resto da peça. O mouse segue a peça inteira.
+ * - **`touch-none` só no mostrador.** Gesto circular não tem eixo para ceder à rolagem, e
+ *   as camadas não pegam ponteiro: em 3D elas passam da borda, e o dedo que começa fora do
+ *   mostrador tem de rolar a página. O mouse segue a peça inteira.
  * - **Movimento reduzido:** a agulha só aponta, e a inclinação fica na pose de nascença.
  * - **Marca em forma, nunca em texto.** A marca vai no eixo; a letra usa `--foreground`.
  */
@@ -126,10 +127,12 @@ export function Compass({
     ny.set(NASCE.y);
   };
   const onKeyDown = (e: React.KeyboardEvent) => {
-    const passo = ({ ArrowRight: 5, ArrowUp: 5, ArrowLeft: -5, ArrowDown: -5 } as Record<string, number>)[e.key];
+    const passo = ({ ArrowRight: 5, ArrowUp: 5, ArrowLeft: -5, ArrowDown: -5, PageUp: 45, PageDown: -45 } as Record<string, number>)[e.key];
     if (!passo || !livre) return;
     e.preventDefault();
     poke();
+    // A seta parte do que está na tela, não de onde a mola ainda ia chegar.
+    alvo.current = angulo.get();
     apontar(alvo.current + passo);
   };
 
@@ -171,15 +174,15 @@ export function Compass({
         <motion.span
           aria-hidden
           style={{ x: sombraX, y: sombraY, z: -36 }}
-          className="absolute inset-[2%] rounded-full blur-xl [background:color-mix(in_srgb,black_30%,transparent)]"
+          className="pointer-events-none absolute inset-[2%] rounded-full blur-xl [background:color-mix(in_srgb,black_30%,transparent)]"
         />
         <span
           aria-hidden
-          className="absolute inset-0 rounded-full border border-border [background:radial-gradient(circle_at_50%_38%,var(--card),color-mix(in_srgb,var(--foreground)_7%,var(--card)))]"
+          className="pointer-events-none absolute inset-0 rounded-full border border-border [background:radial-gradient(circle_at_50%_38%,var(--card),color-mix(in_srgb,var(--foreground)_7%,var(--card)))]"
         />
-        <span aria-hidden className="absolute inset-[3%] rounded-full border border-border" style={camada(6)} />
+        <span aria-hidden className="pointer-events-none absolute inset-[3%] rounded-full border border-border" style={camada(6)} />
 
-        <span aria-hidden className="absolute inset-[5%]" style={camada(12)}>
+        <span aria-hidden className="pointer-events-none absolute inset-[5%]" style={camada(12)}>
           {MARCAS.map((t) => (
             <span key={t} style={{ transform: `rotate(${t}deg)` }} className="absolute inset-0 flex justify-center">
               <span className={t % 90 === 0 ? "h-[6cqw] w-0.5 bg-foreground" : "h-[3cqw] w-px bg-muted-foreground"} />
@@ -194,23 +197,23 @@ export function Compass({
         <motion.span
           aria-hidden
           style={{ rotate: angulo, z: 18, x: "1.5cqw", y: "2.5cqw" }}
-          className="absolute inset-[15%] flex flex-col items-center opacity-25 blur-[2px]"
+          className="pointer-events-none absolute inset-[15%] flex flex-col items-center opacity-25 blur-[2px]"
         >
           <span className="h-1/2 w-[5cqw] bg-black [clip-path:polygon(50%_0,100%_100%,0_100%)]" />
           <span className="h-1/2 w-[5cqw] bg-black [clip-path:polygon(0_0,100%_0,50%_100%)]" />
         </motion.span>
-        <motion.span aria-hidden style={{ rotate: angulo, z: 34 }} className="absolute inset-[15%] flex flex-col items-center">
+        <motion.span aria-hidden style={{ rotate: angulo, z: 34 }} className="pointer-events-none absolute inset-[15%] flex flex-col items-center">
           <span className="h-1/2 w-[5cqw] bg-foreground [clip-path:polygon(50%_0,100%_100%,0_100%)]" />
           <span className="h-1/2 w-[5cqw] bg-muted-foreground [clip-path:polygon(0_0,100%_0,50%_100%)]" />
         </motion.span>
         <span
           aria-hidden
-          className="absolute left-1/2 top-1/2 -ml-[3.5cqw] -mt-[3.5cqw] size-[7cqw] rounded-full border-2 border-foreground bg-[var(--brand)]"
+          className="pointer-events-none absolute left-1/2 top-1/2 -ml-[3.5cqw] -mt-[3.5cqw] size-[7cqw] rounded-full border-2 border-foreground bg-[var(--brand)]"
           style={camada(40)}
         />
 
         {/* O vidro fica dentro do aro: quem escorrega é o reflexo, senão ele sai pela borda ao inclinar. */}
-        <span aria-hidden className="absolute inset-[3%] overflow-hidden rounded-full" style={camada(8)}>
+        <span aria-hidden className="pointer-events-none absolute inset-[3%] overflow-hidden rounded-full" style={camada(8)}>
           <motion.span
             style={{ x: brilhoX, y: brilhoY }}
             className="absolute -inset-1/4 [background:radial-gradient(closest-side_at_50%_50%,color-mix(in_srgb,white_28%,transparent),transparent_70%)]"

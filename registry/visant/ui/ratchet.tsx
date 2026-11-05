@@ -15,7 +15,7 @@ export interface RatchetProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
    */
   teeth?: number;
   /**
-   * Curso do gesto por dente, em px.
+   * Curso da roda do mouse por dente, em px. O arrasto não usa: uma volta do dedo é uma volta da roda.
    * @min 16
    * @max 120
    * @step 4
@@ -25,7 +25,7 @@ export interface RatchetProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   idle?: boolean;
   /** Nome do controle para leitor de tela. */
   label?: string;
-  /** Avisa a cada dente que passa, com o total desde que a peça montou. */
+  /** Avisa a cada dente que a pessoa passa, com o total desde que a peça montou. O passo sozinho não conta. */
   onWind?: (clicks: number) => void;
 }
 
@@ -58,19 +58,19 @@ function contorno(dentes: number) {
 const subida = (s: number, curso: number) => Math.min((s % curso) / curso / 0.9, 1) * 15;
 
 /**
- * Catraca: o gesto dá corda numa roda dentada que só gira para um lado, com a lingueta
- * subindo a rampa de cada dente e caindo da face íngreme.
+ * Catraca: girar o dedo em volta do eixo dá corda numa roda dentada que só anda no sentido
+ * horário, com a lingueta subindo a rampa de cada dente e caindo da face íngreme.
  *
- * - **Só o curso para a frente conta.** Voltar deixa a roda onde está, então dar corda é
- *   descer, voltar e descer de novo, como uma chave de catraca.
+ * - **O gesto é o ângulo, não o eixo.** Uma volta do dedo é uma volta da roda: um clique por
+ *   dente. No sentido contrário a lingueta segura, e a roda fica onde está.
  * - **Metal é luz que não gira.** O reflexo do aço torneado fica parado enquanto o recorte
  *   da roda gira: a roda vai num sentido e o gradiente, dentro dela, no sentido contrário.
  *   Tudo em `transform`, sem repintar por quadro. Um desvio pequeno faz o reflexo cintilar.
  * - **O clique tem três partes:** a lingueta quica (mola subamortecida), a roda recua um
  *   fio e o ponto de contato brilha. É isso que dá vida ao desenho.
- * - **Arrasto em pé, com `pan-x`.** Um rolador nativo, a primeira versão, prendia a página
- *   no celular enquanto o curso não acabasse. A roda do mouse é ouvida sem `preventDefault`:
- *   dá corda e a página rola junto, sem armadilha.
+ * - **`touch-none` só na roda.** Gesto circular não tem eixo para ceder à rolagem, e a zona
+ *   é redonda: o dedo que começa fora dela rola a página. A roda do mouse é ouvida sem
+ *   `preventDefault`: dá corda e a página rola junto, sem armadilha.
  * - **Movimento reduzido:** a lingueta só pousa, sem quique, sem recuo e sem brilho.
  */
 export function Ratchet({ teeth = 16, pitch = 40, idle = true, label = "Catraca", onWind, className, ...rest }: RatchetProps) {
@@ -86,7 +86,8 @@ export function Ratchet({ teeth = 16, pitch = 40, idle = true, label = "Catraca"
   const brilho = useSpring(0, { stiffness: 260, damping: 26 });
   const giro = useTransform([visto, recuo], ([s, r]: number[]) => (s / pitch) * passo + r);
   const reflexo = useTransform(giro, (g) => -g + Math.sin((g * Math.PI) / 45) * 6);
-  const preso = React.useRef<{ y: number; escala: number } | null>(null);
+  const preso = React.useRef<number | null>(null);
+  const sozinho = React.useRef(0);
   const dente = React.useRef(Math.floor(nasce / pitch));
   const total = React.useRef(0);
   const [cliques, setCliques] = React.useState(0);
@@ -97,10 +98,16 @@ export function Ratchet({ teeth = 16, pitch = 40, idle = true, label = "Catraca"
     else lingueta.set(subida(s, pitch));
     const agora = Math.floor(s / pitch);
     if (agora === dente.current) return;
-    total.current += agora - dente.current;
+    const novos = agora - dente.current;
     dente.current = agora;
-    setCliques(total.current);
-    onWind?.(total.current);
+    // O passo sozinho anima a roda, mas não é valor de ninguém.
+    const dele = Math.min(novos, sozinho.current);
+    sozinho.current -= dele;
+    if (novos > dele) {
+      total.current += novos - dele;
+      setCliques(total.current);
+      onWind?.(total.current);
+    }
     if (reduz) return;
     lingueta.jump(0);
     recuo.jump(-0.9);
@@ -109,46 +116,31 @@ export function Ratchet({ teeth = 16, pitch = 40, idle = true, label = "Catraca"
     brilho.set(0);
   });
 
-  const poke = useIdle(caixa, () => curso.set(curso.get() + pitch), 2600, idle);
+  const poke = useIdle(
+    caixa,
+    () => {
+      sozinho.current += 1;
+      curso.set(curso.get() + pitch);
+    },
+    2600,
+    idle,
+  );
   const dar = (d: number) => {
     if (d <= 0) return;
     poke();
     curso.set(curso.get() + d);
   };
 
+  // O ângulo vem da caixa medida na tela, então vale igual dentro de um palco escalado.
+  const anguloDe = (e: React.PointerEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    return (Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180) / Math.PI;
+  };
+
   return (
     <div
       ref={caixa}
-      role="spinbutton"
-      tabIndex={0}
-      aria-label={label}
-      aria-valuenow={cliques}
-      aria-valuetext={`${cliques} ${cliques === 1 ? "clique" : "cliques"}`}
-      onPointerDown={(e) => {
-        const r = e.currentTarget.getBoundingClientRect();
-        e.currentTarget.setPointerCapture(e.pointerId);
-        // Dentro de um palco escalado, o dedo anda em px de tela e a roda em px da peça.
-        preso.current = { y: e.clientY, escala: r.height / (e.currentTarget.offsetHeight || r.height) || 1 };
-        poke();
-      }}
-      onPointerMove={(e) => {
-        if (!preso.current) return;
-        const d = (e.clientY - preso.current.y) / preso.current.escala;
-        preso.current.y = e.clientY;
-        dar(d);
-      }}
-      onPointerUp={() => (preso.current = null)}
-      onPointerCancel={() => (preso.current = null)}
-      onWheel={(e) => dar(e.deltaY)}
-      onKeyDown={(e) => {
-        if (e.key !== "ArrowDown" && e.key !== "ArrowRight") return;
-        e.preventDefault();
-        dar(pitch);
-      }}
-      className={cn(
-        "relative aspect-square w-[min(100%,22rem)] cursor-grab touch-pan-x select-none rounded-[var(--r-surface,1rem)] outline-none [container-type:inline-size] focus-visible:[box-shadow:var(--focus)] active:cursor-grabbing",
-        className,
-      )}
+      className={cn("relative aspect-square w-[min(100%,22rem)] select-none [container-type:inline-size]", className)}
       {...rest}
     >
       {/* 73,3% da caixa = o raio da ponta (44) no viewBox de 120 da lingueta. */}
@@ -192,6 +184,39 @@ export function Ratchet({ teeth = 16, pitch = 40, idle = true, label = "Catraca"
         <motion.circle cx={1} cy={-37} r={7} style={{ opacity: brilho, fill: "color-mix(in srgb, white 70%, transparent)" }} className="blur-[2px]" />
         <circle cx={30} cy={-46} r={3.5} className="fill-[var(--brand)] stroke-foreground" strokeWidth={1} />
       </svg>
+
+      {/* A zona do gesto é a roda e só a roda: redonda, em cima de tudo. */}
+      <div
+        role="slider"
+        tabIndex={0}
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={Math.max(cliques, teeth)}
+        aria-valuenow={cliques}
+        aria-valuetext={`${cliques} ${cliques === 1 ? "clique" : "cliques"}`}
+        onPointerDown={(e) => {
+          e.currentTarget.setPointerCapture(e.pointerId);
+          preso.current = anguloDe(e);
+          poke();
+        }}
+        onPointerMove={(e) => {
+          if (preso.current === null) return;
+          const agora = anguloDe(e);
+          const d = ((((agora - preso.current + 540) % 360) + 360) % 360) - 180;
+          preso.current = agora;
+          dar((d / passo) * pitch);
+        }}
+        onPointerUp={() => (preso.current = null)}
+        onPointerCancel={() => (preso.current = null)}
+        onWheel={(e) => dar(e.deltaY)}
+        onKeyDown={(e) => {
+          const dentes = ({ ArrowUp: 1, ArrowRight: 1, PageUp: 4, ArrowDown: 0, ArrowLeft: 0, PageDown: 0 } as Record<string, number>)[e.key];
+          if (dentes === undefined) return;
+          e.preventDefault(); // voltar é não fazer nada, e a seta não pode cair na navegação da página
+          dar(dentes * pitch);
+        }}
+        className="absolute inset-[13.33%] cursor-grab touch-none rounded-full outline-none focus-visible:[box-shadow:var(--focus)] active:cursor-grabbing"
+      />
     </div>
   );
 }
