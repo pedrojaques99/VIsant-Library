@@ -118,5 +118,17 @@
     "comentario": "mal apresentado, meio inutil; fica s� como a paleta do Rig vintage, fora da vitrine",
     "excluir": false,
     "data": "2026-10-20"
+  },
+  "showcase-card": {
+    "nota": 2,
+    "comentario": "e mt óbvio, oq ele faz de diferente pra merecer estar num catalogo q não seja o próprio shadcn puro?",
+    "excluir": false,
+    "data": "2026-11-05T17:46:15.168053+00:00"
+  },
+  "sticker-peel": {
+    "nota": 1,
+    "comentario": "tá bugado, mt slop",
+    "excluir": false,
+    "data": "2026-11-05T17:47:43.739035+00:00"
   }
 }

@@ -1,0 +1,142 @@
+/*
+ * MODE: pick how a home battery behaves with a bank of latching push keys.
+ *
+ * Collision: an energy dashboard that keeps each card to one calm number and one
+ * trace against "normal" + the interlocking push-button bank of an old radio,
+ * where pressing one key latches it down and the previous one pops back up.
+ * The key latches on press (not on release), so it feels mechanical; the old one
+ * springs up with a little overshoot. Above it, one number (the reserve kept for
+ * an outage) and one trace with a tick where the default sits. A radiogroup:
+ * arrows, Home and End move the latch from the keyboard.
+ */
+import * as React from "react";
+import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
+import type { LabComponentMeta } from "../types";
+
+export const meta: LabComponentMeta = {
+  kind: "component",
+  id: "2026-11-06-teclas-modo",
+  date: "2026-11-06",
+  title: "Teclas de modo",
+  label: "MODE",
+  hint: "press a key · arrows work too",
+  hintTouch: "toque numa tecla",
+  formula: "latch y = 4 · k 700 · c 32 · pop k 520 · c 13 · fill = reserva / 100",
+  rules: ["one-metaphor", "mono-labels", "formula", "born-in-best-state", "no-new-deps", "tokens", "reduced-motion", "touch", "only-transform", "mobile-hint", "mobile-no-hover", "mobile-press", "mobile-perf"],
+  status: "candidate",
+  tags: { input: "press", family: "mechanical", intensity: "subtle", response: "spring" },
+  rationale: "componente: trilho Behance (fora do lab:next); toque simples que trava, não segurar (os 3 press descartados eram de segurar), único do quadro com pressionar como entrada",
+  source: {
+    title: "Solithic - Energy SaaS Dashboard & UX UI Design",
+    url: "https://www.behance.net/gallery/230911983/Solithic-Energy-SaaS-Dashboard-UX-UI-Design",
+    studio: "Rondesignlab",
+    gallery: "ui-ux",
+    refs: [
+      "lab/.refs/2026-11-06-solithic-energy-saas-dashboard-ux-ui-des/ref-1.jpg",
+      "lab/.refs/2026-11-06-solithic-energy-saas-dashboard-ux-ui-des/ref-2.jpg",
+      "lab/.refs/2026-11-06-solithic-energy-saas-dashboard-ux-ui-des/ref-3.jpg",
+    ],
+  },
+  inspiration: "Energia fica fácil de entender quando cada cartão mostra um número calmo e um único traço dizendo onde ele está em relação ao normal.",
+  sketches: [
+    "arco de bateria que você arrasta pra definir a reserva: arrastar já é a entrada do Fechar posição e o gauge em arco é o clichê da própria fonte",
+    "gráfico dia/noite que você inclina pra comparar produção e consumo: inclinar já é do Perfil de rota e gráfico cheio de rótulos é o que o dono mandou limpar",
+  ],
+};
+
+const MODES = [
+  { name: "Sol", reserve: 10, hours: 2 },
+  { name: "Misto", reserve: 40, hours: 9 },
+  { name: "Noite", reserve: 65, hours: 15 },
+  { name: "Backup", reserve: 95, hours: 22 },
+];
+const START = 1;
+const NORMAL = MODES[START].reserve;
+const LATCH = { type: "spring", stiffness: 700, damping: 32 } as const;
+const POP = { type: "spring", stiffness: 520, damping: 13 } as const;
+
+function Key({ i, on, focus, onPick }: { i: number; on: boolean; focus: boolean; onPick: (i: number) => void }) {
+  const reduce = useReducedMotion();
+  const m = MODES[i];
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={on}
+      tabIndex={focus ? 0 : -1}
+      data-lab-target={i === 2 ? "" : undefined}
+      data-key={i}
+      onPointerDown={() => onPick(i)}
+      onClick={() => onPick(i)}
+      onContextMenu={(e) => e.preventDefault()}
+      className="group relative h-14 min-w-0 flex-1 touch-none select-none rounded-control outline-none [-webkit-touch-callout:none] focus-visible:[box-shadow:var(--focus)]"
+    >
+      {/* the skirt: the side of the key you only see while it is up */}
+      <span aria-hidden className="absolute inset-x-0 bottom-0 top-1 rounded-control bg-casa-line" />
+      <motion.span
+        initial={false}
+        animate={{ y: on ? 4 : 0 }}
+        transition={reduce ? { duration: 0 } : on ? LATCH : POP}
+        className={`absolute inset-x-0 bottom-1 top-0 flex flex-col items-start justify-between rounded-control border px-2.5 py-2 ${
+          on ? "border-transparent bg-casa-cta text-casa-cta-fg" : "border-casa-line bg-casa-tile text-casa-fg-2"
+        }`}
+      >
+        <span aria-hidden className={`size-1.5 rounded-full ${on ? "bg-casa-cta-fg" : "bg-casa-line"}`} />
+        <span className="truncate font-casa text-casa-sm">{m.name}</span>
+      </motion.span>
+    </button>
+  );
+}
+
+export default function TeclasModo() {
+  const reduce = useReducedMotion();
+  const [i, setI] = React.useState(START);
+  const group = React.useRef<HTMLDivElement>(null);
+  const reserve = useMotionValue(MODES[START].reserve);
+  const shown = useTransform(reserve, (v) => Math.round(v));
+  const fill = useTransform(reserve, (v) => v / 100);
+  const m = MODES[i];
+
+  React.useEffect(() => {
+    const to = MODES[i].reserve;
+    if (reduce) return void reserve.set(to);
+    const c = animate(reserve, to, { type: "spring", stiffness: 260, damping: 30 });
+    return () => c.stop();
+  }, [i, reduce, reserve]);
+
+  const pick = (n: number) => setI(Math.max(0, Math.min(MODES.length - 1, n)));
+  const onKey = (e: React.KeyboardEvent) => {
+    const map: Record<string, number> = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: MODES.length - 1 };
+    if (!(e.key in map)) return;
+    e.preventDefault();
+    const n = Math.max(0, Math.min(MODES.length - 1, map[e.key]));
+    pick(n);
+    group.current?.querySelector<HTMLElement>(`[data-key="${n}"]`)?.focus();
+  };
+
+  return (
+    <div className="flex h-full flex-col justify-between gap-6">
+      <div className="flex flex-col gap-3 px-1">
+        <div className="flex items-baseline gap-1.5">
+          <motion.span className="font-casa text-[clamp(2.75rem,13vw,3.75rem)] font-medium leading-none tracking-[-0.03em] tabular-nums text-casa-fg">
+            {shown}
+          </motion.span>
+          <span className="font-casa text-casa-lg text-casa-fg-3">%</span>
+        </div>
+        <span className="font-casa text-casa-sm text-casa-fg-2">{`guardado pra queda de luz · ≈ ${m.hours} h`}</span>
+        {/* the one trace: where the reserve sits, with a tick at the default */}
+        <div className="relative h-1 overflow-visible rounded-full bg-casa-line">
+          <motion.div style={{ scaleX: fill }} className="absolute inset-0 origin-left rounded-full bg-casa-fg" />
+          <span aria-hidden className="absolute -top-1 h-3 w-px bg-casa-fg-3" style={{ left: `${NORMAL}%` }} />
+        </div>
+        <span className="sr-only" aria-live="polite">{`${m.name}: reserva de ${m.reserve}%, cerca de ${m.hours} horas`}</span>
+      </div>
+
+      <div ref={group} role="radiogroup" aria-label="Modo da bateria" onKeyDown={onKey} className="flex gap-1.5">
+        {MODES.map((_, n) => (
+          <Key key={n} i={n} on={n === i} focus={n === i} onPick={pick} />
+        ))}
+      </div>
+    </div>
+  );
+}

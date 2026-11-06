@@ -2,7 +2,7 @@
 
 <!-- Gerado por scripts/vite-curadoria.mjs a partir de notas.json. Não edite à mão. -->
 
-**1 na vitrine** · 19 arquivada(s) (nota ≤ 2) · 0 pra excluir
+**1 na vitrine** · 21 arquivada(s) (nota ≤ 2) · 0 pra excluir
 
 ## Na vitrine
 
@@ -32,7 +32,9 @@
 | `tempo-bar` | ★★☆☆☆ | slop |
 | `timeline` | ★★☆☆☆ | ainda mt slop, pode remover |
 | `turbulence-field` | ★★☆☆☆ | slop, esconder |
+| `showcase-card` | ★★☆☆☆ | e mt óbvio, oq ele faz de diferente pra merecer estar num catalogo q não seja o próprio shadcn puro? |
 | `vintage-command-palette` | ★☆☆☆☆ | mal apresentado, meio inutil; fica s� como a paleta do Rig vintage, fora da vitrine |
+| `sticker-peel` | ★☆☆☆☆ | tá bugado, mt slop |
 
 ## Pra excluir de vez (`npm run curadoria -- --excluir`)
 
