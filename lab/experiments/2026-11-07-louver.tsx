@@ -22,7 +22,7 @@ export const meta: LabMeta = {
   hintTouch: "deslize pra girar as lâminas",
   formula: "θ = scrollTop / 48 · 22.5° · snap 5 detents · light = 1 − cos θ",
   rules: ["one-input", "one-metaphor", "mono-labels", "formula", "born-in-best-state", "no-new-deps", "tokens", "reduced-motion", "touch", "small", "only-transform", "mobile-hint", "mobile-no-hover", "mobile-scroll", "mobile-perf"],
-  status: "candidate",
+  status: "kept",
   tags: { input: "scroll", family: "light", intensity: "subtle", response: "snap" },
   rationale: "aposta: subtle 3/4 · exploração: scroll 1/2, light 2/2, snap 2/4",
 };

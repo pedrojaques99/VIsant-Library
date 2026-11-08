@@ -1,7 +1,7 @@
 {
-  "updated": "2026-11-07",
-  "n": 12,
-  "kept": 7,
+  "updated": "2026-11-08",
+  "n": 16,
+  "kept": 11,
   "decisions": [
     {
       "id": "2026-11-01-herbario",
@@ -204,15 +204,85 @@
       "motivos": [],
       "reason": "esse ficou foda, add mais textura, grain etc, pra dar mais vida e organicidade",
       "at": "2026-11-04"
+    },
+    {
+      "id": "2026-11-07-pastas",
+      "kind": "component",
+      "title": "Pastas",
+      "metaphor": "PASTAS: section tabs as hanging folders in a drawer. Drag up or down across\n the stack to thumb through it; the folders in front drop forward until the\n one you want stands open.",
+      "tags": {
+        "input": "drag",
+        "family": "material",
+        "intensity": "subtle",
+        "response": "snap"
+      },
+      "gallery": "ui-ux",
+      "source": "https://www.behance.net/gallery/257301831/Mosbys-Files",
+      "status": "kept",
+      "motivos": [],
+      "reason": "dahora, poderia ter mais respiro visual e melhorar a emenda dos shapes pra ficar mais arredondado e suave",
+      "at": "2026-11-07"
+    },
+    {
+      "id": "2026-11-05-fuso",
+      "kind": "component",
+      "title": "Leitor de fuso",
+      "metaphor": "ZONE: pick a time zone by sliding a strip of film under a reader.",
+      "tags": {
+        "input": "scroll",
+        "family": "typography",
+        "intensity": "subtle",
+        "response": "snap"
+      },
+      "gallery": "ui-ux",
+      "source": "https://www.behance.net/gallery/257630935/Artemii-Lebedev-Portfolio-26",
+      "status": "kept",
+      "motivos": [],
+      "reason": "tá massa, poderia ter mais umas opcoes de layout tipo numero / list - e ux de dragg vertical scroll",
+      "at": "2026-11-07"
+    },
+    {
+      "id": "2026-11-06-teclas-modo",
+      "kind": "component",
+      "title": "Teclas de modo",
+      "metaphor": "MODE: pick how a home battery behaves with a bank of latching push keys.",
+      "tags": {
+        "input": "press",
+        "family": "mechanical",
+        "intensity": "subtle",
+        "response": "spring"
+      },
+      "gallery": "ui-ux",
+      "source": "https://www.behance.net/gallery/230911983/Solithic-Energy-SaaS-Dashboard-UX-UI-Design",
+      "status": "kept",
+      "motivos": [],
+      "reason": "seria massa se mudasse o tema levemente conforme a opcao",
+      "at": "2026-11-07"
+    },
+    {
+      "id": "2026-11-07-louver",
+      "kind": "experiment",
+      "title": "Louver",
+      "metaphor": "LOUVER: scrolling turns the slats of a window blind, and the bars of sunlight\n they let onto the wall widen and narrow.",
+      "tags": {
+        "input": "scroll",
+        "family": "light",
+        "intensity": "subtle",
+        "response": "snap"
+      },
+      "status": "kept",
+      "motivos": [],
+      "reason": "meio inutil, mas ta dahora o conceito, poderia ter mais profundidade",
+      "at": "2026-11-07"
     }
   ],
   "board": {
     "input": {
       "drag": {
-        "kept": 2,
+        "kept": 3,
         "discarded": 0,
-        "n": 2,
-        "rate": 0.75
+        "n": 3,
+        "rate": 0.8
       },
       "tilt": {
         "kept": 1,
@@ -221,10 +291,10 @@
         "rate": 0.6666666666666666
       },
       "scroll": {
-        "kept": 1,
+        "kept": 3,
         "discarded": 1,
-        "n": 2,
-        "rate": 0.5
+        "n": 4,
+        "rate": 0.6666666666666666
       },
       "pointer": {
         "kept": 3,
@@ -233,18 +303,18 @@
         "rate": 0.6666666666666666
       },
       "press": {
-        "kept": 0,
+        "kept": 1,
         "discarded": 3,
-        "n": 3,
-        "rate": 0.2
+        "n": 4,
+        "rate": 0.3333333333333333
       }
     },
     "family": {
       "mechanical": {
-        "kept": 3,
+        "kept": 4,
         "discarded": 0,
-        "n": 3,
-        "rate": 0.8
+        "n": 4,
+        "rate": 0.8333333333333334
       },
       "ink-print": {
         "kept": 0,
@@ -265,22 +335,22 @@
         "rate": 0.25
       },
       "typography": {
+        "kept": 2,
+        "discarded": 1,
+        "n": 3,
+        "rate": 0.6
+      },
+      "light": {
+        "kept": 3,
+        "discarded": 0,
+        "n": 3,
+        "rate": 0.8
+      },
+      "material": {
         "kept": 1,
         "discarded": 1,
         "n": 2,
         "rate": 0.5
-      },
-      "light": {
-        "kept": 2,
-        "discarded": 0,
-        "n": 2,
-        "rate": 0.75
-      },
-      "material": {
-        "kept": 0,
-        "discarded": 1,
-        "n": 1,
-        "rate": 0.3333333333333333
       },
       "other": {
         "kept": 0,
@@ -291,10 +361,10 @@
     },
     "intensity": {
       "subtle": {
-        "kept": 3,
+        "kept": 7,
         "discarded": 1,
-        "n": 4,
-        "rate": 0.6666666666666666
+        "n": 8,
+        "rate": 0.8
       },
       "medium": {
         "kept": 4,
@@ -311,16 +381,16 @@
     },
     "response": {
       "snap": {
-        "kept": 2,
+        "kept": 5,
         "discarded": 2,
-        "n": 4,
-        "rate": 0.5
+        "n": 7,
+        "rate": 0.6666666666666666
       },
       "spring": {
-        "kept": 4,
+        "kept": 5,
         "discarded": 2,
-        "n": 6,
-        "rate": 0.625
+        "n": 7,
+        "rate": 0.6666666666666666
       },
       "inertia": {
         "kept": 1,
@@ -342,10 +412,10 @@
   },
   "sources": {
     "behance/ui-ux": {
-      "kept": 2,
+      "kept": 5,
       "discarded": 2,
-      "n": 4,
-      "rate": 0.5
+      "n": 7,
+      "rate": 0.6666666666666666
     },
     "behance/graphic-design": {
       "kept": 1,
@@ -354,10 +424,10 @@
       "rate": 0.6666666666666666
     },
     "lab": {
-      "kept": 4,
+      "kept": 5,
       "discarded": 3,
-      "n": 7,
-      "rate": 0.5555555555555556
+      "n": 8,
+      "rate": 0.6
     }
   }
 }

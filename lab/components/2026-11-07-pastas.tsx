@@ -24,7 +24,7 @@ export const meta: LabComponentMeta = {
   hintTouch: "arraste pelas pastas",
   formula: "p = p₀ − Δy / 36 · drop = clamp(k − p, 0, 1) · snap round(p) · k 380 c 34",
   rules: ["one-metaphor", "mono-labels", "formula", "born-in-best-state", "no-new-deps", "tokens", "reduced-motion", "touch", "only-transform", "mobile-hint", "mobile-no-hover", "mobile-perf"],
-  status: "candidate",
+  status: "kept",
   tags: { input: "drag", family: "material", intensity: "subtle", response: "snap" },
   rationale: "componente: trilho Behance (fora do lab:next); arrastar (melhor taxa, 75%) com metáfora nova de arquivo de pastas suspensas, diferente do traço de preço do Fechar posição",
   source: {

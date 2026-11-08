@@ -23,7 +23,7 @@ export const meta: LabComponentMeta = {
   hintTouch: "toque numa tecla",
   formula: "latch y = 4 · k 700 · c 32 · pop k 520 · c 13 · fill = reserva / 100",
   rules: ["one-metaphor", "mono-labels", "formula", "born-in-best-state", "no-new-deps", "tokens", "reduced-motion", "touch", "only-transform", "mobile-hint", "mobile-no-hover", "mobile-press", "mobile-perf"],
-  status: "candidate",
+  status: "kept",
   tags: { input: "press", family: "mechanical", intensity: "subtle", response: "spring" },
   rationale: "componente: trilho Behance (fora do lab:next); toque simples que trava, não segurar (os 3 press descartados eram de segurar), único do quadro com pressionar como entrada",
   source: {

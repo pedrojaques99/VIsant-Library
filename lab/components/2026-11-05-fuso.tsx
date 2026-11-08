@@ -24,7 +24,7 @@ export const meta: LabComponentMeta = {
   hintTouch: "deslize a lista ou toque na cidade",
   formula: "i = round(scrollTop / R) · edge = min(|v| · 0.012, R) · k 300 · c 40",
   rules: ["one-metaphor", "mono-labels", "formula", "born-in-best-state", "no-new-deps", "tokens", "reduced-motion", "touch", "only-transform", "mobile-hint", "mobile-no-hover", "mobile-scroll", "mobile-perf"],
-  status: "candidate",
+  status: "kept",
   tags: { input: "scroll", family: "typography", intensity: "subtle", response: "snap" },
   rationale: "componente: trilho Behance (fora do lab:next), único do quadro com rolagem como entrada",
   source: {
