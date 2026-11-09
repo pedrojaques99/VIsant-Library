@@ -1,7 +1,7 @@
 {
-  "updated": "2026-11-08",
-  "n": 16,
-  "kept": 11,
+  "updated": "2026-11-09",
+  "n": 18,
+  "kept": 13,
   "decisions": [
     {
       "id": "2026-11-01-herbario",
@@ -274,21 +274,55 @@
       "motivos": [],
       "reason": "meio inutil, mas ta dahora o conceito, poderia ter mais profundidade",
       "at": "2026-11-07"
+    },
+    {
+      "id": "2026-11-08-canhoto",
+      "kind": "component",
+      "title": "Canhoto",
+      "metaphor": "CANHOTO: confirm attendance by tearing the stub off a ticket.",
+      "tags": {
+        "input": "drag",
+        "family": "material",
+        "intensity": "subtle",
+        "response": "snap"
+      },
+      "gallery": "ui-ux",
+      "source": "https://www.behance.net/gallery/257768777/Chande-Bootcamp-2026",
+      "status": "kept",
+      "motivos": [],
+      "reason": "precisa melhorar a animacao de rasgando, e ter feedback visual depois de rasgar - deixe mais burilado e refinado no design end to end",
+      "at": "2026-11-08"
+    },
+    {
+      "id": "2026-11-08-detent",
+      "kind": "experiment",
+      "title": "Detent",
+      "metaphor": "DETENT: a steel ball in a tray with five dimples. Tilt the tray and the ball\n leans against the wall of its dimple; tilt past the lip and it drops into the\n next one with a click, never resting between two.",
+      "tags": {
+        "input": "tilt",
+        "family": "mechanical",
+        "intensity": "subtle",
+        "response": "snap"
+      },
+      "status": "kept",
+      "motivos": [],
+      "reason": "dahora a ideia, mas precisa melhorar a animacao e birular o design end to end, principalemnte da bolinha de metal q ta mt cru e nao ˜gira~ ainda, mt fake e nao fliuido",
+      "at": "2026-11-08"
     }
   ],
   "board": {
     "input": {
       "drag": {
-        "kept": 3,
+        "kept": 4,
         "discarded": 0,
-        "n": 3,
-        "rate": 0.8
+        "n": 4,
+        "rate": 0.8333333333333334
       },
       "tilt": {
-        "kept": 1,
+        "kept": 2,
         "discarded": 0,
-        "n": 1,
-        "rate": 0.6666666666666666
+        "n": 2,
+        "rate": 0.75
       },
       "scroll": {
         "kept": 3,
@@ -311,10 +345,10 @@
     },
     "family": {
       "mechanical": {
-        "kept": 4,
+        "kept": 5,
         "discarded": 0,
-        "n": 4,
-        "rate": 0.8333333333333334
+        "n": 5,
+        "rate": 0.8571428571428571
       },
       "ink-print": {
         "kept": 0,
@@ -347,10 +381,10 @@
         "rate": 0.8
       },
       "material": {
-        "kept": 1,
+        "kept": 2,
         "discarded": 1,
-        "n": 2,
-        "rate": 0.5
+        "n": 3,
+        "rate": 0.6
       },
       "other": {
         "kept": 0,
@@ -361,10 +395,10 @@
     },
     "intensity": {
       "subtle": {
-        "kept": 7,
+        "kept": 9,
         "discarded": 1,
-        "n": 8,
-        "rate": 0.8
+        "n": 10,
+        "rate": 0.8333333333333334
       },
       "medium": {
         "kept": 4,
@@ -381,10 +415,10 @@
     },
     "response": {
       "snap": {
-        "kept": 5,
+        "kept": 7,
         "discarded": 2,
-        "n": 7,
-        "rate": 0.6666666666666666
+        "n": 9,
+        "rate": 0.7272727272727273
       },
       "spring": {
         "kept": 5,
@@ -412,10 +446,10 @@
   },
   "sources": {
     "behance/ui-ux": {
-      "kept": 5,
+      "kept": 6,
       "discarded": 2,
-      "n": 7,
-      "rate": 0.6666666666666666
+      "n": 8,
+      "rate": 0.7
     },
     "behance/graphic-design": {
       "kept": 1,
@@ -424,10 +458,10 @@
       "rate": 0.6666666666666666
     },
     "lab": {
-      "kept": 5,
+      "kept": 6,
       "discarded": 3,
-      "n": 8,
-      "rate": 0.6
+      "n": 9,
+      "rate": 0.6363636363636364
     }
   }
 }

@@ -24,7 +24,7 @@ export const meta: LabMeta = {
   hintTouch: "arraste ou incline o celular",
   formula: "n′ = |θ/12 − n| > 0.65 ? round(θ/12) : n · x = 30n + 4(θ/12 − n) · k 520 c 26",
   rules: ["one-input", "one-metaphor", "mono-labels", "formula", "born-in-best-state", "no-new-deps", "tokens", "reduced-motion", "touch", "small", "only-transform", "mobile-hint", "mobile-no-hover", "mobile-idle", "mobile-tilt", "mobile-perf"],
-  status: "candidate",
+  status: "kept",
   tags: { input: "tilt", family: "mechanical", intensity: "subtle", response: "snap" },
   rationale: "aposta: mechanical 4/4, subtle 7/8, snap 5/7 · exploração: tilt 1/1",
 };

@@ -23,7 +23,7 @@ export const meta: LabComponentMeta = {
   hintTouch: "arraste o canhoto para o lado",
   formula: "p = clamp(Δx / w, 0, 1) · θ = 9p° · p > 0.55 ? tear : back · k 420 c 32",
   rules: ["one-metaphor", "mono-labels", "formula", "born-in-best-state", "no-new-deps", "tokens", "reduced-motion", "touch", "only-transform", "mobile-hint", "mobile-no-hover", "mobile-perf"],
-  status: "candidate",
+  status: "kept",
   tags: { input: "drag", family: "material", intensity: "subtle", response: "snap" },
   rationale: "componente: trilho Behance (fora do lab:next); arrastar (melhor taxa, 80%) com metáfora nova de canhoto picotado, diferente do traço de preço do Fechar posição e da pilha das Pastas",
   source: {

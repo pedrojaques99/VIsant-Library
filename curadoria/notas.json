@@ -136,5 +136,23 @@
     "comentario": "mt foda, minimal e interativo como eu gosto",
     "excluir": false,
     "data": "2026-11-07T21:08:58.991533+00:00"
+  },
+  "color-picker": {
+    "nota": 4,
+    "comentario": "precisa melhorar os states pra closed, empty, open, tudo animado e burilado refinado aparecendo somente o necessario por vez, deixe inteligente e interativo",
+    "excluir": false,
+    "data": "2026-11-08T14:56:25.843681+00:00"
+  },
+  "scrub-input": {
+    "nota": 4,
+    "comentario": "precisa ter input value permitidno o user digitar tb, alem de slider. e precisa de outros tipos de design, com borda, sem borda, texto dentro do scrub, texto fora, mais minimal, etc",
+    "excluir": false,
+    "data": "2026-11-08T14:57:41.731644+00:00"
+  },
+  "sensor-dial": {
+    "nota": 3,
+    "comentario": "precisa refinar o design pra manter os controles mas ficar mais util pra webapps no geral, hoje ficou igual a ref q mandei, precisa ter uma finalidade mais pro dia a dia de webapps",
+    "excluir": false,
+    "data": "2026-11-08T14:55:50.93466+00:00"
   }
 }
