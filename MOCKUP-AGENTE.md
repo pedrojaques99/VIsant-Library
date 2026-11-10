@@ -81,6 +81,8 @@ Só `tela` é obrigatória. A ordem de aplicação é: padrão do estúdio, pres
 
 Com vídeo na tela e sem `duracao`, o movimento dura o vídeo, até 30 s.
 
+Vídeo local na tela entra como uma cópia só de keyframes (cache em `%TEMP%/mockup-agente-telas`). Sem isso o seek quadro a quadro estoura o prazo no Chrome sem janela e o export falha.
+
 ## Receitas de showreel
 
 | id | Aparelho | O que faz |

@@ -10,6 +10,8 @@
 import { spawn, execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
+import os from "node:os";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
 import { z } from "zod";
@@ -144,7 +146,25 @@ async function lerFonte(fonte) {
   }
   const p = path.resolve(fonte);
   if (!existsSync(p)) throw new Error(`Arquivo não existe: ${p}`);
+  if (tipoDe(p).startsWith("video/")) return { corpo: readFileSync(soKeyframes(p)), tipo: "video/mp4", nome: path.basename(p).replace(/\.\w+$/, ".mp4") };
   return { corpo: readFileSync(p), tipo: tipoDe(p), nome: path.basename(p) };
+}
+
+/**
+ * Vídeo na tela é buscado quadro a quadro. Com keyframes espaçados (o normal de um mp4), o seek no Chrome sem janela
+ * passa do prazo e o export falha ("Não consegui ler um quadro do vídeo da tela"). Uma cópia só de keyframes, no
+ * máximo 1920 de largura e sem áudio, busca na hora. Fica em cache por caminho, tamanho e data.
+ */
+function soKeyframes(p) {
+  const st = statSync(p);
+  const dir = path.join(os.tmpdir(), "mockup-agente-telas");
+  mkdirSync(dir, { recursive: true });
+  const chave = createHash("sha1").update(`${p}|${st.size}|${st.mtimeMs}`).digest("hex").slice(0, 16);
+  const saida = path.join(dir, `${chave}.mp4`);
+  if (!existsSync(saida)) {
+    execFileSync("ffmpeg", ["-y", "-v", "error", "-i", p, "-an", "-vf", "scale='min(1920,iw)':-2", "-c:v", "libx264", "-g", "1", "-crf", "16", "-pix_fmt", "yuv420p", "-movflags", "+faststart", saida]);
+  }
+  return saida;
 }
 
 /* ── Catálogo ─────────────────────────────────────────────────────────── */
