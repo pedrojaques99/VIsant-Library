@@ -25,6 +25,14 @@ Each rule has an id. An experiment lists the ids it follows in `meta.rules`, and
 - **`born-in-best-state`**: the card looks good before anyone touches it (in a
   screenshot, on touch, in a grid thumbnail). Interaction intensifies, it never
   reveals.
+- **`tactile-object`**: never ship a flat 2D stick-figure SVG or stacked grey form
+  bars. Every piece must feel like a real physical object with reactive light,
+  shadow, bevel/relief that moves with the gesture, plus surface texture/grain/depth.
+- **`real-ui-purpose`**: both the metaphor and the component must solve an
+  immediately obvious UI action in 2 seconds (confirm, tear, latch, filter,
+  navigate, scrub, lock). Never build abstract physics toys (like a steam-engine
+  governor) or invent fake product metrics (like choosing a plan by "% headroom"
+  on a caliper).
 
 ## The code
 

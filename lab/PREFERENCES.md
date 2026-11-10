@@ -8,37 +8,43 @@ The owner's "Aprovar" / "Descartar" on `/lab?admin` land here through
 `pnpm lab:sync` on the next daily run, as do `pnpm lab:keep <id> "why"` and `pnpm lab:discard <id> "why"`
 locally. The taste block below is generated from the numbers; write by hand only outside it.
 
+## Standing rules from the owner (2026-11-09)
+
+- **Objeto físico + função real de interface (os dois juntos):** todo card precisa ser uma peça física com presença tátil e resolver uma ação óbvia de UI (confirmar, arquivar, trancar, trocar modo, navegar, filtrar) que qualquer pessoa entende em 2 segundos sem ler a dica.
+- **Zero vetor chapado ou form padrão:** proibido SVG 2D cru (palitos e bolinhas lisas como no `governor`) e proibido empilhar barrinhas cinzas com cara de formulário (`alcance`). Exige luz, sombra projetada e relevo que reagem ao gesto + textura/grain/profundidade de superfície.
+- **Zero caso de uso inventado:** nunca inventar métrica ou mecânica forçada (como escolher plano medindo "% de folga" num paquímetro, ou regulador de máquina a vapor que não controla nada real). Use tanto ações de decisão/confirmação (Canhoto, Fechar posição) quanto navegação/filtro/troca de estado (Pastas, Fuso, Teclas de modo), desde que o caso de uso exista de verdade num SaaS ou site.
+
 ## What the taste looks like so far
 
 <!-- lab:taste (written by pnpm lab:sync; edits here are overwritten) -->
-- 13 de 18 aprovados até aqui.
-- Gosta de mechanical (family, 5/5) e subtle (intensity, 9/10).
+- 13 de 20 aprovados até aqui.
+- Gosta de light (family, 3/3) e tilt (input, 2/2).
 - Rejeita optics (family, 0/2) e bold (intensity, 0/2).
 
 | dimensão | valor | kept | discarded | taxa (Beta 1,1) |
 |---|---|---|---|---|
-| input | drag | 4 | 0 | 83% |
 | input | tilt | 2 | 0 | 75% |
+| input | drag | 4 | 1 | 71% |
 | input | scroll | 3 | 1 | 67% |
-| input | pointer | 3 | 1 | 67% |
+| input | pointer | 3 | 2 | 57% |
 | input | press | 1 | 3 | 33% |
-| family | mechanical | 5 | 0 | 86% |
 | family | light | 3 | 0 | 80% |
+| family | mechanical | 5 | 2 | 67% |
 | family | fluid | 1 | 0 | 67% |
 | family | typography | 2 | 1 | 60% |
 | family | material | 2 | 1 | 60% |
 | family | ink-print | 0 | 1 | 33% |
 | family | optics | 0 | 2 | 25% |
-| intensity | subtle | 9 | 1 | 83% |
+| intensity | subtle | 9 | 3 | 71% |
 | intensity | medium | 4 | 2 | 63% |
 | intensity | bold | 0 | 2 | 25% |
-| response | snap | 7 | 2 | 73% |
+| response | snap | 7 | 3 | 67% |
 | response | spring | 5 | 2 | 67% |
-| response | inertia | 1 | 0 | 67% |
+| response | inertia | 1 | 1 | 50% |
 | response | direct | 0 | 1 | 33% |
 
 Motivos ao aprovar: nenhum. Ao descartar: nenhum.
-Fontes: behance/ui-ux 6/8 (70%), behance/graphic-design 1/1 (67%), lab 6/9 (64%).
+Fontes: behance/graphic-design 1/1 (67%), behance/ui-ux 6/9 (64%), lab 6/10 (58%).
 <!-- /lab:taste -->
 
 ## Prontos pra colher
@@ -77,3 +83,5 @@ into `registry/` is a separate step, only when the owner asks.
 - 2026-11-07 · kept · `2026-11-07-louver` · meio inutil, mas ta dahora o conceito, poderia ter mais profundidade · via /lab
 - 2026-11-08 · kept · `2026-11-08-canhoto` · precisa melhorar a animacao de rasgando, e ter feedback visual depois de rasgar - deixe mais burilado e refinado no design end to end · via /lab
 - 2026-11-08 · kept · `2026-11-08-detent` · dahora a ideia, mas precisa melhorar a animacao e birular o design end to end, principalemnte da bolinha de metal q ta mt cru e nao ˜gira~ ainda, mt fake e nao fliuido · via /lab
+- 2026-11-09 · discarded · `2026-11-09-governor` · visual chapado/vetor cru (dois palitos e bolinhas 2D sem 3D/textura), gesto desconectado da resposta e metáfora abstrata sem função real em UI
+- 2026-11-09 · discarded · `2026-11-09-alcance` · visual sem graça com cara de form padrão (barrinhas cinzas empilhadas sem presença de objeto físico) e caso de uso forçado (ninguém escolhe plano medindo folga num paquímetro)

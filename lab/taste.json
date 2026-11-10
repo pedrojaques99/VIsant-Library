@@ -1,6 +1,6 @@
 {
   "updated": "2026-11-09",
-  "n": 18,
+  "n": 20,
   "kept": 13,
   "decisions": [
     {
@@ -308,15 +308,47 @@
       "motivos": [],
       "reason": "dahora a ideia, mas precisa melhorar a animacao e birular o design end to end, principalemnte da bolinha de metal q ta mt cru e nao ˜gira~ ainda, mt fake e nao fliuido",
       "at": "2026-11-08"
+    },
+    {
+      "id": "2026-11-09-governor",
+      "kind": "experiment",
+      "title": "Governor",
+      "metaphor": "GOVERNOR: a flyball governor, the brass regulator on a steam engine. Two heavy\n balls hang from a spinning shaft; spin it faster and they swing out, lifting a\n collar along the shaft. Slow it down and they fall back.",
+      "tags": {
+        "input": "pointer",
+        "family": "mechanical",
+        "intensity": "subtle",
+        "response": "inertia"
+      },
+      "status": "discarded",
+      "reason": "visual chapado/vetor cru (dois palitos e bolinhas 2D sem 3D/textura), gesto desconectado da resposta e metáfora abstrata sem função real em UI",
+      "at": "2026-11-09"
+    },
+    {
+      "id": "2026-11-09-alcance",
+      "kind": "component",
+      "title": "Alcance",
+      "metaphor": "ALCANCE: pick a plan by how much you need, not by its name.",
+      "tags": {
+        "input": "drag",
+        "family": "mechanical",
+        "intensity": "subtle",
+        "response": "snap"
+      },
+      "gallery": "ui-ux",
+      "source": "https://www.behance.net/gallery/257747751/RIDGELINE-Golf-Dashboard-Mobile-App-Website",
+      "status": "discarded",
+      "reason": "visual sem graça com cara de form padrão (barrinhas cinzas empilhadas sem presença de objeto físico) e caso de uso forçado (ninguém escolhe plano medindo folga num paquímetro)",
+      "at": "2026-11-09"
     }
   ],
   "board": {
     "input": {
       "drag": {
         "kept": 4,
-        "discarded": 0,
-        "n": 4,
-        "rate": 0.8333333333333334
+        "discarded": 1,
+        "n": 5,
+        "rate": 0.7142857142857143
       },
       "tilt": {
         "kept": 2,
@@ -332,9 +364,9 @@
       },
       "pointer": {
         "kept": 3,
-        "discarded": 1,
-        "n": 4,
-        "rate": 0.6666666666666666
+        "discarded": 2,
+        "n": 5,
+        "rate": 0.5714285714285714
       },
       "press": {
         "kept": 1,
@@ -346,9 +378,9 @@
     "family": {
       "mechanical": {
         "kept": 5,
-        "discarded": 0,
-        "n": 5,
-        "rate": 0.8571428571428571
+        "discarded": 2,
+        "n": 7,
+        "rate": 0.6666666666666666
       },
       "ink-print": {
         "kept": 0,
@@ -396,9 +428,9 @@
     "intensity": {
       "subtle": {
         "kept": 9,
-        "discarded": 1,
-        "n": 10,
-        "rate": 0.8333333333333334
+        "discarded": 3,
+        "n": 12,
+        "rate": 0.7142857142857143
       },
       "medium": {
         "kept": 4,
@@ -416,9 +448,9 @@
     "response": {
       "snap": {
         "kept": 7,
-        "discarded": 2,
-        "n": 9,
-        "rate": 0.7272727272727273
+        "discarded": 3,
+        "n": 10,
+        "rate": 0.6666666666666666
       },
       "spring": {
         "kept": 5,
@@ -428,9 +460,9 @@
       },
       "inertia": {
         "kept": 1,
-        "discarded": 0,
-        "n": 1,
-        "rate": 0.6666666666666666
+        "discarded": 1,
+        "n": 2,
+        "rate": 0.5
       },
       "direct": {
         "kept": 0,
@@ -447,9 +479,9 @@
   "sources": {
     "behance/ui-ux": {
       "kept": 6,
-      "discarded": 2,
-      "n": 8,
-      "rate": 0.7
+      "discarded": 3,
+      "n": 9,
+      "rate": 0.6363636363636364
     },
     "behance/graphic-design": {
       "kept": 1,
@@ -459,9 +491,9 @@
     },
     "lab": {
       "kept": 6,
-      "discarded": 3,
-      "n": 9,
-      "rate": 0.6363636363636364
+      "discarded": 4,
+      "n": 10,
+      "rate": 0.5833333333333334
     }
   }
 }
