@@ -19,7 +19,7 @@ export const meta: LabMeta = {
   hintTouch: "arraste a alavanca para armar",
   formula: "F = −k·sin(πu) · snap sign(u) · x = 32u · shadow = −24u · k 560 c 28",
   rules: ["one-input", "one-metaphor", "mono-labels", "formula", "born-in-best-state", "tactile-object", "real-ui-purpose", "no-new-deps", "tokens", "reduced-motion", "touch", "small", "only-transform", "mobile-hint", "mobile-no-hover", "mobile-perf"],
-  status: "candidate",
+  status: "kept",
   tags: { input: "drag", family: "mechanical", intensity: "medium", response: "snap" },
   rationale: "desvio: o lab:next sorteou pointer+fluid+inertia, mas após o descarte do GOVERNOR e do Alcance o dono pediu objeto físico com função real de UI em 2s + relevo/luz/textura; drag (71%), mechanical (67%), medium (63%) e snap (67%) entregam uma chave alavanca basculante real",
 };
