@@ -782,6 +782,30 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
     }
   };
   exportarRef.current = exportar;
+  const avisoRef = React.useRef(aviso);
+  avisoRef.current = aviso;
+  /*
+   * Com `?agente` na URL, a cena se monta e exporta por código (scripts/mockup-agente): os mesmos
+   * `receber` e `exportar` do clique, então o arquivo do agente é o mesmo que a pessoa baixaria.
+   */
+  React.useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has("agente")) return;
+    const w = window as unknown as { estudioAgente?: unknown };
+    w.estudioAgente = {
+      cena: () => cenaAtual.current,
+      definir: (p: Partial<Cena>) => {
+        setTocando(false);
+        setCenaBase((c) => ({ ...c, ...p }));
+      },
+      receber: (f: Blob & { name?: string }) => receberRef.current(f),
+      irPara: (t: number) => tempo.set(t),
+      exportar: (modo?: "video" | "imagem") => exportarRef.current(modo),
+      aviso: () => avisoRef.current,
+    };
+    return () => {
+      delete w.estudioAgente;
+    };
+  }, [setCenaBase, tempo]);
   // Só PNG vai para a área de transferência: é o único formato de imagem que todo navegador aceita ali.
   const copiarImagem = async () => {
     if (!pronto) return;
