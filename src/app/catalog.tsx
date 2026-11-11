@@ -554,6 +554,8 @@ const SignaturePadColheitaDemo = React.lazy(() => import("./demos/signature-pad-
 const PromptComposerDemo = React.lazy(() => import("./demos/prompt-composer-demo"));
 const FrameMarkupDemo = React.lazy(() => import("./demos/frame-markup-demo"));
 const UseCatalogDemo = React.lazy(() => import("./demos/use-catalog-demo"));
+const DeviceKitDemo = React.lazy(() => import("./demos/device-kit-demo"));
+const VoiceRecorderDemo = React.lazy(() => import("./demos/voice-recorder-demo"));
 const SlideToConfirmColheitaDemo = React.lazy(() => import("./demos/slide-to-confirm-demo"));
 const StickerPeelColheitaDemo = React.lazy(() => import("./demos/sticker-peel-demo"));
 const StreamgraphColheitaDemo = React.lazy(() => import("./demos/streamgraph-demo"));
@@ -2343,6 +2345,28 @@ export const CATALOG: CatalogItem[] = [
     tags: ["chat", "agente", "ia", "prompt", "anexo"],
     demo: PromptComposerDemo,
     preview: { w: 520, h: 380 },
+  },
+  {
+    name: "device-kit",
+    title: "Device Kit",
+    type: "ui",
+    family: "controles",
+    description:
+      "Aparelho y2k industrial em peças: carcaça de alumínio escovado, display LCD na luz da marca, LED de estado, encoder com detentes, tecla que afunda e chave de ligar.",
+    tags: ["aparelho", "hardware", "led", "encoder", "knob", "switch", "lcd", "rack"],
+    demo: DeviceKitDemo,
+    preview: { w: 520, h: 560 },
+  },
+  {
+    name: "voice-recorder",
+    title: "Voice Recorder",
+    type: "ui",
+    family: "controles",
+    description:
+      "Gravador de voz de bolso montado com o Device Kit: REC que trava afundado, display com timecode e onda, encoder lateral que navega entre as notas ou vira volume.",
+    tags: ["áudio", "gravador", "voz", "nota", "aparelho", "transcrição"],
+    demo: VoiceRecorderDemo,
+    preview: { w: 860, h: 520 },
   },
   {
     name: "use-catalog",

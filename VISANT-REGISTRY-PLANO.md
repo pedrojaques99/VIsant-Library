@@ -495,6 +495,21 @@ quadrada (um uso só, ainda arquivo, não padrão).
 (`segmented-control`, `liquid-toggle`) no mesmo formato, pra projeto sem React
 ter a mesma casa.
 
+### De `jaques-os/app` (Estúdio) — device-kit PREPARADO, NÃO PUBLICADO (11/11/2026)
+
+O aparelho y2k industrial do Gravador virou kit. Branch `device-kit`, commit local, sem
+push e sem deploy: o dono ainda não aprovou publicar. A origem (`app/src/components/ui/device-*`)
+ganha o cabeçalho "Colhido para o registry" só depois da publicação.
+
+| Item | Origem | Usos | Por que vale |
+|---|---|---|---|
+| `device-kit` | `app/src/components/ui/device-{shell,lcd,led,key,encoder}.tsx` + `device-kit.css` | Gravador, Serviços (rack), LED do Agente | Carcaça escovada, LCD na luz do `--brand`, LED (off/on/respira/pisca/erro), encoder com detentes (`role=slider`), tecla que afunda e chave de ligar. Material só no `css` do item (`--dk-*`, claro e escuro): zero hex no .tsx |
+| `voice-recorder` | `app/src/components/ui/voice-recorder.tsx` | Gravador do Estúdio | O gravador de bolso montado com o kit; dado por prop, nenhum fetch |
+
+Recolher depois de corrigir no app: `node scripts/colher-device-kit.mjs` (em `jaques-os/app`).
+Regra de uso: o aparelho só entra onde o gesto físico é função (gravar, tocar, girar, acender,
+ligar); lista, tabela, formulário e navegação ficam sóbrios.
+
 ### De `jaques-os/app` (Estúdio) — COLHIDO em 11/11/2026
 
 Os controles de trabalho do app do Estúdio: a lista que todo módulo filtra e o

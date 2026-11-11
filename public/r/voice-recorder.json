@@ -1,0 +1,147 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "voice-recorder",
+  "title": "Voice Recorder",
+  "author": "Visant Labs <visantsupply@gmail.com>",
+  "description": "Gravador de voz de bolso montado com o Device Kit: REC que trava afundado, display com timecode e onda, encoder lateral que navega entre as notas ou vira volume, e a lista das notas ao lado.",
+  "dependencies": [
+    "lucide-react",
+    "motion"
+  ],
+  "registryDependencies": [
+    "utils",
+    "@visant/device-kit"
+  ],
+  "files": [
+    {
+      "path": "registry/visant/ui/voice-recorder.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { useReducedMotion } from \"motion/react\";\nimport { BatteryFull, BatteryLow, BatteryMedium, BatteryWarning, Play, Square } from \"lucide-react\";\n\nimport { cn } from \"@/lib/utils\";\nimport { DeviceEncoder } from \"@/components/ui/device-encoder\";\nimport { DeviceKey, usePressFlash } from \"@/components/ui/device-key\";\nimport { DeviceLcd, DeviceReadout, DeviceSegments, timecode } from \"@/components/ui/device-lcd\";\nimport { DeviceLed } from \"@/components/ui/device-led\";\nimport { DeviceEngraving, DeviceShell } from \"@/components/ui/device-shell\";\n\n/**\n * Voice Recorder: um gravador de voz de bolso, de alumínio escovado, que reage a cada operação.\n *\n * \"Você aperta, fala, encerra. O aparelho captura; o software organiza e transcreve.\" Então o\n * aparelho tem um display pequeno, um REC dominante, Stop e Play discretos e um encoder na\n * lateral. A transcrição não aparece nele: aparece na nota, na lista ao lado.\n *\n * A peça é só a casca: não grava, não toca e não busca nada. Recebe o estado, o tempo, o nível\n * e as notas por props e devolve as ações por callbacks. Quem liga o microfone e o player é a\n * tela que a usa.\n *\n * ── Decisões que não são óbvias ────────────────────────────────────────────\n *\n * 1. **O nível chega por `getLevel`, puxado a cada quadro.** Passar `level` como prop\n *    re-renderiza o aparelho 60 vezes por segundo; a função não. Os dois funcionam.\n * 2. **O REC trava afundado enquanto grava ou pausa**, como uma tecla de gravador de verdade,\n *    e o LED do meio é a luz de gravação: respira gravando, pisca devagar pausado.\n * 3. **O encoder muda de função com o estado**: parado, navega entre as notas; gravando ou\n *    tocando, é o volume. O display mostra o valor enquanto gira e por 1,2 s depois.\n *    Arrasto vertical, roda do mouse e setas andam um detente por vez.\n * 4. **O teclado também afunda o botão.** R/Espaço, S e P marcam a tecla como apertada por um\n *    instante, para o atalho e o clique contarem a mesma história.\n * 5. **O aparelho é montado com o kit `device-*`** (carcaça, display, LED, teclas, encoder). O\n *    material mora no kit (variáveis `--dk-*`, claro e escuro, em `device-kit.css`); aqui fica\n *    só a disposição do gravador. A tinta do display é o `--brand`.\n */\n\nexport type RecorderState = \"idle\" | \"recording\" | \"paused\" | \"saving\" | \"transcribing\" | \"playing\" | \"error\";\n\nexport interface RecorderNote {\n  id: string;\n  title: string;\n  durationMs: number;\n  date: number | string | Date;\n  /** O texto da nota. Aparece na lista, nunca no aparelho. */\n  transcript?: string | null;\n  /** Ainda transcrevendo. */\n  pending?: boolean;\n}\n\nexport interface VoiceRecorderProps {\n  state: RecorderState;\n  /** Tempo corrido da gravação, ou a posição do que toca, em ms. */\n  timeMs?: number;\n  /** Nível do microfone (ou do que toca), de 0 a 1. */\n  level?: number;\n  /** O mesmo nível, puxado a cada quadro. Tem preferência sobre `level`. */\n  getLevel?: () => number;\n  notes?: RecorderNote[];\n  selectedId?: string | null;\n  /** Volume de 0 a 1. */\n  volume?: number;\n  /** Bateria de 0 a 1. Sem ela, o ícone não aparece. */\n  battery?: number | null;\n  /** A mensagem do erro, em português, pronta para mostrar. */\n  error?: string | null;\n  /** Gravar, ou retomar a pausa. */\n  onRecord?: () => void;\n  onPause?: () => void;\n  /** Parar a gravação ou o que toca. */\n  onStop?: () => void;\n  /** Descartar a gravação em curso (Esc). */\n  onDiscard?: () => void;\n  onPlay?: (id: string) => void;\n  onVolumeChange?: (v: number) => void;\n  onSelect?: (id: string) => void;\n  /** Abrir a nota (a transcrição inteira, o player). */\n  onOpen?: (id: string) => void;\n  /** Data da nota na lista. Padrão: \"11 nov., 14:02\". */\n  formatDate?: (d: Date) => string;\n  /** Quantas notas a lista mostra de uma vez. */\n  listSize?: number;\n  className?: string;\n}\n\nconst PASSO_VOLUME = 0.05;\nconst MOSTRA_GIRO_MS = 1200;\n\nconst dataPadrao = (d: Date) =>\n  `${d.toLocaleDateString(\"pt-BR\", { day: \"numeric\", month: \"short\" })}, ${d.toLocaleTimeString(\"pt-BR\", { hour: \"2-digit\", minute: \"2-digit\" })}`;\n\nconst curto = (ms: number) => {\n  const s = Math.max(0, Math.round(ms / 1000));\n  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, \"0\")}`;\n};\n\nconst ROTULO: Record<RecorderState, string> = {\n  idle: \"Pronto\", recording: \"Rec\", paused: \"Pausa\", saving: \"Salvando\", transcribing: \"Transcrevendo\", playing: \"Play\", error: \"Erro\",\n};\nconst ANUNCIO: Record<RecorderState, string> = {\n  idle: \"Parado\", recording: \"Gravando\", paused: \"Pausado\", saving: \"Salvando a gravação\", transcribing: \"Transcrevendo a nota\", playing: \"Tocando\", error: \"Erro\",\n};\n\nexport function VoiceRecorder({\n  state, timeMs = 0, level, getLevel, notes = [], selectedId = null, volume = 0.8, battery = null, error = null,\n  onRecord, onPause, onStop, onDiscard, onPlay, onVolumeChange, onSelect, onOpen, formatDate = dataPadrao, listSize = 6, className,\n}: VoiceRecorderProps) {\n  const corpo = React.useRef<HTMLDivElement>(null);\n  const reduzido = !!useReducedMotion();\n  const [apertada, apertar] = usePressFlash(); // o atalho de teclado afunda a tecla também\n\n  const idx = Math.max(0, notes.findIndex((n) => n.id === selectedId));\n  const nota = notes.length ? notes[idx] : null;\n  const gravando = state === \"recording\" || state === \"paused\";\n  const modo: \"notas\" | \"volume\" = (state === \"idle\" || state === \"transcribing\" || state === \"error\") && notes.length > 1 ? \"notas\" : \"volume\";\n\n  // ── Ações (as mesmas para clique, teclado e atalho)\n  const rec = () => {\n    if (state === \"saving\") return;\n    apertar(\"rec\");\n    if (state === \"recording\") onPause?.();\n    else onRecord?.();\n  };\n  const podeParar = gravando || state === \"playing\";\n  const parar = () => { if (!podeParar) return; apertar(\"stop\"); onStop?.(); };\n  const podeTocar = !!nota && !gravando && state !== \"saving\";\n  const tocar = () => {\n    if (state === \"playing\") { apertar(\"play\"); onStop?.(); return; }\n    if (!podeTocar || !nota) return;\n    apertar(\"play\"); onPlay?.(nota.id);\n  };\n\n  // ── Encoder\n  const [giro, setGiro] = React.useState(0);\n  const [mostrando, setMostrando] = React.useState<null | \"notas\" | \"volume\">(null);\n  const fim = React.useRef<number>();\n  const vol = React.useRef(volume); vol.current = volume;\n  const estadoAtual = React.useRef({ modo, idx, notes, onVolumeChange, onSelect });\n  estadoAtual.current = { modo, idx, notes, onVolumeChange, onSelect };\n  const detente = React.useCallback((d: 1 | -1) => {\n    const a = estadoAtual.current;\n    setGiro((g) => g + d);\n    setMostrando(a.modo);\n    window.clearTimeout(fim.current);\n    fim.current = window.setTimeout(() => setMostrando(null), MOSTRA_GIRO_MS);\n    if (a.modo === \"volume\") {\n      const v = Math.min(1, Math.max(0, Math.round((vol.current + d * PASSO_VOLUME) * 20) / 20));\n      vol.current = v;\n      a.onVolumeChange?.(v);\n    } else {\n      // Para cima, a nota mais nova (o topo da lista); para baixo, a mais antiga.\n      const n = Math.min(a.notes.length - 1, Math.max(0, a.idx - d));\n      // O índice anda aqui também: vários detentes no mesmo quadro (roda, arrasto) chegam antes do render.\n      if (a.notes[n]) { a.idx = n; a.onSelect?.(a.notes[n].id); }\n    }\n  }, []);\n  React.useEffect(() => () => window.clearTimeout(fim.current), []);\n\n  // ── Teclado: no aparelho, e na página quando nada mais tem o foco.\n  const acoes = React.useRef({ rec, parar, tocar, detente, onDiscard, gravando });\n  acoes.current = { rec, parar, tocar, detente, onDiscard, gravando };\n  React.useEffect(() => {\n    const k = (e: KeyboardEvent) => {\n      if (e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;\n      const alvo = e.target as HTMLElement | null;\n      const dentro = !!alvo && !!corpo.current?.contains(alvo);\n      const solto = !alvo || alvo === document.body;\n      if (!dentro && !solto) return;\n      const a = acoes.current;\n      const tecla = e.key.length === 1 ? e.key.toLowerCase() : e.key;\n      // Espaço num botão que não é o REC continua sendo o clique daquele botão.\n      const outroBotao = dentro && alvo?.tagName === \"BUTTON\" && !alvo.classList.contains(\"vr-rec\");\n      const f =\n        tecla === \"r\" || (tecla === \" \" && !outroBotao) ? a.rec\n        : tecla === \"s\" ? a.parar\n        : tecla === \"p\" ? a.tocar\n        : tecla === \"Escape\" && a.gravando && a.onDiscard ? a.onDiscard\n        : dentro && (tecla === \"ArrowUp\" || tecla === \"ArrowRight\") ? () => a.detente(1)\n        : dentro && (tecla === \"ArrowDown\" || tecla === \"ArrowLeft\") ? () => a.detente(-1)\n        : null;\n      if (!f) return;\n      e.preventDefault();\n      f();\n    };\n    window.addEventListener(\"keydown\", k);\n    return () => window.removeEventListener(\"keydown\", k);\n  }, []);\n\n  // ── Onda\n  const tela = React.useRef<HTMLCanvasElement>(null);\n  const nivel = React.useRef(level ?? 0); nivel.current = level ?? 0;\n  const puxar = React.useRef(getLevel); puxar.current = getLevel;\n  const historia = React.useRef<Float32Array>(new Float32Array(52));\n  React.useEffect(() => {\n    const cv = tela.current;\n    if (!cv) return;\n    const ctx = cv.getContext(\"2d\");\n    if (!ctx) return;\n    const h = historia.current;\n    const vivo = state === \"recording\" || state === \"playing\";\n    let raf = 0, ultimo = 0, suave = 0, cor = \"\", quadros = 0;\n    const desenhar = (t: number) => {\n      const dpr = window.devicePixelRatio || 1;\n      const W = cv.clientWidth, H = cv.clientHeight;\n      if (cv.width !== Math.round(W * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }\n      if (!cor || quadros++ % 30 === 0) cor = getComputedStyle(cv).color;\n      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);\n      ctx.clearRect(0, 0, W, H);\n      ctx.fillStyle = cor;\n      const n = h.length, passo = W / n, larg = Math.max(1.5, passo * 0.5);\n      const varre = state === \"transcribing\" && !reduzido ? ((t / 1600) % 1.3) - 0.15 : -1;\n      let soma = 0;\n      for (let i = 0; i < n; i++) {\n        const v = h[i]; soma += v;\n        const x = i * passo + (passo - larg) / 2;\n        const alt = Math.max(1.5, v * (H - 2));\n        let a = state === \"saving\" || state === \"paused\" ? 0.55 : state === \"transcribing\" ? 0.3 : 0.4 + 0.6 * (i / n);\n        if (varre >= 0) a += Math.max(0, 0.7 - Math.abs(i / n - varre) * 6);\n        ctx.globalAlpha = Math.min(1, a);\n        ctx.fillRect(x, (H - alt) / 2, larg, alt);\n      }\n      ctx.globalAlpha = 1;\n      return soma;\n    };\n    const quadro = (t: number) => {\n      if (vivo && t - ultimo > 45) {\n        ultimo = t;\n        const bruto = Math.min(1, Math.max(0, puxar.current ? puxar.current() : nivel.current));\n        suave = bruto > suave ? bruto : suave * 0.6 + bruto * 0.4; // sobe na hora, desce macio\n        h.copyWithin(0, 1); h[h.length - 1] = suave;\n      }\n      if (state === \"idle\" || state === \"error\") for (let i = 0; i < h.length; i++) h[i] *= 0.9;\n      const soma = desenhar(t);\n      const continua = vivo || (state === \"transcribing\" && !reduzido) || ((state === \"idle\" || state === \"error\") && soma > 0.02);\n      if (continua) raf = requestAnimationFrame(quadro);\n    };\n    if (reduzido && (state === \"idle\" || state === \"error\")) h.fill(0);\n    raf = requestAnimationFrame(quadro);\n    return () => cancelAnimationFrame(raf);\n  }, [state, reduzido]);\n\n  // ── O que o display diz\n  const tempo = state === \"idle\" || state === \"error\" ? (nota?.durationMs ?? 0) : timeMs;\n  const linha = (() => {\n    if (mostrando === \"volume\") {\n      return <>VOL<DeviceSegments className=\"vr-meter\" value={volume} />{Math.round(volume * 100)}</>;\n    }\n    if (mostrando === \"notas\" && nota) return nota.title; // o contador 01/38 já anda no canto\n    if (state === \"error\") return error && /negad/i.test(error) ? \"Microfone negado\" : (error || \"Algo falhou\");\n    if (state === \"recording\") return \"S para, Esc descarta\";\n    if (state === \"paused\") return \"REC retoma, S para\";\n    if (state === \"saving\") return \"Subindo o áudio…\";\n    if (state === \"transcribing\") return \"O texto vai para a nota\";\n    if (state === \"playing\") return nota ? nota.title : \"\";\n    return nota ? nota.title : \"Aperte REC e fale\";\n  })();\n  const anuncio = state === \"playing\" && nota ? `Tocando ${nota.title}` : state === \"error\" ? (error || ANUNCIO.error) : ANUNCIO[state];\n\n  const janela = Math.max(0, Math.min(idx - 2, notes.length - listSize));\n  const visiveis = notes.slice(janela, janela + listSize);\n\n  return (\n    <div className={cn(\"vr flex flex-wrap items-start gap-x-14 gap-y-8\", className)}>\n      <DeviceShell ref={corpo} size=\"md\" className=\"vr-body\" data-state={state} data-turning={mostrando ? \"\" : undefined}\n        role=\"group\" aria-roledescription=\"gravador\" aria-label=\"Gravador de voz\" tabIndex={0}\n        aria-keyshortcuts=\"R Space S P ArrowUp ArrowDown Escape\">\n        <div className=\"vr-top\">\n          <span className=\"vr-grille\" aria-hidden />\n          <DeviceEngraving className=\"vr-mark\" aria-hidden>GRAVADOR</DeviceEngraving>\n        </div>\n\n        <DeviceLcd lit={state !== \"idle\" || !!mostrando} className=\"vr-bezel\" screenClassName=\"vr-screen\" aria-hidden>\n          <div className=\"vr-row\">\n            <span className=\"vr-status\"><span className=\"vr-status-dot\" />{ROTULO[state]}</span>\n            <span className=\"vr-meta\">\n              {notes.length && !gravando ? <span>{String(idx + 1).padStart(2, \"0\")}/{String(notes.length).padStart(2, \"0\")}</span> : null}\n              {battery != null ? <Bateria v={battery} /> : null}\n            </span>\n          </div>\n          <DeviceReadout className=\"vr-time\" glow={state !== \"idle\"}>{timecode(tempo)}</DeviceReadout>\n          <div className=\"vr-sub\">{linha}</div>\n          <canvas ref={tela} className=\"vr-wave\" />\n        </DeviceLcd>\n\n        <div className=\"vr-controls\">\n          <DeviceKey shape=\"ring\" size=\"lg\" className=\"vr-rec\" onClick={rec} disabled={state === \"saving\"}\n            pressing={apertada === \"rec\"} pressed={gravando}\n            aria-label={state === \"recording\" ? \"Pausar a gravação\" : state === \"paused\" ? \"Retomar a gravação\" : \"Gravar\"}\n            aria-keyshortcuts=\"R Space\">\n            <DeviceLed size=\"lg\" tone=\"red\" className=\"vr-led\" state={state === \"recording\" ? \"breathe\" : state === \"paused\" ? \"blink\" : \"off\"} />\n          </DeviceKey>\n          <div className=\"vr-small\">\n            <DeviceKey shape=\"square\" size=\"lg\" className=\"vr-btn\" onClick={parar} disabled={!podeParar}\n              pressing={apertada === \"stop\"} aria-label=\"Parar\" aria-keyshortcuts=\"S\">\n              <Square aria-hidden fill=\"currentColor\" strokeWidth={1.5} />\n            </DeviceKey>\n            <DeviceKey shape=\"square\" size=\"lg\" className=\"vr-btn\" onClick={tocar} disabled={!podeTocar && state !== \"playing\"}\n              pressing={apertada === \"play\"} pressed={state === \"playing\"}\n              aria-label={state === \"playing\" ? \"Parar de tocar\" : nota ? `Tocar ${nota.title}` : \"Tocar\"} aria-keyshortcuts=\"P\">\n              <Play aria-hidden fill=\"currentColor\" strokeWidth={1.5} />\n            </DeviceKey>\n          </div>\n        </div>\n\n        <DeviceEncoder variant=\"wheel\" className=\"vr-encoder\" position={giro} onDetent={detente}\n          label={modo === \"volume\" ? \"Volume\" : \"Navegar entre as notas\"}\n          min={modo === \"volume\" ? 0 : 1}\n          max={modo === \"volume\" ? 100 : notes.length}\n          value={modo === \"volume\" ? Math.round(volume * 100) : idx + 1}\n          valueText={modo === \"volume\" ? `${Math.round(volume * 100)}%` : nota ? `Nota ${idx + 1} de ${notes.length}: ${nota.title}` : undefined} />\n\n        <span className=\"sr-only\" role=\"status\" aria-live=\"polite\">{anuncio}</span>\n      </DeviceShell>\n\n      <section aria-label=\"Notas de voz\" className=\"min-w-0 max-w-md flex-1 basis-72 pt-2\">\n        {error && state === \"error\" ? <p role=\"alert\" className=\"mb-5 text-sm text-destructive first-letter:uppercase\">{error}</p> : null}\n        {!notes.length ? (\n          <p className=\"text-sm text-muted-foreground\">Nenhuma nota ainda. Aperte REC, fale e pare: a nota aparece aqui com o texto.</p>\n        ) : (\n          <ol className=\"flex flex-col\">\n            {visiveis.map((n) => {\n              const sel = n.id === nota?.id;\n              const tocando = sel && state === \"playing\";\n              return (\n                <li key={n.id} className=\"border-b border-border/70 last:border-0\">\n                  <button type=\"button\" onClick={() => onSelect?.(n.id)} aria-current={sel ? \"true\" : undefined}\n                    className={cn(\"group flex w-full items-baseline gap-4 py-3 text-left outline-none focus-visible:underline focus-visible:underline-offset-4\",\n                      \"transition-colors [transition-duration:var(--dur-fast)]\", sel ? \"text-foreground\" : \"text-muted-foreground hover:text-foreground\")}>\n                    <span className={cn(\"min-w-0 flex-1 truncate\", sel && \"font-medium\")}>{n.title}</span>\n                    <span className=\"num shrink-0 text-xs\">{tocando ? `${curto(timeMs)} / ` : \"\"}{curto(n.durationMs)}</span>\n                    <span className=\"hidden w-28 shrink-0 text-right text-xs sm:block\">{formatDate(new Date(n.date))}</span>\n                  </button>\n                  {sel ? (\n                    <div className=\"pb-4\">\n                      <p className=\"line-clamp-4 text-pretty text-sm leading-relaxed text-foreground/80\">\n                        {n.pending ? \"Transcrevendo…\" : n.transcript?.trim() || \"Sem fala nesta nota.\"}\n                      </p>\n                      {onOpen ? (\n                        <button type=\"button\" onClick={() => onOpen(n.id)}\n                          className=\"mt-2 text-xs text-muted-foreground underline underline-offset-4 outline-none hover:text-foreground focus-visible:text-foreground\">\n                          Abrir a nota\n                        </button>\n                      ) : null}\n                    </div>\n                  ) : null}\n                </li>\n              );\n            })}\n          </ol>\n        )}\n        {gravando && onDiscard ? (\n          <button type=\"button\" onClick={onDiscard} className=\"mt-4 text-xs text-muted-foreground underline underline-offset-4 outline-none hover:text-foreground focus-visible:text-foreground\">\n            Descartar esta gravação (Esc)\n          </button>\n        ) : null}\n      </section>\n    </div>\n  );\n}\n\nfunction Bateria({ v }: { v: number }) {\n  const Icone = v > 0.75 ? BatteryFull : v > 0.4 ? BatteryMedium : v > 0.15 ? BatteryLow : BatteryWarning;\n  return <Icone aria-hidden className=\"size-4\" strokeWidth={1.75} />;\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "css": {
+    ".vr-body": {
+      "width": "300px",
+      "flex-shrink": "0",
+      "padding": "22px 22px 26px"
+    },
+    ".vr-top": {
+      "display": "flex",
+      "align-items": "flex-start",
+      "justify-content": "space-between",
+      "height": "44px",
+      "margin-bottom": "18px"
+    },
+    ".vr-grille": {
+      "width": "63px",
+      "height": "35px",
+      "margin": "2px 0 0 2px",
+      "background": "radial-gradient(circle at 50% 42%, var(--dk-hole) 0 1.5px, transparent 2px) 0 0 / 7px 7px, radial-gradient(circle at 50% 62%, var(--dk-hl) 0 1.6px, transparent 2.1px) 0 0 / 7px 7px"
+    },
+    ".vr-mark": {
+      "padding-top": "2px"
+    },
+    ".vr-screen": {
+      "height": "148px",
+      "padding": "12px 14px 10px"
+    },
+    ".vr-body:focus-within .dk-lcd-in": {
+      "opacity": "1"
+    },
+    ".vr-row": {
+      "display": "flex",
+      "align-items": "center",
+      "justify-content": "space-between",
+      "gap": "8px",
+      "height": "14px",
+      "font-size": "9.5px",
+      "font-weight": "600",
+      "letter-spacing": "0.16em",
+      "text-transform": "uppercase"
+    },
+    ".vr-status": {
+      "display": "inline-flex",
+      "align-items": "center",
+      "gap": "6px"
+    },
+    ".vr-status-dot": {
+      "width": "6px",
+      "height": "6px",
+      "border-radius": "50%",
+      "background": "currentColor"
+    },
+    ".vr-body[data-state=\"recording\"] .vr-status, .vr-body[data-state=\"error\"] .vr-status": {
+      "color": "var(--dk-led-red)",
+      "text-shadow": "0 0 8px var(--dk-led-red-glow)"
+    },
+    ".vr-body[data-state=\"recording\"] .vr-status-dot": {
+      "animation": "vr-blink 1s steps(1, end) infinite"
+    },
+    ".vr-meta": {
+      "display": "inline-flex",
+      "align-items": "center",
+      "gap": "8px"
+    },
+    ".vr-time": {
+      "margin-top": "10px"
+    },
+    ".vr-sub": {
+      "margin-top": "6px",
+      "height": "14px",
+      "font-size": "11px",
+      "font-weight": "500",
+      "letter-spacing": "0.01em",
+      "white-space": "nowrap",
+      "overflow": "hidden",
+      "text-overflow": "ellipsis",
+      "opacity": "0.78"
+    },
+    ".vr-meter": {
+      "vertical-align": "-1px",
+      "margin": "0 6px"
+    },
+    ".vr-wave": {
+      "margin-top": "auto",
+      "width": "100%",
+      "height": "34px",
+      "display": "block"
+    },
+    ".vr-controls": {
+      "display": "flex",
+      "align-items": "center",
+      "justify-content": "space-between",
+      "margin-top": "24px",
+      "padding": "0 4px 0 2px"
+    },
+    ".vr-small": {
+      "display": "flex",
+      "gap": "12px"
+    },
+    ".vr-encoder": {
+      "position": "absolute",
+      "right": "-9px",
+      "top": "176px"
+    },
+    "@keyframes vr-blink": {
+      "0%": {
+        "opacity": "1"
+      },
+      "50%": {
+        "opacity": "0.15"
+      }
+    },
+    "@media (prefers-reduced-motion: reduce)": {
+      ".vr-body[data-state=\"recording\"] .vr-status-dot": {
+        "animation": "none"
+      }
+    }
+  },
+  "categories": [
+    "controles",
+    "audio",
+    "gravador",
+    "voz",
+    "aparelho"
+  ],
+  "type": "registry:ui"
+}
