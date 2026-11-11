@@ -766,5 +766,33 @@
   "use-tilt": {
     "quando": "Deixar a inclinação do aparelho pilotar uma peça que já funciona por arrasto",
     "evite": "Como única entrada: boa parte dos aparelhos não concede o sensor"
+  },
+  "louver": {
+    "quando": "Escolher um nível em poucas paradas com um gesto de rolar: brilho, intensidade, privacidade",
+    "evite": "Valor contínuo e preciso: scrub-input; ligar e desligar: toggle-lever"
+  },
+  "detent-tray": {
+    "quando": "Escolher entre poucas posições com um gesto de inclinar, sentindo cada parada",
+    "evite": "Valor com consequência a mostrar: detent-slider; opções com nome: segmented-control"
+  },
+  "toggle-lever": {
+    "quando": "Ligar e desligar algo que pede um gesto firme: energia, modo, armar",
+    "evite": "Interruptor discreto numa lista de preferências: glass-switch; painel de aparelho antigo: vintage-toggle"
+  },
+  "zone-reader": {
+    "quando": "Escolher um fuso horário ou um item de uma lista densa e monoespaçada",
+    "evite": "Escolher uma hora: time-dial; poucas opções: segmented-control"
+  },
+  "mode-keys": {
+    "quando": "Escolher um modo entre três ou quatro, com o efeito resumido num número",
+    "evite": "Opções sem efeito a mostrar: segmented-control; ligar e desligar: toggle-lever"
+  },
+  "folder-tabs": {
+    "quando": "Navegar entre seções de um arquivo, portfólio ou projeto com cara de objeto",
+    "evite": "Abas sobre foto ou vídeo: glass-tabs; poucas opções em linha: segmented-control"
+  },
+  "ticket-stub": {
+    "quando": "Confirmar presença, inscrição ou ingresso com um gesto deliberado",
+    "evite": "Confirmação destrutiva: hold-to-confirm; deslizar sem metáfora: slide-to-confirm"
   }
 }

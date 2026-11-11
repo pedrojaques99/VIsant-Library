@@ -1,3 +1,5 @@
+"use client";
+
 /*
  * ZONE: pick a time zone by sliding a strip of film under a reader.
  *
@@ -11,35 +13,8 @@
  */
 import * as React from "react";
 import { motion, useMotionTemplate, useMotionValue, useReducedMotion, useSpring, useTransform, useVelocity } from "motion/react";
-import { useCoarse, useInView } from "../hooks";
-import type { LabComponentMeta } from "../types";
-
-export const meta: LabComponentMeta = {
-  kind: "component",
-  id: "2026-11-05-fuso",
-  date: "2026-11-05",
-  title: "Leitor de fuso",
-  label: "ZONE",
-  hint: "scroll the film · arrows work too",
-  hintTouch: "deslize a lista ou toque na cidade",
-  formula: "i = round(scrollTop / R) · edge = min(|v| · 0.012, R) · k 300 · c 40",
-  rules: ["one-metaphor", "mono-labels", "formula", "born-in-best-state", "no-new-deps", "tokens", "reduced-motion", "touch", "only-transform", "mobile-hint", "mobile-no-hover", "mobile-scroll", "mobile-perf"],
-  status: "kept",
-  tags: { input: "scroll", family: "typography", intensity: "subtle", response: "snap" },
-  rationale: "componente: trilho Behance (fora do lab:next), único do quadro com rolagem como entrada",
-  source: {
-    title: "Artemii Lebedev. Portfolio '26.",
-    url: "https://www.behance.net/gallery/257630935/Artemii-Lebedev-Portfolio-26",
-    studio: "Le:mma Studio",
-    gallery: "ui-ux",
-    refs: ["lab/.refs/2026-11-05-artemii-lebedev-portfolio-26/ref-1.png", "lab/.refs/2026-11-05-artemii-lebedev-portfolio-26/ref-2.png", "lab/.refs/2026-11-05-artemii-lebedev-portfolio-26/ref-3.png"],
-  },
-  inspiration: "Uma lista densa e monoespaçada é a interface inteira, e uma única linha invertida diz onde você está.",
-  sketches: [
-    "índice de arquivos com prévia que troca conforme a linha: repete o layout da fonte e não resolve nada que o catálogo não tenha",
-    "seletor com máscara que abre ao segurar: segurar está 0/3 no placar e obturador já foi descartado",
-  ],
-};
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { useInView } from "@/hooks/use-idle";
 
 const ZONES = [
   ["Honolulu", "Pacific/Honolulu"], ["Los Angeles", "America/Los_Angeles"], ["Cidade do México", "America/Mexico_City"],
@@ -83,7 +58,7 @@ function Rows({ now, R, on, selected, onPick }: { now: Date; R: number; on?: boo
           aria-selected={on ? undefined : selected === i}
           onClick={onPick && (() => onPick(i))}
           style={{ height: R }}
-          className={`flex snap-center items-center justify-between gap-4 px-3 font-casa-mono text-casa-sm uppercase tabular-nums ${on ? "" : "cursor-pointer text-casa-fg-2"}`}
+          className={`flex snap-center items-center justify-between gap-4 px-3 font-mono text-xs uppercase tabular-nums ${on ? "" : "cursor-pointer text-muted-foreground"}`}
         >
           <span className="truncate">{z.city}</span>
           <span>{offsetLabel(offsetOf(z, now))}</span>
@@ -93,9 +68,9 @@ function Rows({ now, R, on, selected, onPick }: { now: Date; R: number; on?: boo
   );
 }
 
-export default function Fuso() {
+export function ZoneReader() {
   const reduce = useReducedMotion();
-  const coarse = useCoarse();
+  const coarse = useMediaQuery("(pointer: coarse)");
   const R = coarse ? 44 : 32; // a finger needs the taller row; same window height either way
   const rows = coarse ? 5 : 7;
   const H = R * rows;
@@ -113,7 +88,7 @@ export default function Fuso() {
   const stretch = (v: number) => (reduce ? 0 : Math.min(Math.abs(v) * 0.012, R));
   const top = useTransform(speed, (v) => PAD - (v > 0 ? stretch(v) : 0));
   const bottom = useTransform(speed, (v) => PAD - (v < 0 ? stretch(v) : 0));
-  const clip = useMotionTemplate`inset(${top}px 4px ${bottom}px 4px round var(--radius-control))`;
+  const clip = useMotionTemplate`inset(${top}px 4px ${bottom}px 4px round var(--r-control))`;
 
   React.useEffect(() => {
     if (!inView) return;
@@ -153,12 +128,12 @@ export default function Fuso() {
           initial={reduce ? false : { y: 6, opacity: 0.4 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: "spring", stiffness: 420, damping: 34 }}
-          className="font-casa text-[clamp(2.5rem,12vw,3.5rem)] font-medium leading-none tracking-[-0.03em] tabular-nums text-casa-fg"
+          className="[font-family:var(--font-display,inherit)] text-[clamp(2.5rem,12vw,3.5rem)] font-medium leading-none tracking-[-0.03em] tabular-nums text-foreground"
         >
           {hm}
-          <span className="text-casa-fg-3">{sec}</span>
+          <span className="text-muted-foreground">{sec}</span>
         </motion.span>
-        <span className="shrink-0 font-casa-mono text-casa-sm tabular-nums text-casa-fg-2">{diffLabel(zone, now)}</span>
+        <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">{diffLabel(zone, now)}</span>
       </div>
       <span className="sr-only" aria-live="polite">{`${zone.city}, ${hm}`}</span>
 
@@ -178,12 +153,12 @@ export default function Fuso() {
             if (n !== i) setI(n);
           }}
           style={{ height: H, paddingBlock: PAD }}
-          className="snap-y snap-mandatory touch-pan-y select-none overflow-y-scroll rounded-control outline-none [scrollbar-width:none] focus-visible:[box-shadow:var(--focus)] [&::-webkit-scrollbar]:hidden"
+          className="snap-y snap-mandatory touch-pan-y select-none overflow-y-scroll rounded-[var(--r-control)] outline-none [scrollbar-width:none] focus-visible:[box-shadow:var(--focus)] [&::-webkit-scrollbar]:hidden"
         >
           <Rows now={now} R={R} selected={i} onPick={go} />
         </div>
         {/* The window: the same film, in negative, moved only by transform. */}
-        <motion.div aria-hidden style={{ clipPath: clip }} className="pointer-events-none absolute inset-0 bg-casa-fg text-casa-bg">
+        <motion.div aria-hidden style={{ clipPath: clip }} className="pointer-events-none absolute inset-0 bg-foreground text-background">
           <motion.div style={{ y: shift, paddingBlock: PAD }}>
             <Rows now={now} R={R} on />
           </motion.div>

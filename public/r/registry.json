@@ -8595,6 +8595,232 @@
           "evite": "Uma série de números sem terreno: streamgraph; só um nível, sem percurso: gauge"
         }
       }
+    },
+    {
+      "name": "louver",
+      "type": "registry:ui",
+      "title": "Louver",
+      "description": "Persiana em lâminas: rolar gira as lâminas em cinco paradas, e as faixas de luz na parede abrem e fecham junto.",
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "registry/visant/ui/louver.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "categories": [
+        "controles",
+        "persiana",
+        "luz",
+        "rolagem",
+        "paradas",
+        "laminas"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Escolher um nível em poucas paradas com um gesto de rolar: brilho, intensidade, privacidade",
+          "evite": "Valor contínuo e preciso: scrub-input; ligar e desligar: toggle-lever"
+        }
+      }
+    },
+    {
+      "name": "detent-tray",
+      "type": "registry:ui",
+      "title": "Detent Tray",
+      "description": "Bandeja com cinco covas e uma esfera de aço: inclinar segura a esfera na cova até passar da borda, e ela cai na seguinte com um clique.",
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [
+        "@visant/use-media-query",
+        "@visant/use-idle",
+        "@visant/use-tilt"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/ui/detent-tray.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "categories": [
+        "controles",
+        "paradas",
+        "esfera",
+        "inclinacao",
+        "giroscopio",
+        "clique"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Escolher entre poucas posições com um gesto de inclinar, sentindo cada parada",
+          "evite": "Valor com consequência a mostrar: detent-slider; opções com nome: segmented-control"
+        }
+      }
+    },
+    {
+      "name": "toggle-lever",
+      "type": "registry:ui",
+      "title": "Toggle Lever",
+      "description": "Alavanca de painel sobre chapa escovada: empurrar contra a mola até passar do centro e ela estala para o outro lado, com a lente piloto acendendo.",
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "registry/visant/ui/toggle-lever.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "categories": [
+        "controles",
+        "alavanca",
+        "interruptor",
+        "ligar",
+        "metal",
+        "painel"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Ligar e desligar algo que pede um gesto firme: energia, modo, armar",
+          "evite": "Interruptor discreto numa lista de preferências: glass-switch; painel de aparelho antigo: vintage-toggle"
+        }
+      }
+    },
+    {
+      "name": "zone-reader",
+      "type": "registry:ui",
+      "title": "Zone Reader",
+      "description": "Escolher um fuso horário passando um filme sob a janela de um leitor de microficha, com hora e diferença ao vivo.",
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [
+        "@visant/use-media-query",
+        "@visant/use-idle"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/ui/zone-reader.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "categories": [
+        "texto",
+        "fuso",
+        "horario",
+        "lista",
+        "rolagem",
+        "cidade",
+        "relogio"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Escolher um fuso horário ou um item de uma lista densa e monoespaçada",
+          "evite": "Escolher uma hora: time-dial; poucas opções: segmented-control"
+        }
+      }
+    },
+    {
+      "name": "mode-keys",
+      "type": "registry:ui",
+      "title": "Mode Keys",
+      "description": "Teclas de rádio antigo que travam: apertar uma abaixa e solta a anterior, para escolher o modo de uma bateria com a reserva num número calmo.",
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "registry/visant/ui/mode-keys.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "categories": [
+        "controles",
+        "teclas",
+        "modo",
+        "energia",
+        "bateria",
+        "radio",
+        "escolha"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Escolher um modo entre três ou quatro, com o efeito resumido num número",
+          "evite": "Opções sem efeito a mostrar: segmented-control; ligar e desligar: toggle-lever"
+        }
+      }
+    },
+    {
+      "name": "folder-tabs",
+      "type": "registry:ui",
+      "title": "Folder Tabs",
+      "description": "Abas como pastas suspensas numa gaveta: arrastar folheia a pilha, e a pasta escolhida fica de pé e aberta.",
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "registry/visant/ui/folder-tabs.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "categories": [
+        "controles",
+        "abas",
+        "pastas",
+        "navegacao",
+        "arquivo",
+        "gaveta"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Navegar entre seções de um arquivo, portfólio ou projeto com cara de objeto",
+          "evite": "Abas sobre foto ou vídeo: glass-tabs; poucas opções em linha: segmented-control"
+        }
+      }
+    },
+    {
+      "name": "ticket-stub",
+      "type": "registry:ui",
+      "title": "Ticket Stub",
+      "description": "Confirmar presença destacando o canhoto de um ingresso: arrastar pela picotagem rasga, e soltar antes da metade devolve.",
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "registry/visant/ui/ticket-stub.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "categories": [
+        "controles",
+        "confirmar",
+        "ingresso",
+        "rasgar",
+        "arrastar",
+        "evento"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Confirmar presença, inscrição ou ingresso com um gesto deliberado",
+          "evite": "Confirmação destrutiva: hold-to-confirm; deslizar sem metáfora: slide-to-confirm"
+        }
+      }
     }
   ]
 }

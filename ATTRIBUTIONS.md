@@ -128,5 +128,9 @@ Código próprio. A referência foi só visual e deu o princípio; nenhum layout
 - `word-dial`: inspirado no princípio de "AYNI Andean Boutique Hotel", Katherine Dodds (https://www.behance.net/gallery/248693823/AYNI-Andean-Boutique-Hotel)
 - `detent-slider`: inspirado no princípio de "CFI", Fireart Studio (https://www.behance.net/gallery/239914091/CFI)
 - `route-profile`: inspirado no princípio de "TheTrail App – Travel Dashboard & UX UI Design", Rondesignlab (https://www.behance.net/gallery/236308597/TheTrail-App-Travel-Dashboard-UX-UI-Design)
+- `zone-reader`: inspirado no princípio de "Artemii Lebedev. Portfolio '26.", Le:mma Studio (https://www.behance.net/gallery/257630935/Artemii-Lebedev-Portfolio-26)
+- `mode-keys`: inspirado no princípio de "Solithic - Energy SaaS Dashboard & UX UI Design", Rondesignlab (https://www.behance.net/gallery/230911983/Solithic-Energy-SaaS-Dashboard-UX-UI-Design)
+- `folder-tabs`: inspirado no princípio de "Mosby’s Files", tubik studio (https://www.behance.net/gallery/257301831/Mosbys-Files)
+- `ticket-stub`: inspirado no princípio de "Chande Bootcamp 2026", Lumen Studio (https://www.behance.net/gallery/257768777/Chande-Bootcamp-2026)
 
-Sem fonte de terceiros no `meta` do experimento: `compass`, `drip-word`, `ratchet`, `raking-light`.
+Sem fonte de terceiros no `meta` do experimento: `compass`, `drip-word`, `ratchet`, `raking-light`, `louver`, `detent-tray`, `toggle-lever`.

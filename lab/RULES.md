@@ -95,6 +95,23 @@ and optional free text). The verdict goes to a store (`api/lab.ts`, Supabase
 `lab.veredictos`) and the page merges it at runtime: an approval is public at
 once, no deploy. Git catches up on the next run. No PR, no command for the owner.
 
+**One file per piece: candidate → approved → registry.**
+
+- **Candidate**: lives only in `lab/experiments/` or `lab/components/`. Never in
+  the catalog.
+- **Approved**: `lab:sync` (or `lab:keep`) hands it to `pnpm lab:promote <id>`,
+  which `git mv`s the file to `registry/visant/ui/<nome>.tsx` (named export,
+  hooks from `@/hooks/*`, `--casa-*` tokens swapped for the theme's; nothing
+  else changes), adds the registry, catalog (`estilo: ["lab"]` + the lab stamp:
+  label, hint, formula, source), `uso.json`, demo and credit entries, and runs
+  the generators. No copy stays in `lab/`. The piece shows in its family, in
+  `/estilo/lab` and on the public `/lab`, which reads that catalog list.
+- **Discarded**: the file is deleted.
+- `meta.catalogo` (`nome`, `descricao`, `tags`, `quando`, `evite`, Portuguese)
+  is what the catalog will say once it is approved; write it with the piece.
+- `lab:check` refuses a lab file whose id is already promoted, a `kept` file
+  still in `lab/`, and a `catalogo.nome` already in the registry.
+
 The lab learns: every experiment carries `meta.tags` (input, family,
 intensity, response). `lab:sync` turns verdicts into a Beta(1,1) approval rate
 per tag value (`lab/taste.json` + the table in `PREFERENCES.md`), and
@@ -107,8 +124,10 @@ checkout (it holds the owner's uncommitted work and has `main` checked out).
 
 1. `git fetch origin && git checkout -B lab/<yyyy-mm-dd>-<slug> origin/main`.
 2. `pnpm lab:sync`: pulls the verdicts given on `/lab` into git (kept → status
-   `kept`, discarded → file deleted, chips + reason logged in `PREFERENCES.md`)
-   and rewrites the taste scoreboard. Idempotent; it ships in today's commit.
+   `kept`, discarded → file deleted, chips + reason logged in `PREFERENCES.md`),
+   rewrites the taste scoreboard, then promotes every kept file to the registry
+   (`lab:promote`, with its shots; `--no-shots` skips the photos). Idempotent; it
+   ships in today's commit.
 3. `pnpm lab:next`: prints today's tag combo and a one-line rationale.
 4. Read `PREFERENCES.md` (the generated taste block and the log). Pick a
    metaphor that fits the combo and is not already on the board.
@@ -125,17 +144,17 @@ checkout (it holds the owner's uncommitted work and has `main` checked out).
 10. `node scripts/ship.mjs --main --no-perf -m "lab: <LABEL> (<input>) + <COMPONENT>, candidates"`
    (all ship gates, commit, push `HEAD:main`, `vercel deploy --prod`). If the
    push is refused (main moved), `git rebase origin/main` and run it again.
-11. Never touch `registry/`, never set `status: "kept"` by hand (only
-    `lab:sync` does, from the owner's verdict). A kept experiment or component
-    only becomes a registry item when the owner says so.
+11. Only `lab:promote` touches `registry/` (called by `lab:sync` from the
+    owner's verdict); never edit a registry piece by hand in a run, and never
+    set `status: "kept"` by hand.
 
 ## The component (one per run, from a featured Behance project)
 
 Besides the interaction, every run ships ONE refined, interactive component to
 `lab/components/<date>-<slug>.tsx`, inspired by a project featured in a curated
 Behance gallery. It goes through the same verdict (Aprovar / Descartar + chips);
-a kept one is listed under "Prontos pra colher" in `PREFERENCES.md` by
-`lab:sync`, and promotion to `registry/` is a separate step the owner asks for.
+a kept one is promoted to `registry/` by `lab:sync` like an experiment (see
+"One file per piece" above).
 
 - C1. `pnpm lab:behance`: picks a random featured project not used before
   (`lab/behance-used.json`), downloads 3 refs into `lab/.refs/<date>-<slug>/`

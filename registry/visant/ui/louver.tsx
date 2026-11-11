@@ -1,3 +1,5 @@
+"use client";
+
 /*
  * LOUVER: scrolling turns the slats of a window blind, and the bars of sunlight
  * they let onto the wall widen and narrow.
@@ -11,21 +13,6 @@
  */
 import * as React from "react";
 import { motion, useMotionValue, useReducedMotion, useTransform, type MotionValue } from "motion/react";
-import type { LabMeta } from "../types";
-
-export const meta: LabMeta = {
-  id: "2026-11-07-louver",
-  date: "2026-11-07",
-  title: "Louver",
-  label: "LOUVER",
-  hint: "scroll to turn the slats",
-  hintTouch: "deslize pra girar as lâminas",
-  formula: "θ = scrollTop / 48 · 22.5° · snap 5 detents · light = 1 − cos θ",
-  rules: ["one-input", "one-metaphor", "mono-labels", "formula", "born-in-best-state", "no-new-deps", "tokens", "reduced-motion", "touch", "small", "only-transform", "mobile-hint", "mobile-no-hover", "mobile-scroll", "mobile-perf"],
-  status: "kept",
-  tags: { input: "scroll", family: "light", intensity: "subtle", response: "snap" },
-  rationale: "aposta: subtle 3/4 · exploração: scroll 1/2, light 2/2, snap 2/4",
-};
 
 const STEP = 48; // px of scroll per detent (h-12)
 const DETENTS = 5; // 0°, 22.5°, 45°, 67.5°, 90°
@@ -37,7 +24,7 @@ const BANDS = 7;
 function Slat({ theta }: { theta: MotionValue<number> }) {
   // Edge-on: 0° stands upright (closed), 90° lies flat (open).
   const rotate = useTransform(theta, (t) => 90 - t);
-  return <motion.span style={{ rotate }} className="block h-px w-4 rounded-full bg-casa-fg-3" />;
+  return <motion.span style={{ rotate }} className="block h-px w-4 rounded-full bg-muted-foreground" />;
 }
 
 function Band({ open }: { open: MotionValue<number> }) {
@@ -46,12 +33,12 @@ function Band({ open }: { open: MotionValue<number> }) {
   return (
     <motion.div
       style={{ scaleY, opacity }}
-      className="h-full w-full rounded-[2px] blur-[3px] [background:linear-gradient(90deg,transparent,color-mix(in_srgb,var(--casa-fg)_14%,transparent)_30%,color-mix(in_srgb,var(--casa-fg)_8%,transparent))]"
+      className="h-full w-full rounded-[2px] blur-[3px] [background:linear-gradient(90deg,transparent,color-mix(in_srgb,var(--foreground)_14%,transparent)_30%,color-mix(in_srgb,var(--foreground)_8%,transparent))]"
     />
   );
 }
 
-export default function Louver() {
+export function Louver() {
   const reduce = useReducedMotion();
   const scroller = React.useRef<HTMLDivElement>(null);
   const theta = useMotionValue(BORN * PER);
@@ -67,7 +54,7 @@ export default function Louver() {
   };
 
   return (
-    <div className="relative isolate h-full w-full select-none overflow-hidden rounded-tile bg-casa-tile">
+    <div className="relative isolate h-full w-full select-none overflow-hidden rounded-[var(--r-surface)] bg-card">
       {/* The wall: bars of light, cast at the sun's slant. */}
       <div aria-hidden className="pointer-events-none absolute -inset-x-6 inset-y-6 -z-10 flex -skew-y-6 flex-col justify-between">
         {Array.from({ length: BANDS }, (_, i) => (

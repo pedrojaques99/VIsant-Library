@@ -12,11 +12,14 @@
  *   pnpm lab:keep <id> "why"              # status → kept, reason logged in PREFERENCES.md
  *   pnpm lab:discard <id> "why"          # file deleted, reason logged (git keeps the code)
  *   pnpm lab:sync                        # pull the verdicts given on /lab?admin into git
+ *   pnpm lab:promote <id>                # kept → registry/visant/ui/<nome>.tsx (scripts/lab-promote.mjs)
  *
  * `lab:sync` reads https://ui.visantlabs.com/api/lab (the verdict store) and, for
  * each verdict not yet in git, does what keep/discard would: kept → status flip,
  * discarded → file deleted, reason logged either way. Idempotent: a verdict
  * already reflected in the files is skipped. `--url <base>` points elsewhere.
+ * Then every kept file still in lab/ is promoted to the registry (`lab:promote`):
+ * an approved piece lives in ONE file, `registry/visant/ui/<nome>.tsx`.
  * Every verdict (with the experiment's tags, read before a discard deletes the
  * file) is kept in `lab/taste.json`, and sync rewrites the scoreboard there and
  * between the `lab:taste` markers in PREFERENCES.md (scripts/lab-taste.mjs).
@@ -30,6 +33,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DIMENSIONS, jaccard, markdown, next, rng, sameCombo, scoreboard } from "./lab-taste.mjs";
+import { promote, readMeta } from "./lab-promote.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const LAB = path.join(ROOT, "lab");
@@ -90,6 +94,14 @@ const metaphor = (src) =>
   (src.match(/^\/\*\n([\s\S]*?)(?:\n \*\n|\n \*\/)/)?.[1] ?? "").replace(/^\s*\*\s?/gm, " ").trim();
 const describe = (src) => `${field(src, "title") ?? ""} ${metaphor(src)}`;
 
+/** lab id → registry name, from the lab stamp of each catalog item (`lab: {"id":...}`). */
+function promotedIds() {
+  const catalog = fs.readFileSync(path.join(ROOT, "src", "app", "catalog.tsx"), "utf8");
+  return new Map(
+    [...catalog.matchAll(/^ {4}name: "([^"]+)",(?:(?!\n {4}name: ")[\s\S])*?\n {4}lab: \{"id":"([^"]+)"/gm)].map(([, name, id]) => [id, name]),
+  );
+}
+
 // ── Taste ledger (lab/taste.json) ──────────────────────────────────────────
 const loadTaste = () => (fs.existsSync(TASTE) ? JSON.parse(fs.readFileSync(TASTE, "utf8")) : { decisions: [] });
 
@@ -107,11 +119,17 @@ function saveTaste(taste) {
   fs.writeFileSync(TASTE, JSON.stringify(out, null, 2) + "\n");
   const prefs = fs.readFileSync(PREFS, "utf8");
   const block = `<!-- lab:taste (written by pnpm lab:sync; edits here are overwritten) -->\n${markdown(board)}\n<!-- /lab:taste -->`;
-  // Kept components are ready to harvest; promotion to registry/ is the owner's call.
+  // Kept components, and where each one lives now: promoted to the registry (lab:promote).
+  const promoted = promotedIds();
   const ready = taste.decisions.filter((d) => d.kind === "component" && d.status === "kept");
   const colher = `<!-- lab:colher (written by pnpm lab:sync) -->\n${
     ready.length
-      ? ready.map((d) => `- \`${d.id}\` · ${d.title ?? ""} · lab/components/${d.id}.tsx${d.source ? ` · ${d.source}` : ""}`).join("\n")
+      ? ready
+          .map((d) => {
+            const where = promoted.has(d.id) ? `@visant/${promoted.get(d.id)}` : `lab/components/${d.id}.tsx (a promover)`;
+            return `- \`${d.id}\` · ${d.title ?? ""} · ${where}${d.source ? ` · ${d.source}` : ""}`;
+          })
+          .join("\n")
       : "_Nenhum componente aprovado ainda._"
   }\n<!-- /lab:colher -->`;
   fs.writeFileSync(
@@ -189,6 +207,9 @@ function cmdCheck() {
   const discarded = loadTaste().decisions.filter((d) => d.status === "discarded");
   const all = entries().map((e) => ({ ...e, src: fs.readFileSync(e.file, "utf8") }));
   const labels = new Map();
+  // SSOT: an approved piece lives in registry/ only. Its lab id is in the catalog's stamp.
+  const promoted = promotedIds();
+  const registryNames = new Set(JSON.parse(fs.readFileSync(path.join(ROOT, "registry.json"), "utf8")).items.map((i) => i.name));
   let errors = 0;
   let warnings = 0;
   for (const { f, src, kind } of all) {
@@ -197,6 +218,13 @@ function cmdCheck() {
     const id = f.replace(/\.tsx$/, "");
 
     if (field(src, "id") !== id) err(`meta.id must be "${id}"`);
+    if (promoted.has(id)) err(`already in the registry as ${promoted.get(id)}: delete the lab copy (one file per piece)`);
+    if (field(src, "status") === "kept") err(`kept but still in lab/: run pnpm lab:promote ${id}`);
+    const cat = readMeta(src)?.meta?.catalogo;
+    if (cat?.nome && registryNames.has(cat.nome)) err(`meta.catalogo.nome "${cat.nome}" is already a registry item`);
+    else if (!cat?.nome && registryNames.has((field(src, "label") ?? "").toLowerCase()))
+      warn(`label ${field(src, "label")} is already a registry item name; set meta.catalogo.nome`);
+    if (!cat) warn("meta.catalogo missing: lab:promote will fall back to the label and the header (write it in Portuguese)");
     if (field(src, "date") !== id.slice(0, 10)) err(`meta.date must be "${id.slice(0, 10)}"`);
     for (const k of ["title", "hint", "formula"]) if (!field(src, k)?.trim()) err(`meta.${k} is empty`);
     const label = field(src, "label");
@@ -304,6 +332,7 @@ function verdict(verb, { pos }) {
   if (verb === "keep") {
     fs.writeFileSync(file, src.replace(/status:\s*"candidate"/, 'status: "kept"'));
     log("kept", id, reason);
+    promote([id]);
   } else {
     fs.unlinkSync(file);
     log("discarded", id, reason);
@@ -344,6 +373,9 @@ async function cmdSync({ opt }) {
   }
   const board = saveTaste(taste);
   console.log(`lab: synced ${n} verdict(s) from ${base}; taste: ${board.kept}/${board.n} kept → lab/taste.json`);
+  // Approved = promoted: nothing kept stays in lab/ (scripts/lab-promote.mjs).
+  const kept = entries().filter((e) => /status:\s*"kept"/.test(fs.readFileSync(e.file, "utf8"))).map((e) => e.f.replace(/\.tsx$/, ""));
+  if (kept.length) promote(kept, { shots: !("no-shots" in opt) });
 }
 
 function cmdNext({ opt }) {
@@ -366,4 +398,5 @@ else if (cmd === "check") cmdCheck();
 else if (cmd === "keep" || cmd === "discard") verdict(cmd, a);
 else if (cmd === "sync") await cmdSync(a);
 else if (cmd === "next") cmdNext(a);
-else die("commands: next | new | check | keep | discard | sync");
+else if (cmd === "promote") promote(a.pos, { name: a.opt.name, build: !("no-build" in a.opt), shots: "shots" in a.opt });
+else die("commands: next | new | check | keep | discard | sync | promote");
