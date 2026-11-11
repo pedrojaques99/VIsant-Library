@@ -97,6 +97,31 @@ export function SegmentedControl<T extends string>({
   );
   const n = options.length || 1;
 
+  /*
+   * Onde o polegar fica, medido no botão ativo.
+   *
+   * A versão anterior supunha colunas iguais (uma fração exata do trilho). Isso só
+   * vale quando todos os rótulos cabem na fração: com `flex-1` e rótulo sem quebra,
+   * um rótulo longo ("Com os tempos" ao lado de "Varrer") alarga o próprio botão, e
+   * o polegar invadia o vizinho ou deixava o texto encostado na borda. Medir o botão
+   * ativo acerta em qualquer combinação. O primeiro desenho (e o SSR) usa a fração,
+   * que é exata no caso comum; a medida entra no layout effect, antes de pintar.
+   */
+  const trilho = React.useRef<HTMLDivElement>(null);
+  const [medida, setMedida] = React.useState<{ left: number; width: number } | null>(null);
+  React.useLayoutEffect(() => {
+    const el = refs.current[activeIndex];
+    const pai = trilho.current;
+    if (!el || !pai) return;
+    const medir = () => setMedida({ left: el.offsetLeft, width: el.offsetWidth });
+    medir();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(medir);
+    ro.observe(pai);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [activeIndex, n]);
+
   // Direção do último passo, pro `stretch` saber qual borda sai primeiro. A
   // ref só anda depois do commit: re-render sem troca dá direção 0, e mudar o
   // atraso com a transição já rodando não a reinicia.
@@ -158,6 +183,7 @@ export function SegmentedControl<T extends string>({
 
   return (
     <div
+      ref={trilho}
       role="group"
       aria-label={ariaLabel}
       onKeyDown={onKeyDown}
@@ -166,8 +192,8 @@ export function SegmentedControl<T extends string>({
         className,
       )}
     >
-      {/* O polegar. `inset` de 4px = o `p-1` do trilho; a largura é uma fração
-          exata das colunas, então nada precisa ser medido em runtime. */}
+      {/* O polegar. `inset` de 4px = o `p-1` do trilho. Posição e largura vêm da
+          medida do botão ativo (ver `medida`); a fração é só o primeiro desenho. */}
       {animation === "stretch" ? (
         // As duas bordas andam separadas (`left` e `right`), e a da frente
         // não espera: é isso que estica. 200 ms + 70 de atraso cabem no teto
@@ -176,8 +202,10 @@ export function SegmentedControl<T extends string>({
           aria-hidden="true"
           className="pointer-events-none absolute inset-y-1 -z-10 rounded-lg bg-background shadow-sm"
           style={{
-            left: `calc(0.25rem + (100% - 0.5rem) * ${activeIndex} / ${n})`,
-            right: `calc(0.25rem + (100% - 0.5rem) * ${n - 1 - activeIndex} / ${n})`,
+            left: medida ? `${medida.left}px` : `calc(0.25rem + (100% - 0.5rem) * ${activeIndex} / ${n})`,
+            right: medida
+              ? `calc(100% - ${medida.left + medida.width}px)`
+              : `calc(0.25rem + (100% - 0.5rem) * ${n - 1 - activeIndex} / ${n})`,
             transitionProperty: "left, right",
             transitionDuration: "var(--dur-base,200ms)",
             transitionTimingFunction: "var(--ease-out)",
@@ -193,14 +221,15 @@ export function SegmentedControl<T extends string>({
         <span
           aria-hidden="true"
           className={cn(
-            "pointer-events-none absolute inset-y-1 left-1 -z-10 rounded-lg bg-background shadow-sm",
+            "pointer-events-none absolute inset-y-1 -z-10 rounded-lg bg-background shadow-sm",
+            medida ? "left-0" : "left-1",
             animation === "spring"
-              ? "transition-transform [transition-duration:280ms]"
-              : "transition-transform [transition-duration:var(--dur-base,200ms)] [transition-timing-function:var(--ease-out)]",
+              ? "transition-[transform,width] [transition-duration:280ms]"
+              : "transition-[transform,width] [transition-duration:var(--dur-base,200ms)] [transition-timing-function:var(--ease-out)]",
           )}
           style={{
-            width: `calc((100% - 0.5rem) / ${n})`,
-            transform: `translateX(${activeIndex * 100}%)`,
+            width: medida ? `${medida.width}px` : `calc((100% - 0.5rem) / ${n})`,
+            transform: medida ? `translateX(${medida.left}px)` : `translateX(${activeIndex * 100}%)`,
             transitionTimingFunction: animation === "spring" ? EASE_MOLA_CSS : undefined,
           }}
         />
