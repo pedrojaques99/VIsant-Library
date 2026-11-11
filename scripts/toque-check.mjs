@@ -632,6 +632,7 @@ async function medir(job, nav, comparar) {
 
   /* ── Toque: um por controle, do maior pro menor ───────────────────────── */
   await abrir();
+  if (process.env.TQ_DEBUG === nome) console.error("TQ_DEBUG apos abrir()", JSON.stringify(await lerEstado()));
   const iT = await inv();
   r.toques = [];
   const fila = [...iT.controles].sort((a, b) => b.area - a.area).slice(0, 4);
@@ -671,12 +672,23 @@ async function medir(job, nav, comparar) {
       const a = document.querySelector(s)?.closest("article");
       const r = a?.getBoundingClientRect();
       const palco = document.querySelector(s)?.getBoundingClientRect();
-      if (a && a.matches("[data-name]") && r && palco && r.bottom > palco.bottom + 8 && r.bottom < innerHeight) return { x: 40, y: r.bottom - 8 };
+      /* Rodapé coberto pela barra sticky ou alto demais pro arrasto de 240px não vale: o dedo cairia na barra e andaria 10px. */
+      const y = r ? r.bottom - 8 : 0;
+      if (a && a.matches("[data-name]") && r && palco && r.bottom > palco.bottom + 8 && r.bottom < innerHeight && y >= 330 && a.contains(document.elementFromPoint(40, y))) return { x: 40, y };
       return { x: 195, y: Math.max(palco ? palco.bottom + 30 : 0, 600) };
     }, raizSel);
     const py = Math.min(ponto.y, TELA.height - 20);
     /* Palco maior que a tela e com rolagem própria (pinned-scene): o dedo só cai nele, e quem rola é ele. */
     const dentroDoPalco = await p.evaluate(([s, x, y]) => Boolean(document.querySelector(s)?.contains(document.elementFromPoint(x, y))), [raizSel, ponto.x, py]);
+    if (process.env.TQ_DEBUG === nome) {
+      const diag = await p.evaluate(([x, y]) => {
+        const hit = document.elementFromPoint(x, y);
+        const cadeia = [];
+        for (let e = hit; e; e = e.parentElement) cadeia.push(`${e.tagName.toLowerCase()}.${String(e.className).split(" ").slice(0, 2).join(".")} [ta:${getComputedStyle(e).touchAction} pos:${getComputedStyle(e).position}]`);
+        return { scrollY, scrollHeight: document.documentElement.scrollHeight, innerHeight, hitTag: hit?.tagName, cadeia: cadeia.slice(0, 8) };
+      }, [ponto.x, py]);
+      console.error("TQ_DEBUG", JSON.stringify({ ponto, py, folga, dentroDoPalco, ...diag }, null, 1));
+    }
     if (dentroDoPalco && r.V?.interna) r.presaIgnorada = true;
     else if (folga >= 60) await d.arrastar(ponto.x, py, ponto.x, Math.max(90, py - 240));
     else await d.arrastar(ponto.x, py, ponto.x, Math.min(TELA.height - 10, py + 240));
@@ -684,6 +696,7 @@ async function medir(job, nav, comparar) {
     const s1 = await lerEstado();
     r.presa = !r.presaIgnorada && Math.abs(s1.scrollY - s0.scrollY) < 20 && !(folga < 60 && s0.scrollY < 60);
     r.corpo = await p.evaluate(() => `${getComputedStyle(document.body).overflow}/${getComputedStyle(document.documentElement).touchAction}`);
+    if (process.env.TQ_DEBUG === nome) console.error("TQ_DEBUG depois", JSON.stringify({ scrollYantes: s0.scrollY, scrollYdepois: s1.scrollY, presa: r.presa }));
   }
 
   await ctx.close();
