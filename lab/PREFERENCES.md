@@ -56,17 +56,17 @@ Fontes: behance/graphic-design 1/1 (67%), lab 7/12 (57%), behance/ui-ux 6/11 (54
 
 ## Prontos pra colher
 
-Components the owner approved on `/lab`. Approval does NOT publish: moving one
-into `registry/` is a separate step, only when the owner asks.
+Components the owner approved on `/lab`. Approval promotes: `lab:sync` moves each
+one into `registry/` with `lab:promote` (one file per piece, lab/RULES.md).
 
 <!-- lab:colher (written by pnpm lab:sync) -->
-- `2026-11-01-fechar-posicao` · Fechar posição · lab/components/2026-11-01-fechar-posicao.tsx · https://www.behance.net/gallery/239914091/CFI
-- `2026-11-01-arranjo` · Arranjo · lab/components/2026-11-01-arranjo.tsx · https://www.behance.net/gallery/248693823/AYNI-Andean-Boutique-Hotel
-- `2026-11-04-perfil-rota` · Perfil de rota · lab/components/2026-11-04-perfil-rota.tsx · https://www.behance.net/gallery/236308597/TheTrail-App-Travel-Dashboard-UX-UI-Design
-- `2026-11-07-pastas` · Pastas · lab/components/2026-11-07-pastas.tsx · https://www.behance.net/gallery/257301831/Mosbys-Files
-- `2026-11-05-fuso` · Leitor de fuso · lab/components/2026-11-05-fuso.tsx · https://www.behance.net/gallery/257630935/Artemii-Lebedev-Portfolio-26
-- `2026-11-06-teclas-modo` · Teclas de modo · lab/components/2026-11-06-teclas-modo.tsx · https://www.behance.net/gallery/230911983/Solithic-Energy-SaaS-Dashboard-UX-UI-Design
-- `2026-11-08-canhoto` · Canhoto · lab/components/2026-11-08-canhoto.tsx · https://www.behance.net/gallery/257768777/Chande-Bootcamp-2026
+- `2026-11-01-fechar-posicao` · Fechar posição · @visant/detent-slider · https://www.behance.net/gallery/239914091/CFI
+- `2026-11-01-arranjo` · Arranjo · @visant/word-dial · https://www.behance.net/gallery/248693823/AYNI-Andean-Boutique-Hotel
+- `2026-11-04-perfil-rota` · Perfil de rota · @visant/route-profile · https://www.behance.net/gallery/236308597/TheTrail-App-Travel-Dashboard-UX-UI-Design
+- `2026-11-07-pastas` · Pastas · @visant/folder-tabs · https://www.behance.net/gallery/257301831/Mosbys-Files
+- `2026-11-05-fuso` · Leitor de fuso · @visant/zone-reader · https://www.behance.net/gallery/257630935/Artemii-Lebedev-Portfolio-26
+- `2026-11-06-teclas-modo` · Teclas de modo · @visant/mode-keys · https://www.behance.net/gallery/230911983/Solithic-Energy-SaaS-Dashboard-UX-UI-Design
+- `2026-11-08-canhoto` · Canhoto · @visant/ticket-stub · https://www.behance.net/gallery/257768777/Chande-Bootcamp-2026
 <!-- /lab:colher -->
 
 ## Log
@@ -96,3 +96,11 @@ into `registry/` is a separate step, only when the owner asks.
 - 2026-11-10 · kept · `2026-11-09-toggle` · precisa ser mais minimal, suave, tem mt linha e ta meio tosco · via /lab
 - 2026-11-11 · discarded · `2026-11-10-iris` · svg mt porco: lâminas em triângulo chapado, nada de nível hardware
 - 2026-11-11 · discarded · `2026-11-10-encaixe` · svg mt porco: blocos chapados com listras, nada de nível hardware
+- 2026-11-11 · promoted · `2026-11-07-louver` → registry `louver`
+- 2026-11-11 · promoted · `2026-11-08-detent` → registry `detent-tray`
+- 2026-11-11 · promoted · `2026-11-09-toggle` → registry `toggle-lever`
+- 2026-11-11 · promoted · `2026-11-05-fuso` → registry `zone-reader`
+- 2026-11-11 · promoted · `2026-11-06-teclas-modo` → registry `mode-keys`
+- 2026-11-11 · promoted · `2026-11-07-pastas` → registry `folder-tabs`
+- 2026-11-11 · promoted · `2026-11-08-canhoto` → registry `ticket-stub`
+- 2026-11-11 · dedup · os 7 aprovados de 04/11 (compass, level, ratchet, raking, arranjo, fechar-posicao, perfil-rota) saem de lab/: a versão do registry é a única (estilo lab no catálogo)

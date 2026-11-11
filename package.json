@@ -58,6 +58,7 @@
     "lab:keep": "node scripts/lab.mjs keep",
     "lab:discard": "node scripts/lab.mjs discard",
     "lab:sync": "node scripts/lab.mjs sync",
+    "lab:promote": "node scripts/lab.mjs promote",
     "lab:next": "node scripts/lab.mjs next",
     "lab:mobile": "node scripts/lab-mobile.mjs",
     "lab:behance": "node scripts/lab-behance.mjs",

@@ -1,3 +1,5 @@
+"use client";
+
 /*
  * CANHOTO: confirm attendance by tearing the stub off a ticket.
  *
@@ -11,47 +13,15 @@
  */
 import * as React from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
-import type { LabComponentMeta } from "../types";
-
-export const meta: LabComponentMeta = {
-  kind: "component",
-  id: "2026-11-08-canhoto",
-  date: "2026-11-08",
-  title: "Canhoto",
-  label: "STUB",
-  hint: "drag the stub off to confirm · enter works too",
-  hintTouch: "arraste o canhoto para o lado",
-  formula: "p = clamp(Δx / w, 0, 1) · θ = 9p° · p > 0.55 ? tear : back · k 420 c 32",
-  rules: ["one-metaphor", "mono-labels", "formula", "born-in-best-state", "no-new-deps", "tokens", "reduced-motion", "touch", "only-transform", "mobile-hint", "mobile-no-hover", "mobile-perf"],
-  status: "kept",
-  tags: { input: "drag", family: "material", intensity: "subtle", response: "snap" },
-  rationale: "componente: trilho Behance (fora do lab:next); arrastar (melhor taxa, 80%) com metáfora nova de canhoto picotado, diferente do traço de preço do Fechar posição e da pilha das Pastas",
-  source: {
-    title: "Chande Bootcamp 2026",
-    url: "https://www.behance.net/gallery/257768777/Chande-Bootcamp-2026",
-    studio: "Lumen Studio",
-    gallery: "ui-ux",
-    refs: [
-      "lab/.refs/2026-11-08-chande-bootcamp-2026/ref-1.gif",
-      "lab/.refs/2026-11-08-chande-bootcamp-2026/ref-2.png",
-      "lab/.refs/2026-11-08-chande-bootcamp-2026/ref-3.png",
-    ],
-  },
-  inspiration: "O evento mora em peças físicas que você guarda (ingresso, etiqueta, chaveiro), então a interface trata participar como pegar um objeto, não marcar um campo.",
-  sketches: [
-    "chaveiro de etiquetas de interesse que você gira com o ponteiro: girar já é do Arranjo e etiqueta em pílula vira um filtro comum com fantasia",
-    "crachá pendurado no cordão que balança ao inclinar: inclinar já é do Perfil de rota e da DETENT de hoje, e um crachá não decide nada",
-  ],
-};
 
 const SNAP = { type: "spring", stiffness: 420, damping: 32 } as const;
 const TEAR = 0.55;
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 // Two half-circle notches where the perforation meets the edges (alpha-only mask).
 const notch = (side: "left" | "right") =>
-  `radial-gradient(circle 8px at ${side === "right" ? "100%" : "0"} 0, transparent 97%, var(--casa-fg)) top / 100% 51% no-repeat, radial-gradient(circle 8px at ${side === "right" ? "100%" : "0"} 100%, transparent 97%, var(--casa-fg)) bottom / 100% 51% no-repeat`;
+  `radial-gradient(circle 8px at ${side === "right" ? "100%" : "0"} 0, transparent 97%, var(--foreground)) top / 100% 51% no-repeat, radial-gradient(circle 8px at ${side === "right" ? "100%" : "0"} 100%, transparent 97%, var(--foreground)) bottom / 100% 51% no-repeat`;
 
-export default function Canhoto() {
+export function TicketStub() {
   const reduce = useReducedMotion();
   const stub = React.useRef<HTMLButtonElement>(null);
   const [torn, setTorn] = React.useState(false);
@@ -105,15 +75,15 @@ export default function Canhoto() {
     <div className="flex flex-col gap-4 p-4 sm:p-6">
       <div className="flex h-36 select-none">
         {/* The ticket: what you are confirming, and nothing else. */}
-        <div style={{ mask: notch("right"), WebkitMask: notch("right") }} className="flex flex-1 flex-col justify-between rounded-l-tile border border-r-0 border-casa-line bg-casa-bg p-4">
+        <div style={{ mask: notch("right"), WebkitMask: notch("right") }} className="flex flex-1 flex-col justify-between rounded-l-tile border border-r-0 border-border bg-background p-4">
           <div className="flex flex-col gap-1">
-            <span className="font-casa text-casa-lg font-medium leading-tight text-casa-fg">Encontro de design</span>
-            <span className="font-casa-mono text-[11px] uppercase tracking-[0.08em] text-casa-fg-3">sáb 14 nov · 19h</span>
+            <span className="[font-family:var(--font-display,inherit)] text-base font-medium leading-tight text-foreground">Encontro de design</span>
+            <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">sáb 14 nov · 19h</span>
           </div>
           <div className="flex items-end justify-between gap-2">
             <div className="flex items-baseline gap-1.5">
-              <span className="font-casa text-[2.5rem] font-medium leading-none tracking-[-0.03em] tabular-nums text-casa-fg">03</span>
-              <span className="font-casa text-casa-sm text-casa-fg-3">mesa</span>
+              <span className="[font-family:var(--font-display,inherit)] text-[2.5rem] font-medium leading-none tracking-[-0.03em] tabular-nums text-foreground">03</span>
+              <span className="[font-family:var(--font-display,inherit)] text-xs text-muted-foreground">mesa</span>
             </div>
             <motion.div
               initial={false}
@@ -121,13 +91,13 @@ export default function Canhoto() {
               transition={{ duration: reduce ? 0 : 0.24, ease: [0.22, 1, 0.36, 1] }}
               className="flex flex-col items-end gap-1"
             >
-              <span className="font-casa-mono text-[11px] uppercase tracking-[0.08em] text-casa-fg">confirmado</span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-foreground">confirmado</span>
               <button
                 type="button"
                 tabIndex={torn ? 0 : -1}
                 aria-hidden={!torn}
                 onClick={undo}
-                className="font-casa text-casa-sm text-casa-fg-3 underline underline-offset-4 outline-none focus-visible:[box-shadow:var(--focus)]"
+                className="[font-family:var(--font-display,inherit)] text-xs text-muted-foreground underline underline-offset-4 outline-none focus-visible:[box-shadow:var(--focus)]"
               >
                 desfazer
               </button>
@@ -135,7 +105,7 @@ export default function Canhoto() {
           </div>
         </div>
         {/* The perforation the stub tears along. */}
-        <div aria-hidden className="w-px border-l border-dashed border-casa-line" />
+        <div aria-hidden className="w-px border-l border-dashed border-border" />
         <motion.button
           ref={stub}
           type="button"
@@ -150,11 +120,11 @@ export default function Canhoto() {
           onPointerUp={onUp}
           onPointerCancel={onUp}
           style={{ x, rotate, originX: 0, originY: 1, mask: notch("left"), WebkitMask: notch("left") }}
-          className="flex w-24 cursor-grab touch-none flex-col items-center justify-between rounded-r-tile border border-l-0 border-casa-line bg-casa-tile py-4 outline-none focus-visible:[box-shadow:var(--focus)] active:cursor-grabbing disabled:cursor-default sm:w-28"
+          className="flex w-24 cursor-grab touch-none flex-col items-center justify-between rounded-r-tile border border-l-0 border-border bg-card py-4 outline-none focus-visible:[box-shadow:var(--focus)] active:cursor-grabbing disabled:cursor-default sm:w-28"
         >
-          <span className="font-casa-mono text-[10px] uppercase tracking-[0.12em] text-casa-fg-3">entrada</span>
-          <span className="font-casa text-casa-lg font-medium tabular-nums text-casa-fg">0128</span>
-          <motion.span style={{ opacity: cue }} className="font-casa-mono text-[10px] uppercase tracking-[0.12em] text-casa-fg-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">entrada</span>
+          <span className="[font-family:var(--font-display,inherit)] text-base font-medium tabular-nums text-foreground">0128</span>
+          <motion.span style={{ opacity: cue }} className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
             rasgue →
           </motion.span>
         </motion.button>

@@ -66,7 +66,9 @@ async function touchDrag(cdp, x, y, dx, dy, steps = 12) {
 }
 const touchEnd = (cdp) => cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
 
-async function act(page, cdp, input, box, touch) {
+/** `mirror`: the same drag right-to-left, for one-way pieces (a ratchet only winds clockwise). */
+async function act(page, cdp, input, box, touch, mirror = false) {
+  if (mirror) box = { ...box, x: box.x + box.width, width: -box.width };
   const x = box.x + box.width / 2;
   const y = box.y + box.height / 2;
   if (input === "scroll") {
@@ -131,8 +133,10 @@ try {
       await card.scrollIntoViewIfNeeded();
       await sleep(300);
       const surface = card.locator("[data-lab-surface]");
-      // A component names its primary control with data-lab-target; act on that.
-      const target = card.locator("[data-lab-target]").first();
+      // A component names its primary control with data-lab-target; act on that. A
+      // promoted piece (registry code, no lab attributes) names it in its stamp instead.
+      const alvo = await card.getAttribute("data-lab-alvo");
+      const target = card.locator(alvo ?? "[data-lab-target]").first();
       const box = (await target.count()) ? await target.boundingBox() : await surface.boundingBox();
       if (!box) {
         fail(id, "no surface box");
@@ -147,18 +151,27 @@ try {
       if (SHOTS && name === "iphone") await card.screenshot({ path: path.join(SHOTS, `${TAG}-${id}.png`) });
       if (SHOTS && isPiece && name === "desktop") await card.screenshot({ path: path.join(SHOTS, `${TAG}-${id}-desktop.png`) });
 
-      const sig = () => card.evaluate((el) => el.querySelector("[data-lab-surface]").innerHTML);
+      // A canvas (WebGL) piece draws without touching the DOM: compare its pixels too.
+      const canvas = await card.evaluate((el) => Boolean(el.querySelector("[data-lab-surface] canvas")));
+      const sig = async () =>
+        (await card.evaluate((el) => el.querySelector("[data-lab-surface]").innerHTML)) +
+        (canvas ? (await surface.screenshot({ animations: "disabled" })).toString("base64") : "");
       const before = await sig();
       const scrollBefore = await page.evaluate(() => window.scrollY);
-      await act(page, cdp, input, box, touch);
-      await sleep(250);
-      const mid = await sig();
-      if (input !== "press" && input !== "scroll") {
-        if (touch) await touchEnd(cdp);
-        else await page.mouse.up();
+      let mid;
+      let after;
+      for (const mirror of input === "press" || input === "scroll" ? [false] : [false, true]) {
+        await act(page, cdp, input, box, touch, mirror);
+        await sleep(250);
+        mid = await sig();
+        if (input !== "press" && input !== "scroll") {
+          if (touch) await touchEnd(cdp);
+          else await page.mouse.up();
+        }
+        await sleep(400);
+        after = await sig();
+        if (before !== mid || before !== after) break;
       }
-      await sleep(400);
-      const after = await sig();
       const scrollAfter = await page.evaluate(() => window.scrollY);
       if (before === mid && before === after) fail(id, `${input} via ${touch ? "touch" : "mouse"} changed nothing`);
       if (input !== "scroll" && Math.abs(scrollAfter - scrollBefore) > 2)

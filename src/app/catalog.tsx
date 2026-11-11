@@ -164,7 +164,27 @@ export type Family =
  * 2026-10-29 "Vintage" era aba, e um knob vintage não aparecia em Controles pra
  * quem procurava knob. Agora o knob mora em Controles e carrega o estilo.
  */
-export type Estilo = "vintage" | "liquid-glass";
+export type Estilo = "vintage" | "liquid-glass" | "lab";
+
+/**
+ * O carimbo do lab (`/lab`, lab/RULES.md): o que o card do lab mostra de uma peça
+ * aprovada lá. Quem escreve é o `pnpm lab:promote`, a partir do `meta` do arquivo
+ * que saiu de `lab/`; o `id` é o do experimento, que o gosto (`lab/taste.json`) usa.
+ */
+export interface LabCarimbo {
+  id: string;
+  kind: "experiment" | "component";
+  /** O gesto da peça: o `lab:mobile` dirige o card por ele. */
+  input: "drag" | "tilt" | "scroll" | "pointer" | "press";
+  /** Uma palavra em caixa alta, mostrada como `[ LABEL ]`. */
+  label: string;
+  hint: string;
+  hintTouch?: string;
+  formula: string;
+  source?: { title: string; url: string; studio: string };
+  /** Seletor do controle onde o gesto começa (`[role="slider"]`), quando não é a peça inteira: o `lab:mobile` age ali. */
+  alvo?: string;
+}
 
 /**
  * Os estilos que têm página própria (`/estilo/<key>`). A peça continua na família
@@ -173,6 +193,7 @@ export type Estilo = "vintage" | "liquid-glass";
 export const ESTILOS: { key: Estilo; label: string; regra: string }[] = [
   { key: "vintage", label: "Vintage", regra: "madeira, metal e LED: painel de aparelho antigo" },
   { key: "liquid-glass", label: "Liquid Glass", regra: "vidro que refrata ou embaça o que está atrás, para pousar sobre foto ou vídeo" },
+  { key: "lab", label: "Lab", regra: "objeto físico com um gesto só, nascido no lab diário e aprovado lá" },
 ];
 
 /**
@@ -196,6 +217,8 @@ export interface CatalogItem {
   family: Family;
   /** Eixo visual, independente da família. Decide o palco (`stageSurfaceOf`) e entra na busca. */
   estilo?: Estilo[];
+  /** Peça de estilo `lab`: o carimbo que o card de `/lab` mostra. */
+  lab?: LabCarimbo;
   description: string;
   tags: string[];
   /** Demo viva. Ausente = item sem superfície visual própria (lib, tema, hook). */
@@ -576,6 +599,13 @@ const RakingLightLabDemo = React.lazy(() => import("./demos/raking-light-demo"))
 const WordDialLabDemo = React.lazy(() => import("./demos/word-dial-demo"));
 const DetentSliderLabDemo = React.lazy(() => import("./demos/detent-slider-demo"));
 const RouteProfileLabDemo = React.lazy(() => import("./demos/route-profile-demo"));
+const LouverLabDemo = React.lazy(() => import("./demos/louver-demo"));
+const DetentTrayLabDemo = React.lazy(() => import("./demos/detent-tray-demo"));
+const ToggleLeverLabDemo = React.lazy(() => import("./demos/toggle-lever-demo"));
+const ZoneReaderLabDemo = React.lazy(() => import("./demos/zone-reader-demo"));
+const ModeKeysLabDemo = React.lazy(() => import("./demos/mode-keys-demo"));
+const FolderTabsLabDemo = React.lazy(() => import("./demos/folder-tabs-demo"));
+const TicketStubLabDemo = React.lazy(() => import("./demos/ticket-stub-demo"));
 const ColorPickerDemo = React.lazy(() => import("./demos/color-picker-demo"));
 const DeviceFrameVidroDemo = React.lazy(() => import("./demos/device-frame-demo"));
 const TexturaTilesColheitaDemo = React.lazy(() => import("./demos/textura-tiles-demo"));
@@ -2982,84 +3012,189 @@ export const CATALOG: CatalogItem[] = [
     title: "Word Dial",
     type: "ui",
     family: "texto",
+    estilo: ["lab"],
     description:
       "Um anel que reordena as letras de uma palavra em linha, onda, anel, escada e espelho, com paradas como um tambor de caleidoscópio.",
     tags: ["palavra","tipografia","marca","anel","arranjo"],
     demo: WordDialLabDemo,
     knobs: "WordDial",
     preview: { w: 420, h: 420 },
+    lab: {"id":"2026-11-01-arranjo","kind":"component","input":"pointer","label":"ARRANGE","hint":"turn the dial · click to step","hintTouch":"gire ou toque","formula":"layout = round(θ / 72°) mod 5 · lean = (θ − 72k) · 0.25","source":{"title":"AYNI Andean Boutique Hotel","url":"https://www.behance.net/gallery/248693823/AYNI-Andean-Boutique-Hotel","studio":"Katherine Dodds"}},
   },
   {
     name: "compass",
     title: "Compass",
     type: "ui",
     family: "controles",
+    estilo: ["lab"],
     description:
       "Bússola em camadas: a agulha vai até o ponteiro, passa e volta, e o mostrador inclina em direção à mão.",
     tags: ["bússola","mostrador","3d","mola","direção"],
     demo: CompassLabDemo,
     knobs: "Compass",
     preview: { w: 400, h: 400 },
+    lab: {"id":"2026-10-29-compass","kind":"experiment","input":"pointer","label":"COMPASS","hint":"move the pointer around","hintTouch":"arraste o dedo em volta","formula":"θ = atan2(Δy, Δx) · k 120 c 7"},
   },
   {
     name: "drip-word",
     title: "Drip Word",
     type: "ui",
     family: "texto",
+    estilo: ["lab"],
     description:
       "Uma palavra de tinta viscosa em shader: dos pés das letras descem fios que soltam a gota, e arrastar de lado inclina a gravidade.",
     tags: ["shader","webgl","líquido","gota","palavra","tipografia"],
     demo: DripWordLabDemo,
     knobs: "DripWord",
     preview: { w: 560, h: 380 },
+    lab: {"id":"2026-10-29-level","kind":"experiment","input":"drag","label":"INK","hint":"drag sideways to tilt the gravity","hintTouch":"arraste ou incline o celular","formula":"g = clamp(Δx / 28, −1, 1) · ink = sdf(word) ∪ₖ threads · ≤ 7 drops"},
   },
   {
     name: "ratchet",
     title: "Ratchet",
     type: "ui",
     family: "controles",
+    estilo: ["lab"],
     description:
       "Catraca de aço: o gesto dá corda numa roda que só gira para um lado, com a lingueta caindo a cada dente.",
     tags: ["catraca","engrenagem","metal","gesto","clique"],
     demo: RatchetLabDemo,
     knobs: "Ratchet",
     preview: { w: 360, h: 360 },
+    lab: {"id":"2026-10-30-ratchet","kind":"experiment","input":"drag","label":"RATCHET","hint":"turn around the axle to wind","hintTouch":"gire o dedo em volta pra dar corda","formula":"θ += max(Δφ, 0) · click every 360/n° · pawl k 700 c 14","alvo":"[role=\"slider\"]"},
   },
   {
     name: "raking-light",
     title: "Raking Light",
     type: "ui",
     family: "texto",
+    estilo: ["lab"],
     description:
       "Relevo seco em papel com fibra: a palavra só existe na sombra e no brilho de uma lâmpada baixa.",
     tags: ["relevo","papel","luz","textura","grão","tipografia"],
     demo: RakingLightLabDemo,
     knobs: "RakingLight",
     preview: { w: 560, h: 340 },
+    lab: {"id":"2026-11-04-raking","kind":"experiment","input":"pointer","label":"RAKE","hint":"move the lamp across the paper","hintTouch":"arraste pra mover a luz","formula":"shadow = −L · 6px · highlight = +L · 2px · k 120 · c 20"},
   },
   {
     name: "detent-slider",
     title: "Detent Slider",
     type: "ui",
     family: "controles",
+    estilo: ["lab"],
     description:
       "Slider com paradas que agarram e a consequência em letra grande, com dígitos que rolam antes de confirmar.",
     tags: ["slider","paradas","percentual","formulário","dígitos"],
     demo: DetentSliderLabDemo,
     knobs: "DetentSlider",
     preview: { w: 400, h: 300 },
+    lab: {"id":"2026-11-01-fechar-posicao","kind":"component","input":"drag","label":"POSITION","hint":"drag to close part · arrows work too","hintTouch":"arraste pra fechar parte","formula":"P&L = (bid − entry) · lots · p · snap 25/50/75/100 ±3","source":{"title":"CFI","url":"https://www.behance.net/gallery/239914091/CFI","studio":"Fireart Studio"},"alvo":"[role=\"slider\"]"},
   },
   {
     name: "route-profile",
     title: "Route Profile",
     type: "ui",
     family: "conteudo",
+    estilo: ["lab"],
     description:
       "Perfil de terreno que se lê arrastando: a altitude e a rampa sob o cursor, e um clinômetro cuja agulha balança com a inclinação.",
     tags: ["rota","gráfico","altitude","terreno","clinômetro"],
     demo: RouteProfileLabDemo,
     knobs: "RouteProfile",
     preview: { w: 440, h: 300 },
+    lab: {"id":"2026-11-04-perfil-rota","kind":"component","input":"tilt","label":"PROFILE","hint":"drag along the route · arrows work too","hintTouch":"arraste ou incline o celular","formula":"θ = atan(Δalt/Δkm) · 4 · a = γ/30 · v·0.94 · k 120 · c 9","source":{"title":"TheTrail App – Travel Dashboard & UX UI Design","url":"https://www.behance.net/gallery/236308597/TheTrail-App-Travel-Dashboard-UX-UI-Design","studio":"Rondesignlab"}},
+  },
+  {
+    name: "louver",
+    title: "Louver",
+    type: "ui",
+    family: "controles",
+    estilo: ["lab"],
+    description:
+      "Persiana em lâminas: rolar gira as lâminas em cinco paradas, e as faixas de luz na parede abrem e fecham junto.",
+    tags: ["persiana","luz","rolagem","paradas","lâminas"],
+    demo: LouverLabDemo,
+    preview: { w: 360, h: 360 },
+    lab: {"id":"2026-11-07-louver","kind":"experiment","input":"scroll","label":"LOUVER","hint":"scroll to turn the slats","hintTouch":"deslize pra girar as lâminas","formula":"θ = scrollTop / 48 · 22.5° · snap 5 detents · light = 1 − cos θ"},
+  },
+  {
+    name: "detent-tray",
+    title: "Detent Tray",
+    type: "ui",
+    family: "controles",
+    estilo: ["lab"],
+    description:
+      "Bandeja com cinco covas e uma esfera de aço: inclinar segura a esfera na cova até passar da borda, e ela cai na seguinte com um clique.",
+    tags: ["paradas","esfera","inclinação","giroscópio","clique"],
+    demo: DetentTrayLabDemo,
+    preview: { w: 360, h: 360 },
+    lab: {"id":"2026-11-08-detent","kind":"experiment","input":"tilt","label":"DETENT","hint":"drag sideways to tilt the tray","hintTouch":"arraste ou incline o celular","formula":"n′ = |θ/12 − n| > 0.65 ? round(θ/12) : n · x = 30n + 4(θ/12 − n) · k 520 c 26"},
+  },
+  {
+    name: "toggle-lever",
+    title: "Toggle Lever",
+    type: "ui",
+    family: "controles",
+    estilo: ["lab"],
+    description:
+      "Alavanca de painel sobre chapa escovada: empurrar contra a mola até passar do centro e ela estala para o outro lado, com a lente piloto acendendo.",
+    tags: ["alavanca","interruptor","ligar","metal","painel"],
+    demo: ToggleLeverLabDemo,
+    preview: { w: 360, h: 360 },
+    lab: {"id":"2026-11-09-toggle","kind":"experiment","input":"drag","label":"TOGGLE","hint":"drag the toggle lever across the detent","hintTouch":"arraste a alavanca para armar","formula":"F = −k·sin(πu) · snap sign(u) · x = 32u · shadow = −24u · k 560 c 28"},
+  },
+  {
+    name: "zone-reader",
+    title: "Zone Reader",
+    type: "ui",
+    family: "texto",
+    estilo: ["lab"],
+    description:
+      "Escolher um fuso horário passando um filme sob a janela de um leitor de microficha, com hora e diferença ao vivo.",
+    tags: ["fuso","horário","lista","rolagem","cidade","relógio"],
+    demo: ZoneReaderLabDemo,
+    preview: { w: 420, h: 320 },
+    lab: {"id":"2026-11-05-fuso","kind":"component","input":"scroll","label":"ZONE","hint":"scroll the film · arrows work too","hintTouch":"deslize a lista ou toque na cidade","formula":"i = round(scrollTop / R) · edge = min(|v| · 0.012, R) · k 300 · c 40","source":{"title":"Artemii Lebedev. Portfolio '26.","url":"https://www.behance.net/gallery/257630935/Artemii-Lebedev-Portfolio-26","studio":"Le:mma Studio"}},
+  },
+  {
+    name: "mode-keys",
+    title: "Mode Keys",
+    type: "ui",
+    family: "controles",
+    estilo: ["lab"],
+    description:
+      "Teclas de rádio antigo que travam: apertar uma abaixa e solta a anterior, para escolher o modo de uma bateria com a reserva num número calmo.",
+    tags: ["teclas","modo","energia","bateria","rádio","escolha"],
+    demo: ModeKeysLabDemo,
+    preview: { w: 420, h: 220 },
+    lab: {"id":"2026-11-06-teclas-modo","kind":"component","input":"press","label":"MODE","hint":"press a key · arrows work too","hintTouch":"toque numa tecla","formula":"latch y = 4 · k 700 · c 32 · pop k 520 · c 13 · fill = reserva / 100","source":{"title":"Solithic - Energy SaaS Dashboard & UX UI Design","url":"https://www.behance.net/gallery/230911983/Solithic-Energy-SaaS-Dashboard-UX-UI-Design","studio":"Rondesignlab"}},
+  },
+  {
+    name: "folder-tabs",
+    title: "Folder Tabs",
+    type: "ui",
+    family: "controles",
+    estilo: ["lab"],
+    description:
+      "Abas como pastas suspensas numa gaveta: arrastar folheia a pilha, e a pasta escolhida fica de pé e aberta.",
+    tags: ["abas","pastas","navegação","arquivo","gaveta"],
+    demo: FolderTabsLabDemo,
+    preview: { w: 420, h: 280 },
+    lab: {"id":"2026-11-07-pastas","kind":"component","input":"drag","label":"FILES","hint":"drag through the folders · arrows work too","hintTouch":"arraste pelas pastas","formula":"p = p₀ − Δy / 36 · drop = clamp(k − p, 0, 1) · snap round(p) · k 380 c 34","source":{"title":"Mosby’s Files","url":"https://www.behance.net/gallery/257301831/Mosbys-Files","studio":"tubik studio"}},
+  },
+  {
+    name: "ticket-stub",
+    title: "Ticket Stub",
+    type: "ui",
+    family: "controles",
+    estilo: ["lab"],
+    description:
+      "Confirmar presença destacando o canhoto de um ingresso: arrastar pela picotagem rasga, e soltar antes da metade devolve.",
+    tags: ["confirmar","ingresso","rasgar","arrastar","evento"],
+    demo: TicketStubLabDemo,
+    preview: { w: 420, h: 220 },
+    lab: {"id":"2026-11-08-canhoto","kind":"component","input":"drag","label":"STUB","hint":"drag the stub off to confirm · enter works too","hintTouch":"arraste o canhoto para o lado","formula":"p = clamp(Δx / w, 0, 1) · θ = 9p° · p > 0.55 ? tear : back · k 420 c 32","source":{"title":"Chande Bootcamp 2026","url":"https://www.behance.net/gallery/257768777/Chande-Bootcamp-2026","studio":"Lumen Studio"}},
   },
 ];
 

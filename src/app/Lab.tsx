@@ -12,9 +12,13 @@
  * at runtime, so an approval is public at once, no redeploy. The next daily run
  * writes them back into git.
  *
- * Experiments are discovered by glob, so adding one is adding a file. They live
- * outside `registry/` on purpose: nothing here is a published component, and
- * nothing here ships through `shadcn add` until the owner promotes it.
+ * Two sources, one file per piece (lab/RULES.md):
+ * - candidates live in `lab/experiments` and `lab/components`, discovered by glob;
+ * - an approved piece is moved by `pnpm lab:promote` into `registry/` and the
+ *   catalog, with estilo `lab` and the lab's stamp (`CatalogItem.lab`). The public
+ *   board reads that catalog list, so a piece is the same file everywhere.
+ * An approval given here is public at once (the runtime verdict), still from
+ * `lab/`, until the next daily run promotes it.
  */
 
 import * as React from "react";
@@ -23,6 +27,8 @@ import type { LabComponentMeta, LabComponentModule, LabMeta, LabModule } from ".
 import MOTIVOS from "../../lab/motivos.json";
 import { Aba } from "./casa-ui";
 import { useCoarse } from "../../lab/hooks";
+import { CATALOG, previewOf, sangra, type CatalogItem, type LabCarimbo } from "./catalog";
+import { PalcoFixo } from "./stage";
 
 const MODULES = import.meta.glob<LabModule>("../../lab/experiments/[0-9]*.tsx", { eager: true });
 
@@ -37,6 +43,33 @@ const COMPONENTS = Object.values(COMPONENT_MODULES)
   .filter((m) => m.meta?.kind === "component" && typeof m.default === "function")
   .sort((a, b) => b.meta.id.localeCompare(a.meta.id));
 const isComponent = (m: LabMeta): m is LabComponentMeta => (m as LabComponentMeta).kind === "component";
+
+/* The approved pieces: catalog items with the lab stamp, newest first. */
+type Promovida = CatalogItem & { lab: LabCarimbo };
+const PROMOVIDAS = CATALOG.filter((i): i is Promovida => Boolean(i.lab && i.demo)).sort((a, b) =>
+  b.lab.id.localeCompare(a.lab.id),
+);
+
+/** What a card prints: the same stamp for a lab file and for a promoted catalog item. */
+type Selo = Pick<LabCarimbo, "id" | "label" | "hint" | "hintTouch" | "formula" | "source" | "alvo"> & {
+  input?: LabCarimbo["input"];
+  component: boolean;
+  candidate?: boolean;
+  /** Promoted: the registry name (catalog page + `shadcn add`). */
+  item?: string;
+};
+const seloDoArquivo = (m: LabMeta, candidate: boolean): Selo => ({
+  id: m.id,
+  label: m.label,
+  hint: m.hint,
+  hintTouch: m.hintTouch,
+  formula: m.formula,
+  input: m.tags?.input,
+  source: isComponent(m) ? m.source : undefined,
+  component: isComponent(m),
+  candidate,
+});
+const seloDoItem = (i: Promovida): Selo => ({ ...i.lab, component: i.lab.kind === "component", item: i.name });
 
 type Action = "approve" | "discard";
 /** `GET /api/lab`: verdicts from the store + who is signed in (the cookie itself is HttpOnly). */
@@ -73,18 +106,19 @@ function useLab() {
   return { on: params.has("admin"), erro: erro ? (ERROS[erro] ?? erro) : null, state, decide };
 }
 
-function Card({ meta, Experiment }: { meta: LabMeta; Experiment: LabModule["default"] }) {
+function Card({ selo, children }: { selo: Selo; children: React.ReactNode }) {
   /* A finger can't "move the pointer around": touch gets its own words. */
   const coarse = useCoarse();
   return (
     <div
-      data-lab-id={meta.id}
-      data-lab-input={meta.tags?.input}
-      className={`flex flex-col overflow-hidden rounded-tile bg-casa-tile p-4 [contain:paint] isolate ${isComponent(meta) ? "" : "aspect-square"}`}
+      data-lab-id={selo.id}
+      data-lab-input={selo.input}
+      data-lab-alvo={selo.alvo}
+      className={`flex flex-col overflow-hidden rounded-tile bg-casa-tile p-4 [contain:paint] isolate ${selo.component || selo.item ? "" : "aspect-square"}`}
     >
       <div className="flex items-start justify-between gap-3 font-casa-mono text-casa-sm">
-        <span className="shrink-0 text-casa-fg-2">[ {meta.label} ]</span>
-        <span className="text-right text-casa-fg-3">{coarse && meta.hintTouch ? meta.hintTouch : meta.hint}</span>
+        <span className="shrink-0 text-casa-fg-2">[ {selo.label} ]</span>
+        <span className="text-right text-casa-fg-3">{coarse && selo.hintTouch ? selo.hintTouch : selo.hint}</span>
       </div>
       <div data-lab-surface className="relative min-h-0 flex-1 py-3">
         <ErrorBoundary
@@ -94,30 +128,62 @@ function Card({ meta, Experiment }: { meta: LabMeta; Experiment: LabModule["defa
             </p>
           }
         >
-          <Experiment />
+          {children}
         </ErrorBoundary>
       </div>
       <div className="flex items-end justify-between gap-3 font-casa-mono text-casa-sm text-casa-fg-3">
-        <span className="line-clamp-2 min-w-0" title={meta.formula}>
-          {meta.formula}
+        <span className="line-clamp-2 min-w-0" title={selo.formula}>
+          {selo.formula}
         </span>
-        {meta.status === "candidate" ? (
-          <span className="shrink-0" title={meta.id}>
+        {selo.candidate ? (
+          <span className="shrink-0" title={selo.id}>
             candidate
           </span>
         ) : null}
       </div>
-      {isComponent(meta) ? (
+      {selo.item ? (
         <a
-          href={meta.source.url}
+          href={`/c/${selo.item}`}
+          className="mt-2 font-casa-mono text-casa-sm text-casa-fg-2 underline-offset-4 focus-visible:underline"
+        >
+          @visant/{selo.item}
+        </a>
+      ) : null}
+      {selo.source ? (
+        <a
+          href={selo.source.url}
           target="_blank"
           rel="noreferrer"
           className="mt-2 font-casa-mono text-casa-sm text-casa-fg-3 underline-offset-4 focus-visible:underline"
         >
-          inspirado em {meta.source.title}, {meta.source.studio}
+          inspirado em {selo.source.title}, {selo.source.studio}
         </a>
       ) : null}
     </div>
+  );
+}
+
+/* A promoted piece on its catalog stage: the box the catalog declares, scaled to fit. */
+function Palco({ item }: { item: Promovida }) {
+  const Demo = item.demo!;
+  const { w, h } = previewOf(item);
+  const piece = (
+    <React.Suspense fallback={null}>
+      <Demo />
+    </React.Suspense>
+  );
+  if (sangra(item))
+    return (
+      <div className="relative w-full" style={{ aspectRatio: String(w / h) }}>
+        <PalcoFixo w={w} h={h} sangra>
+          {piece}
+        </PalcoFixo>
+      </div>
+    );
+  return (
+    <PalcoFixo w={w} h={h} ratio={item.lab.kind === "component" ? w / h : 1}>
+      {piece}
+    </PalcoFixo>
   );
 }
 
@@ -241,9 +307,15 @@ export function Lab() {
   const pieceCandidates = admin
     ? COMPONENTS.filter((c) => c.meta.status === "candidate" && !decided.has(c.meta.id))
     : [];
+  /* Promoted pieces come from the catalog; a runtime discard still hides one at once. */
+  const vivas = PROMOVIDAS.filter((i) => !lab.state?.discarded.includes(i.lab.id));
+  const experimentos = vivas.filter((i) => i.lab.kind === "experiment");
+  const componentes = vivas.filter((i) => i.lab.kind === "component");
   const judge = (meta: LabMeta, Experiment: LabModule["default"]) => (
     <li key={meta.id}>
-      <Card meta={meta} Experiment={Experiment} />
+      <Card selo={seloDoArquivo(meta, true)}>
+        <Experiment />
+      </Card>
       {meta.rationale ? (
         <p className="mt-2 font-casa-mono text-casa-sm text-casa-fg-3" title="pnpm lab:next">
           {meta.rationale}
@@ -260,6 +332,13 @@ export function Lab() {
         <p className="mt-2 text-casa-base text-casa-fg-2">
           A new interaction every day, generated from a short list of rules. Only the ones
           worth keeping stay, so the board drifts toward a taste over time.
+        </p>
+        <p className="mt-2 text-casa-base text-casa-fg-2">
+          Every piece kept here is in the catalog too, ready to install:{" "}
+          <a href="/estilo/lab" className="text-casa-fg underline underline-offset-4">
+            estilo Lab
+          </a>
+          .
         </p>
       </div>
 
@@ -283,7 +362,7 @@ export function Lab() {
         </section>
       ) : null}
 
-      {shown.length === 0 ? (
+      {shown.length + experimentos.length === 0 ? (
         <div className="mt-8 grid min-h-64 place-items-center rounded-tile bg-casa-tile p-8 text-center">
           <p className="text-casa-base text-casa-fg-2">Nothing kept yet. A new one is tried every day.</p>
         </div>
@@ -291,13 +370,22 @@ export function Lab() {
         <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {shown.map(({ meta, default: Experiment }) => (
             <li key={meta.id}>
-              <Card meta={{ ...meta, status: "kept" }} Experiment={Experiment} />
+              <Card selo={seloDoArquivo(meta, false)}>
+                <Experiment />
+              </Card>
+            </li>
+          ))}
+          {experimentos.map((item) => (
+            <li key={item.name}>
+              <Card selo={seloDoItem(item)}>
+                <Palco item={item} />
+              </Card>
             </li>
           ))}
         </ul>
       )}
 
-      {pieces.length ? (
+      {pieces.length + componentes.length ? (
         <section aria-label="Componentes" className="mt-12">
           <h2 className="text-casa-lg">Componentes</h2>
           <p className="mt-1 text-casa-base text-casa-fg-2">
@@ -306,7 +394,16 @@ export function Lab() {
           <ul className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {pieces.map(({ meta, default: Piece }) => (
               <li key={meta.id}>
-                <Card meta={{ ...meta, status: "kept" }} Experiment={Piece} />
+                <Card selo={seloDoArquivo(meta, false)}>
+                  <Piece />
+                </Card>
+              </li>
+            ))}
+            {componentes.map((item) => (
+              <li key={item.name}>
+                <Card selo={seloDoItem(item)}>
+                  <Palco item={item} />
+                </Card>
               </li>
             ))}
           </ul>

@@ -202,5 +202,12 @@
   "raking-light": "react",
   "word-dial": "react",
   "detent-slider": "react",
-  "route-profile": "react"
+  "route-profile": "react",
+  "louver": "react",
+  "detent-tray": "react",
+  "toggle-lever": "react",
+  "zone-reader": "react",
+  "mode-keys": "react",
+  "folder-tabs": "react",
+  "ticket-stub": "react"
 }

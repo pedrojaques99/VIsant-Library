@@ -1,0 +1,34 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "mode-keys",
+  "title": "Mode Keys",
+  "author": "Visant Labs <visantsupply@gmail.com>",
+  "description": "Teclas de rádio antigo que travam: apertar uma abaixa e solta a anterior, para escolher o modo de uma bateria com a reserva num número calmo.",
+  "dependencies": [
+    "motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "registry/visant/ui/mode-keys.tsx",
+      "content": "\"use client\";\n\n/*\n * MODE: pick how a home battery behaves with a bank of latching push keys.\n *\n * Collision: an energy dashboard that keeps each card to one calm number and one\n * trace against \"normal\" + the interlocking push-button bank of an old radio,\n * where pressing one key latches it down and the previous one pops back up.\n * The key latches on press (not on release), so it feels mechanical; the old one\n * springs up with a little overshoot. Above it, one number (the reserve kept for\n * an outage) and one trace with a tick where the default sits. A radiogroup:\n * arrows, Home and End move the latch from the keyboard.\n */\nimport * as React from \"react\";\nimport { animate, motion, useMotionValue, useReducedMotion, useTransform } from \"motion/react\";\n\nconst MODES = [\n  { name: \"Sol\", reserve: 10, hours: 2 },\n  { name: \"Misto\", reserve: 40, hours: 9 },\n  { name: \"Noite\", reserve: 65, hours: 15 },\n  { name: \"Backup\", reserve: 95, hours: 22 },\n];\nconst START = 1;\nconst NORMAL = MODES[START].reserve;\nconst LATCH = { type: \"spring\", stiffness: 700, damping: 32 } as const;\nconst POP = { type: \"spring\", stiffness: 520, damping: 13 } as const;\n\nfunction Key({ i, on, focus, onPick }: { i: number; on: boolean; focus: boolean; onPick: (i: number) => void }) {\n  const reduce = useReducedMotion();\n  const m = MODES[i];\n  return (\n    <button\n      type=\"button\"\n      role=\"radio\"\n      aria-checked={on}\n      tabIndex={focus ? 0 : -1}\n      data-lab-target={i === 2 ? \"\" : undefined}\n      data-key={i}\n      onPointerDown={() => onPick(i)}\n      onClick={() => onPick(i)}\n      onContextMenu={(e) => e.preventDefault()}\n      className=\"group relative h-14 min-w-0 flex-1 touch-none select-none rounded-[var(--r-control)] outline-none [-webkit-touch-callout:none] focus-visible:[box-shadow:var(--focus)]\"\n    >\n      {/* the skirt: the side of the key you only see while it is up */}\n      <span aria-hidden className=\"absolute inset-x-0 bottom-0 top-1 rounded-[var(--r-control)] bg-border\" />\n      <motion.span\n        initial={false}\n        animate={{ y: on ? 4 : 0 }}\n        transition={reduce ? { duration: 0 } : on ? LATCH : POP}\n        className={`absolute inset-x-0 bottom-1 top-0 flex flex-col items-start justify-between rounded-[var(--r-control)] border px-2.5 py-2 ${\n          on ? \"border-transparent bg-primary text-primary-foreground\" : \"border-border bg-card text-muted-foreground\"\n        }`}\n      >\n        <span aria-hidden className={`size-1.5 rounded-full ${on ? \"bg-primary-foreground\" : \"bg-border\"}`} />\n        <span className=\"truncate [font-family:var(--font-display,inherit)] text-xs\">{m.name}</span>\n      </motion.span>\n    </button>\n  );\n}\n\nexport function ModeKeys() {\n  const reduce = useReducedMotion();\n  const [i, setI] = React.useState(START);\n  const group = React.useRef<HTMLDivElement>(null);\n  const reserve = useMotionValue(MODES[START].reserve);\n  const shown = useTransform(reserve, (v) => Math.round(v));\n  const fill = useTransform(reserve, (v) => v / 100);\n  const m = MODES[i];\n\n  React.useEffect(() => {\n    const to = MODES[i].reserve;\n    if (reduce) return void reserve.set(to);\n    const c = animate(reserve, to, { type: \"spring\", stiffness: 260, damping: 30 });\n    return () => c.stop();\n  }, [i, reduce, reserve]);\n\n  const pick = (n: number) => setI(Math.max(0, Math.min(MODES.length - 1, n)));\n  const onKey = (e: React.KeyboardEvent) => {\n    const map: Record<string, number> = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: MODES.length - 1 };\n    if (!(e.key in map)) return;\n    e.preventDefault();\n    const n = Math.max(0, Math.min(MODES.length - 1, map[e.key]));\n    pick(n);\n    group.current?.querySelector<HTMLElement>(`[data-key=\"${n}\"]`)?.focus();\n  };\n\n  return (\n    <div className=\"flex h-full flex-col justify-between gap-6\">\n      <div className=\"flex flex-col gap-3 px-1\">\n        <div className=\"flex items-baseline gap-1.5\">\n          <motion.span className=\"[font-family:var(--font-display,inherit)] text-[clamp(2.75rem,13vw,3.75rem)] font-medium leading-none tracking-[-0.03em] tabular-nums text-foreground\">\n            {shown}\n          </motion.span>\n          <span className=\"[font-family:var(--font-display,inherit)] text-base text-muted-foreground\">%</span>\n        </div>\n        <span className=\"[font-family:var(--font-display,inherit)] text-xs text-muted-foreground\">{`guardado pra queda de luz · ≈ ${m.hours} h`}</span>\n        {/* the one trace: where the reserve sits, with a tick at the default */}\n        <div className=\"relative h-1 overflow-visible rounded-full bg-border\">\n          <motion.div style={{ scaleX: fill }} className=\"absolute inset-0 origin-left rounded-full bg-foreground\" />\n          <span aria-hidden className=\"absolute -top-1 h-3 w-px bg-muted-foreground\" style={{ left: `${NORMAL}%` }} />\n        </div>\n        <span className=\"sr-only\" aria-live=\"polite\">{`${m.name}: reserva de ${m.reserve}%, cerca de ${m.hours} horas`}</span>\n      </div>\n\n      <div ref={group} role=\"radiogroup\" aria-label=\"Modo da bateria\" onKeyDown={onKey} className=\"flex gap-1.5\">\n        {MODES.map((_, n) => (\n          <Key key={n} i={n} on={n === i} focus={n === i} onPick={pick} />\n        ))}\n      </div>\n    </div>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "meta": {
+    "uso": {
+      "quando": "Escolher um modo entre três ou quatro, com o efeito resumido num número",
+      "evite": "Opções sem efeito a mostrar: segmented-control; ligar e desligar: toggle-lever"
+    }
+  },
+  "categories": [
+    "controles",
+    "teclas",
+    "modo",
+    "energia",
+    "bateria",
+    "radio",
+    "escolha"
+  ],
+  "type": "registry:ui"
+}

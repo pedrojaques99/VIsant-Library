@@ -32,6 +32,27 @@ export interface LabMeta {
   tags: LabTags;
   /** Why this combo today: the `pnpm lab:next` line, or the written reason to deviate. */
   rationale: string;
+  /** How the piece enters the catalog once approved (`pnpm lab:promote`). In Portuguese. */
+  catalogo?: LabCatalogo;
+}
+
+/**
+ * What `lab:promote` writes into the catalog and registry when the owner approves the
+ * piece. Optional: without it the name is the label in lowercase and the description
+ * is the first sentence of the header.
+ */
+export interface LabCatalogo {
+  /** Registry name, kebab-case, English (`ticket-stub`): `shadcn add @visant/<nome>`. */
+  nome: string;
+  titulo?: string;
+  /** One sentence, Portuguese, like the other catalog descriptions. */
+  descricao: string;
+  /** Search words, Portuguese. */
+  tags: string[];
+  familia?: "controles" | "feedback" | "conteudo" | "texto" | "efeitos";
+  quando?: string;
+  evite?: string;
+  preview?: { w: number; h: number };
 }
 
 export interface LabTags {

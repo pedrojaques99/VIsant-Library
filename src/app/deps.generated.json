@@ -400,5 +400,28 @@
   "route-profile": [
     "motion",
     "react"
+  ],
+  "louver": [
+    "motion"
+  ],
+  "detent-tray": [
+    "motion",
+    "react"
+  ],
+  "toggle-lever": [
+    "motion"
+  ],
+  "zone-reader": [
+    "motion",
+    "react"
+  ],
+  "mode-keys": [
+    "motion"
+  ],
+  "folder-tabs": [
+    "motion"
+  ],
+  "ticket-stub": [
+    "motion"
   ]
 }

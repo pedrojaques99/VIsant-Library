@@ -1,3 +1,5 @@
+"use client";
+
 /*
  * DETENT: a steel ball in a tray with five dimples. Tilt the tray and the ball
  * leans against the wall of its dimple; tilt past the lip and it drops into the
@@ -12,22 +14,9 @@
  */
 import * as React from "react";
 import { motion, useMotionValue, useMotionValueEvent, useReducedMotion, useSpring, useTransform } from "motion/react";
-import { useCoarse, useIdle, useTilt } from "../hooks";
-import type { LabMeta } from "../types";
-
-export const meta: LabMeta = {
-  id: "2026-11-08-detent",
-  date: "2026-11-08",
-  title: "Detent",
-  label: "DETENT",
-  hint: "drag sideways to tilt the tray",
-  hintTouch: "arraste ou incline o celular",
-  formula: "n′ = |θ/12 − n| > 0.65 ? round(θ/12) : n · x = 30n + 4(θ/12 − n) · k 520 c 26",
-  rules: ["one-input", "one-metaphor", "mono-labels", "formula", "born-in-best-state", "no-new-deps", "tokens", "reduced-motion", "touch", "small", "only-transform", "mobile-hint", "mobile-no-hover", "mobile-idle", "mobile-tilt", "mobile-perf"],
-  status: "kept",
-  tags: { input: "tilt", family: "mechanical", intensity: "subtle", response: "snap" },
-  rationale: "aposta: mechanical 4/4, subtle 7/8, snap 5/7 · exploração: tilt 1/1",
-};
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { useIdle } from "@/hooks/use-idle";
+import { useTilt } from "@/hooks/use-tilt";
 
 const MAX = 30; // degrees of tilt
 const STEP = 12; // degrees per notch
@@ -37,11 +26,11 @@ const CY = 80; // tray line
 const NOTCHES = [-2, -1, 0, 1, 2];
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 
-export default function Detent() {
+export function DetentTray() {
   const box = React.useRef<HTMLDivElement>(null);
   const uid = React.useId().replace(/:/g, "");
   const reduce = useReducedMotion();
-  const coarse = useCoarse();
+  const coarse = useMediaQuery("(pointer: coarse)");
   const tilt = useMotionValue(7); // born leaning, straining toward the next dimple
   const [n, setN] = React.useState(0);
   const nRef = React.useRef(0);
@@ -93,33 +82,33 @@ export default function Detent() {
       }}
       onPointerUp={release}
       onPointerCancel={release}
-      className="relative h-full w-full cursor-grab touch-none select-none overflow-hidden rounded-control bg-casa-tile-2 active:cursor-grabbing"
+      className="relative h-full w-full cursor-grab touch-none select-none overflow-hidden rounded-[var(--r-control)] bg-muted active:cursor-grabbing"
     >
       <svg aria-hidden viewBox="0 0 200 160" preserveAspectRatio="xMidYMid meet" className="absolute inset-0 h-full w-full">
         <defs>
           <radialGradient id={`steel-${uid}`} cx="0.36" cy="0.32" r="0.75">
-            <stop offset="0" style={{ stopColor: "var(--casa-bg)" }} />
-            <stop offset="0.35" style={{ stopColor: "var(--casa-fg-3)" }} />
-            <stop offset="0.8" style={{ stopColor: "var(--casa-fg)" }} />
-            <stop offset="1" style={{ stopColor: "var(--casa-fg-2)" }} />
+            <stop offset="0" style={{ stopColor: "var(--background)" }} />
+            <stop offset="0.35" style={{ stopColor: "var(--muted-foreground)" }} />
+            <stop offset="0.8" style={{ stopColor: "var(--foreground)" }} />
+            <stop offset="1" style={{ stopColor: "var(--muted-foreground)" }} />
           </radialGradient>
         </defs>
         <motion.g style={{ rotate: trayTilt, originX: "100px", originY: `${CY}px` }}>
-          <rect x="18" y={CY - 2} width="164" height="16" rx="8" className="fill-casa-tile stroke-casa-line" strokeWidth="1" />
+          <rect x="18" y={CY - 2} width="164" height="16" rx="8" className="fill-card stroke-border" strokeWidth="1" />
           {NOTCHES.map((k) => (
             <g key={k}>
-              <ellipse cx={100 + k * PITCH} cy={CY + 4} rx="8" ry="3" className="fill-casa-line" />
+              <ellipse cx={100 + k * PITCH} cy={CY + 4} rx="8" ry="3" className="fill-border" />
               <line
                 x1={100 + k * PITCH}
                 x2={100 + k * PITCH}
                 y1={CY + 22}
                 y2={CY + (k === n ? 30 : 26)}
                 strokeWidth="1"
-                className={k === n ? "stroke-casa-fg" : "stroke-casa-fg-3"}
+                className={k === n ? "stroke-foreground" : "stroke-muted-foreground"}
               />
             </g>
           ))}
-          <motion.ellipse cx={shadowX} cy={CY + 5} rx="8" ry="2" className="fill-casa-fg opacity-25" />
+          <motion.ellipse cx={shadowX} cy={CY + 5} rx="8" ry="2" className="fill-foreground opacity-25" />
           <motion.g style={{ x, originX: "100px", originY: `${CY - R + 3}px` }}>
             <circle cx="100" cy={CY - R + 3} r={R} fill={`url(#steel-${uid})`} />
             <motion.path
@@ -127,7 +116,7 @@ export default function Detent() {
               style={{ rotate: roll, originX: "100px", originY: `${CY - R + 3}px` }}
               strokeWidth="0.8"
               fill="none"
-              className="stroke-casa-bg opacity-40"
+              className="stroke-background opacity-40"
             />
           </motion.g>
         </motion.g>

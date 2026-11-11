@@ -1,3 +1,5 @@
+"use client";
+
 /*
  * PASTAS: section tabs as hanging folders in a drawer. Drag up or down across
  * the stack to thumb through it; the folders in front drop forward until the
@@ -12,38 +14,6 @@
  */
 import * as React from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform, type MotionValue } from "motion/react";
-import type { LabComponentMeta } from "../types";
-
-export const meta: LabComponentMeta = {
-  kind: "component",
-  id: "2026-11-07-pastas",
-  date: "2026-11-07",
-  title: "Pastas",
-  label: "FILES",
-  hint: "drag through the folders · arrows work too",
-  hintTouch: "arraste pelas pastas",
-  formula: "p = p₀ − Δy / 36 · drop = clamp(k − p, 0, 1) · snap round(p) · k 380 c 34",
-  rules: ["one-metaphor", "mono-labels", "formula", "born-in-best-state", "no-new-deps", "tokens", "reduced-motion", "touch", "only-transform", "mobile-hint", "mobile-no-hover", "mobile-perf"],
-  status: "kept",
-  tags: { input: "drag", family: "material", intensity: "subtle", response: "snap" },
-  rationale: "componente: trilho Behance (fora do lab:next); arrastar (melhor taxa, 75%) com metáfora nova de arquivo de pastas suspensas, diferente do traço de preço do Fechar posição",
-  source: {
-    title: "Mosby’s Files",
-    url: "https://www.behance.net/gallery/257301831/Mosbys-Files",
-    studio: "tubik studio",
-    gallery: "ui-ux",
-    refs: [
-      "lab/.refs/2026-11-07-mosby-s-files/ref-1.png",
-      "lab/.refs/2026-11-07-mosby-s-files/ref-2.png",
-      "lab/.refs/2026-11-07-mosby-s-files/ref-3.png",
-    ],
-  },
-  inspiration: "A navegação vira objeto: cada seção é uma pasta física com aba, e escolher uma é tirá-la da pilha, não clicar num menu.",
-  sketches: [
-    "abas de pasta que você aperta pra abrir: pressionar tem 0 de 3 aprovados e uma aba que só troca é um tabs comum com fantasia",
-    "dossiê que você rola e as folhas descolam uma a uma: rolar já é do Leitor de fuso e da LOUVER de hoje, e folha descolando pede textura de papel que vira slop",
-  ],
-};
 
 const FOLDERS = [
   { tab: "Briefing", line: "Site novo, 6 páginas, lançamento em março.", n: "6", unit: "páginas" },
@@ -73,18 +43,18 @@ function Folder({ k, p, drop, on, onPick }: { k: number; p: MotionValue<number>;
         data-k={k}
         onClick={() => onPick(k)}
         style={{ marginLeft: `${k * 25}%` }}
-        className={`relative h-7 w-[24%] truncate rounded-t-control border border-b-0 px-2 text-left font-casa-mono text-[10px] uppercase tracking-[0.02em] sm:px-3 sm:text-[11px] sm:tracking-[0.08em] outline-none focus-visible:[box-shadow:var(--focus)] ${
-          on ? "border-casa-line bg-casa-bg text-casa-fg" : "border-casa-line bg-casa-tile text-casa-fg-3"
+        className={`relative h-7 w-[24%] truncate rounded-t-control border border-b-0 px-2 text-left font-mono text-[10px] uppercase tracking-[0.02em] sm:px-3 sm:text-[11px] sm:tracking-[0.08em] outline-none focus-visible:[box-shadow:var(--focus)] ${
+          on ? "border-border bg-background text-foreground" : "border-border bg-card text-muted-foreground"
         }`}
       >
         {f.tab}
       </button>
-      <div className={`h-full rounded-tile rounded-tl-none border border-casa-line shadow-[0_-6px_16px_-10px_color-mix(in_srgb,var(--casa-fg)_30%,transparent)] ${on ? "bg-casa-bg" : "bg-casa-tile"}`} />
+      <div className={`h-full rounded-[var(--r-surface)] rounded-tl-none border border-border shadow-[0_-6px_16px_-10px_color-mix(in_srgb,var(--foreground)_30%,transparent)] ${on ? "bg-background" : "bg-card"}`} />
     </motion.div>
   );
 }
 
-export default function Pastas() {
+export function FolderTabs() {
   const reduce = useReducedMotion();
   const box = React.useRef<HTMLDivElement>(null);
   const list = React.useRef<HTMLDivElement>(null);
@@ -179,10 +149,10 @@ export default function Pastas() {
           className="pointer-events-none absolute inset-x-4 z-10 flex flex-col gap-2"
         >
           <div className="flex items-baseline gap-1.5">
-            <span className="font-casa text-[clamp(2.25rem,10vw,3rem)] font-medium leading-none tracking-[-0.03em] tabular-nums text-casa-fg">{f.n}</span>
-            <span className="font-casa text-casa-sm text-casa-fg-3">{f.unit}</span>
+            <span className="[font-family:var(--font-display,inherit)] text-[clamp(2.25rem,10vw,3rem)] font-medium leading-none tracking-[-0.03em] tabular-nums text-foreground">{f.n}</span>
+            <span className="[font-family:var(--font-display,inherit)] text-xs text-muted-foreground">{f.unit}</span>
           </div>
-          <span className="font-casa text-casa-sm text-casa-fg-2">{f.line}</span>
+          <span className="[font-family:var(--font-display,inherit)] text-xs text-muted-foreground">{f.line}</span>
         </motion.div>
       </div>
       <span className="sr-only" aria-live="polite">{`${f.tab}: ${f.n} ${f.unit}. ${f.line}`}</span>
