@@ -28,6 +28,10 @@ Each rule has an id. An experiment lists the ids it follows in `meta.rules`, and
 - **`tactile-object`**: never ship a flat 2D stick-figure SVG or stacked grey form
   bars. Every piece must feel like a real physical object with reactive light,
   shadow, bevel/relief that moves with the gesture, plus surface texture/grain/depth.
+  The bar is premium hardware (a keycap in a recessed well, an audio-plugin
+  knob): build the body from layered DOM/CSS (bezel → inset well → part with a
+  material gradient, dished face and chamfer → 2–3 stacked outer shadows →
+  moving specular). SVG only for fine detail (ticks, icons), never the body.
 - **`real-ui-purpose`**: both the metaphor and the component must solve an
   immediately obvious UI action in 2 seconds (confirm, tear, latch, filter,
   navigate, scrub, lock). Never build abstract physics toys (like a steam-engine
