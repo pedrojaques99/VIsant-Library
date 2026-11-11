@@ -254,7 +254,15 @@ const ATALHOS: [string, string][] = [
   ["Shift + arrastar controle", "Ajuste fino"],
 ];
 
-export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorElement>) => void }) {
+/**
+ * `telaInicial` e `aoExportar` deixam outro app usar o estúdio como efeito (o app do estúdio do
+ * jaques-os abre com o vídeo de uma peça e recebe o arquivo exportado). Sem eles, nada muda.
+ */
+export function Estudio({ onSair, telaInicial, aoExportar }: {
+  onSair?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  telaInicial?: Tela;
+  aoExportar?: (arquivo: Blob, nome: string) => void;
+}) {
   const { cena, setCena: setCenaBase, desfazer, refazer, podeDesfazer, podeRefazer } = useHistorico();
   // A cena marcada que está aberta: mexer no aparelho enquanto ela está aberta é editar ela.
   const [cenaAberta, setCenaAberta] = React.useState<number | null>(cena.movimento.tipo === "cenas" ? 0 : null);
@@ -284,7 +292,11 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
   const [custo, setCusto] = React.useState<Custo>(lerCusto);
 
   // A peça viva é uma tela de celular: em tablet e notebook ela sai da lista e a escolha volta quando o celular voltar.
-  const telas = React.useMemo(() => [...enviadas, ...TELAS.filter((t) => t.tipo !== "vivo" || cena.modelo === "phone")], [enviadas, cena.modelo]);
+  const telas = React.useMemo(() => [...(telaInicial ? [telaInicial] : []), ...enviadas, ...TELAS.filter((t) => t.tipo !== "vivo" || cena.modelo === "phone")], [telaInicial, enviadas, cena.modelo]);
+  // Aberto por outro app com uma tela: ela entra escolhida.
+  React.useEffect(() => {
+    if (telaInicial) setCenaBase((c) => (c.telaId === telaInicial.id ? c : { ...c, telaId: telaInicial.id }));
+  }, [telaInicial, setCenaBase]);
   const tela: Tela = telas.find((t) => t.id === cena.telaId) ?? (restaurando ? { id: "espera", tipo: "imagem", nome: "" } : telas[0]);
   const anima = animado(cena);
   const [medida, setMedida] = React.useState({ w: 1600, h: 900 });
@@ -767,7 +779,9 @@ export function Estudio({ onSair }: { onSair?: (e: React.MouseEvent<HTMLAnchorEl
       if (blob) {
         const url = URL.createObjectURL(blob);
         const arquivo = `mockup-${arqW}x${arqH}.${extensao}`;
-        baixar(url, arquivo);
+        // Dentro de outro app, o arquivo vai para ele (vira versão da peça); no site, baixa.
+        if (aoExportar) aoExportar(blob, arquivo);
+        else baixar(url, arquivo);
         cenaDoPronto.current = cenaDoArquivo;
         setPronto({ url, nome: arquivo, bytes: blob.size, w: arqW, h: arqH, blob });
         setCopiado(false);
