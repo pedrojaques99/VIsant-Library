@@ -495,6 +495,55 @@ quadrada (um uso só, ainda arquivo, não padrão).
 (`segmented-control`, `liquid-toggle`) no mesmo formato, pra projeto sem React
 ter a mesma casa.
 
+### De `jaques-os/app` (Estúdio) — COLHIDO em 11/11/2026
+
+Os controles de trabalho do app do Estúdio: a lista que todo módulo filtra e o
+campo do agente. Vieram porque o Estúdio já usa a barra do registry
+(`filter-bar` + `filter-menu`) e montou em volta dela o que faltava aqui: o
+estado na URL e o campo de mensagem com anexo.
+
+| Item | Origem | Usos | Por que vale |
+|---|---|---|---|
+| `use-catalog` | `src/lib/catalogo.tsx` (`useCatalogo`, `MenuDeOrdem`, `porTexto/porNumero/porData`) | 5 telas (Peças, Projetos, Gravador, Visual, Biblioteca) | Busca, facetas contadas dos próprios dados, ordem e agrupamento num estado que mora na URL, com a barra pronta |
+| `prompt-composer` | o campo do painel em `src/components/Agente.tsx` | Agente do Estúdio + `prompt-input`/`BrandingChatInput` do visantlabs-os | Texto que cresce, anexos com prévia, ferramentas por dado, Enviar que vira Parar |
+| `frame-markup` | `Rabisco` em `Agente.tsx` + `modulos/editor/Quadro.tsx` | 2 no Estúdio | Rabisco sobre quadro de vídeo ou imagem que sai como PNG, motor de traço do `signature-pad` |
+
+O que foi **desacoplado** (a origem continua como está; os cabeçalhos
+`// Colhido para o registry` marcam as cópias):
+
+- `useSearchParams` do react-router → adaptador opcional `params: { params, setParams }`;
+  o padrão é `window.location` + `history.replaceState` com aviso próprio, para dois
+  catálogos na mesma página se enxergarem
+- API em inglês: `ConfigDoCatalogo` → `CatalogConfig`, `chave/rotulo/de/rotuloDe/ordem` →
+  `key/label/get/labelOf/order`, `barra/secoes/filtrados` → `bar/sections/filtered`,
+  `MenuDeOrdem` → `SortMenu`, `porTexto/porNumero/porData` → `byText/byNumber/byDate`.
+  Parâmetros da URL `?ordem=`/`?grupo=nenhum` viraram `?sort=`/`?group=none`
+- todo texto da barra é `labels` com default em português
+- `byText` sem `pt-BR` cravado (usa o locale do navegador, com `numeric`)
+- o campo do agente: `fetch`, upload, `criarDitado` do Gravador e o `<input type=file>`
+  embutido → `value`, `attachments`, `tools` (microfone é uma ferramenta com `pressed`/`busy`)
+  e `onAttachFiles` por prop; status no vocabulário do `prompt-input` (`ready/submitted/streaming`)
+- o rabisco: `#f4f4f2` e `#ff2d55` cravados → `--muted` e `--brand` resolvidos por
+  `css-color` no clique de concluir; polilinha de canvas → motor do `signature-pad`
+
+O que foi **acrescentado**:
+
+- `isComposing` no Enter (IME não envia mensagem cortada), colar imagem anexa, foco do conjunto
+- desfazer, limpar desfazível, Ctrl+Enter conclui, Esc cancela sem listener no `window`
+- teste de quadro "sujo" (vídeo de outra origem) na montagem, com `frameLost`, em vez de o
+  `toBlob` explodir no fim
+- agrupamento com seção de itens sem valor (`labels.empty`) e `byDate` que ignora data inválida
+
+**Verificado em consumidor limpo** (Vite + TW4, fora de qualquer repo, contra
+`ui.visantlabs.com`): `add @visant/theme-grao-editora` + os três criou 15 arquivos
+pelas dependências, o bloco `css` do composer chegou no `index.css`, zero hex,
+`theme-visant` por cima trocou `--brand` e deixou os componentes byte a byte iguais,
+`tsc` + `vite build` passaram e, aberto no navegador, o catálogo escreveu `?q=` na URL,
+o rabisco exportou PNG e o campo enviou e limpou.
+
+**Não colhidos** (decidido): "Abrir em" (um uso só), deck de versões (acoplado à API) e
+a timeline do editor (sendo refeita; o nome `timeline` já existe aqui).
+
 ### Dos outros repos (levantamento raso — confirmar antes de colher)
 
 - **visantlabs-os** → `packages/brand-tokens` é candidato natural a `registry:theme`

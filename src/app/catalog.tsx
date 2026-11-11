@@ -551,6 +551,9 @@ const PageCurlColheitaDemo = React.lazy(() => import("./demos/page-curl-demo"));
 const PullToRefreshColheitaDemo = React.lazy(() => import("./demos/pull-to-refresh-demo"));
 const ReactionsColheitaDemo = React.lazy(() => import("./demos/reactions-demo"));
 const SignaturePadColheitaDemo = React.lazy(() => import("./demos/signature-pad-demo"));
+const PromptComposerDemo = React.lazy(() => import("./demos/prompt-composer-demo"));
+const FrameMarkupDemo = React.lazy(() => import("./demos/frame-markup-demo"));
+const UseCatalogDemo = React.lazy(() => import("./demos/use-catalog-demo"));
 const SlideToConfirmColheitaDemo = React.lazy(() => import("./demos/slide-to-confirm-demo"));
 const StickerPeelColheitaDemo = React.lazy(() => import("./demos/sticker-peel-demo"));
 const StreamgraphColheitaDemo = React.lazy(() => import("./demos/streamgraph-demo"));
@@ -2318,6 +2321,39 @@ export const CATALOG: CatalogItem[] = [
     demo: SignaturePadColheitaDemo,
     knobs: "SignaturePad",
     preview: { w: 440, h: 320 },
+  },
+  {
+    name: "frame-markup",
+    title: "Frame Markup",
+    type: "ui",
+    family: "controles",
+    description:
+      "Rabisco por cima de um quadro de vídeo ou imagem que sai como PNG, com a tinta da marca, desfazer e Esc para cancelar.",
+    tags: ["desenho", "anotação", "vídeo", "revisão", "feedback"],
+    demo: FrameMarkupDemo,
+    preview: { w: 560, h: 400 },
+  },
+  {
+    name: "prompt-composer",
+    title: "Prompt Composer",
+    type: "ui",
+    family: "controles",
+    description:
+      "O campo de um painel de agente: texto que cresce, anexos com prévia, ferramentas como falar e rabiscar, Enviar que vira Parar. Só apresentação.",
+    tags: ["chat", "agente", "ia", "prompt", "anexo"],
+    demo: PromptComposerDemo,
+    preview: { w: 520, h: 380 },
+  },
+  {
+    name: "use-catalog",
+    title: "useCatalog",
+    type: "lib",
+    family: "fundacao",
+    description:
+      "Busca, facetas, ordem e agrupamento de qualquer lista num estado que mora na URL, com a barra de filtro pronta. Sem router, ou com o seu por adaptador.",
+    tags: ["busca", "filtro", "ordem", "agrupamento", "url", "catálogo"],
+    demo: UseCatalogDemo,
+    preview: { w: 620, h: 520 },
   },
   {
     name: "slide-to-confirm",

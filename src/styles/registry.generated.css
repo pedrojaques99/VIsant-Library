@@ -6,7 +6,7 @@
  * delas — e foi assim que o fold-motion virou bug reportado como "muito
  * simples" quando na verdade não animava nada.
  *
- * 31 itens: book-shelf, device-frame, fold-motion, glass-board, glass-button, glass-panel, glass-slider, glass-switch, glass-tabs, gleam, line-reveal, magnetic-cta, marquee, measure-bar, measure-picker, mist-dialog, nav-drawer, photo-compare, photo-flip, photo-frame, sensor-dial, sfx-toggle, sim-slider, spine-card, testimonial-wall, theme-grao-editora, theme-norte-verde, theme-vega-noturno, theme-visant, vintage-base, vintage-theme
+ * 32 itens: book-shelf, device-frame, fold-motion, glass-board, glass-button, glass-panel, glass-slider, glass-switch, glass-tabs, gleam, line-reveal, magnetic-cta, marquee, measure-bar, measure-picker, mist-dialog, nav-drawer, photo-compare, photo-flip, photo-frame, prompt-composer, sensor-dial, sfx-toggle, sim-slider, spine-card, testimonial-wall, theme-grao-editora, theme-norte-verde, theme-vega-noturno, theme-visant, vintage-base, vintage-theme
  */
 
 @layer components {
@@ -416,6 +416,9 @@
     object-fit: cover;
     display: block;
   }
+  .visant-composer-chip {
+    animation: visant-composer-chip var(--dur-fast, 160ms) var(--ease-out, ease-out) both;
+  }
   .sfx-toggle .sfx-wave {
     transform-origin: 6px 12px;
     transition: opacity var(--dur-base, 240ms) var(--ease-out), transform var(--dur-base, 240ms) var(--ease-out);
@@ -551,6 +554,9 @@
     transition: none;
   }
   .photo-flip-overlay[data-open="1"] {
+    animation: none;
+  }
+  .visant-composer-chip {
     animation: none;
   }
   .sensor-dial-acao i {
@@ -1460,6 +1466,16 @@
   }
   to {
     opacity: 1;
+  }
+}
+@keyframes visant-composer-chip {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 .sensor-dial {

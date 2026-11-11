@@ -8821,6 +8821,133 @@
           "evite": "Confirmação destrutiva: hold-to-confirm; deslizar sem metáfora: slide-to-confirm"
         }
       }
+    },
+    {
+      "name": "use-catalog",
+      "type": "registry:lib",
+      "title": "useCatalog",
+      "description": "Busca, facetas, ordem e agrupamento de qualquer lista num estado que mora na URL, com a barra de filtro pronta. Sem router, ou com o seu por adaptador.",
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "dependencies": [
+        "react"
+      ],
+      "registryDependencies": [
+        "@visant/filter-bar",
+        "@visant/filter-menu",
+        "@visant/use-local-search"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/lib/use-catalog.tsx",
+          "type": "registry:lib"
+        }
+      ],
+      "categories": [
+        "fundacao",
+        "busca",
+        "filtro",
+        "ordem",
+        "agrupamento",
+        "url",
+        "catalogo"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Lista de app com busca, filtro por facetas, ordem e agrupamento, e o estado no link",
+          "evite": "Base paginada no servidor com filtros da API: use filter-bar direto; só busca em memória, use-local-search"
+        }
+      }
+    },
+    {
+      "name": "prompt-composer",
+      "type": "registry:ui",
+      "title": "Prompt Composer",
+      "description": "O campo de um painel de agente: texto que cresce, anexos com prévia, ferramentas como falar e rabiscar, Enviar que vira Parar. Só apresentação.",
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils",
+        "@visant/working-glyph"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/ui/prompt-composer.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "css": {
+        "@keyframes visant-composer-chip": {
+          "from": {
+            "opacity": "0",
+            "transform": "translateY(4px) scale(0.97)"
+          },
+          "to": {
+            "opacity": "1",
+            "transform": "none"
+          }
+        },
+        "@layer components": {
+          ".visant-composer-chip": {
+            "animation": "visant-composer-chip var(--dur-fast, 160ms) var(--ease-out, ease-out) both"
+          }
+        },
+        "@media (prefers-reduced-motion: reduce)": {
+          ".visant-composer-chip": {
+            "animation": "none"
+          }
+        }
+      },
+      "categories": [
+        "controles",
+        "chat",
+        "agente",
+        "ia",
+        "prompt",
+        "anexo"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Campo de mensagem de chat ou agente de IA, com anexos, ferramentas e parar a resposta",
+          "evite": "Campo de texto comum de formulário: textarea do tema; comando curto, command-search"
+        }
+      }
+    },
+    {
+      "name": "frame-markup",
+      "type": "registry:ui",
+      "title": "Frame Markup",
+      "description": "Rabisco por cima de um quadro de vídeo ou imagem que sai como PNG, com a tinta da marca, desfazer e Esc para cancelar.",
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils",
+        "@visant/signature-pad",
+        "@visant/css-color"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/ui/frame-markup.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "controles",
+        "desenho",
+        "anotacao",
+        "video",
+        "revisao",
+        "feedback"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Apontar algo num quadro de vídeo ou imagem para revisão, feedback ou anexo de agente",
+          "evite": "Assinatura: signature-pad; editor de desenho completo com camadas e formas"
+        }
+      }
     }
   ]
 }

@@ -13053,6 +13053,13 @@
           "descricao": null
         },
         {
+          "nome": "count",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "true",
+          "descricao": "Selo com quantos grupos estão filtrando. Desligue em menus de escolha única (ordenar, agrupar), onde sempre há um marcado e o \"1\" não diz nada."
+        },
+        {
           "nome": "emptyLabel",
           "tipo": "string",
           "obrigatoria": false,
@@ -15974,6 +15981,337 @@
           "tipo": "(position: number) => void",
           "obrigatoria": false,
           "padrao": null,
+          "descricao": null
+        }
+      ]
+    }
+  ],
+  "use-catalog": [
+    {
+      "nome": "SortMenu",
+      "descricao": "Só o menu de ordem, para a tela que já tem a própria barra de filtro. Mesmo componente e mesmo texto das listas que usam o catálogo inteiro.",
+      "props": [
+        {
+          "nome": "onChange",
+          "tipo": "(id: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "sorts",
+          "tipo": "{ id: string; label: string; }[]",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "value",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "labels",
+          "tipo": "Pick<CatalogLabels, \"sort\" | \"sortBy\">",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    },
+    {
+      "nome": "byText",
+      "descricao": "Comparadores comuns, para não repetir em cada tela.",
+      "props": []
+    },
+    {
+      "nome": "byNumber",
+      "descricao": "Sem valor vai para o fim, nos dois sentidos. `desc` (padrão) põe o maior primeiro.",
+      "props": []
+    },
+    {
+      "nome": "byDate",
+      "descricao": "Data ISO (ou qualquer texto que `Date.parse` entenda). `desc` põe a mais recente primeiro.",
+      "props": []
+    }
+  ],
+  "prompt-composer": [
+    {
+      "nome": "PromptComposer",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "onSubmit",
+          "tipo": "() => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onValueChange",
+          "tipo": "(value: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "value",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "accept",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "image/*,video/*,audio/*",
+          "descricao": "`accept` do seletor de arquivo."
+        },
+        {
+          "nome": "aside",
+          "tipo": "any",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Slot livre entre as ferramentas e o enviar (créditos, modelo)."
+        },
+        {
+          "nome": "attachLabel",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Anexar arquivo",
+          "descricao": null
+        },
+        {
+          "nome": "attachments",
+          "tipo": "PromptAttachment[]",
+          "obrigatoria": false,
+          "padrao": "[]",
+          "descricao": null
+        },
+        {
+          "nome": "autoFocus",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "canSubmit",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Regra própria para enviar. Padrão: texto ou anexo, e nada em andamento."
+        },
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "disabled",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": null
+        },
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Mensagem",
+          "descricao": "Nome acessível da área de texto."
+        },
+        {
+          "nome": "maxRows",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "8",
+          "descricao": null
+        },
+        {
+          "nome": "minRows",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "2",
+          "descricao": null
+        },
+        {
+          "nome": "onAttachFiles",
+          "tipo": "(files: File[]) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Com isto aparece o clipe, e colar imagem vira anexo."
+        },
+        {
+          "nome": "onRemoveAttachment",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onStop",
+          "tipo": "() => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Interrompe a resposta. Com `status=\"streaming\"`, Enviar vira Parar."
+        },
+        {
+          "nome": "placeholder",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Escreva uma mensagem",
+          "descricao": null
+        },
+        {
+          "nome": "removeLabel",
+          "tipo": "(attachment: PromptAttachment) => string",
+          "obrigatoria": false,
+          "padrao": "(a) => `Tirar ${a.label}`",
+          "descricao": null
+        },
+        {
+          "nome": "status",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "ready",
+          "descricao": "`submitted`: mandado, sem resposta ainda. `streaming`: a resposta está correndo.",
+          "valores": [
+            "ready",
+            "submitted",
+            "streaming"
+          ]
+        },
+        {
+          "nome": "stopLabel",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Parar",
+          "descricao": null
+        },
+        {
+          "nome": "submitLabel",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Enviar",
+          "descricao": null
+        },
+        {
+          "nome": "tools",
+          "tipo": "PromptTool[]",
+          "obrigatoria": false,
+          "padrao": "[]",
+          "descricao": "Ferramentas da esquerda: falar, rabiscar, comentar no tempo."
+        }
+      ]
+    }
+  ],
+  "frame-markup": [
+    {
+      "nome": "FrameMarkup",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "onDone",
+          "tipo": "(result: FrameMarkupResult) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "autoFocus",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "true",
+          "descricao": null
+        },
+        {
+          "nome": "cancelLabel",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Cancelar",
+          "descricao": null
+        },
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "clearLabel",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Limpar",
+          "descricao": null
+        },
+        {
+          "nome": "doneLabel",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Concluir",
+          "descricao": null
+        },
+        {
+          "nome": "fallbackSize",
+          "tipo": "{ width: number; height: number; }",
+          "obrigatoria": false,
+          "padrao": "{ width: 1280, height: 720 }",
+          "descricao": "Proporção quando não há quadro (ou enquanto a imagem carrega)."
+        },
+        {
+          "nome": "hint",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Desenhe por cima para apontar",
+          "descricao": null
+        },
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Rabisco sobre o quadro",
+          "descricao": null
+        },
+        {
+          "nome": "maxSize",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "1280",
+          "descricao": "Lado maior do PNG. O quadro é reduzido até caber."
+        },
+        {
+          "nome": "onCancel",
+          "tipo": "() => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "source",
+          "tipo": "FrameSource",
+          "obrigatoria": false,
+          "padrao": "null",
+          "descricao": "O quadro: vídeo (congela o quadro atual), imagem, canvas ou URL de imagem."
+        },
+        {
+          "nome": "strokeSize",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "1 / 200",
+          "descricao": "Espessura do traço em fração do lado maior."
+        },
+        {
+          "nome": "undoLabel",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Desfazer",
           "descricao": null
         }
       ]

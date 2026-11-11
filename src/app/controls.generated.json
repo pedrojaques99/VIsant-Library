@@ -7499,6 +7499,12 @@
           "resumo": null
         },
         {
+          "prop": "count",
+          "tipo": "chave",
+          "padrao": true,
+          "resumo": "Selo com quantos grupos estão filtrando. Desligue em menus de escolha única (ordenar, agrupar), onde sempre há um marcado e o \"1\" não diz nada."
+        },
+        {
           "prop": "clearLabel",
           "tipo": "texto",
           "padrao": "Limpar filtros",
@@ -9360,6 +9366,189 @@
           "step": 1,
           "padrao": 18,
           "resumo": "Distância total, em km."
+        }
+      ]
+    }
+  },
+  "use-catalog": {
+    "componentes": {
+      "SortMenu": [
+        {
+          "prop": "value",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null
+        }
+      ]
+    }
+  },
+  "prompt-composer": {
+    "componentes": {
+      "PromptComposer": [
+        {
+          "prop": "status",
+          "tipo": "escolha",
+          "valores": [
+            "ready",
+            "submitted",
+            "streaming"
+          ],
+          "padrao": "ready",
+          "resumo": "`submitted`: mandado, sem resposta ainda. `streaming`: a resposta está correndo."
+        },
+        {
+          "prop": "autoFocus",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": null
+        },
+        {
+          "prop": "canSubmit",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Regra própria para enviar. Padrão: texto ou anexo, e nada em andamento."
+        },
+        {
+          "prop": "disabled",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": null
+        },
+        {
+          "prop": "maxRows",
+          "tipo": "numero",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "padrao": 8,
+          "resumo": null
+        },
+        {
+          "prop": "minRows",
+          "tipo": "numero",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "padrao": 2,
+          "resumo": null
+        },
+        {
+          "prop": "accept",
+          "tipo": "texto",
+          "padrao": "image/*,video/*,audio/*",
+          "resumo": "`accept` do seletor de arquivo.",
+          "secundario": true
+        },
+        {
+          "prop": "attachLabel",
+          "tipo": "texto",
+          "padrao": "Anexar arquivo",
+          "resumo": null,
+          "secundario": true
+        },
+        {
+          "prop": "label",
+          "tipo": "texto",
+          "padrao": "Mensagem",
+          "resumo": "Nome acessível da área de texto.",
+          "secundario": true
+        },
+        {
+          "prop": "placeholder",
+          "tipo": "texto",
+          "padrao": "Escreva uma mensagem",
+          "resumo": null,
+          "secundario": true
+        },
+        {
+          "prop": "stopLabel",
+          "tipo": "texto",
+          "padrao": "Parar",
+          "resumo": null,
+          "secundario": true
+        },
+        {
+          "prop": "submitLabel",
+          "tipo": "texto",
+          "padrao": "Enviar",
+          "resumo": null,
+          "secundario": true
+        },
+        {
+          "prop": "value",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null,
+          "secundario": true
+        }
+      ]
+    }
+  },
+  "frame-markup": {
+    "componentes": {
+      "FrameMarkup": [
+        {
+          "prop": "autoFocus",
+          "tipo": "chave",
+          "padrao": true,
+          "resumo": null
+        },
+        {
+          "prop": "maxSize",
+          "tipo": "numero",
+          "min": 10,
+          "max": 2600,
+          "step": 10,
+          "padrao": 1280,
+          "resumo": "Lado maior do PNG. O quadro é reduzido até caber."
+        },
+        {
+          "prop": "strokeSize",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": "Espessura do traço em fração do lado maior."
+        },
+        {
+          "prop": "cancelLabel",
+          "tipo": "texto",
+          "padrao": "Cancelar",
+          "resumo": null
+        },
+        {
+          "prop": "clearLabel",
+          "tipo": "texto",
+          "padrao": "Limpar",
+          "resumo": null
+        },
+        {
+          "prop": "doneLabel",
+          "tipo": "texto",
+          "padrao": "Concluir",
+          "resumo": null
+        },
+        {
+          "prop": "hint",
+          "tipo": "texto",
+          "padrao": "Desenhe por cima para apontar",
+          "resumo": null,
+          "secundario": true
+        },
+        {
+          "prop": "label",
+          "tipo": "texto",
+          "padrao": "Rabisco sobre o quadro",
+          "resumo": null,
+          "secundario": true
+        },
+        {
+          "prop": "undoLabel",
+          "tipo": "texto",
+          "padrao": "Desfazer",
+          "resumo": null,
+          "secundario": true
         }
       ]
     }
