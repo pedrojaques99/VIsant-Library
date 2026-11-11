@@ -59,6 +59,9 @@ export interface FilterMenuProps {
   emptyLabel?: string;
   align?: "start" | "center" | "end";
   className?: string;
+  /** Selo com quantos grupos estão filtrando. Desligue em menus de escolha única (ordenar,
+   *  agrupar), onde sempre há um marcado e o "1" não diz nada. */
+  count?: boolean;
 }
 
 const itemClass = cn(
@@ -112,6 +115,7 @@ export function FilterMenu({
   emptyLabel = "Nada para filtrar aqui.",
   align = "end",
   className,
+  count = true,
 }: FilterMenuProps) {
   // Grupos, não opções: três status marcados são UM eixo de filtragem.
   const activeGroups = groups.filter((g) => (selected[g.key]?.length ?? 0) > 0).length;
@@ -144,7 +148,7 @@ export function FilterMenu({
           <path d="M2 4h12M4.5 8h7M7 12h2" />
         </svg>
         <span>{label}</span>
-        {activeGroups > 0 ? (
+        {count && activeGroups > 0 ? (
           <span
             className={cn(
               "ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5",
