@@ -290,6 +290,41 @@ dentro da peça.
 Descartado: limitar o celular a 1 viva (47%, a montagem é que custava) e foto
 até o toque, que desfaria a decisão de 4/11.
 
+### Rodada 8: o `reels-rail` por dentro (2026-11-12)
+
+Nesta medição, os 33% da rodada 7 não se repetiram. Foi usado o build local, Pixel 7
+com CPU 6x, mediana de 3. A vitrine foi rolada até o ladrilho e a contagem de
+quadros começou 100 ms depois de a página parar, então inclui o momento em que
+a peça acorda e monta. Também houve medição 3,5 s depois de parar.
+
+| Tela | Antes | Depois |
+|---|---|---|
+| celular, acordando (ladrilho a 20% do topo) | 14% | 18% (13–18, ruído) |
+| celular, acordando (ladrilho a 60% do topo) | 15% | 12% |
+| celular, parado | 2% | 0% |
+| desktop, acordando / parado | 2% / 1% | 2% / 0% |
+| JS da peça + trilho, parado, 5 s (CPU profile) | 169 ms | 98 ms |
+
+Acordando, as vizinhas `photo-compare` e `sim-slider` dão 14–15% sozinhas, ou
+seja, o mesmo nível. O que o trace achou dentro da peça, e foi cortado sem
+mudar a API nem a cara:
+
+- `<video>` parado deixa de carregar: ganha `preload="none"`, só quando tem
+  pôster e ainda não carregou. No celular, 9 players carregavam para tocar 1.
+  Antes, o `currentTime = 0` disparava uma busca em todos os vídeos a cada
+  efeito. Agora só busca quem saiu do zero.
+- O centro deixou de ser medido com N `getBoundingClientRect` por quadro: é
+  mapeado uma vez por layout, e cada quadro lê só `scrollLeft`.
+- A deriva só escreve `scrollLeft` quando o pixel muda e começa quando a página
+  fica ociosa. Antes, cada quadro forçava layout com a página ainda montando.
+- A lista de cards é memorizada: render da peça que não muda os cards (ponteiro,
+  foco, IO) não refaz mais o tabindex e as medidas do trilho.
+
+Ficou de fora, por estar no `@visant/rail` e não nesta peça: o `onScroll` do
+trilho faz dois `setState` com objeto novo por evento. São 14 por segundo na
+deriva. Um `setState` que devolve o estado anterior quando nada mudou cortaria o
+render do trilho.
+
 ## Resultado (produção, mesma régua)
 
 | Perfil | Quadros > 33ms antes → depois | Bloqueado antes → depois |

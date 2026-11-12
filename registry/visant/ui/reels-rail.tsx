@@ -255,16 +255,35 @@ export function ReelsRail({
     const scroller = scrollerDe();
     if (!scroller) return;
 
+    /*
+     * O centro de cada card é medido uma vez por layout, em coordenadas de
+     * rolagem, e cada quadro de scroll só lê `scrollLeft`. Medir os N cards por
+     * `getBoundingClientRect` a cada quadro eram N leituras de caixa por quadro
+     * da deriva, que anda o tempo todo; no celular, com a CPU estrangulada, isso
+     * pesava. A divisão por `k` desfaz a escala de quem hospeda (um palco
+     * encolhido), porque `scrollLeft` vive em pixel de layout e a caixa não.
+     * O mapa refaz sozinho quando o número de cards muda (o laço) ou a caixa muda.
+     */
+    let centros: number[] = [];
+    const mapear = () => {
+      const caixa = scroller.getBoundingClientRect();
+      const k = scroller.offsetWidth ? caixa.width / scroller.offsetWidth : 1;
+      const base = scroller.scrollLeft;
+      centros = Array.from(scroller.children).map((filho) => {
+        const r = (filho as HTMLElement).getBoundingClientRect();
+        return (r.left - caixa.left + r.width / 2) / (k || 1) + base;
+      });
+    };
+
     let pendente = 0;
     const medir = () => {
       pendente = 0;
-      const caixa = scroller.getBoundingClientRect();
-      const centro = caixa.left + caixa.width / 2;
+      if (centros.length !== scroller.children.length) mapear();
+      const centro = scroller.scrollLeft + scroller.offsetWidth / 2;
       let melhor = 0;
       let menor = Infinity;
-      Array.from(scroller.children).forEach((filho, i) => {
-        const r = (filho as HTMLElement).getBoundingClientRect();
-        const d = Math.abs(r.left + r.width / 2 - centro);
+      centros.forEach((c, i) => {
+        const d = Math.abs(c - centro);
         if (d < menor) {
           menor = d;
           melhor = i;
@@ -277,19 +296,26 @@ export function ReelsRail({
       if (pendente) return;
       pendente = requestAnimationFrame(medir);
     };
+    const remapear = () => {
+      centros = [];
+      agendar();
+    };
 
     medir();
     scroller.addEventListener("scroll", agendar, { passive: true });
     const ro =
-      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(agendar);
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(remapear);
     ro?.observe(scroller);
+    // O card que muda de largura sem o scroller mudar também desloca os centros.
+    const primeiro = scroller.firstElementChild;
+    if (ro && primeiro) ro.observe(primeiro);
 
     return () => {
       cancelAnimationFrame(pendente);
       scroller.removeEventListener("scroll", agendar);
       ro?.disconnect();
     };
-  }, [scrollerDe, items.length]);
+  }, [scrollerDe, items.length, itemWidth, gap, bleed]);
 
   /*
    * ── O laço ────────────────────────────────────────────────────────────────
@@ -406,6 +432,7 @@ export function ReelsRail({
 
     let raf = 0;
     let ultimo = 0;
+    let espera = 0;
     /*
      * A posição é mantida em ponto flutuante aqui fora porque `scrollLeft`
      * arredonda: a 26px/s são 0,43px por quadro, e escrevendo direto no
@@ -414,7 +441,7 @@ export function ReelsRail({
      * do trilho, a emenda do laço), a divergência passa de 2px e o nosso número
      * obedece ao elemento, nunca o contrário.
      */
-    let pos = scroller.scrollLeft;
+    let pos = 0;
 
     const quadro = (t: number) => {
       if (ultimo) {
@@ -427,14 +454,43 @@ export function ReelsRail({
           return;
         }
         pos += (velRef.current * dt) / 1000;
-        scroller.scrollLeft = pos;
+        // O elemento guarda pixel inteiro: escrever a fração a cada quadro não
+        // move nada e ainda obriga o navegador a atualizar o layout pra
+        // responder à escrita. Só escreve quando o pixel muda (~14 vezes por
+        // segundo a 14px/s, não 60).
+        if (Math.round(pos) !== scroller.scrollLeft) scroller.scrollLeft = pos;
       }
       ultimo = t;
       raf = requestAnimationFrame(quadro);
     };
 
-    raf = requestAnimationFrame(quadro);
-    return () => cancelAnimationFrame(raf);
+    const partir = () => {
+      espera = 0;
+      pos = scroller.scrollLeft;
+      raf = requestAnimationFrame(quadro);
+    };
+
+    /*
+     * Saindo do repouso, a deriva espera a página ficar ociosa. Cada quadro
+     * dela lê `scrollLeft`, e ler posição com o layout sujo obriga o navegador a
+     * refazer o layout ali mesmo. Na montagem (a peça, o laço medindo as cópias,
+     * as vizinhas acordando junto) isso era um layout forçado por quadro. A
+     * rampa já sai do zero, então começar um instante depois não se vê.
+     */
+    const ocioso = window as Window & {
+      requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (velRef.current === 0 && ocioso.requestIdleCallback) {
+      espera = ocioso.requestIdleCallback(partir, { timeout: 1500 });
+    } else {
+      partir();
+    }
+
+    return () => {
+      if (espera) ocioso.cancelIdleCallback?.(espera);
+      cancelAnimationFrame(raf);
+    };
   }, [loop, drift, reduzido, naTela, pausado, driftSpeed, scrollerDe, umPorVez]);
 
   /** O trilho inteiro fora da tela para tudo. */
@@ -458,6 +514,24 @@ export function ReelsRail({
       (c as HTMLElement).querySelector("video"),
     );
   }, [scrollerDe]);
+
+  /**
+   * Quem não toca não carrega.
+   *
+   * O laço põe de 9 a 15 `<video>` no DOM, e cada um com `preload="metadata"`
+   * (o padrão de quase todo slot) abre um player, busca cabeçalho e decodifica o
+   * primeiro quadro, tudo junto, na hora em que a peça monta: no celular eram
+   * nove players carregando para mostrar um vídeo. O card parado mostra o `poster`, que é o
+   * que ele já mostrava; o `play()` do card que vira o do meio carrega o vídeo
+   * dele. Vídeo SEM pôster continua carregando: sem ele, o card parado ficaria
+   * vazio em vez de mostrar o primeiro quadro. Efeito de layout porque roda na mesma tarefa da montagem, antes de o
+   * navegador começar a buscar; vídeo que já carregou fica como está.
+   */
+  React.useLayoutEffect(() => {
+    videos().forEach((v, i) => {
+      if (v && i !== alvo && v.poster && v.readyState === 0 && v.preload !== "none") v.preload = "none";
+    });
+  }, [videos, alvo, copias, items]);
 
   /**
    * O comando de reprodução: um toca, o resto para.
@@ -492,10 +566,13 @@ export function ReelsRail({
         void v.play().catch(() => undefined);
       } else {
         v.muted = true;
-        v.pause();
+        if (!v.paused) v.pause();
         // Volta ao começo: reel é peça de 6 segundos, e reencontrar um card
-        // parado no meio parece vídeo quebrado, não vídeo pausado.
-        if (i !== alvo) v.currentTime = 0;
+        // parado no meio parece vídeo quebrado, não vídeo pausado. Só se saiu
+        // do zero: um `currentTime = 0` em vídeo que nunca andou é uma busca de
+        // graça, e busca obriga o vídeo a carregar, o que desfaria o
+        // `preload="none"` do efeito abaixo.
+        if (i !== alvo && v.currentTime > 0) v.currentTime = 0;
       }
     });
   }, [alvo, naTela, comSom, sound, autoPlay, manual, reduzido, videos, items]);
@@ -514,9 +591,6 @@ export function ReelsRail({
     };
   }, [alvo, videos, items]);
 
-  // O botão só declara a vontade; quem toca e quem para é o efeito acima. Uma
-  // regra de reprodução, num lugar só — ver a nota dele.
-  const alternarPlay = () => setManual(!tocando);
 
   /**
    * A saída só apaga o card se ele ainda for o apontado.
@@ -529,6 +603,43 @@ export function ReelsRail({
   const apontar = React.useCallback((posicao: number, dentro: boolean) => {
     setSobCursor((atual) => (dentro ? posicao : atual === posicao ? null : atual));
   }, []);
+
+  /*
+   * A lista de cards só muda com o que ela mostra. O trilho refaz o tabindex
+   * rotativo e mede as pontas toda vez que os filhos mudam, e cada render desta
+   * peça criava uma lista nova: ponteiro entrando, foco, o trilho entrando na
+   * tela, a medida do celular, tudo virava uma volta inteira de medida no
+   * trilho, que na montagem caía em layout sujo.
+   */
+  const cards = React.useMemo(
+    () =>
+      Array.from({ length: copias }).flatMap((_, c) =>
+        items.map((item, i) => {
+          // O índice do card na fileira INTEIRA: é ele que a medida do centro
+          // devolve, e é por ele que "o do meio" é decidido — o conjunto de
+          // origem não importa pra quem toca.
+          const posicao = c * items.length + i;
+          return (
+            <ReelCard
+              key={`${c}:${item.id}`}
+              item={item}
+              ratio={ratio}
+              ativo={posicao === alvo}
+              onHover={porHover ? (dentro) => apontar(posicao, dentro) : undefined}
+              tocando={tocando}
+              comSom={sound && comSom}
+              mostrarSom={sound}
+              dica={dragHint ? (mexeu ? "sumiu" : "visivel") : null}
+              // O botão só declara a vontade; quem toca e quem para é o efeito
+              // de reprodução. Uma regra, num lugar só — ver a nota dele.
+              onPlay={() => setManual(!tocando)}
+              onSom={() => setComSom((v) => !v)}
+            />
+          );
+        }),
+      ),
+    [copias, items, ratio, alvo, porHover, apontar, tocando, sound, comSom, dragHint, mexeu],
+  );
 
   /*
    * `min-w-0` na raiz, e não é detalhe de estilo.
@@ -576,29 +687,7 @@ export function ReelsRail({
         hint={hint}
         label={label}
       >
-        {Array.from({ length: copias }).flatMap((_, c) =>
-          items.map((item, i) => {
-            // O índice do card na fileira INTEIRA: é ele que a medida do centro
-            // devolve, e é por ele que "o do meio" é decidido — o conjunto de
-            // origem não importa pra quem toca.
-            const posicao = c * items.length + i;
-            return (
-              <ReelCard
-                key={`${c}:${item.id}`}
-                item={item}
-                ratio={ratio}
-                ativo={posicao === alvo}
-                onHover={porHover ? (dentro) => apontar(posicao, dentro) : undefined}
-                tocando={tocando}
-                comSom={sound && comSom}
-                mostrarSom={sound}
-                dica={dragHint ? (mexeu ? "sumiu" : "visivel") : null}
-                onPlay={alternarPlay}
-                onSom={() => setComSom((v) => !v)}
-              />
-            );
-          }),
-        )}
+        {cards}
       </Rail>
     </div>
   );
