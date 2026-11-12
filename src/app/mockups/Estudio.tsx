@@ -293,9 +293,24 @@ export function Estudio({ onSair, telaInicial, aoExportar }: {
 
   // A peça viva é uma tela de celular: em tablet e notebook ela sai da lista e a escolha volta quando o celular voltar.
   const telas = React.useMemo(() => [...(telaInicial ? [telaInicial] : []), ...enviadas, ...TELAS.filter((t) => t.tipo !== "vivo" || cena.modelo === "phone")], [telaInicial, enviadas, cena.modelo]);
-  // Aberto por outro app com uma tela: ela entra escolhida.
+  // Aberto por outro app com uma tela: ela entra escolhida e é lida como um arquivo solto
+  // (aparelho deitado para vídeo largo, vídeo já em movimento com a duração dele). Só na
+  // primeira vez que a tela chega: reabrir a mesma tela mantém a cena que a pessoa ajustou.
   React.useEffect(() => {
-    if (telaInicial) setCenaBase((c) => (c.telaId === telaInicial.id ? c : { ...c, telaId: telaInicial.id }));
+    if (!telaInicial) return;
+    let nova = false;
+    setCenaBase((c) => {
+      if (c.telaId === telaInicial.id) return c;
+      nova = true;
+      return { ...c, telaId: telaInicial.id, rolagem: 0 };
+    });
+    if (!nova || !telaInicial.url || (telaInicial.tipo !== "video" && telaInicial.tipo !== "imagem")) return;
+    let vivo = true;
+    const video = telaInicial.tipo === "video";
+    medirArquivo(telaInicial.url, video)
+      .then((medidas) => vivo && setCenaBase((c) => (c.telaId === telaInicial.id ? cenaDoArquivo(c, medidas, video) : c)))
+      .catch(() => { /* sem medida, a cena fica como estava */ });
+    return () => { vivo = false; };
   }, [telaInicial, setCenaBase]);
   const tela: Tela = telas.find((t) => t.id === cena.telaId) ?? (restaurando ? { id: "espera", tipo: "imagem", nome: "" } : telas[0]);
   const anima = animado(cena);
@@ -666,17 +681,7 @@ export function Estudio({ onSair, telaInicial, aoExportar }: {
     setEnviadas((l) => [{ id, tipo: video ? "video" : "imagem", url, nome }, ...l]);
     void guardarArquivo(id, nome, f);
     contarEstudio("enviou-tela");
-    setCena((c) => ({
-      ...c,
-      telaId: id,
-      rolagem: 0,
-      // A forma do arquivo decide a da tela, e o aparelho deita sozinho.
-      orientacao: medidas.w > medidas.h * 1.05 ? "paisagem" : "retrato",
-      // Vídeo já é movimento: a cena sobe junto, com a duração dele.
-      movimento: video
-        ? { ...c.movimento, tipo: c.movimento.tipo === "parado" ? "flutuar" : c.movimento.tipo, duracao: Math.max(1, Math.min(30, Math.round(medidas.duracao ?? c.movimento.duracao))) }
-        : c.movimento,
-    }));
+    setCena((c) => cenaDoArquivo({ ...c, telaId: id, rolagem: 0 }, medidas, video));
     setAba("tela");
   };
   const receberRef = React.useRef(receber);
@@ -1462,6 +1467,19 @@ function IconeDoMovimento({ tipo }: { tipo: TipoMovimento }) {
 const inerte = (el: HTMLDivElement | null) => {
   if (el) el.inert = true;
 };
+
+/** O que a cena deduz de um arquivo que chegou, solto ou trazido por outro app. */
+function cenaDoArquivo(c: Cena, medidas: { w: number; h: number; duracao?: number }, video: boolean): Cena {
+  return {
+    ...c,
+    // A forma do arquivo decide a da tela, e o aparelho deita sozinho.
+    orientacao: medidas.w > medidas.h * 1.05 ? "paisagem" : "retrato",
+    // Vídeo já é movimento: a cena sobe junto, com a duração dele.
+    movimento: video
+      ? { ...c.movimento, tipo: c.movimento.tipo === "parado" ? "flutuar" : c.movimento.tipo, duracao: Math.max(1, Math.min(30, Math.round(medidas.duracao ?? c.movimento.duracao))) }
+      : c.movimento,
+  };
+}
 
 /** A medida do que chegou, para o aparelho já nascer na orientação certa. */
 function medirArquivo(url: string, video: boolean) {
