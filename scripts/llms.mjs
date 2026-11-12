@@ -220,6 +220,17 @@ const familiaDe = (item) => item.categories?.[0] ?? "fundacao";
 const ativas = itens.filter((i) => !arquivada(i.name));
 const arquivadas = itens.filter((i) => arquivada(i.name));
 const primeiraFrase = (t = "") => t.split(/(?<=[.!?])\s/)[0];
+/** Linha de skill no índice: a descrição delas é uma frase longa (o "use em ..." dos gatilhos).
+ *  Aqui basta o que ela faz: até os dois-pontos, ou ~120 letras no fim de uma palavra. A
+ *  descrição inteira continua em skills.md, que a linha aponta. Sem isso o llms.txt passava
+ *  do teto (agentes-check) e o agente desistia de ler ou cortava no meio. */
+const resumoDaSkill = (t = "") => {
+  const f = primeiraFrase(t);
+  const dois = f.indexOf(": ");
+  if (dois >= 30 && dois <= 120) return f.slice(0, dois) + ".";
+  if (f.length <= 120) return f;
+  return f.slice(0, 120).replace(/\s+\S*$/, "") + "…";
+};
 
 /** Uma linha que basta pra escolher: o "quando usar" ganha da descrição. */
 const motivo = (item) => item.meta?.uso?.quando ?? primeiraFrase(item.description);
@@ -257,7 +268,7 @@ const indice = [
   "",
   `Instalar: \`npx skills add ${SKILLS_REPO} --skill <nome>\`. Pra interface, comece por \`visant-design\`.`,
   "",
-  ...skills.map((s) => `- [${s.nome}](${SITE}/skills.md#${s.nome}): ${primeiraFrase(s.descricao)}`),
+  ...skills.map((s) => `- [${s.nome}](${SITE}/skills.md#${s.nome}): ${resumoDaSkill(s.descricao)}`),
   "",
 ];
 

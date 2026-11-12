@@ -138,8 +138,8 @@
   },
   "meta": {
     "uso": {
-      "quando": "Gravar, pausar, ouvir e navegar notas de voz curtas, com a transcrição na lista ao lado",
-      "evite": "Nota de voz dentro de chat: voice-note; editor de áudio com corte e busca na onda"
+      "quando": "Gravar, pausar e ouvir notas de voz curtas, com a transcrição ao lado",
+      "evite": "Nota de voz em chat: voice-note; editor de áudio com corte"
     }
   },
   "categories": [

@@ -21,8 +21,8 @@
   ],
   "meta": {
     "uso": {
-      "quando": "Apontar algo num quadro de vídeo ou imagem para revisão, feedback ou anexo de agente",
-      "evite": "Assinatura: signature-pad; editor de desenho completo com camadas e formas"
+      "quando": "Apontar algo num quadro de vídeo ou imagem para revisão",
+      "evite": "Assinatura: signature-pad; desenho com camadas e formas"
     }
   },
   "categories": [

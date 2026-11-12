@@ -209,5 +209,10 @@
   "zone-reader": "react",
   "mode-keys": "react",
   "folder-tabs": "react",
-  "ticket-stub": "react"
+  "ticket-stub": "react",
+  "use-catalog": "react",
+  "prompt-composer": "react",
+  "frame-markup": "react",
+  "device-kit": "react",
+  "voice-recorder": "react"
 }

@@ -42,8 +42,8 @@
   },
   "meta": {
     "uso": {
-      "quando": "Campo de mensagem de chat ou agente de IA, com anexos, ferramentas e parar a resposta",
-      "evite": "Campo de texto comum de formulário: textarea do tema; comando curto, command-search"
+      "quando": "Campo de chat ou agente de IA, com anexos, ferramentas e parar",
+      "evite": "Texto comum de formulário: textarea; comando curto: command-search"
     }
   },
   "categories": [

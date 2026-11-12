@@ -796,23 +796,23 @@
     "evite": "Confirmação destrutiva: hold-to-confirm; deslizar sem metáfora: slide-to-confirm"
   },
   "use-catalog": {
-    "quando": "Lista de app com busca, filtro por facetas, ordem e agrupamento, e o estado no link",
-    "evite": "Base paginada no servidor com filtros da API: use filter-bar direto; só busca em memória, use-local-search"
+    "quando": "Lista com busca, facetas, ordem e grupos, com o estado no link",
+    "evite": "Filtro no servidor: filter-bar direto; só busca: use-local-search"
   },
   "prompt-composer": {
-    "quando": "Campo de mensagem de chat ou agente de IA, com anexos, ferramentas e parar a resposta",
-    "evite": "Campo de texto comum de formulário: textarea do tema; comando curto, command-search"
+    "quando": "Campo de chat ou agente de IA, com anexos, ferramentas e parar",
+    "evite": "Texto comum de formulário: textarea; comando curto: command-search"
   },
   "frame-markup": {
-    "quando": "Apontar algo num quadro de vídeo ou imagem para revisão, feedback ou anexo de agente",
-    "evite": "Assinatura: signature-pad; editor de desenho completo com camadas e formas"
+    "quando": "Apontar algo num quadro de vídeo ou imagem para revisão",
+    "evite": "Assinatura: signature-pad; desenho com camadas e formas"
   },
   "device-kit": {
-    "quando": "Controle onde o gesto físico é a função: gravar, tocar, girar um valor, acender um estado, ligar e desligar",
-    "evite": "Lista, tabela, formulário e navegação: os primitivos do tema; switch comum de preferência: liquid-toggle ou o switch do tema"
+    "quando": "Controle cujo gesto físico é a função: gravar, girar, acender, ligar",
+    "evite": "Lista, tabela, formulário e navegação; switch comum: liquid-toggle"
   },
   "voice-recorder": {
-    "quando": "Gravar, pausar, ouvir e navegar notas de voz curtas, com a transcrição na lista ao lado",
-    "evite": "Nota de voz dentro de chat: voice-note; editor de áudio com corte e busca na onda"
+    "quando": "Gravar, pausar e ouvir notas de voz curtas, com a transcrição ao lado",
+    "evite": "Nota de voz em chat: voice-note; editor de áudio com corte"
   }
 }

@@ -21,8 +21,8 @@
   ],
   "meta": {
     "uso": {
-      "quando": "Lista de app com busca, filtro por facetas, ordem e agrupamento, e o estado no link",
-      "evite": "Base paginada no servidor com filtros da API: use filter-bar direto; só busca em memória, use-local-search"
+      "quando": "Lista com busca, facetas, ordem e grupos, com o estado no link",
+      "evite": "Filtro no servidor: filter-bar direto; só busca: use-local-search"
     }
   },
   "categories": [
