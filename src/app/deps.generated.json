@@ -372,6 +372,11 @@
   "device-frame": [
     "motion"
   ],
+  "media-timeline": [
+    "@xzdarcy/react-timeline-editor@^1.0.0",
+    "@xzdarcy/timeline-engine@^1.0.0",
+    "lucide-react"
+  ],
   "use-idle": [
     "motion"
   ],

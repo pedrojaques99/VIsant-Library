@@ -15569,6 +15569,1433 @@
       ]
     }
   ],
+  "media-timeline": [
+    {
+      "nome": "MediaTimeline",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "clock",
+          "tipo": "Clock",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "controller",
+          "tipo": "{ duration: number; startLeft: number; fps: number; maxZoom: number; zoom: number; zoomTo: (z: number, x?: number) => void; zoomTarget: () => number; fit: () => void; pxPerSecond: number; ruler: { step: any; divisions: any; count: number; }; ... 9 more ...; anchor: MutableRefObject<...>; }",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "O estado de vista, de `useMediaTimeline`."
+        },
+        {
+          "nome": "renderClip",
+          "tipo": "(clip: MediaClip, track: string, info: { px: number; }) => any",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "tracks",
+          "tipo": "MediaTrack[]",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "areaClassName",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "editingTrack",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "emptyHints",
+          "tipo": "{ track: string; text: string; }[]",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Frase nas faixas vazias."
+        },
+        {
+          "nome": "expandArea",
+          "tipo": "(ids: Set<string>) => Set<string>",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "O que a área marca enquanto arrasta, dado o que ela pega (ex.: o bloco inteiro)."
+        },
+        {
+          "nome": "formatTime",
+          "tipo": "(t: number) => string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "headerLabels",
+          "tipo": "Partial<TrackHeaderLabels>",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "headersClassName",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "keyboard",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Atalhos próprios: = e − (zoom), Shift+Z (caber), V e C (ferramenta). Desligue se a tela já tem um teclado."
+        },
+        {
+          "nome": "onAreaSelect",
+          "tipo": "(ids: Set<string>, info: { additive: boolean; }) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Ao soltar a seleção por área: os ids pegos e se Shift/Ctrl somava."
+        },
+        {
+          "nome": "onClipClick",
+          "tipo": "(clip: MediaClip, track: string, e: MouseEvent<Element, MouseEvent>) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onCut",
+          "tipo": "(clip: MediaClip, track: string, t: number) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Navalha: corte no tempo `t` (já no quadro e no ímã)."
+        },
+        {
+          "nome": "onEmptyClick",
+          "tipo": "(e: MouseEvent<Element, MouseEvent>) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Clique no vazio de uma faixa (não vem logo depois de uma seleção por área)."
+        },
+        {
+          "nome": "onMove",
+          "tipo": "(c: ClipChange) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onResize",
+          "tipo": "(c: ClipChange & { edge: \"left\" | \"right\"; }) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onScroll",
+          "tipo": "(p: { left: number; top: number; }) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onScrub",
+          "tipo": "(t: number) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onScrubEnd",
+          "tipo": "(t: number) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onScrubStart",
+          "tipo": "() => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onToolChange",
+          "tipo": "(tool: \"select\" | \"razor\") => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onTrackCollapse",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onTrackEdit",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onTrackHide",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onTrackLock",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onTrackMute",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onTrackRename",
+          "tipo": "(id: string, name: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onTrackSelect",
+          "tipo": "(id: string, additive: boolean) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onTrackSolo",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "selectedTracks",
+          "tipo": "Set<string>",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "snap",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Ímã: a agulha, a navalha e o arrasto grudam nos pontos (começos e fins, marcas)."
+        },
+        {
+          "nome": "snapPoints",
+          "tipo": "number[]",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "snapPx",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Distância do ímã (px)."
+        },
+        {
+          "nome": "tool",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null,
+          "valores": [
+            "select",
+            "razor"
+          ]
+        },
+        {
+          "nome": "trackHeight",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Altura padrão de uma faixa (px)."
+        },
+        {
+          "nome": "trackState",
+          "tipo": "(id: string) => TrackState",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Estado dos botões de cada faixa (solo, calar, travar)."
+        },
+        {
+          "nome": "wrapArea",
+          "tipo": "(node: ReactElement<any, string | JSXElementConstructor<any>>) => any",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "wrapHeaders",
+          "tipo": "(node: ReactElement<any, string | JSXElementConstructor<any>>) => any",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Envolve os cabeçalhos e a área (menu de contexto, por exemplo)."
+        }
+      ]
+    },
+    {
+      "nome": "useMediaTimeline",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "clock",
+          "tipo": "Clock",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "O relógio do play: o zoom sem ponteiro ancora na agulha."
+        },
+        {
+          "nome": "duration",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "Duração do filme (s)."
+        },
+        {
+          "nome": "fps",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "30",
+          "descricao": null
+        },
+        {
+          "nome": "maxZoom",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "48",
+          "descricao": null
+        },
+        {
+          "nome": "minPxPerSecond",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "24",
+          "descricao": "Mínimo de px por segundo, mesmo com o zoom de caber."
+        },
+        {
+          "nome": "settleMs",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "140",
+          "descricao": "Quanto o gesto espera depois do último passo para aplicar a escala (ms)."
+        },
+        {
+          "nome": "startLeft",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "12",
+          "descricao": "Folga à esquerda do tempo zero (px)."
+        }
+      ]
+    },
+    {
+      "nome": "windowOf",
+      "descricao": "A janela desenhada: a vista com uma tela de folga para cada lado.",
+      "props": [
+        {
+          "nome": "t0",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "t1",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "y0",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "y1",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    },
+    {
+      "nome": "needsNewWindow",
+      "descricao": "Troca quando a vista chega a meia tela da borda da janela, ou quando a janela ficou larga demais para a vista (depois de aproximar o zoom, ela desenharia o filme quase inteiro).",
+      "props": []
+    },
+    {
+      "nome": "cropRows",
+      "descricao": "As linhas com só as ações da janela (e as fixas, como a que está sendo arrastada). Linha fora da janela fica, com a mesma altura, sem ações. Nada cortado devolve o mesmo array.",
+      "props": []
+    },
+    {
+      "nome": "VisibleTimeline",
+      "descricao": "A `Timeline` da lib com as ações fora da vista fora do DOM. Mesma API, mais `anchor`.",
+      "props": [
+        {
+          "nome": "anchor",
+          "tipo": "{ t: number; x: number; }",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Depois de uma troca de escala, o tempo `t` fica no x `x` da vista (o zoom ancorado). A janela já nasce certa no mesmo render, sem desenhar primeiro a da escala velha."
+        }
+      ]
+    },
+    {
+      "nome": "TRACKS_TOP",
+      "descricao": "Altura da régua da lib (32) mais a margem de cima da área das faixas (10).",
+      "props": []
+    },
+    {
+      "nome": "Overlay",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "clock",
+          "tipo": "Clock",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "duration",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "formatTime",
+          "tipo": "(t: number) => string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "fps",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "geometry",
+          "tipo": "TrackGeometry[]",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "pxPerSecond",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "startLeft",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "step",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "Intervalo entre dois números da régua (s)."
+        },
+        {
+          "nome": "width",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "hints",
+          "tipo": "{ track: string; text: string; }[]",
+          "obrigatoria": false,
+          "padrao": "[]",
+          "descricao": "Frase das faixas vazias, no começo da área visível."
+        }
+      ]
+    },
+    {
+      "nome": "TrackRename",
+      "descricao": "Edição no lugar: Enter grava, Esc cancela, sair do campo grava.",
+      "props": [
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onCancel",
+          "tipo": "() => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onSave",
+          "tipo": "(n: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "value",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    },
+    {
+      "nome": "TrackHeaders",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "editing",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onCollapse",
+          "tipo": "(id: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onEdit",
+          "tipo": "(id: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onLock",
+          "tipo": "(id: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onMute",
+          "tipo": "(id: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onRename",
+          "tipo": "(id: string, name: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onSelect",
+          "tipo": "(id: string, additive: boolean) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onSolo",
+          "tipo": "(id: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "selected",
+          "tipo": "Set<string>",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "state",
+          "tipo": "(id: string) => TrackState",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "top",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "Espaço em cima (a altura da régua), para as linhas casarem com as faixas."
+        },
+        {
+          "nome": "tracks",
+          "tipo": "TrackHeader[]",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "labels",
+          "tipo": "Partial<TrackHeaderLabels>",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onHide",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Tira a linha da timeline (quem chama decide onde ela continua aparecendo)."
+        }
+      ]
+    },
+    {
+      "nome": "rulerScale",
+      "descricao": "O passo da régua (s), quantas marcas cabem entre dois números e quantos números há.",
+      "props": []
+    },
+    {
+      "nome": "rulerLabel",
+      "descricao": "\"3s\" nos segundos inteiros; \"15f\" (o quadro dentro do segundo) no resto.",
+      "props": []
+    },
+    {
+      "nome": "timecode",
+      "descricao": "mm:ss:ff.",
+      "props": []
+    },
+    {
+      "nome": "snapTo",
+      "descricao": "O ponto mais perto dentro de `limit` (s), ou null.",
+      "props": []
+    },
+    {
+      "nome": "formatSeconds",
+      "descricao": "Segundos com vírgula e sinal: \"+0,42s\".",
+      "props": []
+    },
+    {
+      "nome": "WithTime",
+      "descricao": "Renderiza `children(tempo)` com o tempo vivo: o pai não re-renderiza a cada quadro.",
+      "props": [
+        {
+          "nome": "clock",
+          "tipo": "Clock",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    },
+    {
+      "nome": "useClockTime",
+      "descricao": "O tempo atual do relógio, re-renderizando só quem chama.",
+      "props": [
+        {
+          "nome": "get",
+          "tipo": "() => number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "set",
+          "tipo": "(t: number) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "subscribe",
+          "tipo": "(f: () => void) => () => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    },
+    {
+      "nome": "Filmstrip",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "duration",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "from",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "Onde o clipe começa dentro do vídeo (s) e quanto dura."
+        },
+        {
+          "nome": "height",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "pxPerSecond",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "sprite",
+          "tipo": "FilmstripSprite",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "src",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    },
+    {
+      "nome": "MediaTimeline",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "clock",
+          "tipo": "Clock",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "controller",
+          "tipo": "{ duration: number; startLeft: number; fps: number; maxZoom: number; zoom: number; zoomTo: (z: number, x?: number) => void; zoomTarget: () => number; fit: () => void; pxPerSecond: number; ruler: { step: any; divisions: any; count: number; }; ... 9 more ...; anchor: MutableRefObject<...>; }",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "O estado de vista, de `useMediaTimeline`."
+        },
+        {
+          "nome": "renderClip",
+          "tipo": "(clip: MediaClip, track: string, info: { px: number; }) => any",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "tracks",
+          "tipo": "MediaTrack[]",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "areaClassName",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "editingTrack",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "emptyHints",
+          "tipo": "{ track: string; text: string; }[]",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Frase nas faixas vazias."
+        },
+        {
+          "nome": "expandArea",
+          "tipo": "(ids: Set<string>) => Set<string>",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "O que a área marca enquanto arrasta, dado o que ela pega (ex.: o bloco inteiro)."
+        },
+        {
+          "nome": "formatTime",
+          "tipo": "(t: number) => string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "headerLabels",
+          "tipo": "Partial<TrackHeaderLabels>",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "headersClassName",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "keyboard",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Atalhos próprios: = e − (zoom), Shift+Z (caber), V e C (ferramenta). Desligue se a tela já tem um teclado."
+        },
+        {
+          "nome": "onAreaSelect",
+          "tipo": "(ids: Set<string>, info: { additive: boolean; }) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Ao soltar a seleção por área: os ids pegos e se Shift/Ctrl somava."
+        },
+        {
+          "nome": "onClipClick",
+          "tipo": "(clip: MediaClip, track: string, e: MouseEvent<Element, MouseEvent>) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onCut",
+          "tipo": "(clip: MediaClip, track: string, t: number) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Navalha: corte no tempo `t` (já no quadro e no ímã)."
+        },
+        {
+          "nome": "onEmptyClick",
+          "tipo": "(e: MouseEvent<Element, MouseEvent>) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Clique no vazio de uma faixa (não vem logo depois de uma seleção por área)."
+        },
+        {
+          "nome": "onMove",
+          "tipo": "(c: ClipChange) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onResize",
+          "tipo": "(c: ClipChange & { edge: \"left\" | \"right\"; }) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onScroll",
+          "tipo": "(p: { left: number; top: number; }) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onScrub",
+          "tipo": "(t: number) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onScrubEnd",
+          "tipo": "(t: number) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onScrubStart",
+          "tipo": "() => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onToolChange",
+          "tipo": "(tool: \"select\" | \"razor\") => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onTrackCollapse",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onTrackEdit",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onTrackHide",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onTrackLock",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onTrackMute",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onTrackRename",
+          "tipo": "(id: string, name: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onTrackSelect",
+          "tipo": "(id: string, additive: boolean) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onTrackSolo",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "selectedTracks",
+          "tipo": "Set<string>",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "snap",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Ímã: a agulha, a navalha e o arrasto grudam nos pontos (começos e fins, marcas)."
+        },
+        {
+          "nome": "snapPoints",
+          "tipo": "number[]",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "snapPx",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Distância do ímã (px)."
+        },
+        {
+          "nome": "tool",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null,
+          "valores": [
+            "select",
+            "razor"
+          ]
+        },
+        {
+          "nome": "trackHeight",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Altura padrão de uma faixa (px)."
+        },
+        {
+          "nome": "trackState",
+          "tipo": "(id: string) => TrackState",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Estado dos botões de cada faixa (solo, calar, travar)."
+        },
+        {
+          "nome": "wrapArea",
+          "tipo": "(node: ReactElement<any, string | JSXElementConstructor<any>>) => any",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "wrapHeaders",
+          "tipo": "(node: ReactElement<any, string | JSXElementConstructor<any>>) => any",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Envolve os cabeçalhos e a área (menu de contexto, por exemplo)."
+        }
+      ]
+    },
+    {
+      "nome": "useMediaTimeline",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "clock",
+          "tipo": "Clock",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "O relógio do play: o zoom sem ponteiro ancora na agulha."
+        },
+        {
+          "nome": "duration",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "Duração do filme (s)."
+        },
+        {
+          "nome": "fps",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "30",
+          "descricao": null
+        },
+        {
+          "nome": "maxZoom",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "48",
+          "descricao": null
+        },
+        {
+          "nome": "minPxPerSecond",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "24",
+          "descricao": "Mínimo de px por segundo, mesmo com o zoom de caber."
+        },
+        {
+          "nome": "settleMs",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "140",
+          "descricao": "Quanto o gesto espera depois do último passo para aplicar a escala (ms)."
+        },
+        {
+          "nome": "startLeft",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "12",
+          "descricao": "Folga à esquerda do tempo zero (px)."
+        }
+      ]
+    },
+    {
+      "nome": "useClockTime",
+      "descricao": "O tempo atual do relógio, re-renderizando só quem chama.",
+      "props": [
+        {
+          "nome": "get",
+          "tipo": "() => number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "set",
+          "tipo": "(t: number) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "subscribe",
+          "tipo": "(f: () => void) => () => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    },
+    {
+      "nome": "WithTime",
+      "descricao": "Renderiza `children(tempo)` com o tempo vivo: o pai não re-renderiza a cada quadro.",
+      "props": [
+        {
+          "nome": "clock",
+          "tipo": "Clock",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    },
+    {
+      "nome": "formatSeconds",
+      "descricao": "Segundos com vírgula e sinal: \"+0,42s\".",
+      "props": []
+    },
+    {
+      "nome": "rulerLabel",
+      "descricao": "\"3s\" nos segundos inteiros; \"15f\" (o quadro dentro do segundo) no resto.",
+      "props": []
+    },
+    {
+      "nome": "rulerScale",
+      "descricao": "O passo da régua (s), quantas marcas cabem entre dois números e quantos números há.",
+      "props": []
+    },
+    {
+      "nome": "snapTo",
+      "descricao": "O ponto mais perto dentro de `limit` (s), ou null.",
+      "props": []
+    },
+    {
+      "nome": "timecode",
+      "descricao": "mm:ss:ff.",
+      "props": []
+    },
+    {
+      "nome": "Filmstrip",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "duration",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "from",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "Onde o clipe começa dentro do vídeo (s) e quanto dura."
+        },
+        {
+          "nome": "height",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "pxPerSecond",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "sprite",
+          "tipo": "FilmstripSprite",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "src",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    },
+    {
+      "nome": "TrackHeaders",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "editing",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onCollapse",
+          "tipo": "(id: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onEdit",
+          "tipo": "(id: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onLock",
+          "tipo": "(id: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onMute",
+          "tipo": "(id: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onRename",
+          "tipo": "(id: string, name: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onSelect",
+          "tipo": "(id: string, additive: boolean) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onSolo",
+          "tipo": "(id: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "selected",
+          "tipo": "Set<string>",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "state",
+          "tipo": "(id: string) => TrackState",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "top",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "Espaço em cima (a altura da régua), para as linhas casarem com as faixas."
+        },
+        {
+          "nome": "tracks",
+          "tipo": "TrackHeader[]",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "labels",
+          "tipo": "Partial<TrackHeaderLabels>",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onHide",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Tira a linha da timeline (quem chama decide onde ela continua aparecendo)."
+        }
+      ]
+    },
+    {
+      "nome": "TrackRename",
+      "descricao": "Edição no lugar: Enter grava, Esc cancela, sair do campo grava.",
+      "props": [
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onCancel",
+          "tipo": "() => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onSave",
+          "tipo": "(n: string) => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "value",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    },
+    {
+      "nome": "TRACKS_TOP",
+      "descricao": "Altura da régua da lib (32) mais a margem de cima da área das faixas (10).",
+      "props": []
+    },
+    {
+      "nome": "cropRows",
+      "descricao": "As linhas com só as ações da janela (e as fixas, como a que está sendo arrastada). Linha fora da janela fica, com a mesma altura, sem ações. Nada cortado devolve o mesmo array.",
+      "props": []
+    },
+    {
+      "nome": "needsNewWindow",
+      "descricao": "Troca quando a vista chega a meia tela da borda da janela, ou quando a janela ficou larga demais para a vista (depois de aproximar o zoom, ela desenharia o filme quase inteiro).",
+      "props": []
+    },
+    {
+      "nome": "VisibleTimeline",
+      "descricao": "A `Timeline` da lib com as ações fora da vista fora do DOM. Mesma API, mais `anchor`.",
+      "props": [
+        {
+          "nome": "anchor",
+          "tipo": "{ t: number; x: number; }",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Depois de uma troca de escala, o tempo `t` fica no x `x` da vista (o zoom ancorado). A janela já nasce certa no mesmo render, sem desenhar primeiro a da escala velha."
+        }
+      ]
+    },
+    {
+      "nome": "windowOf",
+      "descricao": "A janela desenhada: a vista com uma tela de folga para cada lado.",
+      "props": [
+        {
+          "nome": "t0",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "t1",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "y0",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "y1",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    },
+    {
+      "nome": "View",
+      "descricao": "O que está à vista: tempo em segundos e altura em px do conteúdo.",
+      "props": []
+    }
+  ],
   "use-idle": [
     {
       "nome": "useInView",

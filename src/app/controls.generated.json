@@ -9180,6 +9180,297 @@
       ]
     }
   },
+  "media-timeline": {
+    "componentes": {
+      "MediaTimeline": [
+        {
+          "prop": "tool",
+          "tipo": "escolha",
+          "valores": [
+            "select",
+            "razor"
+          ],
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "keyboard",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Atalhos próprios: = e − (zoom), Shift+Z (caber), V e C (ferramenta). Desligue se a tela já tem um teclado."
+        },
+        {
+          "prop": "snap",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Ímã: a agulha, a navalha e o arrasto grudam nos pontos (começos e fins, marcas)."
+        },
+        {
+          "prop": "snapPx",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": "Distância do ímã (px)."
+        },
+        {
+          "prop": "trackHeight",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": "Altura padrão de uma faixa (px)."
+        },
+        {
+          "prop": "areaClassName",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "editingTrack",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null,
+          "secundario": true
+        },
+        {
+          "prop": "headersClassName",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null,
+          "secundario": true
+        }
+      ],
+      "useMediaTimeline": [
+        {
+          "prop": "duration",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": "Duração do filme (s)."
+        },
+        {
+          "prop": "fps",
+          "tipo": "numero",
+          "min": 1,
+          "max": 80,
+          "step": 1,
+          "padrao": 30,
+          "resumo": null
+        },
+        {
+          "prop": "maxZoom",
+          "tipo": "numero",
+          "min": 0,
+          "max": 120,
+          "step": 1,
+          "padrao": 48,
+          "resumo": null
+        },
+        {
+          "prop": "minPxPerSecond",
+          "tipo": "numero",
+          "min": 1,
+          "max": 60,
+          "step": 1,
+          "padrao": 24,
+          "resumo": "Mínimo de px por segundo, mesmo com o zoom de caber."
+        },
+        {
+          "prop": "settleMs",
+          "tipo": "numero",
+          "min": 0,
+          "max": 300,
+          "step": 10,
+          "padrao": 140,
+          "resumo": "Quanto o gesto espera depois do último passo para aplicar a escala (ms)."
+        },
+        {
+          "prop": "startLeft",
+          "tipo": "numero",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "padrao": 12,
+          "resumo": "Folga à esquerda do tempo zero (px)."
+        }
+      ],
+      "windowOf": [
+        {
+          "prop": "t0",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "t1",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "y0",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "y1",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": null
+        }
+      ],
+      "Overlay": [
+        {
+          "prop": "duration",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "fps",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "pxPerSecond",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "startLeft",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "step",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": "Intervalo entre dois números da régua (s)."
+        },
+        {
+          "prop": "width",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": null
+        }
+      ],
+      "TrackRename": [
+        {
+          "prop": "label",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "value",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null
+        }
+      ],
+      "TrackHeaders": [
+        {
+          "prop": "top",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": "Espaço em cima (a altura da régua), para as linhas casarem com as faixas."
+        },
+        {
+          "prop": "editing",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null
+        }
+      ],
+      "Filmstrip": [
+        {
+          "prop": "duration",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "from",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": "Onde o clipe começa dentro do vídeo (s) e quanto dura."
+        },
+        {
+          "prop": "height",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "pxPerSecond",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "src",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null
+        }
+      ]
+    }
+  },
   "compass": {
     "componentes": {
       "Compass": [

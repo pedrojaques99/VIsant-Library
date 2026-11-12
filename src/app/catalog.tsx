@@ -3056,7 +3056,7 @@ export const CATALOG: CatalogItem[] = [
     type: "block",
     family: "controles",
     description:
-      "Timeline de edição de mídia: arrastar, aparar, scrub na régua, seleção por área, navalha, faixas com solo, calar e travar, zoom em gesto. Só os clipes à vista vão para o DOM.",
+      "Timeline de edição de mídia: arrastar, aparar, scrub, seleção por área, navalha, faixas e zoom em gesto. Dados por props.",
     tags: ["edição", "vídeo", "áudio", "timeline", "navalha"],
     demo: MediaTimelineDemo,
     preview: { w: 960, h: 420 },

@@ -8301,7 +8301,7 @@
       "name": "media-timeline",
       "type": "registry:block",
       "title": "Media Timeline",
-      "description": "Timeline de edição de mídia: régua que vira quadros de perto, agulha com scrub e ímã, seleção por área, navalha, HUD do arrasto, cabeçalhos de faixa (renomear, grupos, solo, calar, travar), zoom em gesto e só os clipes à vista no DOM. Dados por props, mudanças por callback.",
+      "description": "Timeline de edição de mídia: arrastar, aparar, scrub, seleção por área, navalha, faixas e zoom em gesto. Dados por props.",
       "author": "Visant Labs <visantsupply@gmail.com>",
       "dependencies": [
         "@xzdarcy/react-timeline-editor@^1.0.0",
