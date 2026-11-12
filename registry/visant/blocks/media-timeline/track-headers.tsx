@@ -80,10 +80,10 @@ export const TrackHeaders = React.forwardRef<HTMLDivElement, TrackHeadersProps>(
               ? <TrackRename value={t.label} label={L.name} onSave={(n) => { onRename(t.id, n); onEdit(null); }} onCancel={() => onEdit(null)} />
               : <span className="mt-track-name" title={t.renamable ? `${t.label} (${L.renameHint})` : t.label}>{t.label}{t.group ? <span className="mt-num mt-track-count"> {t.group.count}</span> : null}</span>}
             <span className="mt-track-actions">
-              {c.solo ? <HeaderButton active={s.solo} label={`${L.solo} ${t.label}`} onClick={() => onSolo(t.id)}><span className="mt-track-solo">S</span></HeaderButton> : null}
-              {c.mute ? <HeaderButton active={s.muted} label={`${s.muted ? L.unmute : L.mute} ${t.label}`} onClick={() => onMute(t.id)}>{s.muted ? <VolumeX /> : <Volume2 />}</HeaderButton> : null}
-              {c.hide && onHide ? <HeaderButton active={false} label={`${L.hide} ${t.label}`} onClick={() => onHide(t.id)}><EyeOff /></HeaderButton> : null}
-              {c.lock ? <HeaderButton active={s.locked} label={`${s.locked ? L.unlock : L.lock} ${t.label}`} onClick={() => onLock(t.id)}>{s.locked ? <Lock /> : <LockOpen />}</HeaderButton> : null}
+              {c.solo ? <TrackButton active={s.solo} label={`${L.solo} ${t.label}`} onClick={() => onSolo(t.id)}><span className="mt-track-solo">S</span></TrackButton> : null}
+              {c.mute ? <TrackButton active={s.muted} label={`${s.muted ? L.unmute : L.mute} ${t.label}`} onClick={() => onMute(t.id)}>{s.muted ? <VolumeX /> : <Volume2 />}</TrackButton> : null}
+              {c.hide && onHide ? <TrackButton active={false} label={`${L.hide} ${t.label}`} onClick={() => onHide(t.id)}><EyeOff /></TrackButton> : null}
+              {c.lock ? <TrackButton active={s.locked} label={`${s.locked ? L.unlock : L.lock} ${t.label}`} onClick={() => onLock(t.id)}>{s.locked ? <Lock /> : <LockOpen />}</TrackButton> : null}
             </span>
           </div>
         );
@@ -106,7 +106,8 @@ export function TrackRename({ value, label, onSave, onCancel }: { value: string;
   );
 }
 
-function HeaderButton({ active, label, onClick, children }: { active: boolean; label: string; onClick: () => void; children: React.ReactNode }) {
+/** Botão de estado da faixa (solo, calar, esconder, travar): desligado só aparece no hover da linha. */
+export function TrackButton({ active, label, onClick, children }: { active: boolean; label: string; onClick: () => void; children: React.ReactNode }) {
   return (
     <button type="button" aria-label={label} aria-pressed={active} title={label} onClick={onClick} className="mt-track-button">
       {children}
