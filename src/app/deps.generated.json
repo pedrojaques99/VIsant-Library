@@ -423,5 +423,21 @@
   ],
   "ticket-stub": [
     "motion"
+  ],
+  "use-catalog": [
+    "@radix-ui/react-dropdown-menu",
+    "motion",
+    "react"
+  ],
+  "prompt-composer": [
+    "lucide-react"
+  ],
+  "frame-markup": [
+    "lucide-react",
+    "motion"
+  ],
+  "voice-recorder": [
+    "lucide-react",
+    "motion"
   ]
 }

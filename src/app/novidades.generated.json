@@ -207,5 +207,10 @@
   "zone-reader": "2026-11-05",
   "mode-keys": "2026-11-06",
   "folder-tabs": "2026-11-07",
-  "ticket-stub": "2026-11-08"
+  "ticket-stub": "2026-11-08",
+  "use-catalog": "2026-11-11",
+  "prompt-composer": "2026-11-11",
+  "frame-markup": "2026-11-11",
+  "device-kit": "2026-11-11",
+  "voice-recorder": "2026-11-11"
 }

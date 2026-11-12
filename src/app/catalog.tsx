@@ -2363,7 +2363,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "controles",
     description:
-      "Gravador de voz de bolso montado com o Device Kit: REC que trava afundado, display com timecode e onda, encoder lateral que navega entre as notas ou vira volume.",
+      "Gravador de voz de bolso montado com o Device Kit: REC que trava afundado, display com timecode e onda, encoder lateral que navega entre as notas ou vira volume, e a lista das notas ao lado.",
     tags: ["áudio", "gravador", "voz", "nota", "aparelho", "transcrição"],
     demo: VoiceRecorderDemo,
     preview: { w: 860, h: 520 },

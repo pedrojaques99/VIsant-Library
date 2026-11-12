@@ -136,12 +136,20 @@
       }
     }
   },
+  "meta": {
+    "uso": {
+      "quando": "Gravar, pausar, ouvir e navegar notas de voz curtas, com a transcrição na lista ao lado",
+      "evite": "Nota de voz dentro de chat: voice-note; editor de áudio com corte e busca na onda"
+    }
+  },
   "categories": [
     "controles",
     "audio",
     "gravador",
     "voz",
-    "aparelho"
+    "nota",
+    "aparelho",
+    "transcricao"
   ],
   "type": "registry:ui"
 }

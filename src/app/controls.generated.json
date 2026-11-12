@@ -9552,5 +9552,412 @@
         }
       ]
     }
+  },
+  "device-kit": {
+    "componentes": {
+      "DeviceShell": [
+        {
+          "prop": "size",
+          "tipo": "escolha",
+          "valores": [
+            "sm",
+            "md",
+            "lg"
+          ],
+          "padrao": "md",
+          "resumo": null
+        }
+      ],
+      "DeviceLcd": [
+        {
+          "prop": "size",
+          "tipo": "escolha",
+          "valores": [
+            "sm",
+            "md"
+          ],
+          "padrao": "md",
+          "resumo": null
+        },
+        {
+          "prop": "lit",
+          "tipo": "chave",
+          "padrao": true,
+          "resumo": "Backlight aceso. Padrão: aceso."
+        },
+        {
+          "prop": "screenClassName",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "Classe da tela (o vidro), para altura e respiro."
+        }
+      ],
+      "DeviceReadout": [
+        {
+          "prop": "size",
+          "tipo": "escolha",
+          "valores": [
+            "sm",
+            "md",
+            "lg"
+          ],
+          "padrao": "lg",
+          "resumo": "`lg` é o timecode do gravador (38px); `sm` cabe numa unidade de rack."
+        },
+        {
+          "prop": "glow",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Brilho da tinta: o número está vivo (gravando, tocando)."
+        }
+      ],
+      "DeviceSegments": [
+        {
+          "prop": "count",
+          "tipo": "numero",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "padrao": 10,
+          "resumo": "Quantos segmentos. Padrão: 10."
+        },
+        {
+          "prop": "value",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": "De 0 a 1."
+        },
+        {
+          "prop": "label",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "Com rótulo, vira um `meter` acessível; sem, é só desenho (o valor já está dito em outro lugar)."
+        }
+      ],
+      "DeviceProgress": [
+        {
+          "prop": "segments",
+          "tipo": "numero",
+          "min": 0,
+          "max": 60,
+          "step": 1,
+          "padrao": 24,
+          "resumo": null
+        },
+        {
+          "prop": "value",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": "De 0 a 1. Sem valor, a barra fica vazia."
+        },
+        {
+          "prop": "label",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "Nome da barra para leitor de tela."
+        },
+        {
+          "prop": "valueText",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "O que o leitor de tela diz, se a porcentagem não basta (\"3 de 12\")."
+        }
+      ],
+      "DeviceLed": [
+        {
+          "prop": "size",
+          "tipo": "escolha",
+          "valores": [
+            "sm",
+            "md",
+            "lg",
+            "xs"
+          ],
+          "padrao": "sm",
+          "resumo": "`xs` 6px, `sm` 10px, `md` 14px, `lg` 26px (o LED do REC)."
+        },
+        {
+          "prop": "state",
+          "tipo": "escolha",
+          "valores": [
+            "off",
+            "on",
+            "breathe",
+            "blink",
+            "error"
+          ],
+          "padrao": "off",
+          "resumo": null
+        },
+        {
+          "prop": "tone",
+          "tipo": "escolha",
+          "valores": [
+            "red",
+            "brand"
+          ],
+          "padrao": "brand",
+          "resumo": null
+        },
+        {
+          "prop": "label",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "title",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null
+        }
+      ],
+      "DeviceKey": [
+        {
+          "prop": "shape",
+          "tipo": "escolha",
+          "valores": [
+            "ring",
+            "square"
+          ],
+          "padrao": "square",
+          "resumo": null
+        },
+        {
+          "prop": "size",
+          "tipo": "escolha",
+          "valores": [
+            "sm",
+            "md",
+            "lg"
+          ],
+          "padrao": "md",
+          "resumo": null
+        },
+        {
+          "prop": "pressed",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Travado afundado. Vira `aria-pressed`; sem valor, a tecla não é de alternar."
+        },
+        {
+          "prop": "pressing",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Afundado por um instante (o atalho de teclado acionou a tecla)."
+        }
+      ],
+      "DeviceSwitch": [
+        {
+          "prop": "size",
+          "tipo": "escolha",
+          "valores": [
+            "sm",
+            "md"
+          ],
+          "padrao": "md",
+          "resumo": null
+        },
+        {
+          "prop": "busy",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Em trânsito: a chave fica onde foi posta e não aceita outro toque."
+        },
+        {
+          "prop": "checked",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": null
+        }
+      ],
+      "DeviceEncoder": [
+        {
+          "prop": "orientation",
+          "tipo": "escolha",
+          "valores": [
+            "horizontal",
+            "vertical"
+          ],
+          "padrao": "vertical",
+          "resumo": null
+        },
+        {
+          "prop": "size",
+          "tipo": "escolha",
+          "valores": [
+            "sm",
+            "md",
+            "lg"
+          ],
+          "padrao": "md",
+          "resumo": null
+        },
+        {
+          "prop": "variant",
+          "tipo": "escolha",
+          "valores": [
+            "wheel",
+            "knob"
+          ],
+          "padrao": "wheel",
+          "resumo": null
+        },
+        {
+          "prop": "disabled",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": null
+        },
+        {
+          "prop": "max",
+          "tipo": "numero",
+          "min": 0,
+          "max": 250,
+          "step": 1,
+          "padrao": 100,
+          "resumo": null
+        },
+        {
+          "prop": "min",
+          "tipo": "numero",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "padrao": 0,
+          "resumo": null
+        },
+        {
+          "prop": "position",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": null,
+          "secundario": true
+        },
+        {
+          "prop": "step",
+          "tipo": "numero",
+          "min": 0,
+          "max": 1,
+          "step": 0.05,
+          "padrao": 1,
+          "resumo": null,
+          "secundario": true
+        },
+        {
+          "prop": "value",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": null,
+          "secundario": true
+        },
+        {
+          "prop": "label",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null,
+          "secundario": true
+        },
+        {
+          "prop": "valueText",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null,
+          "secundario": true
+        }
+      ]
+    }
+  },
+  "voice-recorder": {
+    "componentes": {
+      "VoiceRecorder": [
+        {
+          "prop": "state",
+          "tipo": "escolha",
+          "valores": [
+            "idle",
+            "recording",
+            "paused",
+            "saving",
+            "transcribing",
+            "playing",
+            "error"
+          ],
+          "padrao": null,
+          "resumo": null
+        },
+        {
+          "prop": "battery",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": "Bateria de 0 a 1. Sem ela, o ícone não aparece."
+        },
+        {
+          "prop": "level",
+          "tipo": "numero",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "padrao": null,
+          "resumo": "Nível do microfone (ou do que toca), de 0 a 1."
+        },
+        {
+          "prop": "listSize",
+          "tipo": "numero",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "padrao": 6,
+          "resumo": "Quantas notas a lista mostra de uma vez."
+        },
+        {
+          "prop": "timeMs",
+          "tipo": "numero",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "padrao": 0,
+          "resumo": "Tempo corrido da gravação, ou a posição do que toca, em ms."
+        },
+        {
+          "prop": "volume",
+          "tipo": "numero",
+          "min": 0,
+          "max": 1,
+          "step": 0.05,
+          "padrao": 0.8,
+          "resumo": "Volume de 0 a 1."
+        },
+        {
+          "prop": "error",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "A mensagem do erro, em português, pronta para mostrar.",
+          "secundario": true
+        },
+        {
+          "prop": "selectedId",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null,
+          "secundario": true
+        }
+      ]
+    }
   }
 }

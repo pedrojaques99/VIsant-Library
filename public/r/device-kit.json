@@ -524,14 +524,22 @@
       }
     }
   },
+  "meta": {
+    "uso": {
+      "quando": "Controle onde o gesto físico é a função: gravar, tocar, girar um valor, acender um estado, ligar e desligar",
+      "evite": "Lista, tabela, formulário e navegação: os primitivos do tema; switch comum de preferência: liquid-toggle ou o switch do tema"
+    }
+  },
   "categories": [
     "controles",
     "aparelho",
     "hardware",
-    "skeuomorfismo",
     "led",
     "encoder",
-    "switch"
+    "knob",
+    "switch",
+    "lcd",
+    "rack"
   ],
   "type": "registry:ui"
 }

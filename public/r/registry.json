@@ -9474,11 +9474,19 @@
         "controles",
         "aparelho",
         "hardware",
-        "skeuomorfismo",
         "led",
         "encoder",
-        "switch"
-      ]
+        "knob",
+        "switch",
+        "lcd",
+        "rack"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Controle onde o gesto físico é a função: gravar, tocar, girar um valor, acender um estado, ligar e desligar",
+          "evite": "Lista, tabela, formulário e navegação: os primitivos do tema; switch comum de preferência: liquid-toggle ou o switch do tema"
+        }
+      }
     },
     {
       "name": "voice-recorder",
@@ -9622,8 +9630,16 @@
         "audio",
         "gravador",
         "voz",
-        "aparelho"
-      ]
+        "nota",
+        "aparelho",
+        "transcricao"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Gravar, pausar, ouvir e navegar notas de voz curtas, com a transcrição na lista ao lado",
+          "evite": "Nota de voz dentro de chat: voice-note; editor de áudio com corte e busca na onda"
+        }
+      }
     }
   ]
 }

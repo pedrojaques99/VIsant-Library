@@ -16304,7 +16304,7 @@
           "nome": "strokeSize",
           "tipo": "number",
           "obrigatoria": false,
-          "padrao": "1 / 200",
+          "padrao": "1 / 150",
           "descricao": "Espessura do traço em fração do lado maior."
         },
         {
@@ -16313,6 +16313,612 @@
           "obrigatoria": false,
           "padrao": "Desfazer",
           "descricao": null
+        }
+      ]
+    }
+  ],
+  "device-kit": [
+    {
+      "nome": "DeviceEngraving",
+      "descricao": "Texto gravado no metal: rótulo de marca, nome de canal, nome do serviço.",
+      "props": []
+    },
+    {
+      "nome": "DeviceScrew",
+      "descricao": "Parafuso de fenda, para as orelhas de uma unidade de rack. Decorativo.",
+      "props": [
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    },
+    {
+      "nome": "DeviceShell",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "size",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "md",
+          "descricao": null,
+          "valores": [
+            "sm",
+            "md",
+            "lg"
+          ]
+        }
+      ]
+    },
+    {
+      "nome": "DeviceLcd",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "lit",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "true",
+          "descricao": "Backlight aceso. Padrão: aceso."
+        },
+        {
+          "nome": "screenClassName",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Classe da tela (o vidro), para altura e respiro."
+        },
+        {
+          "nome": "size",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "md",
+          "descricao": null,
+          "valores": [
+            "sm",
+            "md"
+          ]
+        }
+      ]
+    },
+    {
+      "nome": "timecode",
+      "descricao": "`hh:mm:ss` de um tempo em ms.",
+      "props": []
+    },
+    {
+      "nome": "DeviceReadout",
+      "descricao": "O número do display, em algarismos tabulares para não pular enquanto corre.",
+      "props": [
+        {
+          "nome": "glow",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": "Brilho da tinta: o número está vivo (gravando, tocando)."
+        },
+        {
+          "nome": "size",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "lg",
+          "descricao": "`lg` é o timecode do gravador (38px); `sm` cabe numa unidade de rack.",
+          "valores": [
+            "sm",
+            "md",
+            "lg"
+          ]
+        }
+      ]
+    },
+    {
+      "nome": "DeviceSegments",
+      "descricao": "Medidor em segmentos de LCD (volume, nível).",
+      "props": [
+        {
+          "nome": "value",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "De 0 a 1."
+        },
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "count",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "10",
+          "descricao": "Quantos segmentos. Padrão: 10."
+        },
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Com rótulo, vira um `meter` acessível; sem, é só desenho (o valor já está dito em outro lugar)."
+        }
+      ]
+    },
+    {
+      "nome": "DeviceProgress",
+      "descricao": "Barra de progresso em segmentos, na tinta do LCD.",
+      "props": [
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "Nome da barra para leitor de tela."
+        },
+        {
+          "nome": "value",
+          "tipo": "number",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": "De 0 a 1. Sem valor, a barra fica vazia."
+        },
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "segments",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "24",
+          "descricao": null
+        },
+        {
+          "nome": "valueText",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "O que o leitor de tela diz, se a porcentagem não basta (\"3 de 12\")."
+        }
+      ]
+    },
+    {
+      "nome": "DeviceLed",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "size",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "sm",
+          "descricao": "`xs` 6px, `sm` 10px, `md` 14px, `lg` 26px (o LED do REC).",
+          "valores": [
+            "sm",
+            "md",
+            "lg",
+            "xs"
+          ]
+        },
+        {
+          "nome": "state",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "off",
+          "descricao": null,
+          "valores": [
+            "off",
+            "on",
+            "breathe",
+            "blink",
+            "error"
+          ]
+        },
+        {
+          "nome": "title",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "tone",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "brand",
+          "descricao": null,
+          "valores": [
+            "red",
+            "brand"
+          ]
+        }
+      ]
+    },
+    {
+      "nome": "usePressFlash",
+      "descricao": "Marca uma tecla como apertada por um instante: `const [qual, apertar] = usePressFlash()`.",
+      "props": []
+    },
+    {
+      "nome": "DeviceKey",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "pressed",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Travado afundado. Vira `aria-pressed`; sem valor, a tecla não é de alternar."
+        },
+        {
+          "nome": "pressing",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": "Afundado por um instante (o atalho de teclado acionou a tecla)."
+        },
+        {
+          "nome": "shape",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "square",
+          "descricao": null,
+          "valores": [
+            "ring",
+            "square"
+          ]
+        },
+        {
+          "nome": "size",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "md",
+          "descricao": null,
+          "valores": [
+            "sm",
+            "md",
+            "lg"
+          ]
+        }
+      ]
+    },
+    {
+      "nome": "DeviceSwitch",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "checked",
+          "tipo": "boolean",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "busy",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": "Em trânsito: a chave fica onde foi posta e não aceita outro toque."
+        },
+        {
+          "nome": "onCheckedChange",
+          "tipo": "(checked: boolean) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "size",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "md",
+          "descricao": null,
+          "valores": [
+            "sm",
+            "md"
+          ]
+        }
+      ]
+    },
+    {
+      "nome": "DeviceEncoder",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "disabled",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": null
+        },
+        {
+          "nome": "max",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "100",
+          "descricao": null
+        },
+        {
+          "nome": "min",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "0",
+          "descricao": null
+        },
+        {
+          "nome": "onDetent",
+          "tipo": "(d: 1 | -1) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onValueChange",
+          "tipo": "(v: number) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "orientation",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "vertical",
+          "descricao": null,
+          "valores": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        {
+          "nome": "position",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "size",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "md",
+          "descricao": null,
+          "valores": [
+            "sm",
+            "md",
+            "lg"
+          ]
+        },
+        {
+          "nome": "step",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "1",
+          "descricao": null
+        },
+        {
+          "nome": "style",
+          "tipo": "CSSProperties",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "value",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "valueText",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "variant",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "wheel",
+          "descricao": null,
+          "valores": [
+            "wheel",
+            "knob"
+          ]
+        }
+      ]
+    }
+  ],
+  "voice-recorder": [
+    {
+      "nome": "VoiceRecorder",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "state",
+          "tipo": "enum",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null,
+          "valores": [
+            "idle",
+            "recording",
+            "paused",
+            "saving",
+            "transcribing",
+            "playing",
+            "error"
+          ]
+        },
+        {
+          "nome": "battery",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "null",
+          "descricao": "Bateria de 0 a 1. Sem ela, o ícone não aparece."
+        },
+        {
+          "nome": "className",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "error",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "null",
+          "descricao": "A mensagem do erro, em português, pronta para mostrar."
+        },
+        {
+          "nome": "formatDate",
+          "tipo": "(d: Date) => string",
+          "obrigatoria": false,
+          "padrao": "(d: Date) =>\n  `${d.toLocaleDateString(\"pt-BR\", { day: \"numeric\", month: \"short\" })}, ${d.toLocaleTimeString(\"pt-BR\", { hour: \"2-digit\", minute: \"2-digit\" })}`",
+          "descricao": "Data da nota na lista. Padrão: \"11 nov., 14:02\"."
+        },
+        {
+          "nome": "getLevel",
+          "tipo": "() => number",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "O mesmo nível, puxado a cada quadro. Tem preferência sobre `level`."
+        },
+        {
+          "nome": "level",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Nível do microfone (ou do que toca), de 0 a 1."
+        },
+        {
+          "nome": "listSize",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "6",
+          "descricao": "Quantas notas a lista mostra de uma vez."
+        },
+        {
+          "nome": "notes",
+          "tipo": "RecorderNote[]",
+          "obrigatoria": false,
+          "padrao": "[]",
+          "descricao": null
+        },
+        {
+          "nome": "onDiscard",
+          "tipo": "() => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Descartar a gravação em curso (Esc)."
+        },
+        {
+          "nome": "onOpen",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Abrir a nota (a transcrição inteira, o player)."
+        },
+        {
+          "nome": "onPause",
+          "tipo": "() => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onPlay",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onRecord",
+          "tipo": "() => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Gravar, ou retomar a pausa."
+        },
+        {
+          "nome": "onSelect",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onStop",
+          "tipo": "() => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Parar a gravação ou o que toca."
+        },
+        {
+          "nome": "onVolumeChange",
+          "tipo": "(v: number) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "selectedId",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "null",
+          "descricao": null
+        },
+        {
+          "nome": "timeMs",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "0",
+          "descricao": "Tempo corrido da gravação, ou a posição do que toca, em ms."
+        },
+        {
+          "nome": "volume",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "0.8",
+          "descricao": "Volume de 0 a 1."
         }
       ]
     }
