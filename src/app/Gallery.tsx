@@ -207,6 +207,14 @@ function Pronto({ onPronto }: { onPronto: () => void }) {
  */
 let ultimaUrgencia = 0;
 
+/** Quanto a página fica parada antes de a peça do celular acordar sozinha. */
+const QUIETO = 350;
+/** Hora da última rolagem: um ouvinte passivo para a página toda (e para o que rola dentro dela). */
+let rolouEm = 0;
+if (typeof window !== "undefined") {
+  window.addEventListener("scroll", () => void (rolouEm = performance.now()), { passive: true, capture: true });
+}
+
 const Ladrilho = React.memo(function Ladrilho({
   item,
   onOpen,
@@ -275,12 +283,23 @@ const Ladrilho = React.memo(function Ladrilho({
   const quer = Boolean(Demo) && (porIntencao ? acordada && active : gpu ? active : foto ? perto : mounted);
   const viva = useVaga(item.name, quer, naVista, urgencia);
 
-  /* Assenta na tela por 220ms e acorda: quem passa rolando não paga a montagem. */
+  /*
+   * Assenta na tela e acorda: quem passa rolando não paga a montagem. "Assentar" é a
+   * PÁGINA parada há `QUIETO` ms, e não só o ladrilho na tela há 220ms: rolando meia tela
+   * a cada 250ms, os 220ms venciam em todo passo e cada ladrilho montava e desmontava
+   * no caminho (celular, CPU 6x: 58% de quadros lentos; sem montar nada, 4%).
+   */
   const toque = ehToque();
   const acordaNaVista = toque && porIntencao && !gpu && !pediuEconomia();
   React.useEffect(() => {
     if (!acordaNaVista || !naVista || acordada) return;
-    const t = window.setTimeout(() => setAcordada(true), 220);
+    let t = 0;
+    const tentar = () => {
+      const falta = QUIETO - (performance.now() - rolouEm);
+      if (falta <= 0) setAcordada(true);
+      else t = window.setTimeout(tentar, Math.max(falta, 60));
+    };
+    t = window.setTimeout(tentar, 220);
     return () => window.clearTimeout(t);
   }, [acordaNaVista, naVista, acordada]);
 
@@ -337,6 +356,17 @@ const Ladrilho = React.memo(function Ladrilho({
             ratio={16 / 10}
             sangra={cheia}
             active={active}
+            /*
+              Palco fora da tela não pinta nem entra na composição de camadas, que era o
+              maior custo da rolagem no celular (`Layerize`, 13,7 s de 30). Só com foto, a
+              rolagem a CPU 6x foi de 15% para 4% de quadros lentos. O tamanho não depende do
+              conteúdo (`aspect-ratio` ou `inset`), então nada pula.
+              A camada própria (`camada` em `PalcoFixo`) só fica no alto: no desktop com GPU ela
+              ajuda (sem ela, 5% → 6–7% de quadros lentos), e abaixo disso é ela que derruba a
+              peça viva parada.
+            */
+            className="[content-visibility:auto]"
+            camada={nivel === "alto"}
             tinta={(TINTA as Record<string, number[]>)[item.name]}
             style={stageSurfaceOf(item)}
           >

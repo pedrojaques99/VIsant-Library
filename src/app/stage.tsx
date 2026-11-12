@@ -315,10 +315,18 @@ export function PalcoFixo({
   tinta,
   sangra = false,
   compensaAlvo = false,
+  camada = true,
   className,
   style,
   children,
 }: {
+  /**
+   * `will-change: transform` na peça encolhida. A grade desliga fora do nível alto: com a
+   * camada, o Chrome pinta a peça no tamanho natural e encolhe depois, então cada quadro
+   * de uma peça que anima repinta a peça inteira em tamanho cheio. No celular a CPU 6x, o
+   * device-frame parado ia a 12 fps (p50 83 ms); sem a camada, 60 fps (p50 17 ms).
+   */
+  camada?: boolean;
   w: number;
   h: number;
   /**
@@ -389,7 +397,7 @@ export function PalcoFixo({
           height: h,
           transform: `translate(-50%, -50%) scale(${escala})`,
           ...(compensaAlvo && escala ? ({ "--alvo-escala": escala } as React.CSSProperties) : null),
-          willChange: escala === 1 ? undefined : "transform",
+          willChange: escala === 1 || !camada ? undefined : "transform",
           ...CAIXA_DO_PALCO,
         }}
       >

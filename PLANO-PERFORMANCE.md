@@ -242,6 +242,54 @@ React, CSS e Geist é de ~120 KB, ou 2,4 s, antes de qualquer conteúdo. A próx
 alavanca é a qualidade das fotos da grade (0,9 → 0,6 corta metade), e a escolha
 é de produto.
 
+### Rodada 7: o celular voltou a 57% (2026-11-11)
+
+Desde 4/11 o celular media 50–65% de quadros lentos (teto 20%), com
+`vivasPico` 3 e nenhum WebGL. A causa não era peça pesada: era a regra de 4/11
+("no toque, a peça sem GPU acorda ao assentar na tela", rodada de testes em
+aparelho real) somada a dois custos da casca. Medido no build local, mesma régua
+(`perf-catalogo.mjs --perfil celular`, Pixel 7, CPU 6x):
+
+| Variante | Quadros > 33ms |
+|---|---|
+| como estava | 58% (298 tarefas longas) |
+| `?vivas=0` (só foto) | 15% |
+| `?vivas=1` | 47% |
+
+O trace da rolagem (CDP `Tracing`) mostrou **`Layerize` com 13,7 s de 30**: cada
+quadro de qualquer peça animando recompunha as camadas dos 146 palcos, cada um
+com `will-change: transform`. Parada, com três peças vivas na tela, a página
+perdia até 100% dos quadros (device-frame a 12 fps, p50 83 ms).
+
+O que mudou, tudo na casca, nenhuma peça do registry:
+
+- [x] **Assentar = página parada.** O ladrilho acordava 220 ms depois de entrar
+      na tela, mesmo com a pessoa rolando: meia tela a cada 250 ms montava e
+      desmontava cada peça no caminho. Agora acorda quando a página está parada
+      há 350 ms (`QUIETO`, um ouvinte de `scroll` passivo). A regra de 4/11
+      continua: parou, a peça sem GPU acorda sozinha e o primeiro toque é dela.
+- [x] **`content-visibility: auto` no palco do ladrilho.** O tamanho vem de
+      `aspect-ratio` ou `inset`, então nada pula. Só com foto: 15% → 4%.
+- [x] **Sem camada própria fora do alto** (`camada` em `PalcoFixo`). Com
+      `will-change`, o Chrome pinta a peça no tamanho natural e encolhe depois.
+      Sem ela, o device-frame parado foi de 12 para 60 fps. No desktop a camada
+      ajuda (sem ela, 5% → 6–7%), então lá ela fica.
+
+| Perfil (build local) | Quadros > 33ms antes → depois | Bloqueado antes → depois |
+|---|---|---|
+| celular (baixo, CPU 6x, mediana de 3) | 58% → **1%** | 7,7 s → **0,9 s** |
+| notebook (médio, CPU 4x, mediana de 3) | 1% → **0%** | 0,4 s → **0,3 s** |
+| desktop (alto, headless, mediana de 3) | 5% → **5%** | 0,8 s → **0,7 s** |
+
+O "antes" de notebook e desktop foi medido no mesmo build com
+`content-visibility: visible` injetado (o resto da mudança não roda fora do
+toque). Parado, com as peças vivas na tela, nenhuma tela do celular passa de
+16% de quadros lentos, exceto a fileira do `reels-rail` (33%), que é custo de
+dentro da peça.
+
+Descartado: limitar o celular a 1 viva (47%, a montagem é que custava) e foto
+até o toque, que desfaria a decisão de 4/11.
+
 ## Resultado (produção, mesma régua)
 
 | Perfil | Quadros > 33ms antes → depois | Bloqueado antes → depois |
