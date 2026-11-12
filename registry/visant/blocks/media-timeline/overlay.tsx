@@ -78,7 +78,7 @@ export const Overlay = React.forwardRef<OverlayHandle, {
         {labels}
         {context !== null ? <span className="mt-ruler-context mt-num">{rulerLabel(context, fps)}</span> : null}
       </div>
-      {hints.map((h) => { const l = g(h.track); return l ? <span key={h.track} className="mt-empty-hint" style={{ transform: `translateY(${topOf(l)}px)`, height: l.h }}>{h.text}</span> : null; })}
+      {hints.map((h) => { const l = g(h.track); return l ? <span key={h.track} className="mt-empty-hint" style={{ transform: `translateY(${topOf(l)}px)`, height: l.h, lineHeight: `${l.h}px` }}>{h.text}</span> : null; })}
       <div className="mt-overlay-tracks">
         {hover ? <div className="mt-hover-track" style={{ transform: `translateY(${hover.top - s.top}px)`, height: hover.h }} /> : null}
       </div>
