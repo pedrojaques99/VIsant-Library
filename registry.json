@@ -8850,6 +8850,553 @@
       }
     },
     {
+      "name": "inspector-controls",
+      "type": "registry:block",
+      "title": "Inspector Controls",
+      "description": "As linhas de um painel de propriedades: slider que é a própria linha (arrastar, digitar, setas), segmentos, cor com paleta, vetor X/Y, miniaturas, interruptor e pasta com reset. Sem cor própria.",
+      "author": "Visant Labs <visantsupply@gmail.com>",
+      "dependencies": [
+        "@radix-ui/react-tooltip",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/visant/blocks/inspector-controls/inspector-controls.tsx",
+          "type": "registry:component",
+          "target": "components/ui/inspector-controls/inspector-controls.tsx"
+        },
+        {
+          "path": "registry/visant/blocks/inspector-controls/index.ts",
+          "type": "registry:component",
+          "target": "components/ui/inspector-controls/index.ts"
+        }
+      ],
+      "categories": [
+        "controles",
+        "formulario",
+        "edicao",
+        "painel"
+      ],
+      "meta": {
+        "uso": {
+          "quando": "Painel lateral de propriedades: inspetor de editor, estúdio de mockup, ajustes finos de uma peça selecionada",
+          "evite": "Formulário de cadastro ou página de configurações longa: campos de formulário comuns"
+        }
+      },
+      "css": {
+        ".ic-section, .ic-row, .ic-slider, .ic-segments, .ic-thumbs, .ic-swatches, .ic-vector, .ic-stack": {
+          "--ic-row-h": "var(--ic-row, 2rem)",
+          "--ic-radius": "var(--r-control, 8px)",
+          "--ic-tile": "var(--muted)",
+          "--ic-fg-2": "var(--muted-foreground)",
+          "--ic-fg-3": "color-mix(in oklab, var(--muted-foreground) 70%, transparent)",
+          "font-size": "0.8125rem",
+          "line-height": "1.2"
+        },
+        ".ic-section + .ic-section": {
+          "border-top": "1px solid var(--border)"
+        },
+        ".ic-section-head": {
+          "position": "sticky",
+          "top": "0",
+          "z-index": "2",
+          "display": "flex",
+          "align-items": "center",
+          "justify-content": "space-between",
+          "gap": "0.5rem",
+          "height": "2.5rem",
+          "padding": "0 0.5rem 0 0.75rem",
+          "background": "var(--ic-surface, var(--background))"
+        },
+        ".ic-section-title": {
+          "display": "flex",
+          "align-items": "center",
+          "gap": "0.375rem",
+          "flex": "1",
+          "min-width": "0",
+          "height": "100%",
+          "margin": "0",
+          "padding": "0",
+          "border": "0",
+          "background": "none",
+          "color": "var(--foreground)",
+          "font": "inherit",
+          "font-weight": "500",
+          "text-align": "left",
+          "cursor": "pointer",
+          "outline": "none"
+        },
+        "h3.ic-section-title": {
+          "cursor": "default"
+        },
+        ".ic-section-title svg": {
+          "flex": "none",
+          "color": "var(--ic-fg-3)",
+          "transition": "transform var(--dur-fast, 160ms) var(--ease-out, ease-out)"
+        },
+        ".ic-section[data-open] .ic-section-title svg": {
+          "transform": "rotate(90deg)"
+        },
+        ".ic-section-title:focus-visible": {
+          "border-radius": "4px",
+          "box-shadow": "0 0 0 2px var(--ring)"
+        },
+        ".ic-section-aside": {
+          "flex": "none",
+          "padding-right": "0.25rem",
+          "color": "var(--ic-fg-2)",
+          "font-size": "0.75rem",
+          "font-variant-numeric": "tabular-nums"
+        },
+        ".ic-reset": {
+          "display": "grid",
+          "place-items": "center",
+          "width": "1.75rem",
+          "height": "1.75rem",
+          "border": "0",
+          "border-radius": "var(--ic-radius)",
+          "background": "none",
+          "color": "var(--ic-fg-2)",
+          "cursor": "pointer",
+          "outline": "none"
+        },
+        ".ic-reset:hover": {
+          "background": "var(--ic-tile)",
+          "color": "var(--foreground)"
+        },
+        ".ic-reset:focus-visible": {
+          "box-shadow": "0 0 0 2px var(--ring)"
+        },
+        ".ic-section-body": {
+          "display": "grid",
+          "grid-template-rows": "0fr",
+          "transition": "grid-template-rows var(--dur-base, 200ms) var(--ease-out, ease-out)"
+        },
+        ".ic-section[data-open] .ic-section-body": {
+          "grid-template-rows": "1fr"
+        },
+        ".ic-section-body > div": {
+          "min-height": "0",
+          "overflow": "hidden",
+          "visibility": "hidden",
+          "transition": "visibility var(--dur-base, 200ms)"
+        },
+        ".ic-section[data-open] .ic-section-body > div": {
+          "display": "flex",
+          "flex-direction": "column",
+          "gap": "0.375rem",
+          "padding": "0 0.75rem 0.875rem",
+          "visibility": "visible"
+        },
+        ".ic-label": {
+          "color": "var(--ic-fg-2)"
+        },
+        ".ic-value": {
+          "color": "var(--foreground)",
+          "font-variant-numeric": "tabular-nums"
+        },
+        ".ic-value i": {
+          "font-style": "normal",
+          "color": "var(--ic-fg-3)"
+        },
+        ".ic-row": {
+          "display": "flex",
+          "align-items": "center",
+          "justify-content": "space-between",
+          "gap": "0.5rem",
+          "min-height": "var(--ic-row-h)"
+        },
+        ".ic-row > .ic-label": {
+          "flex": "none"
+        },
+        ".ic-row-control": {
+          "display": "flex",
+          "flex": "1",
+          "min-width": "0",
+          "justify-content": "flex-end"
+        },
+        ".ic-row-control > .ic-segments": {
+          "flex": "1",
+          "max-width": "15rem"
+        },
+        ".ic-stack": {
+          "display": "flex",
+          "flex-direction": "column",
+          "gap": "0.375rem"
+        },
+        ".ic-slider": {
+          "position": "relative",
+          "display": "flex",
+          "align-items": "center",
+          "justify-content": "space-between",
+          "gap": "0.5rem",
+          "height": "var(--ic-row-h)",
+          "padding": "0 0.625rem",
+          "overflow": "hidden",
+          "border-radius": "var(--ic-radius)",
+          "background": "var(--ic-tile)",
+          "cursor": "ew-resize",
+          "touch-action": "pan-y",
+          "user-select": "none",
+          "-webkit-user-select": "none",
+          "outline": "none"
+        },
+        ".ic-slider:hover .ic-label": {
+          "color": "var(--foreground)"
+        },
+        ".ic-slider:focus-visible": {
+          "box-shadow": "0 0 0 2px var(--ring)"
+        },
+        ".ic-slider[aria-disabled=\"true\"]": {
+          "opacity": "0.5",
+          "cursor": "default"
+        },
+        ".ic-slider > span:not(.ic-slider-fill, .ic-slider-mark), .ic-slider-input": {
+          "position": "relative"
+        },
+        ".ic-slider > .ic-label": {
+          "overflow": "hidden",
+          "text-overflow": "ellipsis",
+          "white-space": "nowrap"
+        },
+        ".ic-slider-fill": {
+          "position": "absolute",
+          "top": "0",
+          "bottom": "0",
+          "background": "color-mix(in oklab, var(--ic-tile), var(--foreground) 12%)"
+        },
+        ".ic-slider-mark": {
+          "position": "absolute",
+          "top": "25%",
+          "bottom": "25%",
+          "width": "1px",
+          "background": "var(--ic-fg-3)",
+          "opacity": "0.6"
+        },
+        ".ic-slider-input": {
+          "width": "4.5rem",
+          "padding": "0",
+          "border": "0",
+          "outline": "0",
+          "background": "none",
+          "color": "var(--foreground)",
+          "font": "inherit",
+          "font-size": "16px",
+          "text-align": "right",
+          "font-variant-numeric": "tabular-nums",
+          "cursor": "text"
+        },
+        ".ic-slider[data-editing]": {
+          "box-shadow": "inset 0 0 0 1px var(--ring)",
+          "cursor": "text"
+        },
+        ".ic-segments": {
+          "position": "relative",
+          "display": "grid",
+          "grid-auto-flow": "column",
+          "grid-auto-columns": "1fr",
+          "height": "var(--ic-row-h)",
+          "padding": "2px",
+          "border-radius": "var(--ic-radius)",
+          "background": "var(--ic-tile)"
+        },
+        ".ic-segments-light": {
+          "position": "absolute",
+          "top": "2px",
+          "bottom": "2px",
+          "left": "2px",
+          "width": "calc((100% - 4px) / var(--n))",
+          "border-radius": "calc(var(--ic-radius) - 2px)",
+          "background": "var(--background)",
+          "box-shadow": "0 1px 2px color-mix(in oklab, var(--foreground) 14%, transparent), 0 0 0 0.5px var(--border)",
+          "transform": "translateX(calc(var(--i) * 100%))",
+          "transition": "transform var(--dur-base, 200ms) var(--ease-out, ease-out)"
+        },
+        ".ic-segments button": {
+          "position": "relative",
+          "min-width": "0",
+          "padding": "0 0.25rem",
+          "overflow": "hidden",
+          "border": "0",
+          "border-radius": "calc(var(--ic-radius) - 2px)",
+          "background": "none",
+          "color": "var(--ic-fg-2)",
+          "font": "inherit",
+          "text-overflow": "ellipsis",
+          "white-space": "nowrap",
+          "cursor": "pointer",
+          "outline": "none",
+          "transition": "color var(--dur-fast, 160ms) var(--ease-out, ease-out)"
+        },
+        ".ic-segments button:hover": {
+          "color": "var(--foreground)"
+        },
+        ".ic-segments button[aria-checked=\"true\"]": {
+          "color": "var(--foreground)",
+          "font-weight": "500"
+        },
+        ".ic-segments button:focus-visible": {
+          "box-shadow": "0 0 0 2px var(--ring)"
+        },
+        ".ic-segments button:disabled": {
+          "opacity": "0.4",
+          "cursor": "default"
+        },
+        ".ic-thumbs": {
+          "display": "grid",
+          "grid-template-columns": "repeat(var(--columns), minmax(0, 1fr))",
+          "gap": "0.375rem"
+        },
+        ".ic-thumb": {
+          "display": "flex",
+          "flex-direction": "column",
+          "gap": "0.25rem",
+          "min-width": "0",
+          "padding": "0",
+          "border": "0",
+          "background": "none",
+          "color": "var(--ic-fg-2)",
+          "font": "inherit",
+          "font-size": "0.6875rem",
+          "cursor": "pointer",
+          "outline": "none"
+        },
+        ".ic-thumb-art": {
+          "position": "relative",
+          "display": "grid",
+          "place-items": "center",
+          "width": "100%",
+          "aspect-ratio": "1",
+          "overflow": "hidden",
+          "border-radius": "var(--ic-radius)",
+          "background": "var(--ic-tile)",
+          "box-shadow": "inset 0 0 0 1px transparent",
+          "transition": "box-shadow var(--dur-fast, 160ms) var(--ease-out, ease-out)"
+        },
+        ".ic-thumb:hover .ic-thumb-art": {
+          "box-shadow": "inset 0 0 0 1px var(--ic-fg-3)"
+        },
+        ".ic-thumb[aria-checked=\"true\"]": {
+          "color": "var(--foreground)"
+        },
+        ".ic-thumb[aria-checked=\"true\"] .ic-thumb-art": {
+          "box-shadow": "0 0 0 2px var(--background), 0 0 0 3.5px var(--foreground)"
+        },
+        ".ic-thumb:focus-visible .ic-thumb-art": {
+          "box-shadow": "0 0 0 2px var(--background), 0 0 0 3.5px var(--ring)"
+        },
+        ".ic-thumb:disabled": {
+          "opacity": "0.4",
+          "cursor": "default"
+        },
+        ".ic-thumb-name": {
+          "overflow": "hidden",
+          "text-overflow": "ellipsis",
+          "white-space": "nowrap",
+          "text-align": "center"
+        },
+        ".ic-swatches": {
+          "display": "flex",
+          "flex-wrap": "wrap",
+          "gap": "0.375rem",
+          "padding": "0.125rem 0"
+        },
+        ".ic-swatches button": {
+          "width": "1.375rem",
+          "height": "1.375rem",
+          "padding": "0",
+          "border": "0",
+          "border-radius": "50%",
+          "background": "var(--swatch)",
+          "box-shadow": "inset 0 0 0 1px color-mix(in oklab, var(--foreground) 15%, transparent)",
+          "cursor": "pointer",
+          "outline": "none"
+        },
+        ".ic-swatches button[data-hollow]": {
+          "background": "radial-gradient(circle, var(--background) 0 42%, var(--swatch) 44%)"
+        },
+        ".ic-swatches button[aria-checked=\"true\"]": {
+          "box-shadow": "0 0 0 2px var(--background), 0 0 0 3.5px var(--foreground)"
+        },
+        ".ic-swatches button:focus-visible": {
+          "box-shadow": "0 0 0 2px var(--background), 0 0 0 3.5px var(--ring)"
+        },
+        ".ic-color": {
+          "padding": "0 0.25rem 0 0.625rem",
+          "border-radius": "var(--ic-radius)",
+          "background": "var(--ic-tile)"
+        },
+        ".ic-color-hex": {
+          "flex": "1",
+          "min-width": "0",
+          "border": "0",
+          "outline": "0",
+          "background": "none",
+          "color": "var(--foreground)",
+          "font": "inherit",
+          "font-size": "16px",
+          "text-align": "right",
+          "font-variant-numeric": "tabular-nums",
+          "text-transform": "uppercase"
+        },
+        ".ic-color-well": {
+          "position": "relative",
+          "flex": "none",
+          "width": "1.5rem",
+          "height": "1.5rem",
+          "overflow": "hidden",
+          "border-radius": "calc(var(--ic-radius) - 2px)",
+          "background": "var(--swatch)",
+          "box-shadow": "inset 0 0 0 1px color-mix(in oklab, var(--foreground) 15%, transparent)",
+          "cursor": "pointer"
+        },
+        ".ic-color-well input": {
+          "position": "absolute",
+          "inset": "-4px",
+          "width": "200%",
+          "height": "200%",
+          "opacity": "0",
+          "cursor": "pointer"
+        },
+        ".ic-color:focus-within": {
+          "box-shadow": "inset 0 0 0 1px var(--ring)"
+        },
+        ".ic-vector": {
+          "display": "grid",
+          "grid-auto-flow": "column",
+          "grid-auto-columns": "1fr",
+          "gap": "0.25rem"
+        },
+        ".ic-part": {
+          "display": "flex",
+          "align-items": "center",
+          "height": "var(--ic-row-h)",
+          "overflow": "hidden",
+          "border-radius": "var(--ic-radius)",
+          "background": "var(--ic-tile)"
+        },
+        ".ic-part-letter": {
+          "flex": "none",
+          "display": "grid",
+          "place-items": "center",
+          "width": "1.5rem",
+          "height": "100%",
+          "color": "var(--ic-fg-3)",
+          "cursor": "ew-resize",
+          "touch-action": "none",
+          "user-select": "none",
+          "-webkit-user-select": "none"
+        },
+        ".ic-part input": {
+          "flex": "1",
+          "min-width": "0",
+          "width": "100%",
+          "height": "100%",
+          "padding": "0 0.5rem 0 0",
+          "border": "0",
+          "outline": "0",
+          "background": "none",
+          "color": "var(--foreground)",
+          "font": "inherit",
+          "font-size": "16px",
+          "text-align": "right",
+          "font-variant-numeric": "tabular-nums"
+        },
+        ".ic-part:focus-within": {
+          "box-shadow": "inset 0 0 0 1px var(--ring)"
+        },
+        ".ic-toggle": {
+          "width": "100%",
+          "padding": "0",
+          "border": "0",
+          "background": "none",
+          "color": "inherit",
+          "font": "inherit",
+          "text-align": "left",
+          "cursor": "pointer",
+          "outline": "none"
+        },
+        ".ic-toggle:hover .ic-label": {
+          "color": "var(--foreground)"
+        },
+        ".ic-toggle:disabled": {
+          "opacity": "0.5",
+          "cursor": "default"
+        },
+        ".ic-toggle-track": {
+          "position": "relative",
+          "flex": "none",
+          "width": "1.75rem",
+          "height": "1rem",
+          "border-radius": "999px",
+          "background": "color-mix(in oklab, var(--foreground) 18%, var(--ic-tile))",
+          "transition": "background-color var(--dur-fast, 160ms) var(--ease-out, ease-out)"
+        },
+        ".ic-toggle-thumb": {
+          "position": "absolute",
+          "top": "2px",
+          "left": "2px",
+          "width": "0.75rem",
+          "height": "0.75rem",
+          "border-radius": "999px",
+          "background": "var(--background)",
+          "box-shadow": "0 1px 2px color-mix(in oklab, var(--foreground) 25%, transparent)",
+          "transition": "transform var(--dur-fast, 160ms) var(--ease-out, ease-out)"
+        },
+        ".ic-toggle[aria-checked=\"true\"] .ic-toggle-track": {
+          "background": "var(--foreground)"
+        },
+        ".ic-toggle[aria-checked=\"true\"] .ic-toggle-thumb": {
+          "transform": "translateX(0.75rem)"
+        },
+        ".ic-toggle:focus-visible .ic-toggle-track": {
+          "box-shadow": "0 0 0 2px var(--background), 0 0 0 3.5px var(--ring)"
+        },
+        ".ic-hint": {
+          "z-index": "60",
+          "display": "flex",
+          "align-items": "center",
+          "gap": "0.5rem",
+          "padding": "0.3125rem 0.5rem",
+          "border-radius": "var(--r-control, 8px)",
+          "background": "var(--foreground)",
+          "color": "var(--background)",
+          "font-size": "0.75rem",
+          "line-height": "1"
+        },
+        ".ic-hint kbd": {
+          "font": "inherit",
+          "opacity": "0.6"
+        },
+        "@media (pointer: coarse)": {
+          ".ic-section, .ic-row, .ic-slider, .ic-segments, .ic-vector, .ic-stack": {
+            "--ic-row-h": "var(--ic-row, 2.75rem)"
+          },
+          ".ic-reset": {
+            "width": "2.75rem",
+            "height": "2.75rem"
+          },
+          ".ic-swatches button": {
+            "width": "2.125rem",
+            "height": "2.125rem"
+          }
+        },
+        "@media (pointer: fine)": {
+          ".ic-slider-input, .ic-color-hex, .ic-part input": {
+            "font-size": "inherit"
+          }
+        },
+        "@media (prefers-reduced-motion: reduce)": {
+          ".ic-section-body, .ic-section-body > div, .ic-segments-light, .ic-thumb-art, .ic-section-title svg, .ic-toggle-thumb, .ic-toggle-track": {
+            "transition": "none"
+          }
+        }
+      }
+    },
+    {
       "name": "use-idle",
       "type": "registry:hook",
       "title": "useIdle",

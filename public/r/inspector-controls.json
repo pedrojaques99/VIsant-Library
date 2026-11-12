@@ -1,0 +1,550 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "inspector-controls",
+  "title": "Inspector Controls",
+  "author": "Visant Labs <visantsupply@gmail.com>",
+  "description": "As linhas de um painel de propriedades: slider que é a própria linha (arrastar, digitar, setas), segmentos, cor com paleta, vetor X/Y, miniaturas, interruptor e pasta com reset. Sem cor própria.",
+  "dependencies": [
+    "@radix-ui/react-tooltip",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "registry/visant/blocks/inspector-controls/inspector-controls.tsx",
+      "content": "\"use client\";\n\n/**\n * Inspector controls: as linhas de um painel de propriedades (estúdio de mockups, editor de vídeo).\n *\n * Colhido do estúdio de mockups da vitrine (`src/app/mockups/controles.tsx`). O controle tem a forma\n * do dado: número limitado é a própria linha virando slider, cor é poço com hex, escolha entre\n * poucos é segmento, escolha com imagem é miniatura. Toda linha tem a mesma altura e a mesma ordem:\n * rótulo à esquerda, valor à direita, unidade um tom abaixo. Separação por linha fina entre pastas,\n * nunca caixa dentro de caixa.\n *\n * Sem cor própria: tudo sai de `--background`, `--foreground`, `--muted`, `--muted-foreground`,\n * `--border` e `--ring`. A altura da linha é `--ic-row` (2rem) e o fundo do topo fixo da pasta é\n * `--ic-surface` (padrão `--background`; num popover, aponte para `--popover`).\n */\n\nimport * as React from \"react\";\nimport * as Tooltip from \"@radix-ui/react-tooltip\";\nimport { ChevronRight, RotateCcw } from \"lucide-react\";\n\nimport { cn } from \"@/lib/utils\";\n\n/* ── Número ─────────────────────────────────────────────────────────────── */\n\n/** Número com vírgula, como se lê em português: 0,85 e não 0.85. */\nexport const formatNumber = (n: number, decimals = 0) => n.toFixed(decimals).replace(\".\", \",\");\n\n/** O inverso, tolerante: aceita vírgula ou ponto, e ignora unidade digitada junto (\"12 dB\"). */\nexport function parseNumber(s: string): number {\n  const limpo = s.trim().replace(\",\", \".\").replace(/[^\\d.+-]/g, \"\");\n  return limpo === \"\" ? NaN : Number(limpo);\n}\n\nconst prender = (n: number, min: number, max: number, step: number) => {\n  // Arredondar ao passo antes de prender: o arrasto produz 0,30000000004 e o valor salvo vira lixo.\n  const snap = Math.round(n / step) * step;\n  return Math.min(max, Math.max(min, +snap.toFixed(6)));\n};\n\n/* ── Teclado em grupo de rádio ──────────────────────────────────────────── */\n\n/** Setas andam entre as opções de um radiogroup e já escolhem, como num rádio nativo. */\nfunction andarNoGrupo(e: React.KeyboardEvent<HTMLElement>) {\n  const passo = ({ ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 } as Record<string, number>)[e.key];\n  if (!passo) return;\n  const itens = [...e.currentTarget.querySelectorAll<HTMLButtonElement>('[role=\"radio\"]:not(:disabled)')];\n  if (!itens.length) return;\n  e.preventDefault();\n  const agora = itens.indexOf(document.activeElement as HTMLButtonElement);\n  const alvo = itens[(agora + passo + itens.length) % itens.length];\n  alvo.focus();\n  alvo.click();\n}\n\n/** Só a opção marcada entra no Tab (ou a primeira, se nenhuma): um grupo é uma parada do Tab, não N. */\nconst tabDoGrupo = (marcada: boolean, indice: number, algumaMarcada: boolean) =>\n  marcada || (!algumaMarcada && indice === 0) ? 0 : -1;\n\n/* ── Dica ───────────────────────────────────────────────────────────────── */\n\n/**\n * O nome e o atalho de um botão de ícone. O filho precisa repassar ref (um `<button>` repassa).\n * Traz o próprio Provider: funciona solta em qualquer painel. No toque não aparece; lá o\n * `aria-label` e o desenho bastam.\n */\nexport function InspectorHint({\n  label,\n  shortcut,\n  side = \"top\",\n  children,\n}: {\n  label: string;\n  shortcut?: string;\n  side?: \"top\" | \"bottom\" | \"left\" | \"right\";\n  children: React.ReactElement;\n}) {\n  return (\n    <Tooltip.Provider delayDuration={450} skipDelayDuration={200}>\n      <Tooltip.Root>\n        <Tooltip.Trigger asChild>{children}</Tooltip.Trigger>\n        <Tooltip.Portal>\n          <Tooltip.Content className=\"ic-hint\" side={side} sideOffset={6}>\n            {label}\n            {shortcut ? <kbd>{shortcut}</kbd> : null}\n          </Tooltip.Content>\n        </Tooltip.Portal>\n      </Tooltip.Root>\n    </Tooltip.Provider>\n  );\n}\n\n/* ── Pasta ──────────────────────────────────────────────────────────────── */\n\nexport interface InspectorSectionProps {\n  title: React.ReactNode;\n  /** Um resumo à direita do título: contagem, duração. Some quando há reset a mostrar. */\n  aside?: React.ReactNode;\n  /** O reset só existe depois que algo aqui mudou: é sinal antes de ser ação. */\n  dirty?: boolean;\n  onReset?: () => void;\n  resetLabel?: string;\n  defaultOpen?: boolean;\n  /** `false` vira cabeça fixa, sem seta: para a pasta que nunca deveria sumir. */\n  collapsible?: boolean;\n  className?: string;\n  children: React.ReactNode;\n}\n\nexport function InspectorSection({\n  title,\n  aside,\n  dirty,\n  onReset,\n  resetLabel,\n  defaultOpen = true,\n  collapsible = true,\n  className,\n  children,\n}: InspectorSectionProps) {\n  const [open, setOpen] = React.useState(defaultOpen);\n  // Campo opcional que ganhou conteúdo abre sozinho: o que acabou de aparecer precisa ser visto.\n  React.useEffect(() => {\n    if (defaultOpen) setOpen(true);\n  }, [defaultOpen]);\n  const aberta = !collapsible || open;\n  const nome = resetLabel ?? (typeof title === \"string\" ? `Restaurar ${title}` : \"Restaurar\");\n  return (\n    <section className={cn(\"ic-section\", className)} data-open={aberta || undefined}>\n      <header className=\"ic-section-head\">\n        {collapsible ? (\n          <button type=\"button\" className=\"ic-section-title\" aria-expanded={open} onClick={() => setOpen(!open)}>\n            <ChevronRight size={13} aria-hidden />\n            {title}\n          </button>\n        ) : (\n          <h3 className=\"ic-section-title\">{title}</h3>\n        )}\n        {dirty && onReset ? (\n          <InspectorHint label={nome}>\n            <button type=\"button\" className=\"ic-reset\" aria-label={nome} onClick={onReset}>\n              <RotateCcw size={12} />\n            </button>\n          </InspectorHint>\n        ) : aside != null ? (\n          <span className=\"ic-section-aside\">{aside}</span>\n        ) : null}\n      </header>\n      <div className=\"ic-section-body\">\n        <div>{children}</div>\n      </div>\n    </section>\n  );\n}\n\n/* ── Linha: rótulo e o que for ──────────────────────────────────────────── */\n\n/** Rótulo à esquerda, qualquer controle à direita. Para o que não é um slider inteiro. */\nexport function InspectorRow({ label, children, className }: { label: React.ReactNode; children: React.ReactNode; className?: string }) {\n  return (\n    <div className={cn(\"ic-row\", className)}>\n      <span className=\"ic-label\">{label}</span>\n      <div className=\"ic-row-control\">{children}</div>\n    </div>\n  );\n}\n\n/* ── Linha que é slider ─────────────────────────────────────────────────── */\n\nexport interface InspectorSliderProps {\n  label: string;\n  /** Nome para o leitor de tela quando o rótulo visível é curto demais (\"Entrada\" → \"Fade de entrada\"). */\n  ariaLabel?: string;\n  value: number;\n  min: number;\n  max: number;\n  step?: number;\n  /** Marca na trilha, e destino do duplo clique. */\n  defaultValue?: number;\n  unit?: string;\n  decimals?: number;\n  /** Valor → texto. Para mostrar noutra escala (0,85 → \"85\" com unidade \"%\"). */\n  format?: (v: number) => string;\n  /** Texto digitado → valor. Obrigatório quando `format` muda de escala. */\n  parse?: (s: string) => number;\n  disabled?: boolean;\n  /** Mudança contínua: arrasto e setas. Chega muitas vezes por gesto. */\n  onValueChange: (v: number) => void;\n  /** Mudança de uma vez: valor digitado e duplo clique de volta ao padrão. Sem ela, vai para `onValueChange`. */\n  onValueCommit?: (v: number) => void;\n  className?: string;\n}\n\nexport function InspectorSlider({\n  label,\n  ariaLabel,\n  value,\n  min,\n  max,\n  step = 1,\n  defaultValue,\n  unit = \"\",\n  decimals = 0,\n  format,\n  parse = parseNumber,\n  disabled,\n  onValueChange,\n  onValueCommit,\n  className,\n}: InspectorSliderProps) {\n  const [rascunho, setRascunho] = React.useState<string | null>(null);\n  const raiz = React.useRef<HTMLDivElement>(null);\n  const fechando = React.useRef(false);\n  const gesto = React.useRef<{ x: number; y: number; v: number; ativo: boolean; toque: boolean; w: number; ultimo: number } | null>(null);\n  const editando = rascunho !== null;\n  const commit = onValueCommit ?? onValueChange;\n\n  const prende = (n: number) => prender(n, min, max, step);\n  const pct = (n: number) => (max === min ? 0 : ((Math.min(max, Math.max(min, n)) - min) / (max - min)) * 100);\n  // Faixa que cruza o zero enche a partir do zero: enchido da esquerda, -6 dB leria como um quarto de algo.\n  const origem = min < 0 && max > 0 ? pct(0) : 0;\n  const atual = pct(value);\n  const texto = format ? format(value) : formatNumber(value, decimals);\n\n  const abrirCampo = () => {\n    fechando.current = false;\n    setRascunho(texto);\n  };\n  // Enter e o blur chegam juntos: só o primeiro grava. Esc desiste. O foco volta para a linha.\n  const fecharCampo = (gravar: boolean) => {\n    if (fechando.current) return;\n    fechando.current = true;\n    if (gravar && rascunho !== null) {\n      const n = parse(rascunho);\n      if (Number.isFinite(n)) {\n        const v = prende(n);\n        if (Math.abs(v - value) > 1e-9) commit(v);\n      }\n    }\n    setRascunho(null);\n    requestAnimationFrame(() => raiz.current?.focus({ preventScroll: true }));\n  };\n\n  return (\n    <div\n      ref={raiz}\n      className={cn(\"ic-slider\", className)}\n      role=\"slider\"\n      tabIndex={editando || disabled ? -1 : 0}\n      aria-label={ariaLabel ?? label}\n      aria-valuemin={min}\n      aria-valuemax={max}\n      aria-valuenow={value}\n      aria-valuetext={`${texto}${unit}`}\n      aria-disabled={disabled || undefined}\n      data-editing={editando || undefined}\n      onPointerDown={(e) => {\n        if (editando || disabled || e.button !== 0) return;\n        const toque = e.pointerType !== \"mouse\";\n        gesto.current = { x: e.clientX, y: e.clientY, v: value, ativo: false, toque, w: e.currentTarget.getBoundingClientRect().width || 1, ultimo: value };\n        e.currentTarget.setPointerCapture(e.pointerId);\n      }}\n      onPointerMove={(e) => {\n        const g = gesto.current;\n        if (!g) return;\n        const dx = e.clientX - g.x;\n        if (!g.ativo) {\n          // O dedo diz o eixo primeiro: arrasto em pé é rolagem do painel, e o valor fica onde está.\n          if (Math.abs(dx) < 4) return;\n          if (g.toque && Math.abs(e.clientY - g.y) > Math.abs(dx)) {\n            gesto.current = null;\n            return;\n          }\n          g.ativo = true;\n        }\n        // Shift afina o arrasto: a linha inteira passa a valer um quinto da faixa.\n        const fino = e.shiftKey ? 0.2 : 1;\n        const v = prende(g.v + (dx / g.w) * (max - min) * fino);\n        if (v !== g.ultimo) {\n          g.ultimo = v;\n          onValueChange(v);\n        }\n      }}\n      onPointerUp={() => {\n        const g = gesto.current;\n        gesto.current = null;\n        // Clique sem arrasto digita: as três entradas de um número são arrastar, digitar e setas.\n        if (g && !g.ativo) abrirCampo();\n      }}\n      onPointerCancel={() => (gesto.current = null)}\n      onDoubleClick={() => {\n        if (defaultValue === undefined || disabled) return;\n        fechando.current = true;\n        setRascunho(null);\n        if (Math.abs(defaultValue - value) > 1e-9) commit(defaultValue);\n      }}\n      onKeyDown={(e) => {\n        if (editando || disabled) return;\n        if (e.key === \"Enter\" || e.key === \"F2\") {\n          e.preventDefault();\n          abrirCampo();\n          return;\n        }\n        const d = (e.shiftKey ? 10 : 1) * step;\n        const alvo = (\n          {\n            ArrowRight: value + d,\n            ArrowUp: value + d,\n            ArrowLeft: value - d,\n            ArrowDown: value - d,\n            PageUp: value + step * 10,\n            PageDown: value - step * 10,\n            Home: min,\n            End: max,\n          } as Record<string, number>\n        )[e.key];\n        if (alvo === undefined) return;\n        e.preventDefault();\n        const v = prende(alvo);\n        if (v !== value) onValueChange(v);\n      }}\n    >\n      <span className=\"ic-slider-fill\" style={{ left: `${Math.min(origem, atual)}%`, width: `${Math.abs(atual - origem)}%` }} aria-hidden />\n      {defaultValue !== undefined ? <span className=\"ic-slider-mark\" style={{ left: `${pct(defaultValue)}%` }} aria-hidden /> : null}\n      <span className=\"ic-label\">{label}</span>\n      {editando ? (\n        <input\n          className=\"ic-slider-input\"\n          autoFocus\n          inputMode=\"decimal\"\n          aria-label={`Valor de ${ariaLabel ?? label}`}\n          value={rascunho ?? \"\"}\n          onFocus={(e) => e.target.select()}\n          onChange={(e) => setRascunho(e.target.value)}\n          onBlur={() => fecharCampo(true)}\n          onKeyDown={(e) => {\n            e.stopPropagation();\n            if (e.key === \"Enter\") fecharCampo(true);\n            if (e.key === \"Escape\") fecharCampo(false);\n          }}\n          onPointerDown={(e) => e.stopPropagation()}\n        />\n      ) : (\n        <span className=\"ic-value\">\n          {texto}\n          {unit ? <i>{unit}</i> : null}\n        </span>\n      )}\n    </div>\n  );\n}\n\n/* ── Escolha entre poucos ───────────────────────────────────────────────── */\n\nexport interface SegmentOption<T extends string> {\n  value: T;\n  label: React.ReactNode;\n  disabled?: boolean;\n}\n\n/** De duas a quatro opções curtas. Valor fora das opções (seleção mista) apaga a luz. */\nexport function InspectorSegments<T extends string>({\n  label,\n  value,\n  options,\n  onValueChange,\n  className,\n}: {\n  label: string;\n  value: T | null;\n  options: SegmentOption<T>[];\n  onValueChange: (v: T) => void;\n  className?: string;\n}) {\n  const i = options.findIndex((o) => o.value === value);\n  return (\n    <div\n      className={cn(\"ic-segments\", className)}\n      role=\"radiogroup\"\n      aria-label={label}\n      style={{ \"--n\": options.length, \"--i\": Math.max(0, i) } as React.CSSProperties}\n      onKeyDown={andarNoGrupo}\n    >\n      {i >= 0 ? <span className=\"ic-segments-light\" aria-hidden /> : null}\n      {options.map((o, k) => (\n        <button\n          key={o.value}\n          type=\"button\"\n          role=\"radio\"\n          aria-checked={o.value === value}\n          tabIndex={tabDoGrupo(o.value === value, k, i >= 0)}\n          disabled={o.disabled}\n          onClick={() => o.value !== value && onValueChange(o.value)}\n        >\n          {o.label}\n        </button>\n      ))}\n    </div>\n  );\n}\n\n/* ── Miniaturas ─────────────────────────────────────────────────────────── */\n\nexport function InspectorThumbs({ label, columns = 3, className, children }: { label: string; columns?: number; className?: string; children: React.ReactNode }) {\n  return (\n    <div className={cn(\"ic-thumbs\", className)} role=\"radiogroup\" aria-label={label} style={{ \"--columns\": columns } as React.CSSProperties} onKeyDown={andarNoGrupo}>\n      {children}\n    </div>\n  );\n}\n\n/** Uma opção com desenho. O desenho é o filho; o nome vai embaixo e é também o nome acessível. */\nexport function InspectorThumb({\n  label,\n  selected,\n  onSelect,\n  disabled,\n  children,\n}: {\n  label: string;\n  selected: boolean;\n  onSelect: () => void;\n  disabled?: boolean;\n  children: React.ReactNode;\n}) {\n  return (\n    <button type=\"button\" className=\"ic-thumb\" role=\"radio\" aria-checked={selected} aria-label={label} disabled={disabled} onClick={onSelect}>\n      <span className=\"ic-thumb-art\">{children}</span>\n      <span className=\"ic-thumb-name\">{label}</span>\n    </button>\n  );\n}\n\n/* ── Cor ────────────────────────────────────────────────────────────────── */\n\nexport interface SwatchOption<T extends string = string> {\n  value: T;\n  /** Qualquer cor CSS: hex, `var(--…)`, oklch. */\n  color: string;\n  label: string;\n  /** Anel vazado: a opção \"nenhuma cor própria, vale a herdada\". */\n  hollow?: boolean;\n}\n\n/** Fileira de amostras. Aceita hex solto ou opções com nome (a paleta da marca, cores por token). */\nexport function InspectorSwatches<T extends string = string>({\n  label,\n  value,\n  options,\n  onValueChange,\n  className,\n}: {\n  label: string;\n  value: T | null;\n  options: (T | SwatchOption<T>)[];\n  onValueChange: (v: T) => void;\n  className?: string;\n}) {\n  const lista: SwatchOption<T>[] = options.map((o) => (typeof o === \"string\" ? { value: o, color: o, label: o } : o));\n  const igual = (a: string, b: string | null) => b !== null && a.toUpperCase() === b.toUpperCase();\n  const alguma = lista.some((o) => igual(o.value, value));\n  return (\n    <div className={cn(\"ic-swatches\", className)} role=\"radiogroup\" aria-label={label} onKeyDown={andarNoGrupo}>\n      {lista.map((o, k) => (\n        <InspectorHint key={o.value} label={o.label}>\n          <button\n            type=\"button\"\n            role=\"radio\"\n            aria-checked={igual(o.value, value)}\n            aria-label={o.label}\n            tabIndex={tabDoGrupo(igual(o.value, value), k, alguma)}\n            data-hollow={o.hollow || undefined}\n            style={{ \"--swatch\": o.color } as React.CSSProperties}\n            onClick={() => onValueChange(o.value)}\n          />\n        </InspectorHint>\n      ))}\n    </div>\n  );\n}\n\nconst HEX = /^#?[0-9a-f]{6}$/i;\n\n/** Cor livre: hex digitável e o poço que abre o seletor do sistema. Com `swatches`, a paleta vem embaixo. */\nexport function InspectorColor({\n  label,\n  value,\n  onValueChange,\n  swatches,\n  className,\n}: {\n  label: string;\n  /** `#RRGGBB`. */\n  value: string;\n  onValueChange: (c: string) => void;\n  swatches?: (string | SwatchOption)[];\n  className?: string;\n}) {\n  const [texto, setTexto] = React.useState(value);\n  React.useEffect(() => setTexto(value), [value]);\n  const linha = (\n    <div className={cn(\"ic-row ic-color\", !swatches && className)}>\n      <span className=\"ic-label\">{label}</span>\n      <input\n        className=\"ic-color-hex\"\n        aria-label={`${label} em hexadecimal`}\n        spellCheck={false}\n        value={texto}\n        onFocus={(e) => e.target.select()}\n        onChange={(e) => {\n          setTexto(e.target.value);\n          if (HEX.test(e.target.value)) onValueChange(`#${e.target.value.replace(\"#\", \"\").toUpperCase()}`);\n        }}\n        onBlur={() => setTexto(value)}\n      />\n      <label className=\"ic-color-well\" style={{ \"--swatch\": value } as React.CSSProperties}>\n        <span className=\"sr-only\">Escolher {label}</span>\n        <input type=\"color\" value={HEX.test(value) ? value : \"\"} onChange={(e) => onValueChange(e.target.value.toUpperCase())} />\n      </label>\n    </div>\n  );\n  if (!swatches) return linha;\n  return (\n    <div className={cn(\"ic-stack\", className)}>\n      {linha}\n      <InspectorSwatches label={`Paleta de ${label}`} value={value} options={swatches} onValueChange={onValueChange} />\n    </div>\n  );\n}\n\n/* ── Vetor: um valor com partes ─────────────────────────────────────────── */\n\nexport interface VectorPart {\n  /** A letra que nomeia a parte (X, Y, W, H). Arrastar sobre ela muda o valor. */\n  letter: string;\n  value: number;\n  min: number;\n  max: number;\n  step?: number;\n  unit?: string;\n  onValueChange: (v: number) => void;\n}\n\nexport function InspectorVector({ label, parts, className }: { label: string; parts: VectorPart[]; className?: string }) {\n  return (\n    <div className={cn(\"ic-vector\", className)} role=\"group\" aria-label={label}>\n      {parts.map((p) => (\n        <Parte key={p.letter} {...p} grupo={label} />\n      ))}\n    </div>\n  );\n}\n\nfunction Parte({ letter, value, min, max, step = 1, unit = \"\", onValueChange, grupo }: VectorPart & { grupo: string }) {\n  const [texto, setTexto] = React.useState<string | null>(null);\n  const gesto = React.useRef<{ x: number; v: number } | null>(null);\n  const prende = (n: number) => prender(n, min, max, step);\n  const casas = Math.max(0, -Math.floor(Math.log10(step)));\n  return (\n    <label className=\"ic-part\">\n      <span\n        className=\"ic-part-letter\"\n        onPointerDown={(e) => {\n          gesto.current = { x: e.clientX, v: value };\n          e.currentTarget.setPointerCapture(e.pointerId);\n        }}\n        onPointerMove={(e) => {\n          if (gesto.current) onValueChange(prende(gesto.current.v + (e.clientX - gesto.current.x) * 0.5 * step * (e.shiftKey ? 0.2 : 1)));\n        }}\n        onPointerUp={() => (gesto.current = null)}\n        onPointerCancel={() => (gesto.current = null)}\n      >\n        {letter}\n      </span>\n      <input\n        inputMode=\"decimal\"\n        aria-label={`${grupo} ${letter}`}\n        value={texto ?? `${formatNumber(value, casas)}${unit}`}\n        onFocus={(e) => {\n          setTexto(formatNumber(value, casas));\n          requestAnimationFrame(() => e.target.select());\n        }}\n        onChange={(e) => {\n          setTexto(e.target.value);\n          const n = parseNumber(e.target.value);\n          if (Number.isFinite(n)) onValueChange(prende(n));\n        }}\n        onBlur={() => setTexto(null)}\n        onKeyDown={(e) => {\n          if (e.key !== \"ArrowUp\" && e.key !== \"ArrowDown\") return;\n          e.preventDefault();\n          const n = prende(value + (e.key === \"ArrowUp\" ? 1 : -1) * step * (e.shiftKey ? 10 : 1));\n          onValueChange(n);\n          setTexto(formatNumber(n, casas));\n        }}\n      />\n    </label>\n  );\n}\n\n/* ── Liga e desliga ─────────────────────────────────────────────────────── */\n\n/** A linha inteira é o interruptor: o rótulo diz o que acontece quando está ligado. */\nexport function InspectorToggle({\n  label,\n  checked,\n  onCheckedChange,\n  disabled,\n  className,\n}: {\n  label: React.ReactNode;\n  /** `null` enquanto o valor ainda não chegou: mostra desligado e não deixa mexer. */\n  checked: boolean | null;\n  onCheckedChange: (v: boolean) => void;\n  disabled?: boolean;\n  className?: string;\n}) {\n  return (\n    <button\n      type=\"button\"\n      role=\"switch\"\n      aria-checked={checked === true}\n      disabled={disabled || checked === null}\n      className={cn(\"ic-row ic-toggle\", className)}\n      onClick={() => onCheckedChange(!checked)}\n    >\n      <span className=\"ic-label\">{label}</span>\n      <span className=\"ic-toggle-track\" aria-hidden>\n        <span className=\"ic-toggle-thumb\" />\n      </span>\n    </button>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/ui/inspector-controls/inspector-controls.tsx"
+    },
+    {
+      "path": "registry/visant/blocks/inspector-controls/index.ts",
+      "content": "// O CSS vem pelo campo `css` do item: o `shadcn add` injeta no globals.css de quem instala.\nexport {\n  formatNumber,\n  parseNumber,\n  InspectorColor,\n  InspectorHint,\n  InspectorRow,\n  InspectorSection,\n  InspectorSegments,\n  InspectorSlider,\n  InspectorSwatches,\n  InspectorThumb,\n  InspectorThumbs,\n  InspectorToggle,\n  InspectorVector,\n  type InspectorSectionProps,\n  type InspectorSliderProps,\n  type SegmentOption,\n  type SwatchOption,\n  type VectorPart,\n} from \"./inspector-controls\";\n",
+      "type": "registry:component",
+      "target": "components/ui/inspector-controls/index.ts"
+    }
+  ],
+  "css": {
+    ".ic-section, .ic-row, .ic-slider, .ic-segments, .ic-thumbs, .ic-swatches, .ic-vector, .ic-stack": {
+      "--ic-row-h": "var(--ic-row, 2rem)",
+      "--ic-radius": "var(--r-control, 8px)",
+      "--ic-tile": "var(--muted)",
+      "--ic-fg-2": "var(--muted-foreground)",
+      "--ic-fg-3": "color-mix(in oklab, var(--muted-foreground) 70%, transparent)",
+      "font-size": "0.8125rem",
+      "line-height": "1.2"
+    },
+    ".ic-section + .ic-section": {
+      "border-top": "1px solid var(--border)"
+    },
+    ".ic-section-head": {
+      "position": "sticky",
+      "top": "0",
+      "z-index": "2",
+      "display": "flex",
+      "align-items": "center",
+      "justify-content": "space-between",
+      "gap": "0.5rem",
+      "height": "2.5rem",
+      "padding": "0 0.5rem 0 0.75rem",
+      "background": "var(--ic-surface, var(--background))"
+    },
+    ".ic-section-title": {
+      "display": "flex",
+      "align-items": "center",
+      "gap": "0.375rem",
+      "flex": "1",
+      "min-width": "0",
+      "height": "100%",
+      "margin": "0",
+      "padding": "0",
+      "border": "0",
+      "background": "none",
+      "color": "var(--foreground)",
+      "font": "inherit",
+      "font-weight": "500",
+      "text-align": "left",
+      "cursor": "pointer",
+      "outline": "none"
+    },
+    "h3.ic-section-title": {
+      "cursor": "default"
+    },
+    ".ic-section-title svg": {
+      "flex": "none",
+      "color": "var(--ic-fg-3)",
+      "transition": "transform var(--dur-fast, 160ms) var(--ease-out, ease-out)"
+    },
+    ".ic-section[data-open] .ic-section-title svg": {
+      "transform": "rotate(90deg)"
+    },
+    ".ic-section-title:focus-visible": {
+      "border-radius": "4px",
+      "box-shadow": "0 0 0 2px var(--ring)"
+    },
+    ".ic-section-aside": {
+      "flex": "none",
+      "padding-right": "0.25rem",
+      "color": "var(--ic-fg-2)",
+      "font-size": "0.75rem",
+      "font-variant-numeric": "tabular-nums"
+    },
+    ".ic-reset": {
+      "display": "grid",
+      "place-items": "center",
+      "width": "1.75rem",
+      "height": "1.75rem",
+      "border": "0",
+      "border-radius": "var(--ic-radius)",
+      "background": "none",
+      "color": "var(--ic-fg-2)",
+      "cursor": "pointer",
+      "outline": "none"
+    },
+    ".ic-reset:hover": {
+      "background": "var(--ic-tile)",
+      "color": "var(--foreground)"
+    },
+    ".ic-reset:focus-visible": {
+      "box-shadow": "0 0 0 2px var(--ring)"
+    },
+    ".ic-section-body": {
+      "display": "grid",
+      "grid-template-rows": "0fr",
+      "transition": "grid-template-rows var(--dur-base, 200ms) var(--ease-out, ease-out)"
+    },
+    ".ic-section[data-open] .ic-section-body": {
+      "grid-template-rows": "1fr"
+    },
+    ".ic-section-body > div": {
+      "min-height": "0",
+      "overflow": "hidden",
+      "visibility": "hidden",
+      "transition": "visibility var(--dur-base, 200ms)"
+    },
+    ".ic-section[data-open] .ic-section-body > div": {
+      "display": "flex",
+      "flex-direction": "column",
+      "gap": "0.375rem",
+      "padding": "0 0.75rem 0.875rem",
+      "visibility": "visible"
+    },
+    ".ic-label": {
+      "color": "var(--ic-fg-2)"
+    },
+    ".ic-value": {
+      "color": "var(--foreground)",
+      "font-variant-numeric": "tabular-nums"
+    },
+    ".ic-value i": {
+      "font-style": "normal",
+      "color": "var(--ic-fg-3)"
+    },
+    ".ic-row": {
+      "display": "flex",
+      "align-items": "center",
+      "justify-content": "space-between",
+      "gap": "0.5rem",
+      "min-height": "var(--ic-row-h)"
+    },
+    ".ic-row > .ic-label": {
+      "flex": "none"
+    },
+    ".ic-row-control": {
+      "display": "flex",
+      "flex": "1",
+      "min-width": "0",
+      "justify-content": "flex-end"
+    },
+    ".ic-row-control > .ic-segments": {
+      "flex": "1",
+      "max-width": "15rem"
+    },
+    ".ic-stack": {
+      "display": "flex",
+      "flex-direction": "column",
+      "gap": "0.375rem"
+    },
+    ".ic-slider": {
+      "position": "relative",
+      "display": "flex",
+      "align-items": "center",
+      "justify-content": "space-between",
+      "gap": "0.5rem",
+      "height": "var(--ic-row-h)",
+      "padding": "0 0.625rem",
+      "overflow": "hidden",
+      "border-radius": "var(--ic-radius)",
+      "background": "var(--ic-tile)",
+      "cursor": "ew-resize",
+      "touch-action": "pan-y",
+      "user-select": "none",
+      "-webkit-user-select": "none",
+      "outline": "none"
+    },
+    ".ic-slider:hover .ic-label": {
+      "color": "var(--foreground)"
+    },
+    ".ic-slider:focus-visible": {
+      "box-shadow": "0 0 0 2px var(--ring)"
+    },
+    ".ic-slider[aria-disabled=\"true\"]": {
+      "opacity": "0.5",
+      "cursor": "default"
+    },
+    ".ic-slider > span:not(.ic-slider-fill, .ic-slider-mark), .ic-slider-input": {
+      "position": "relative"
+    },
+    ".ic-slider > .ic-label": {
+      "overflow": "hidden",
+      "text-overflow": "ellipsis",
+      "white-space": "nowrap"
+    },
+    ".ic-slider-fill": {
+      "position": "absolute",
+      "top": "0",
+      "bottom": "0",
+      "background": "color-mix(in oklab, var(--ic-tile), var(--foreground) 12%)"
+    },
+    ".ic-slider-mark": {
+      "position": "absolute",
+      "top": "25%",
+      "bottom": "25%",
+      "width": "1px",
+      "background": "var(--ic-fg-3)",
+      "opacity": "0.6"
+    },
+    ".ic-slider-input": {
+      "width": "4.5rem",
+      "padding": "0",
+      "border": "0",
+      "outline": "0",
+      "background": "none",
+      "color": "var(--foreground)",
+      "font": "inherit",
+      "font-size": "16px",
+      "text-align": "right",
+      "font-variant-numeric": "tabular-nums",
+      "cursor": "text"
+    },
+    ".ic-slider[data-editing]": {
+      "box-shadow": "inset 0 0 0 1px var(--ring)",
+      "cursor": "text"
+    },
+    ".ic-segments": {
+      "position": "relative",
+      "display": "grid",
+      "grid-auto-flow": "column",
+      "grid-auto-columns": "1fr",
+      "height": "var(--ic-row-h)",
+      "padding": "2px",
+      "border-radius": "var(--ic-radius)",
+      "background": "var(--ic-tile)"
+    },
+    ".ic-segments-light": {
+      "position": "absolute",
+      "top": "2px",
+      "bottom": "2px",
+      "left": "2px",
+      "width": "calc((100% - 4px) / var(--n))",
+      "border-radius": "calc(var(--ic-radius) - 2px)",
+      "background": "var(--background)",
+      "box-shadow": "0 1px 2px color-mix(in oklab, var(--foreground) 14%, transparent), 0 0 0 0.5px var(--border)",
+      "transform": "translateX(calc(var(--i) * 100%))",
+      "transition": "transform var(--dur-base, 200ms) var(--ease-out, ease-out)"
+    },
+    ".ic-segments button": {
+      "position": "relative",
+      "min-width": "0",
+      "padding": "0 0.25rem",
+      "overflow": "hidden",
+      "border": "0",
+      "border-radius": "calc(var(--ic-radius) - 2px)",
+      "background": "none",
+      "color": "var(--ic-fg-2)",
+      "font": "inherit",
+      "text-overflow": "ellipsis",
+      "white-space": "nowrap",
+      "cursor": "pointer",
+      "outline": "none",
+      "transition": "color var(--dur-fast, 160ms) var(--ease-out, ease-out)"
+    },
+    ".ic-segments button:hover": {
+      "color": "var(--foreground)"
+    },
+    ".ic-segments button[aria-checked=\"true\"]": {
+      "color": "var(--foreground)",
+      "font-weight": "500"
+    },
+    ".ic-segments button:focus-visible": {
+      "box-shadow": "0 0 0 2px var(--ring)"
+    },
+    ".ic-segments button:disabled": {
+      "opacity": "0.4",
+      "cursor": "default"
+    },
+    ".ic-thumbs": {
+      "display": "grid",
+      "grid-template-columns": "repeat(var(--columns), minmax(0, 1fr))",
+      "gap": "0.375rem"
+    },
+    ".ic-thumb": {
+      "display": "flex",
+      "flex-direction": "column",
+      "gap": "0.25rem",
+      "min-width": "0",
+      "padding": "0",
+      "border": "0",
+      "background": "none",
+      "color": "var(--ic-fg-2)",
+      "font": "inherit",
+      "font-size": "0.6875rem",
+      "cursor": "pointer",
+      "outline": "none"
+    },
+    ".ic-thumb-art": {
+      "position": "relative",
+      "display": "grid",
+      "place-items": "center",
+      "width": "100%",
+      "aspect-ratio": "1",
+      "overflow": "hidden",
+      "border-radius": "var(--ic-radius)",
+      "background": "var(--ic-tile)",
+      "box-shadow": "inset 0 0 0 1px transparent",
+      "transition": "box-shadow var(--dur-fast, 160ms) var(--ease-out, ease-out)"
+    },
+    ".ic-thumb:hover .ic-thumb-art": {
+      "box-shadow": "inset 0 0 0 1px var(--ic-fg-3)"
+    },
+    ".ic-thumb[aria-checked=\"true\"]": {
+      "color": "var(--foreground)"
+    },
+    ".ic-thumb[aria-checked=\"true\"] .ic-thumb-art": {
+      "box-shadow": "0 0 0 2px var(--background), 0 0 0 3.5px var(--foreground)"
+    },
+    ".ic-thumb:focus-visible .ic-thumb-art": {
+      "box-shadow": "0 0 0 2px var(--background), 0 0 0 3.5px var(--ring)"
+    },
+    ".ic-thumb:disabled": {
+      "opacity": "0.4",
+      "cursor": "default"
+    },
+    ".ic-thumb-name": {
+      "overflow": "hidden",
+      "text-overflow": "ellipsis",
+      "white-space": "nowrap",
+      "text-align": "center"
+    },
+    ".ic-swatches": {
+      "display": "flex",
+      "flex-wrap": "wrap",
+      "gap": "0.375rem",
+      "padding": "0.125rem 0"
+    },
+    ".ic-swatches button": {
+      "width": "1.375rem",
+      "height": "1.375rem",
+      "padding": "0",
+      "border": "0",
+      "border-radius": "50%",
+      "background": "var(--swatch)",
+      "box-shadow": "inset 0 0 0 1px color-mix(in oklab, var(--foreground) 15%, transparent)",
+      "cursor": "pointer",
+      "outline": "none"
+    },
+    ".ic-swatches button[data-hollow]": {
+      "background": "radial-gradient(circle, var(--background) 0 42%, var(--swatch) 44%)"
+    },
+    ".ic-swatches button[aria-checked=\"true\"]": {
+      "box-shadow": "0 0 0 2px var(--background), 0 0 0 3.5px var(--foreground)"
+    },
+    ".ic-swatches button:focus-visible": {
+      "box-shadow": "0 0 0 2px var(--background), 0 0 0 3.5px var(--ring)"
+    },
+    ".ic-color": {
+      "padding": "0 0.25rem 0 0.625rem",
+      "border-radius": "var(--ic-radius)",
+      "background": "var(--ic-tile)"
+    },
+    ".ic-color-hex": {
+      "flex": "1",
+      "min-width": "0",
+      "border": "0",
+      "outline": "0",
+      "background": "none",
+      "color": "var(--foreground)",
+      "font": "inherit",
+      "font-size": "16px",
+      "text-align": "right",
+      "font-variant-numeric": "tabular-nums",
+      "text-transform": "uppercase"
+    },
+    ".ic-color-well": {
+      "position": "relative",
+      "flex": "none",
+      "width": "1.5rem",
+      "height": "1.5rem",
+      "overflow": "hidden",
+      "border-radius": "calc(var(--ic-radius) - 2px)",
+      "background": "var(--swatch)",
+      "box-shadow": "inset 0 0 0 1px color-mix(in oklab, var(--foreground) 15%, transparent)",
+      "cursor": "pointer"
+    },
+    ".ic-color-well input": {
+      "position": "absolute",
+      "inset": "-4px",
+      "width": "200%",
+      "height": "200%",
+      "opacity": "0",
+      "cursor": "pointer"
+    },
+    ".ic-color:focus-within": {
+      "box-shadow": "inset 0 0 0 1px var(--ring)"
+    },
+    ".ic-vector": {
+      "display": "grid",
+      "grid-auto-flow": "column",
+      "grid-auto-columns": "1fr",
+      "gap": "0.25rem"
+    },
+    ".ic-part": {
+      "display": "flex",
+      "align-items": "center",
+      "height": "var(--ic-row-h)",
+      "overflow": "hidden",
+      "border-radius": "var(--ic-radius)",
+      "background": "var(--ic-tile)"
+    },
+    ".ic-part-letter": {
+      "flex": "none",
+      "display": "grid",
+      "place-items": "center",
+      "width": "1.5rem",
+      "height": "100%",
+      "color": "var(--ic-fg-3)",
+      "cursor": "ew-resize",
+      "touch-action": "none",
+      "user-select": "none",
+      "-webkit-user-select": "none"
+    },
+    ".ic-part input": {
+      "flex": "1",
+      "min-width": "0",
+      "width": "100%",
+      "height": "100%",
+      "padding": "0 0.5rem 0 0",
+      "border": "0",
+      "outline": "0",
+      "background": "none",
+      "color": "var(--foreground)",
+      "font": "inherit",
+      "font-size": "16px",
+      "text-align": "right",
+      "font-variant-numeric": "tabular-nums"
+    },
+    ".ic-part:focus-within": {
+      "box-shadow": "inset 0 0 0 1px var(--ring)"
+    },
+    ".ic-toggle": {
+      "width": "100%",
+      "padding": "0",
+      "border": "0",
+      "background": "none",
+      "color": "inherit",
+      "font": "inherit",
+      "text-align": "left",
+      "cursor": "pointer",
+      "outline": "none"
+    },
+    ".ic-toggle:hover .ic-label": {
+      "color": "var(--foreground)"
+    },
+    ".ic-toggle:disabled": {
+      "opacity": "0.5",
+      "cursor": "default"
+    },
+    ".ic-toggle-track": {
+      "position": "relative",
+      "flex": "none",
+      "width": "1.75rem",
+      "height": "1rem",
+      "border-radius": "999px",
+      "background": "color-mix(in oklab, var(--foreground) 18%, var(--ic-tile))",
+      "transition": "background-color var(--dur-fast, 160ms) var(--ease-out, ease-out)"
+    },
+    ".ic-toggle-thumb": {
+      "position": "absolute",
+      "top": "2px",
+      "left": "2px",
+      "width": "0.75rem",
+      "height": "0.75rem",
+      "border-radius": "999px",
+      "background": "var(--background)",
+      "box-shadow": "0 1px 2px color-mix(in oklab, var(--foreground) 25%, transparent)",
+      "transition": "transform var(--dur-fast, 160ms) var(--ease-out, ease-out)"
+    },
+    ".ic-toggle[aria-checked=\"true\"] .ic-toggle-track": {
+      "background": "var(--foreground)"
+    },
+    ".ic-toggle[aria-checked=\"true\"] .ic-toggle-thumb": {
+      "transform": "translateX(0.75rem)"
+    },
+    ".ic-toggle:focus-visible .ic-toggle-track": {
+      "box-shadow": "0 0 0 2px var(--background), 0 0 0 3.5px var(--ring)"
+    },
+    ".ic-hint": {
+      "z-index": "60",
+      "display": "flex",
+      "align-items": "center",
+      "gap": "0.5rem",
+      "padding": "0.3125rem 0.5rem",
+      "border-radius": "var(--r-control, 8px)",
+      "background": "var(--foreground)",
+      "color": "var(--background)",
+      "font-size": "0.75rem",
+      "line-height": "1"
+    },
+    ".ic-hint kbd": {
+      "font": "inherit",
+      "opacity": "0.6"
+    },
+    "@media (pointer: coarse)": {
+      ".ic-section, .ic-row, .ic-slider, .ic-segments, .ic-vector, .ic-stack": {
+        "--ic-row-h": "var(--ic-row, 2.75rem)"
+      },
+      ".ic-reset": {
+        "width": "2.75rem",
+        "height": "2.75rem"
+      },
+      ".ic-swatches button": {
+        "width": "2.125rem",
+        "height": "2.125rem"
+      }
+    },
+    "@media (pointer: fine)": {
+      ".ic-slider-input, .ic-color-hex, .ic-part input": {
+        "font-size": "inherit"
+      }
+    },
+    "@media (prefers-reduced-motion: reduce)": {
+      ".ic-section-body, .ic-section-body > div, .ic-segments-light, .ic-thumb-art, .ic-section-title svg, .ic-toggle-thumb, .ic-toggle-track": {
+        "transition": "none"
+      }
+    }
+  },
+  "meta": {
+    "uso": {
+      "quando": "Painel lateral de propriedades: inspetor de editor, estúdio de mockup, ajustes finos de uma peça selecionada",
+      "evite": "Formulário de cadastro ou página de configurações longa: campos de formulário comuns"
+    }
+  },
+  "categories": [
+    "controles",
+    "formulario",
+    "edicao",
+    "painel"
+  ],
+  "type": "registry:block"
+}
