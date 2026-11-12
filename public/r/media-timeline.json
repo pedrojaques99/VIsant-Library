@@ -1,0 +1,555 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "media-timeline",
+  "title": "Media Timeline",
+  "author": "Visant Labs <visantsupply@gmail.com>",
+  "description": "Timeline de edição de mídia: régua que vira quadros de perto, agulha com scrub e ímã, seleção por área, navalha, HUD do arrasto, cabeçalhos de faixa (renomear, grupos, solo, calar, travar), zoom em gesto e só os clipes à vista no DOM. Dados por props, mudanças por callback.",
+  "dependencies": [
+    "@xzdarcy/react-timeline-editor@^1.0.0",
+    "@xzdarcy/timeline-engine@^1.0.0",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "utils",
+    "@visant/inline-edit"
+  ],
+  "files": [
+    {
+      "path": "registry/visant/blocks/media-timeline/media-timeline.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport type { TimelineAction, TimelineRow } from \"@xzdarcy/timeline-engine\";\nimport \"@xzdarcy/react-timeline-editor/dist/react-timeline-editor.css\";\nimport { cn } from \"@/lib/utils\";\nimport type { Clock } from \"./clock\";\nimport { Overlay, RULER_HEIGHT, TRACKS_TOP, type OverlayHandle } from \"./overlay\";\nimport { rulerLabel, snapTo, timecode } from \"./ruler\";\nimport { TrackHeaders, type TrackHeader, type TrackHeaderLabels, type TrackState } from \"./track-headers\";\nimport type { MediaTimelineController } from \"./use-media-timeline\";\nimport { VisibleTimeline } from \"./window\";\n\n// Timeline de mídia (som, vídeo, legenda, nota) no nível de uma ferramenta de edição: régua que\n// vira quadros de perto, agulha com scrub e ímã, seleção por área, navalha, HUD do arrasto,\n// cabeçalhos de faixa (renomear, grupos, esconder, calar, solo, travar), zoom em gesto e só os\n// clipes à vista no DOM. Não sabe de onde vêm os dados nem de API: faixas e clipes entram por\n// props, o desenho de cada clipe é de quem usa (`renderClip`) e toda mudança sai por callback.\n// Arrastar e aparar são da lib `@xzdarcy/react-timeline-editor`; o resto é camada por cima.\n\nexport interface MediaClip {\n  id: string;\n  start: number;\n  end: number;\n  /** Tipo livre (som, vídeo, nota): vai para o `renderClip` e para a classe da lib. */\n  kind?: string;\n  /** Nome para a dica do clipe estreito (sem nome, sem dica). */\n  name?: string;\n  movable?: boolean;\n  resizable?: boolean;\n  selected?: boolean;\n  /** A seleção por área e a navalha pegam este clipe (padrão: sim). */\n  selectable?: boolean;\n  /** Limites de arrasto (s). */\n  min?: number;\n  max?: number;\n}\n\nexport interface MediaTrack extends Omit<TrackHeader, \"height\"> {\n  height?: number;\n  /** Os clipes. Mantenha o mesmo array enquanto nada mudar: a timeline só redesenha a faixa\n   *  cujo array mudou. */\n  clips: MediaClip[];\n  /** Travada: não arrasta, não apara, a área e a navalha passam por cima. */\n  locked?: boolean;\n}\n\nexport interface ClipChange { clip: MediaClip; track: string; start: number; end: number }\n\nexport interface MediaTimelineProps {\n  /** O estado de vista, de `useMediaTimeline`. */\n  controller: MediaTimelineController;\n  tracks: MediaTrack[];\n  clock: Clock;\n  renderClip: (clip: MediaClip, track: string, info: { px: number }) => React.ReactNode;\n  /** Altura padrão de uma faixa (px). */\n  trackHeight?: number;\n  tool?: \"select\" | \"razor\";\n  /** Ímã: a agulha, a navalha e o arrasto grudam nos pontos (começos e fins, marcas). */\n  snap?: boolean;\n  snapPoints?: number[];\n  /** Distância do ímã (px). */\n  snapPx?: number;\n  formatTime?: (t: number) => string;\n  /** Estado dos botões de cada faixa (solo, calar, travar). */\n  trackState?: (id: string) => TrackState;\n  selectedTracks?: Set<string>;\n  editingTrack?: string | null;\n  headerLabels?: Partial<TrackHeaderLabels>;\n  onTrackEdit?: (id: string | null) => void;\n  onTrackRename?: (id: string, name: string) => void;\n  onTrackSelect?: (id: string, additive: boolean) => void;\n  onTrackLock?: (id: string) => void;\n  onTrackMute?: (id: string) => void;\n  onTrackSolo?: (id: string) => void;\n  onTrackCollapse?: (id: string) => void;\n  onTrackHide?: (id: string) => void;\n  onMove?: (c: ClipChange) => void;\n  onResize?: (c: ClipChange & { edge: \"left\" | \"right\" }) => void;\n  onClipClick?: (clip: MediaClip, track: string, e: React.MouseEvent) => void;\n  /** Clique no vazio de uma faixa (não vem logo depois de uma seleção por área). */\n  onEmptyClick?: (e: React.MouseEvent) => void;\n  /** Ao soltar a seleção por área: os ids pegos e se Shift/Ctrl somava. */\n  onAreaSelect?: (ids: Set<string>, info: { additive: boolean }) => void;\n  /** O que a área marca enquanto arrasta, dado o que ela pega (ex.: o bloco inteiro). */\n  expandArea?: (ids: Set<string>) => Set<string>;\n  /** Navalha: corte no tempo `t` (já no quadro e no ímã). */\n  onCut?: (clip: MediaClip, track: string, t: number) => void;\n  onScrubStart?: () => void;\n  onScrub?: (t: number) => void;\n  onScrubEnd?: (t: number) => void;\n  onScroll?: (p: { left: number; top: number }) => void;\n  /** Frase nas faixas vazias. */\n  emptyHints?: { track: string; text: string }[];\n  /** Atalhos próprios: = e − (zoom), Shift+Z (caber), V e C (ferramenta). Desligue se a tela já\n   *  tem um teclado. */\n  keyboard?: boolean;\n  onToolChange?: (tool: \"select\" | \"razor\") => void;\n  /** Envolve os cabeçalhos e a área (menu de contexto, por exemplo). */\n  wrapHeaders?: (node: React.ReactElement) => React.ReactNode;\n  wrapArea?: (node: React.ReactElement) => React.ReactNode;\n  className?: string;\n  headersClassName?: string;\n  areaClassName?: string;\n}\n\nconst STATE_OFF: TrackState = { locked: false, muted: false, solo: false };\nconst nada = () => {};\n\nexport function MediaTimeline(props: MediaTimelineProps) {\n  const {\n    controller: tl, tracks, clock, renderClip, trackHeight = 34, tool = \"select\", snap = true, snapPoints = [], snapPx = 8,\n    formatTime: fmt, trackState = () => STATE_OFF, selectedTracks, editingTrack = null, headerLabels,\n    onMove, onResize, onClipClick, onEmptyClick, onAreaSelect, expandArea, onCut, onScrubStart, onScrub, onScrubEnd, onScroll,\n    emptyHints, keyboard = true, onToolChange, wrapHeaders, wrapArea, className, headersClassName, areaClassName,\n  } = props;\n  const { startLeft, fps, pxPerSecond, ruler, width, duration } = tl;\n  const formatTime = React.useMemo(() => fmt ?? ((t: number) => timecode(t, fps)), [fmt, fps]);\n  const overlay = React.useRef<OverlayHandle>(null);\n  const headers = React.useRef<HTMLDivElement>(null);\n  const marqueeAt = React.useRef(0);\n  // O que a seleção por área marca agora: o clipe que entra na janela no meio do gesto já nasce marcado.\n  const inMarquee = React.useRef<Set<string>>(new Set());\n\n  // ── Faixas e clipes → linhas da lib, com cache por array de clipes ──────────\n  // A lib copia os dados para um estado e redesenha tudo quando o array muda; com o cache, um\n  // render de quem usa que não mexeu em clipe nenhum não chega à lib.\n  const cache = React.useRef(new WeakMap<MediaClip[], { row: TimelineRow; h: number; locked: boolean }>());\n  const prevRows = React.useRef<TimelineRow[]>([]);\n  const rows = React.useMemo(() => {\n    const out = tracks.map((t) => {\n      const h = t.height ?? trackHeight, locked = !!t.locked;\n      const c = cache.current.get(t.clips);\n      if (c && c.row.id === t.id && c.h === h && c.locked === locked) return c.row;\n      const row: TimelineRow = {\n        id: t.id, rowHeight: h,\n        actions: t.clips.map((k) => ({\n          id: k.id, start: k.start, end: k.end, effectId: k.kind ?? \"clip\", selected: k.selected,\n          movable: !locked && k.movable !== false, flexible: !locked && k.resizable !== false,\n          ...(k.min !== undefined ? { minStart: k.min } : {}), ...(k.max !== undefined ? { maxEnd: k.max } : {}),\n        })),\n      };\n      cache.current.set(t.clips, { row, h, locked });\n      return row;\n    });\n    const same = out.length === prevRows.current.length && out.every((r, i) => r === prevRows.current[i]);\n    return same ? prevRows.current : (prevRows.current = out);\n  }, [tracks, trackHeight]);\n  const clipIndex = React.useMemo(() => {\n    const m = new Map<string, { clip: MediaClip; track: MediaTrack }>();\n    for (const t of tracks) for (const c of t.clips) m.set(c.id, { clip: c, track: t });\n    return m;\n  }, [tracks]);\n  const kinds = [...new Set(tracks.flatMap((t) => t.clips.map((c) => c.kind ?? \"clip\")))].sort().join(\",\");\n  const effects = React.useMemo(() => Object.fromEntries(kinds.split(\",\").map((k) => [k, { id: k }])), [kinds]);\n  const geometry = React.useMemo(() => {\n    let top = 0;\n    return tracks.map((t) => { const h = t.height ?? trackHeight; const g = { id: t.id, top, h }; top += h; return g; });\n  }, [tracks, trackHeight]);\n\n  // ── Geometria e ímã ─────────────────────────────────────────────────────────\n  const trackAtY = (y: number) => {\n    const yy = y - TRACKS_TOP + tl.scrollTop.current;\n    return geometry.find((g) => yy >= g.top && yy < g.top + g.h) ?? null;\n  };\n  const local = (e: { clientX: number; clientY: number }) => {\n    const r = tl.box.current!.getBoundingClientRect();\n    return { x: e.clientX - r.left, y: e.clientY - r.top };\n  };\n  const snapped = (t: number, free: boolean, extra: number[] = []) => {\n    if (!snap || free) return { t, snapped: false };\n    const p = snapTo(t, extra.length ? [...snapPoints, ...extra] : snapPoints, snapPx / pxPerSecond);\n    return p === null ? { t, snapped: false } : { t: p, snapped: true };\n  };\n  const onFrame = (t: number) => Math.round(t * fps) / fps;\n  // A faixa sob o mouse acende também o cabeçalho dela.\n  const markHeader = (id: string | null) => {\n    headers.current?.querySelectorAll<HTMLElement>(\"[data-track]\").forEach((el) => el.toggleAttribute(\"data-hover\", el.dataset.track === id));\n  };\n  const clearHover = () => { overlay.current?.set({ ghost: null, hoverTrack: null, razor: null, tip: null }); markHeader(null); };\n\n  // ── Agulha: arrastar na régua é scrub contínuo; Alt solta do ímã ─────────────\n  const dragPlayhead = (e: React.PointerEvent) => {\n    // Sem preventDefault: o clique na régua precisa tirar o foco de um campo, senão o Ctrl+Z\n    // seguinte vai para o campo e não para a timeline.\n    const focus = document.activeElement as HTMLElement | null;\n    if (focus?.closest(\"input, textarea, [contenteditable=\\\"true\\\"]\")) focus.blur();\n    onScrubStart?.();\n    let last = clock.get();\n    overlay.current?.set({ ghost: null });\n    const move = (ev: PointerEvent | React.PointerEvent) => {\n      const g = snapped(tl.timeAtX(local(ev).x), ev.altKey);\n      // Só o relógio anda: quem usa re-renderiza uma vez, ao soltar.\n      last = Math.max(0, Math.min(duration, g.t));\n      clock.set(last);\n      overlay.current?.set({ scrub: { snapped: g.snapped } });\n      onScrub?.(last);\n    };\n    const up = () => {\n      window.removeEventListener(\"pointermove\", move);\n      window.removeEventListener(\"pointerup\", up);\n      window.removeEventListener(\"pointercancel\", up);\n      overlay.current?.set({ scrub: null });\n      onScrubEnd?.(last);\n    };\n    move(e);\n    window.addEventListener(\"pointermove\", move);\n    window.addEventListener(\"pointerup\", up);\n    window.addEventListener(\"pointercancel\", up);\n  };\n\n  // ── Seleção por área: pega, ao vivo, os clipes que o retângulo toca ───────────\n  const selectByArea = (e: React.PointerEvent) => {\n    // O começo fica no conteúdo (com a rolagem), para o retângulo crescer com a rolagem automática.\n    const p0 = local(e);\n    const ini = { x: p0.x + tl.scrollLeft.current, y: p0.y + tl.scrollTop.current };\n    const additive = e.shiftKey || e.ctrlKey || e.metaKey;\n    let moved = false, last = p0, frame = 0, dirty = false;\n    let marked = new Set<string>();\n    let picked: Set<string> | null = null;\n    const box = tl.box.current!;\n    const mark = (id: string, on: boolean) => box.querySelector(`[data-mt-clip=\"${CSS.escape(id)}\"]`)?.toggleAttribute(\"data-in-marquee\", on);\n    const update = () => {\n      const p = last;\n      const ax = ini.x - tl.scrollLeft.current, ay = ini.y - tl.scrollTop.current;\n      const x = Math.max(0, Math.min(ax, p.x)), y = Math.max(TRACKS_TOP, Math.min(ay, p.y));\n      const r = { x, y, w: Math.max(0, Math.min(width, Math.max(ax, p.x)) - x), h: Math.max(0, Math.max(ay, p.y) - y) };\n      overlay.current?.set({ marquee: r });\n      // Acertos pela geometria (faixas e tempos), sem ler o layout de cada clipe.\n      const ids = new Set<string>();\n      const cx0 = r.x + tl.scrollLeft.current, cx1 = cx0 + r.w;\n      const cy0 = r.y - TRACKS_TOP + tl.scrollTop.current, cy1 = cy0 + r.h;\n      tracks.forEach((t, i) => {\n        const g = geometry[i];\n        if (g.top >= cy1 || g.top + g.h <= cy0 || t.locked) return;\n        for (const c of t.clips) {\n          if (c.selectable === false) continue;\n          const x0 = startLeft + c.start * pxPerSecond, x1 = Math.max(x0 + 6, startLeft + c.end * pxPerSecond);\n          if (x1 >= cx0 && x0 <= cx1) ids.add(c.id);\n        }\n      });\n      // Durante o gesto, a seleção é só visual (atributo no DOM, trocando só o que mudou); quem usa\n      // recebe uma vez, ao soltar. Antes, cada quadro re-renderizava todas as ações.\n      const now = expandArea ? expandArea(ids) : ids;\n      for (const k of marked) if (!now.has(k)) mark(k, false);\n      for (const k of now) if (!marked.has(k)) mark(k, true);\n      marked = now;\n      inMarquee.current = now;\n      picked = ids;\n    };\n    // Rolagem automática perto da borda. Rola o elemento da grade, não o estado da lib: rolagem\n    // por código re-renderizava todas as ações a cada passo.\n    const roll = () => {\n      const p = last, edge = 28, high = box.clientHeight;\n      const dx = p.x < edge ? p.x - edge : p.x > width - edge ? p.x - (width - edge) : 0;\n      const dy = p.y < TRACKS_TOP + edge && p.y < ini.y - tl.scrollTop.current ? p.y - TRACKS_TOP - edge : p.y > high - edge ? p.y - (high - edge) : 0;\n      const grid = box.querySelector<HTMLElement>(\".timeline-editor-edit-area .ReactVirtualized__Grid\");\n      const step = (d: number) => Math.sign(d) * Math.max(1, Math.abs(d * 0.4));\n      if (grid && dx) grid.scrollLeft = Math.max(0, grid.scrollLeft + step(dx));\n      if (grid && dy) grid.scrollTop = Math.max(0, grid.scrollTop + step(dy));\n      // No máximo uma conta por quadro, mesmo com o mouse mandando vários movimentos.\n      if (dx || dy || dirty) { dirty = false; update(); }\n      frame = requestAnimationFrame(roll);\n    };\n    const move = (ev: PointerEvent) => {\n      last = local(ev);\n      if (!moved && Math.hypot(last.x - p0.x, last.y - p0.y) < 4) return;\n      if (!moved) { clearHover(); frame = requestAnimationFrame(roll); }\n      moved = true;\n      dirty = true;\n    };\n    const up = () => {\n      cancelAnimationFrame(frame);\n      if (dirty) update();\n      window.removeEventListener(\"pointermove\", move);\n      window.removeEventListener(\"pointerup\", up);\n      window.removeEventListener(\"pointercancel\", up);\n      overlay.current?.set({ marquee: null });\n      inMarquee.current = new Set();\n      for (const k of marked) mark(k, false);\n      if (moved) marqueeAt.current = performance.now();\n      if (moved && picked) onAreaSelect?.(picked, { additive });\n    };\n    window.addEventListener(\"pointermove\", move);\n    window.addEventListener(\"pointerup\", up);\n    window.addEventListener(\"pointercancel\", up);\n  };\n\n  // ── Ponteiro na área: régua, vazio, navalha e hover ──────────────────────────\n  const clipUnder = (el: HTMLElement) => {\n    const id = el.closest<HTMLElement>(\"[data-mt-clip]\")?.dataset.mtClip;\n    return id ? clipIndex.get(id) ?? null : null;\n  };\n  const pointer = {\n    onPointerDown: (e: React.PointerEvent) => {\n      if (e.button !== 0) return;\n      const el = e.target as HTMLElement;\n      if (el.closest(\".timeline-editor-time-area\")) { dragPlayhead(e); return; }\n      const hit = clipUnder(el);\n      if (tool === \"razor\") {\n        if (hit && !hit.track.locked && hit.clip.selectable !== false) onCut?.(hit.clip, hit.track.id, snapped(onFrame(tl.timeAtX(local(e).x)), e.altKey, [clock.get()]).t);\n        return;\n      }\n      if (el.closest(\".timeline-editor-edit-area\") && !el.closest(\".timeline-editor-action\")) selectByArea(e);\n    },\n    onPointerMove: (e: React.PointerEvent) => {\n      const now = overlay.current?.get();\n      if (e.buttons && (now?.scrub || now?.marquee || now?.hud)) return;\n      const p = local(e);\n      const onRuler = p.y < RULER_HEIGHT;\n      const t = onRuler ? null : trackAtY(p.y);\n      const hit = onRuler ? null : clipUnder(e.target as HTMLElement);\n      // Clipe estreito (o nome não cabe): dica com nome, início e duração em cima dele.\n      let tip = null;\n      const action = hit?.clip.name ? (e.target as HTMLElement).closest<HTMLElement>(\".timeline-editor-action\") : null;\n      if (hit && action && !e.buttons && action.offsetWidth < 64) {\n        const r = action.getBoundingClientRect(), b = tl.box.current!.getBoundingClientRect();\n        tip = { x: r.left - b.left + r.width / 2, y: r.top - b.top, name: hit.clip.name!, start: hit.clip.start, duration: hit.clip.end - hit.clip.start };\n      }\n      overlay.current?.set({\n        ghost: onRuler ? tl.timeAtX(p.x) : null,\n        hoverTrack: t?.id ?? null,\n        razor: tool === \"razor\" && t && hit && hit.clip.selectable !== false ? { t: snapped(onFrame(tl.timeAtX(p.x)), e.altKey, [clock.get()]).t, track: t.id } : null,\n        tip,\n      });\n      markHeader(t?.id ?? null);\n    },\n    onPointerLeave: clearHover,\n  };\n\n  // HUD do arrasto e do aparo: início, duração e o quanto andou desde que pegou.\n  const showHud = (action: TimelineAction, track: string, start: number, end: number, edge?: \"left\" | \"right\") => {\n    const o = clipIndex.get(action.id)?.clip;\n    if (!o) return;\n    const delta = edge === \"right\" ? (end - start) - (o.end - o.start) : start - o.start;\n    overlay.current?.set({ hud: { track, start, duration: end - start, delta }, ghost: null, razor: null });\n  };\n\n  // ── Teclado próprio (opcional) ──────────────────────────────────────────────\n  React.useEffect(() => {\n    if (!keyboard) return;\n    const key = (e: KeyboardEvent) => {\n      if ((e.target as HTMLElement).closest(\"input, textarea, [contenteditable=\\\"true\\\"], [role=dialog]\") || e.ctrlKey || e.metaKey) return;\n      const k = e.key.toLowerCase();\n      if (e.key === \"=\" || e.key === \"+\") tl.zoomTo(tl.zoomTarget() * 1.5);\n      else if (e.key === \"-\" || e.key === \"_\") tl.zoomTo(tl.zoomTarget() / 1.5);\n      else if (k === \"z\" && e.shiftKey) tl.fit();\n      else if (k === \"v\") onToolChange?.(\"select\");\n      else if (k === \"c\") onToolChange?.(\"razor\");\n    };\n    window.addEventListener(\"keydown\", key);\n    return () => window.removeEventListener(\"keydown\", key);\n  });\n\n  const head = (\n    <TrackHeaders ref={headers} top={TRACKS_TOP} className={headersClassName} labels={headerLabels}\n      tracks={tracks.map((t) => ({ ...t, height: t.height ?? trackHeight }))} state={trackState}\n      selected={selectedTracks ?? new Set()} editing={editingTrack}\n      onEdit={props.onTrackEdit ?? nada} onRename={props.onTrackRename ?? nada} onSelect={props.onTrackSelect ?? nada}\n      onLock={props.onTrackLock ?? nada} onMute={props.onTrackMute ?? nada} onSolo={props.onTrackSolo ?? nada}\n      onCollapse={props.onTrackCollapse ?? nada} onHide={props.onTrackHide} />\n  );\n  const area = (\n    <div ref={tl.box} className={cn(\"mt-viewport\", tool === \"razor\" && \"is-razor\", areaClassName)} {...pointer}>\n      <VisibleTimeline ref={tl.timeline} anchor={tl.anchor.current} style={{ width: \"100%\", height: \"100%\" }} editorData={rows} effects={effects}\n        // Régua que se adapta ao zoom: segundos longe, meio segundo, quadros de perto.\n        scale={ruler.step} scaleWidth={pxPerSecond * ruler.step} scaleSplitCount={ruler.divisions} startLeft={startLeft} rowHeight={trackHeight}\n        minScaleCount={ruler.count} maxScaleCount={ruler.count} autoScroll gridSnap={snap} dragLine={snap}\n        // A agulha é a da camada por cima (arrasta pela régua, gruda, tem HUD).\n        hideCursor disableDrag={tool === \"razor\"}\n        getScaleRender={(s) => <span className=\"mt-num\">{rulerLabel(s, fps)}</span>}\n        getActionRender={(a, row) => {\n          const hit = clipIndex.get(a.id);\n          if (!hit) return null;\n          return (\n            <span className=\"mt-clip\" data-mt-clip={a.id} data-in-marquee={inMarquee.current.has(a.id) ? \"\" : undefined}>\n              {renderClip(hit.clip, row.id, { px: (a.end - a.start) * pxPerSecond })}\n            </span>\n          );\n        }}\n        onClickActionOnly={(e, { action, row }) => { const hit = clipIndex.get(action.id); if (hit) onClipClick?.(hit.clip, row.id, e); }}\n        onClickRow={(e) => {\n          // Clique no vazio da faixa (menos logo depois de uma seleção por área).\n          if (performance.now() - marqueeAt.current < 300) return;\n          if (!(e.target as HTMLElement).closest(\".mt-clip\")) onEmptyClick?.(e);\n        }}\n        onActionMoving={({ action, row, start, end }) => { showHud(action, row.id, start, end); }}\n        onActionResizing={({ action, row, start, end, dir }) => { showHud(action, row.id, start, end, dir); }}\n        onActionMoveEnd={({ action, row, start, end }) => {\n          overlay.current?.set({ hud: null });\n          const hit = clipIndex.get(action.id);\n          if (hit) onMove?.({ clip: hit.clip, track: row.id, start, end });\n        }}\n        onActionResizeEnd={({ action, row, start, end, dir }) => {\n          overlay.current?.set({ hud: null });\n          const hit = clipIndex.get(action.id);\n          if (hit) onResize?.({ clip: hit.clip, track: row.id, start, end, edge: dir });\n        }}\n        onScroll={({ scrollTop, scrollLeft }) => {\n          tl.scrollLeft.current = scrollLeft; tl.scrollTop.current = scrollTop;\n          overlay.current?.set({ left: scrollLeft, top: scrollTop });\n          if (headers.current) headers.current.scrollTop = scrollTop;\n          onScroll?.({ left: scrollLeft, top: scrollTop });\n        }} />\n      <Overlay ref={overlay} startLeft={startLeft} pxPerSecond={pxPerSecond} clock={clock} duration={duration} width={width} geometry={geometry}\n        step={ruler.step} fps={fps} formatTime={formatTime} hints={emptyHints} />\n    </div>\n  );\n  return (\n    <div className={cn(\"mt\", className)}>\n      {wrapHeaders ? wrapHeaders(head) : head}\n      {wrapArea ? wrapArea(area) : area}\n    </div>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/ui/media-timeline/media-timeline.tsx"
+    },
+    {
+      "path": "registry/visant/blocks/media-timeline/use-media-timeline.ts",
+      "content": "import * as React from \"react\";\nimport type { TimelineState } from \"@xzdarcy/react-timeline-editor\";\nimport type { Clock } from \"./clock\";\nimport { rulerScale } from \"./ruler\";\n\n// O estado de vista da timeline: zoom, px por segundo, régua, rolagem e a âncora do zoom. Fica num\n// hook (e não dentro do componente) porque quem usa precisa dele fora da timeline: o play rola a\n// vista, a tira de quadros mede pelo px por segundo, o slider de zoom mora numa barra.\n\nexport interface UseMediaTimelineOptions {\n  /** Duração do filme (s). */\n  duration: number;\n  /** O relógio do play: o zoom sem ponteiro ancora na agulha. */\n  clock: Clock;\n  /** Folga à esquerda do tempo zero (px). */\n  startLeft?: number;\n  /** Mínimo de px por segundo, mesmo com o zoom de caber. */\n  minPxPerSecond?: number;\n  maxZoom?: number;\n  fps?: number;\n  /** Quanto o gesto espera depois do último passo para aplicar a escala (ms). */\n  settleMs?: number;\n}\n\nexport type MediaTimelineController = ReturnType<typeof useMediaTimeline>;\n\nexport function useMediaTimeline({ duration, clock, startLeft = 12, minPxPerSecond = 24, maxZoom = 48, fps = 30, settleMs = 140 }: UseMediaTimelineOptions) {\n  const total = duration || 1;\n  const timeline = React.useRef<TimelineState>(null);\n  const box = React.useRef<HTMLDivElement>(null);\n  const scrollLeft = React.useRef(0);\n  const scrollTop = React.useRef(0);\n  const anchor = React.useRef<{ t: number; x: number } | null>(null);\n  const [width, setWidth] = React.useState(1200);\n  const [zoom, setZoom] = React.useState(1);\n  const pxPerSecond = Math.max(minPxPerSecond, ((width - 40) / total) * zoom);\n  const ppsRef = React.useRef(pxPerSecond);\n  ppsRef.current = pxPerSecond;\n  const widthRef = React.useRef(width);\n  widthRef.current = width;\n  const zoomRef = React.useRef(zoom);\n  zoomRef.current = zoom;\n  const ruler = rulerScale(pxPerSecond, total, fps);\n  const ppsAt = (z: number) => Math.max(minPxPerSecond, ((widthRef.current - 40) / total) * z);\n  const setScroll = (x: number) => timeline.current?.setScrollLeft(Math.max(0, x));\n\n  // Depois do zoom, rola para o tempo da âncora voltar ao mesmo x (mouse, agulha ou meio).\n  React.useLayoutEffect(() => {\n    const a = anchor.current;\n    if (!a) return;\n    anchor.current = null;\n    setScroll(startLeft + a.t * pxPerSecond - a.x);\n    stretch(null);\n    // eslint-disable-next-line react-hooks/exhaustive-deps\n  }, [pxPerSecond]);\n\n  // Zoom em gesto: durante a roda, as teclas ou o slider, a timeline estica por `transform` em\n  // volta da âncora, sem re-renderizar as ações; a escala de verdade entra uma vez, `settleMs`\n  // depois do último passo. Com 300 clipes, cada passo custava ~70 ms de render.\n  const gesture = React.useRef<{ target: number; t: number; x: number; timer: number } | null>(null);\n  const stretch = (s: number | null, x = 0) => {\n    const el = box.current;\n    if (!el) return;\n    el.querySelectorAll<HTMLElement>(\".ReactVirtualized__Grid__innerScrollContainer\").forEach((a) => {\n      a.style.transformOrigin = s === null ? \"\" : `${x + scrollLeft.current}px 0`;\n      a.style.transform = s === null ? \"\" : `scaleX(${s})`;\n    });\n    const over = el.querySelector<HTMLElement>(\".mt-overlay\");\n    if (over) { over.style.transformOrigin = s === null ? \"\" : `${x}px 0`; over.style.transform = s === null ? \"\" : `scaleX(${s})`; }\n  };\n  const gestureZoom = (z: number, at: { t: number; x: number }) => {\n    const g = gesture.current ?? { target: zoomRef.current, ...at, timer: 0 };\n    g.target = Math.max(1, Math.min(maxZoom, z));\n    gesture.current = g;\n    stretch(ppsAt(g.target) / ppsRef.current, g.x);\n    window.clearTimeout(g.timer);\n    g.timer = window.setTimeout(() => {\n      const f = gesture.current;\n      gesture.current = null;\n      if (!f) return;\n      if (Math.abs(ppsAt(f.target) - ppsRef.current) < 0.01) { stretch(null); return; }\n      anchor.current = { t: f.t, x: f.x };\n      setZoom(f.target);\n    }, settleMs);\n  };\n  const gestureRef = React.useRef(gestureZoom);\n  gestureRef.current = gestureZoom;\n  /** O zoom para onde o gesto está indo (ou o atual): teclas e roda somam sobre ele. */\n  const zoomTarget = () => gesture.current?.target ?? zoomRef.current;\n  const zoomTargetRef = React.useRef(zoomTarget);\n  zoomTargetRef.current = zoomTarget;\n  /** Zoom em volta do x (px na vista); sem x, em volta da agulha (ou do meio, se ela está fora). */\n  const zoomTo = (z: number, x?: number) => {\n    const now = clock.get();\n    const xA = startLeft + now * ppsRef.current - scrollLeft.current;\n    gestureZoom(z, x !== undefined\n      ? { t: (x + scrollLeft.current - startLeft) / ppsRef.current, x }\n      : { t: now, x: xA >= 0 && xA <= widthRef.current ? xA : widthRef.current / 2 });\n  };\n  const fit = () => { anchor.current = { t: 0, x: startLeft }; setZoom(1); setScroll(0); };\n\n  // Largura da área e Ctrl+roda (zoom em volta do mouse; listener não passivo para segurar o zoom\n  // da página).\n  React.useEffect(() => {\n    const el = box.current;\n    if (!el) return;\n    const o = new ResizeObserver(([e]) => setWidth(e.contentRect.width));\n    o.observe(el);\n    const wheel = (e: WheelEvent) => {\n      if (!e.ctrlKey && !e.metaKey) return;\n      e.preventDefault();\n      const x = e.clientX - el.getBoundingClientRect().left;\n      gestureRef.current(zoomTargetRef.current() * (e.deltaY < 0 ? 1.15 : 1 / 1.15), { t: (x + scrollLeft.current - startLeft) / ppsRef.current, x });\n    };\n    el.addEventListener(\"wheel\", wheel, { passive: false });\n    return () => { o.disconnect(); el.removeEventListener(\"wheel\", wheel); };\n  }, [startLeft]);\n\n  /** A agulha nunca some: saiu da vista, a timeline vira a página (como nos editores de vídeo). */\n  const reveal = React.useCallback((t: number) => {\n    const x = startLeft + t * ppsRef.current, left = scrollLeft.current, w = widthRef.current;\n    if (x < left) setScroll(x - w * 0.85);\n    else if (x > left + w - 16) setScroll(x - w * 0.15);\n  }, [startLeft]);\n  /** No play: a vista segue a agulha quando ela chega perto da borda. */\n  const follow = React.useCallback((t: number) => {\n    const x = startLeft + t * ppsRef.current;\n    if (x > scrollLeft.current + widthRef.current - 80 || x < scrollLeft.current) setScroll(x - 80);\n  }, [startLeft]);\n  /** O tempo (s) num x da vista, dentro do filme. */\n  const timeAtX = (x: number) => Math.max(0, Math.min(total, (x + scrollLeft.current - startLeft) / ppsRef.current));\n\n  return {\n    duration: total, startLeft, fps, maxZoom,\n    zoom, zoomTo, zoomTarget, fit, pxPerSecond, ruler, width,\n    reveal, follow, timeAtX, setScroll,\n    /** Refs que a timeline preenche: quem usa lê, não escreve. */\n    timeline, box, scrollLeft, scrollTop, anchor,\n  };\n}\n",
+      "type": "registry:component",
+      "target": "components/ui/media-timeline/use-media-timeline.ts"
+    },
+    {
+      "path": "registry/visant/blocks/media-timeline/window.tsx",
+      "content": "import * as React from \"react\";\nimport { Timeline, type TimelineState } from \"@xzdarcy/react-timeline-editor\";\nimport type { TimelineRow } from \"@xzdarcy/timeline-engine\";\n\n// Virtualização das ações. A lib (`@xzdarcy/react-timeline-editor`) só virtualiza as linhas\n// (react-virtualized, overscan de 10): cada linha desenha todas as suas ações, e a cada mudança\n// de escala ou de dados todas re-renderizam. Esta camada passa para a lib só as ações dentro da\n// janela rolada, com uma tela de folga para cada lado, e só troca a janela quando a vista chega a\n// meia tela da borda (histerese: rolar não pisca nem remonta a cada passo). Medido num filme de\n// 300 clipes: zoom de 83 para 89 fps, rolagem de 89 para 92, 2.444 para 1.607 nós de perto.\n\n/** O que está à vista: tempo em segundos e altura em px do conteúdo. */\nexport interface View { t0: number; t1: number; y0: number; y1: number }\n\nexport function viewOf(left: number, top: number, width: number, height: number, pxPerSecond: number, startLeft: number): View {\n  return { t0: (left - startLeft) / pxPerSecond, t1: (left + width - startLeft) / pxPerSecond, y0: top, y1: top + height };\n}\n\n/** A janela desenhada: a vista com uma tela de folga para cada lado. */\nexport function windowOf(v: View): View {\n  const dt = v.t1 - v.t0, dy = v.y1 - v.y0;\n  return { t0: v.t0 - dt, t1: v.t1 + dt, y0: v.y0 - dy, y1: v.y1 + dy };\n}\n\n/** Troca quando a vista chega a meia tela da borda da janela, ou quando a janela ficou larga\n *  demais para a vista (depois de aproximar o zoom, ela desenharia o filme quase inteiro). */\nexport function needsNewWindow(w: View, v: View): boolean {\n  const dt = v.t1 - v.t0, dy = v.y1 - v.y0;\n  return v.t0 < w.t0 + dt / 2 || v.t1 > w.t1 - dt / 2 || w.t1 - w.t0 > dt * 6\n    || v.y0 < w.y0 + dy / 2 || v.y1 > w.y1 - dy / 2 || w.y1 - w.y0 > dy * 6;\n}\n\n/** As linhas com só as ações da janela (e as fixas, como a que está sendo arrastada). Linha fora\n *  da janela fica, com a mesma altura, sem ações. Nada cortado devolve o mesmo array. */\nexport function cropRows(rows: TimelineRow[], w: View, defaultHeight: number, pinned: ReadonlySet<string>): TimelineRow[] {\n  let top = 0, changed = false;\n  const out = rows.map((r) => {\n    const h = r.rowHeight ?? defaultHeight;\n    const inside = top < w.y1 && top + h > w.y0;\n    top += h;\n    const actions = r.actions.filter((a) => pinned.has(a.id) || (inside && a.end >= w.t0 && a.start <= w.t1));\n    if (actions.length === r.actions.length) return r;\n    changed = true;\n    return { ...r, actions };\n  });\n  return changed ? out : rows;\n}\n\nexport type VisibleTimelineProps = React.ComponentProps<typeof Timeline> & {\n  /** Depois de uma troca de escala, o tempo `t` fica no x `x` da vista (o zoom ancorado). A\n   *  janela já nasce certa no mesmo render, sem desenhar primeiro a da escala velha. */\n  anchor?: { t: number; x: number } | null;\n};\n\n/** A `Timeline` da lib com as ações fora da vista fora do DOM. Mesma API, mais `anchor`. */\nexport const VisibleTimeline = React.forwardRef<TimelineState, VisibleTimelineProps>(function VisibleTimeline({ anchor, ...props }, ref) {\n  const { editorData, scale = 1, scaleWidth = 160, startLeft = 20, rowHeight = 32 } = props;\n  const pps = scaleWidth / scale;\n  const inner = React.useRef<TimelineState>(null);\n  // Sem dependências: a lib refaz o objeto dela a cada render, e quem chama deve ver o atual.\n  React.useImperativeHandle(ref, () => inner.current as TimelineState);\n  const scroll = React.useRef({ left: 0, top: 0 });\n  const size = React.useRef({ width: 0, height: 0 });\n  const pinned = React.useRef(new Set<string>());\n  const win = React.useRef<View | null>(null);\n  const seenPps = React.useRef(pps);\n  const [, refresh] = React.useReducer((n: number) => n + 1, 0);\n\n  // Escala nova: a rolagem que vai valer é a da âncora (quem chama rola para lá logo depois).\n  let newScale = false;\n  if (pps !== seenPps.current) {\n    seenPps.current = pps;\n    newScale = true;\n    if (anchor) scroll.current = { ...scroll.current, left: Math.max(0, startLeft + anchor.t * pps - anchor.x) };\n  }\n  const viewNow = () => viewOf(scroll.current.left, scroll.current.top, size.current.width, size.current.height, pps, startLeft);\n  if (size.current.width > 0) {\n    const v = viewNow();\n    if (!win.current || newScale || needsNewWindow(win.current, v)) win.current = windowOf(v);\n  }\n  const w = win.current;\n  const data = React.useMemo(() => (w ? cropRows(editorData, w, rowHeight, pinned.current) : editorData), [editorData, w, rowHeight]);\n\n  // Medida da área: sem ela (1º render), desenha tudo, como a lib sozinha.\n  React.useEffect(() => {\n    const el = inner.current?.target;\n    if (!el) return;\n    const o = new ResizeObserver(() => {\n      const r = el.getBoundingClientRect();\n      if (r.width === size.current.width && r.height === size.current.height) return;\n      size.current = { width: r.width, height: r.height };\n      refresh();\n    });\n    o.observe(el);\n    return () => o.disconnect();\n  }, []);\n\n  const { onScroll, onActionMoveStart, onActionResizeStart, onActionMoveEnd, onActionResizeEnd } = props;\n  return (\n    <Timeline ref={inner} {...props} editorData={data}\n      onScroll={(p) => {\n        scroll.current = { left: p.scrollLeft, top: p.scrollTop };\n        onScroll?.(p);\n        if (win.current && size.current.width > 0 && needsNewWindow(win.current, viewNow())) refresh();\n      }}\n      // A ação arrastada fica desenhada até soltar, mesmo que a rolagem automática leve a janela\n      // para longe do lugar original dela (a lib precisa dela nos dados para fechar o arrasto).\n      onActionMoveStart={(d) => { pinned.current.add(d.action.id); return onActionMoveStart?.(d); }}\n      onActionResizeStart={(d) => { pinned.current.add(d.action.id); return onActionResizeStart?.(d); }}\n      onActionMoveEnd={(d) => { pinned.current.delete(d.action.id); return onActionMoveEnd?.(d); }}\n      onActionResizeEnd={(d) => { pinned.current.delete(d.action.id); return onActionResizeEnd?.(d); }} />\n  );\n});\n",
+      "type": "registry:component",
+      "target": "components/ui/media-timeline/window.tsx"
+    },
+    {
+      "path": "registry/visant/blocks/media-timeline/overlay.tsx",
+      "content": "import * as React from \"react\";\nimport { cn } from \"@/lib/utils\";\nimport { useClockTime, type Clock } from \"./clock\";\nimport { formatSeconds, rulerLabel } from \"./ruler\";\n\n// A camada por cima da timeline da lib: agulha própria, agulha fantasma da régua, faixa sob o\n// mouse, retângulo de seleção, linha da navalha, HUD do arrasto e dica do clipe estreito.\n// A lib continua dona dos clipes (arrastar, aparar); isto só desenha. Guarda o próprio estado e\n// muda por `set`, sem renderizar quem usa a timeline a cada movimento do mouse.\n\n/** Altura da régua da lib (32) mais a margem de cima da área das faixas (10). */\nexport const TRACKS_TOP = 42;\nexport const RULER_HEIGHT = 32;\n/** Largura que um rótulo da régua ocupa (para não cortar na borda direita). */\nconst LABEL_PX = 34;\n\nexport interface OverlayState {\n  left: number; top: number;\n  ghost: number | null;\n  hoverTrack: string | null;\n  scrub: { snapped: boolean } | null;\n  marquee: { x: number; y: number; w: number; h: number } | null;\n  razor: { t: number; track: string } | null;\n  hud: { track: string; start: number; duration: number; delta: number } | null;\n  /** Dica do clipe estreito sob o mouse (nome, início, duração), presa no topo dele. */\n  tip: { x: number; y: number; name: string; start: number; duration: number } | null;\n}\nexport interface OverlayHandle { set: (p: Partial<OverlayState>) => void; get: () => OverlayState }\nexport interface TrackGeometry { id: string; top: number; h: number }\nconst EMPTY: OverlayState = { left: 0, top: 0, ghost: null, hoverTrack: null, scrub: null, marquee: null, razor: null, hud: null, tip: null };\n\nexport const Overlay = React.forwardRef<OverlayHandle, {\n  startLeft: number; pxPerSecond: number; duration: number; width: number; geometry: TrackGeometry[];\n  clock: Clock;\n  /** Intervalo entre dois números da régua (s). */\n  step: number;\n  fps: number;\n  formatTime: (t: number) => string;\n  /** Frase das faixas vazias, no começo da área visível. */\n  hints?: { track: string; text: string }[];\n}>(function Overlay({ startLeft, pxPerSecond, clock, duration, width, geometry, step, fps, formatTime, hints = [] }, ref) {\n  const [s, setS] = React.useState<OverlayState>(EMPTY);\n  const current = React.useRef(s);\n  current.current = s;\n  React.useImperativeHandle(ref, () => ({\n    set: (p) => setS((v) => {\n      const n = { ...v, ...p };\n      return (Object.keys(p) as (keyof OverlayState)[]).every((k) => v[k] === n[k]) ? v : n;\n    }),\n    get: () => current.current,\n  }), []);\n  const xOf = (t: number) => startLeft + t * pxPerSecond - s.left;\n  const inView = (x: number) => x >= 0 && x <= width;\n  const g = (id: string | null) => (id ? geometry.find((x) => x.id === id) ?? null : null);\n  const topOf = (l: TrackGeometry) => TRACKS_TOP + l.top - s.top;\n  const hover = g(s.hoverTrack);\n  const razorTrack = s.razor ? g(s.razor.track) : null;\n  const hudTrack = s.hud ? g(s.hud.track) : null;\n  const hudY = hudTrack ? topOf(hudTrack) - 26 : 0;\n  const below = hudTrack ? hudY < TRACKS_TOP : false;\n  // Régua: o número fica logo à direita da marca (nada corta na borda esquerda) e some antes de\n  // cortar na direita. Em quadros, o segundo inteiro vem em destaque e um rótulo fixo à esquerda\n  // diz em que segundo se está, para nenhum \"15f\" ficar sem contexto.\n  const tStart = Math.max(0, (s.left - startLeft) / pxPerSecond), tEnd = Math.min(duration, (s.left + width - startLeft) / pxPerSecond);\n  const marks: { k: number; t: number; x: number; whole: boolean }[] = [];\n  for (let k = Math.floor(tStart / step); k * step <= tEnd + 1e-6; k++) {\n    const t = k * step, x = xOf(t) + 4;\n    if (x < 0 || x + LABEL_PX > width) continue;\n    marks.push({ k, t, x, whole: Math.abs(t - Math.round(t)) < 1e-6 });\n  }\n  const firstWhole = marks.find((m) => m.whole)?.x ?? Infinity;\n  const context = step < 1 && firstWhole > LABEL_PX + 12 ? Math.floor(tStart + 1e-6) : null;\n  const labels = marks.filter((m) => context === null || m.x > LABEL_PX + 4).map((m) => (\n    <span key={m.k} className={cn(\"mt-ruler-label mt-num\", m.whole && \"is-whole\")} style={{ transform: `translateX(${m.x}px)` }}>{rulerLabel(m.t, fps)}</span>\n  ));\n  return (\n    <div aria-hidden className=\"mt-overlay\">\n      <div className=\"mt-ruler-labels\">\n        {labels}\n        {context !== null ? <span className=\"mt-ruler-context mt-num\">{rulerLabel(context, fps)}</span> : null}\n      </div>\n      {hints.map((h) => { const l = g(h.track); return l ? <span key={h.track} className=\"mt-empty-hint\" style={{ transform: `translateY(${topOf(l)}px)`, height: l.h }}>{h.text}</span> : null; })}\n      <div className=\"mt-overlay-tracks\">\n        {hover ? <div className=\"mt-hover-track\" style={{ transform: `translateY(${hover.top - s.top}px)`, height: hover.h }} /> : null}\n      </div>\n      {s.ghost !== null && !s.scrub && inView(xOf(s.ghost)) ? (\n        <div className=\"mt-ghost\" style={{ transform: `translateX(${xOf(s.ghost)}px)` }}>\n          <span className=\"mt-ghost-time mt-num\">{formatTime(s.ghost)}</span>\n        </div>\n      ) : null}\n      {s.razor && razorTrack && inView(xOf(s.razor.t)) ? (\n        <div className=\"mt-razor\" style={{ transform: `translate(${xOf(s.razor.t)}px, ${topOf(razorTrack)}px)`, height: razorTrack.h }}>\n          <span className=\"mt-razor-time mt-num\">{formatTime(s.razor.t)}</span>\n        </div>\n      ) : null}\n      <Playhead clock={clock} x={xOf} width={width} duration={duration} scrub={s.scrub} formatTime={formatTime} />\n      {s.tip && !s.scrub && !s.marquee && !s.hud ? (\n        <div className=\"mt-clip-tip\" style={{ transform: `translate(${s.tip.x}px, ${s.tip.y}px)` }}>\n          <span className=\"mt-clip-tip-name\">{s.tip.name}</span>\n          <span className=\"mt-num\">{formatTime(s.tip.start)} · {formatSeconds(s.tip.duration)}</span>\n        </div>\n      ) : null}\n      {s.marquee ? <div className=\"mt-marquee\" style={{ transform: `translate(${s.marquee.x}px, ${s.marquee.y}px)`, width: s.marquee.w, height: s.marquee.h }} /> : null}\n      {s.hud && hudTrack ? (\n        <div className=\"mt-hud mt-num\" style={{ transform: `translate(${Math.max(4, xOf(s.hud.start))}px, ${below ? topOf(hudTrack) + hudTrack.h + 4 : hudY}px)` }}>\n          <span>{formatTime(s.hud.start)}</span>\n          <span className=\"mt-hud-sep\" />\n          <span>{formatSeconds(s.hud.duration)}</span>\n          {Math.abs(s.hud.delta) > 0.0005 ? <><span className=\"mt-hud-sep\" /><span className=\"mt-hud-delta\">{formatSeconds(s.hud.delta, true)}</span></> : null}\n        </div>\n      ) : null}\n    </div>\n  );\n});\n\n/** A agulha é a única parte que redesenha a cada quadro do play (assina o relógio sozinha). */\nfunction Playhead({ clock, x, width, duration, scrub, formatTime }: { clock: Clock; x: (t: number) => number; width: number; duration: number; scrub: { snapped: boolean } | null; formatTime: (t: number) => string }) {\n  const time = useClockTime(clock);\n  const xA = x(time);\n  if (xA < 0 || xA > width || time > duration) return null;\n  return (\n    <div className={cn(\"mt-playhead\", scrub && \"is-dragging\", scrub?.snapped && \"is-snapped\")} style={{ transform: `translateX(${xA}px)` }}>\n      <span className=\"mt-playhead-head\">{scrub ? <span className=\"mt-num\">{formatTime(time)}</span> : null}</span>\n    </div>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/ui/media-timeline/overlay.tsx"
+    },
+    {
+      "path": "registry/visant/blocks/media-timeline/track-headers.tsx",
+      "content": "import * as React from \"react\";\nimport { ChevronRight, EyeOff, Lock, LockOpen, Volume2, VolumeX } from \"lucide-react\";\nimport { InlineEdit } from \"@/components/ui/inline-edit\";\nimport { cn } from \"@/lib/utils\";\n\n// Cabeçalhos das faixas: nome (renomeável no lugar), cor, solo, calar, esconder e travar, e os\n// grupos que recolhem. Não sabe de dado: recebe as faixas e o estado por props e devolve cada\n// gesto por callback.\n\nexport interface TrackHeader {\n  id: string;\n  label: string;\n  height: number;\n  /** Cor do ponto (valor CSS, de preferência um token). Sem cor, sem ponto. */\n  color?: string;\n  /** Cabeçalho de grupo: recolhido ou não, e quantas faixas tem. */\n  group?: { collapsed: boolean; count: number };\n  /** Faixa dentro de um grupo aberto: recua um passo. */\n  nested?: boolean;\n  /** Quais botões a linha tem. */\n  controls?: { solo?: boolean; mute?: boolean; hide?: boolean; lock?: boolean };\n  renamable?: boolean;\n}\nexport interface TrackState { locked: boolean; muted: boolean; solo: boolean; hidden?: boolean }\n\nexport interface TrackHeaderLabels {\n  list: string; name: string; solo: string; mute: string; unmute: string; hide: string;\n  lock: string; unlock: string; expand: string; collapse: string; renameHint: string;\n}\nexport const TRACK_HEADER_LABELS: TrackHeaderLabels = {\n  list: \"Faixas\", name: \"Nome da faixa\", solo: \"Solo em\", mute: \"Calar\", unmute: \"Ouvir\", hide: \"Esconder\",\n  lock: \"Travar\", unlock: \"Destravar\", expand: \"Abrir\", collapse: \"Recolher\", renameHint: \"dois cliques ou F2 renomeiam\",\n};\n\nexport interface TrackHeadersProps {\n  tracks: TrackHeader[];\n  state: (id: string) => TrackState;\n  selected: Set<string>;\n  editing: string | null;\n  /** Espaço em cima (a altura da régua), para as linhas casarem com as faixas. */\n  top: number;\n  className?: string;\n  labels?: Partial<TrackHeaderLabels>;\n  onEdit: (id: string | null) => void;\n  onRename: (id: string, name: string) => void;\n  onSelect: (id: string, additive: boolean) => void;\n  onLock: (id: string) => void;\n  onMute: (id: string) => void;\n  onSolo: (id: string) => void;\n  onCollapse: (id: string) => void;\n  /** Tira a linha da timeline (quem chama decide onde ela continua aparecendo). */\n  onHide?: (id: string) => void;\n}\n\nexport const TrackHeaders = React.forwardRef<HTMLDivElement, TrackHeadersProps>(function TrackHeaders(\n  { tracks, state, selected, editing, top, className, labels, onEdit, onRename, onSelect, onLock, onMute, onSolo, onCollapse, onHide }, ref) {\n  const L = { ...TRACK_HEADER_LABELS, ...labels };\n  return (\n    <div ref={ref} role=\"listbox\" aria-label={L.list} aria-multiselectable className={cn(\"mt-headers\", className)} style={{ paddingTop: top }}>\n      {tracks.map((t) => {\n        const s = state(t.id);\n        const c = t.controls ?? {};\n        return (\n          <div key={t.id} role=\"option\" aria-selected={selected.has(t.id)} tabIndex={0} data-track={t.id} data-alvo={`faixa:${t.id}`}\n            className={cn(\"mt-track-header\", t.group && \"is-group\", t.nested && \"is-nested\", s.muted && \"is-muted\")}\n            style={{ height: t.height }}\n            onClick={(e) => { if (!(e.target as HTMLElement).closest(\"button, input\")) onSelect(t.id, e.shiftKey || e.ctrlKey || e.metaKey); }}\n            onDoubleClick={(e) => { if (t.renamable && !(e.target as HTMLElement).closest(\"button\")) onEdit(t.id); }}\n            onKeyDown={(e) => {\n              if (e.target !== e.currentTarget) return;\n              if (e.key === \"F2\" && t.renamable) { e.preventDefault(); e.stopPropagation(); onEdit(t.id); }\n              else if ((e.key === \"Enter\" || e.key === \" \") && t.group) { e.preventDefault(); e.stopPropagation(); onCollapse(t.id); }\n            }}>\n            {t.group ? (\n              <button type=\"button\" className=\"mt-track-chevron\" aria-expanded={!t.group.collapsed} aria-label={`${t.group.collapsed ? L.expand : L.collapse} ${t.label}`} onClick={() => onCollapse(t.id)}>\n                <ChevronRight className={cn(!t.group.collapsed && \"rotate-90\")} />\n              </button>\n            ) : t.color ? <span aria-hidden className=\"mt-track-dot\" style={{ background: t.color }} /> : null}\n            {editing === t.id\n              ? <TrackRename value={t.label} label={L.name} onSave={(n) => { onRename(t.id, n); onEdit(null); }} onCancel={() => onEdit(null)} />\n              : <span className=\"mt-track-name\" title={t.renamable ? `${t.label} (${L.renameHint})` : t.label}>{t.label}{t.group ? <span className=\"mt-num mt-track-count\"> {t.group.count}</span> : null}</span>}\n            <span className=\"mt-track-actions\">\n              {c.solo ? <HeaderButton active={s.solo} label={`${L.solo} ${t.label}`} onClick={() => onSolo(t.id)}><span className=\"mt-track-solo\">S</span></HeaderButton> : null}\n              {c.mute ? <HeaderButton active={s.muted} label={`${s.muted ? L.unmute : L.mute} ${t.label}`} onClick={() => onMute(t.id)}>{s.muted ? <VolumeX /> : <Volume2 />}</HeaderButton> : null}\n              {c.hide && onHide ? <HeaderButton active={false} label={`${L.hide} ${t.label}`} onClick={() => onHide(t.id)}><EyeOff /></HeaderButton> : null}\n              {c.lock ? <HeaderButton active={s.locked} label={`${s.locked ? L.unlock : L.lock} ${t.label}`} onClick={() => onLock(t.id)}>{s.locked ? <Lock /> : <LockOpen />}</HeaderButton> : null}\n            </span>\n          </div>\n        );\n      })}\n    </div>\n  );\n});\n\n/** Edição no lugar: Enter grava, Esc cancela, sair do campo grava. */\nexport function TrackRename({ value, label, onSave, onCancel }: { value: string; label: string; onSave: (n: string) => void; onCancel: () => void }) {\n  const [text, setText] = React.useState(value);\n  const done = React.useRef(false);\n  const save = () => { if (done.current) return; done.current = true; if (text.trim() === value) onCancel(); else onSave(text); };\n  return (\n    <InlineEdit isEditing value={value} onStartEdit={() => {}} className=\"min-w-0 flex-1 [--ie-h:1.5rem]\"\n      onSave={async () => save()} onCancel={() => { done.current = true; onCancel(); }}>\n      <input autoFocus aria-label={label} value={text} maxLength={40} onChange={(e) => setText(e.target.value)}\n        onFocus={(e) => e.currentTarget.select()} onBlur={save} className=\"mt-track-input\" />\n    </InlineEdit>\n  );\n}\n\nfunction HeaderButton({ active, label, onClick, children }: { active: boolean; label: string; onClick: () => void; children: React.ReactNode }) {\n  return (\n    <button type=\"button\" aria-label={label} aria-pressed={active} title={label} onClick={onClick} className=\"mt-track-button\">\n      {children}\n    </button>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/ui/media-timeline/track-headers.tsx"
+    },
+    {
+      "path": "registry/visant/blocks/media-timeline/ruler.tsx",
+      "content": "// Régua que se adapta ao zoom (segundos de longe, meio segundo, quadros de perto), ímã e formatos\n// de tempo. Funções puras: quem usa pode testar e reaproveitar sem o componente.\n\n/** Distância mínima, em px, entre dois números da régua. */\nconst LABEL_SPACE = 64;\n\n/** Os intervalos possíveis entre dois números da régua (s): quadros, depois segundos. */\nconst stepsFor = (fps: number) => [1, 2, 5, 10, 15].map((q) => q / fps).concat([1, 2, 5, 10, 15, 30, 60]);\n\n/** O passo da régua (s), quantas marcas cabem entre dois números e quantos números há. */\nexport function rulerScale(pxPerSecond: number, duration: number, fps = 30) {\n  const step = stepsFor(fps).find((p) => p * pxPerSecond >= LABEL_SPACE) ?? 60;\n  const frames = Math.round(step * fps);\n  // Marcas pequenas com pelo menos 6 px entre si: cada quadro quando cabe, senão menos.\n  const divisions = step < 1\n    ? [frames, 5, 3, 2, 1].find((d) => frames % d === 0 && (step * pxPerSecond) / d >= 6) ?? 1\n    : [10, 5, 2, 1].find((d) => (step * pxPerSecond) / d >= 8) ?? 1;\n  return { step, divisions, count: Math.ceil(duration / step) + 1 };\n}\n\n/** \"3s\" nos segundos inteiros; \"15f\" (o quadro dentro do segundo) no resto. */\nexport function rulerLabel(t: number, fps = 30) {\n  const q = Math.round(t * fps);\n  const s = Math.floor(q / fps), f = q % fps;\n  if (f) return <span className=\"mt-ruler-frame\">{f}f</span>;\n  return s >= 60 ? `${Math.floor(s / 60)}:${String(s % 60).padStart(2, \"0\")}` : `${s}s`;\n}\n\n/** mm:ss:ff. */\nexport function timecode(t: number, fps = 30) {\n  const m = Math.floor(t / 60), s = Math.floor(t % 60), q = Math.floor((t % 1) * fps);\n  return `${String(m).padStart(2, \"0\")}:${String(s).padStart(2, \"0\")}:${String(q).padStart(2, \"0\")}`;\n}\n\n/** Segundos com vírgula e sinal: \"+0,42s\". */\nexport const formatSeconds = (d: number, signed = false) =>\n  `${signed ? (d > 0.0005 ? \"+\" : d < -0.0005 ? \"−\" : \"±\") : \"\"}${Math.abs(d).toFixed(2).replace(\".\", \",\")}s`;\n\n/** O ponto mais perto dentro de `limit` (s), ou null. */\nexport function snapTo(t: number, points: number[], limit: number) {\n  let best: number | null = null;\n  for (const p of points) if (Math.abs(p - t) <= limit && (best === null || Math.abs(p - t) < Math.abs(best - t))) best = p;\n  return best;\n}\n",
+      "type": "registry:component",
+      "target": "components/ui/media-timeline/ruler.tsx"
+    },
+    {
+      "path": "registry/visant/blocks/media-timeline/clock.tsx",
+      "content": "import * as React from \"react\";\n\n// O tempo do play fora do estado de quem usa a timeline. Com o tempo num `useState`, cada quadro\n// do play re-renderizava a tela inteira (99 commits/s); assim, só as folhas que mostram o tempo\n// (agulha, timecode) assinam o relógio e redesenham.\n\nexport interface Clock {\n  get: () => number;\n  set: (t: number) => void;\n  subscribe: (f: () => void) => () => void;\n}\n\nexport function createClock(initial = 0): Clock {\n  let t = initial;\n  const listeners = new Set<() => void>();\n  return {\n    get: () => t,\n    set: (v) => {\n      if (v === t) return;\n      t = v;\n      listeners.forEach((f) => f());\n    },\n    subscribe: (f) => {\n      listeners.add(f);\n      return () => {\n        listeners.delete(f);\n      };\n    },\n  };\n}\n\n/** O tempo atual do relógio, re-renderizando só quem chama. */\nexport const useClockTime = (c: Clock) => React.useSyncExternalStore(c.subscribe, c.get);\n\n/** Renderiza `children(tempo)` com o tempo vivo: o pai não re-renderiza a cada quadro. */\nexport function WithTime({ clock, children }: { clock: Clock; children: (t: number) => React.ReactNode }) {\n  return <>{children(useClockTime(clock))}</>;\n}\n",
+      "type": "registry:component",
+      "target": "components/ui/media-timeline/clock.tsx"
+    },
+    {
+      "path": "registry/visant/blocks/media-timeline/filmstrip.tsx",
+      "content": "// Tira de quadros (filmstrip) dentro de um clipe de vídeo. Recebe uma imagem com N quadros lado a\n// lado (sprite) e mostra, em cada ladrilho, o quadro do tempo que cai embaixo dele, no zoom que\n// estiver. Não sabe de onde vem a imagem: url e medida chegam por props.\n\nexport interface FilmstripSprite {\n  /** Quadros na imagem, lado a lado. */\n  frames: number;\n  /** Largura e altura de um quadro na imagem (px). */\n  width: number;\n  height: number;\n  /** Duração do vídeo que a imagem cobre (s). */\n  duration: number;\n}\n\n/** Ladrilhos colados na largura natural do quadro; acima de 800 por clipe, eles se espaçam. */\nconst MAX_TILES = 800;\n\nexport function Filmstrip({ src, sprite, from, duration, pxPerSecond, height }: {\n  src: string; sprite: FilmstripSprite;\n  /** Onde o clipe começa dentro do vídeo (s) e quanto dura. */\n  from: number; duration: number;\n  pxPerSecond: number; height: number;\n}) {\n  const width = duration * pxPerSecond;\n  const natural = sprite.width * (height / sprite.height);\n  const tile = Math.max(natural, width / MAX_TILES);\n  const count = Math.max(1, Math.ceil(width / tile));\n  const tiles = [];\n  for (let k = 0; k < count; k++) {\n    const t = from + (k * tile + tile / 2) / pxPerSecond;\n    const i = Math.max(0, Math.min(sprite.frames - 1, Math.floor((t / sprite.duration) * sprite.frames)));\n    tiles.push(\n      <span key={k} style={{ left: k * tile, width: natural, backgroundImage: `url(${src})`, backgroundSize: `${sprite.frames * natural}px ${height}px`, backgroundPosition: `${-i * natural}px 0` }} />,\n    );\n  }\n  return <span aria-hidden className=\"mt-filmstrip\">{tiles}</span>;\n}\n",
+      "type": "registry:component",
+      "target": "components/ui/media-timeline/filmstrip.tsx"
+    },
+    {
+      "path": "registry/visant/blocks/media-timeline/index.ts",
+      "content": "// O CSS deste bloco vem pelo campo `css` do item (vai para o globals.css no `shadcn add`).\n\nexport { MediaTimeline, type ClipChange, type MediaClip, type MediaTimelineProps, type MediaTrack } from \"./media-timeline\";\nexport { useMediaTimeline, type MediaTimelineController, type UseMediaTimelineOptions } from \"./use-media-timeline\";\nexport { createClock, useClockTime, WithTime, type Clock } from \"./clock\";\nexport { formatSeconds, rulerLabel, rulerScale, snapTo, timecode } from \"./ruler\";\nexport { Filmstrip, type FilmstripSprite } from \"./filmstrip\";\nexport { TrackHeaders, TrackRename, TRACK_HEADER_LABELS, type TrackHeader, type TrackHeaderLabels, type TrackState } from \"./track-headers\";\nexport { RULER_HEIGHT, TRACKS_TOP } from \"./overlay\";\nexport { cropRows, needsNewWindow, viewOf, VisibleTimeline, windowOf, type View } from \"./window\";\n",
+      "type": "registry:component",
+      "target": "components/ui/media-timeline/index.ts"
+    }
+  ],
+  "css": {
+    ".mt": {
+      "display": "flex",
+      "width": "100%",
+      "height": "100%",
+      "min-height": "0"
+    },
+    ".mt-viewport": {
+      "position": "relative",
+      "flex": "1",
+      "min-width": "0",
+      "height": "100%",
+      "user-select": "none",
+      "-webkit-user-select": "none"
+    },
+    ".mt-num": {
+      "font-variant-numeric": "tabular-nums"
+    },
+    ".mt .timeline-editor": {
+      "background": "var(--background)",
+      "color": "var(--muted-foreground)",
+      "font-family": "var(--font-sans)",
+      "font-size": "0.75rem"
+    },
+    ".mt .timeline-editor-edit-row": {
+      "background-image": "linear-gradient(var(--background), var(--background)),\n    linear-gradient(90deg, color-mix(in oklab, var(--border) 38%, transparent) 1px, transparent 0)",
+      "border-bottom": "1px solid color-mix(in oklab, var(--border) 35%, transparent)"
+    },
+    ".mt .timeline-editor-time-area": {
+      "border-bottom": "1px solid color-mix(in oklab, var(--border) 60%, transparent)",
+      "touch-action": "none"
+    },
+    ".mt .timeline-editor-time-area-interact": {
+      "cursor": "ew-resize"
+    },
+    ".mt .timeline-editor-time-unit": {
+      "border-right-color": "color-mix(in oklab, var(--foreground) 14%, transparent)"
+    },
+    ".mt .timeline-editor-time-unit-big": {
+      "border-right-color": "color-mix(in oklab, var(--foreground) 32%, transparent)"
+    },
+    ".mt .timeline-editor-time-unit-scale": {
+      "display": "none"
+    },
+    ".mt .timeline-editor-cursor": {
+      "border-color": "var(--brand)"
+    },
+    ".mt .timeline-editor-drag-line": {
+      "border-left": "1px solid color-mix(in oklab, var(--brand) 80%, transparent)"
+    },
+    ".mt .timeline-editor-edit-area .ReactVirtualized__Grid::-webkit-scrollbar-thumb": {
+      "background": "var(--border)"
+    },
+    ".mt .timeline-editor-action": {
+      "background": "transparent",
+      "border-radius": "4px",
+      "overflow": "hidden",
+      "cursor": "grab"
+    },
+    ".mt .timeline-editor-action:active": {
+      "cursor": "grabbing"
+    },
+    ".mt .timeline-editor-action-left-stretch::after,\n.mt .timeline-editor-action-right-stretch::after": {
+      "border-left-color": "transparent",
+      "border-right-color": "transparent"
+    },
+    ".mt .timeline-editor-action-left-stretch,\n.mt .timeline-editor-action-right-stretch": {
+      "width": "5px",
+      "opacity": "0",
+      "cursor": "ew-resize",
+      "z-index": "2",
+      "transition": "opacity var(--dur-fast) var(--ease-out)"
+    },
+    ".mt .timeline-editor-action:hover .timeline-editor-action-left-stretch,\n.mt .timeline-editor-action:hover .timeline-editor-action-right-stretch": {
+      "opacity": "1",
+      "background": "color-mix(in oklab, var(--brand) 55%, transparent)"
+    },
+    ".mt-clip": {
+      "display": "contents"
+    },
+    ".mt-viewport.is-razor .timeline-editor-action,\n.mt-viewport.is-razor .timeline-editor-action:active": {
+      "cursor": "crosshair"
+    },
+    ".mt-viewport.is-razor .timeline-editor-action-left-stretch,\n.mt-viewport.is-razor .timeline-editor-action-right-stretch": {
+      "display": "none"
+    },
+    ".mt-overlay": {
+      "position": "absolute",
+      "inset": "0",
+      "z-index": "5",
+      "overflow": "hidden",
+      "pointer-events": "none"
+    },
+    ".mt-overlay-tracks": {
+      "position": "absolute",
+      "inset": "42px 0 0 0",
+      "overflow": "hidden"
+    },
+    ".mt-hover-track": {
+      "position": "absolute",
+      "top": "0",
+      "left": "0",
+      "right": "0",
+      "background": "color-mix(in oklab, var(--foreground) 3.5%, transparent)"
+    },
+    ".mt-ruler-labels": {
+      "position": "absolute",
+      "top": "0",
+      "left": "0",
+      "right": "0",
+      "height": "32px",
+      "overflow": "hidden"
+    },
+    ".mt-ruler-label, .mt-ruler-context": {
+      "position": "absolute",
+      "top": "5px",
+      "left": "0",
+      "font-size": "0.65625rem",
+      "line-height": "1",
+      "white-space": "nowrap",
+      "color": "var(--muted-foreground)"
+    },
+    ".mt-ruler-label.is-whole": {
+      "color": "var(--foreground)",
+      "font-weight": "500"
+    },
+    ".mt-ruler-context": {
+      "top": "0",
+      "height": "18px",
+      "padding": "5px 8px 0 4px",
+      "color": "var(--foreground)",
+      "font-weight": "500",
+      "background": "linear-gradient(90deg, var(--background) 70%, transparent)"
+    },
+    ".mt-ruler-frame": {
+      "color": "color-mix(in oklab, var(--muted-foreground) 70%, transparent)"
+    },
+    ".mt-playhead, .mt-ghost, .mt-razor": {
+      "position": "absolute",
+      "top": "0",
+      "left": "0",
+      "width": "0"
+    },
+    ".mt-playhead, .mt-ghost": {
+      "bottom": "0"
+    },
+    ".mt-playhead::before": {
+      "content": "\"\"",
+      "position": "absolute",
+      "top": "30px",
+      "bottom": "0",
+      "left": "-0.5px",
+      "width": "1px",
+      "background": "var(--brand)"
+    },
+    ".mt-playhead-head": {
+      "position": "absolute",
+      "top": "19px",
+      "left": "0",
+      "height": "13px",
+      "min-width": "9px",
+      "padding": "0",
+      "display": "grid",
+      "place-items": "center",
+      "transform": "translateX(-50%)",
+      "border-radius": "3px",
+      "background": "var(--brand)",
+      "color": "var(--brand-foreground)",
+      "font-size": "0.65625rem",
+      "font-weight": "600",
+      "line-height": "1",
+      "transition": "padding var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) ease"
+    },
+    ".mt-playhead.is-dragging .mt-playhead-head": {
+      "height": "18px",
+      "top": "3px",
+      "padding": "0 6px"
+    },
+    ".mt-playhead.is-dragging::before": {
+      "top": "21px"
+    },
+    ".mt-playhead.is-snapped .mt-playhead-head": {
+      "box-shadow": "0 0 0 3px color-mix(in oklab, var(--brand) 30%, transparent)"
+    },
+    ".mt-ghost::before": {
+      "content": "\"\"",
+      "position": "absolute",
+      "top": "22px",
+      "bottom": "0",
+      "left": "-0.5px",
+      "width": "1px",
+      "background": "color-mix(in oklab, var(--foreground) 22%, transparent)"
+    },
+    ".mt-ghost-time, .mt-razor-time": {
+      "position": "absolute",
+      "top": "4px",
+      "left": "0",
+      "transform": "translateX(-50%)",
+      "padding": "2px 5px",
+      "border-radius": "4px",
+      "white-space": "nowrap",
+      "font-size": "0.625rem",
+      "line-height": "1.2",
+      "color": "var(--foreground)",
+      "background": "color-mix(in oklab, var(--muted) 92%, var(--foreground) 4%)",
+      "animation": "mt-surge var(--dur-fast) var(--ease-out)"
+    },
+    ".mt-razor": {
+      "border-left": "1px dashed var(--foreground)",
+      "margin-left": "-0.5px"
+    },
+    ".mt-razor-time": {
+      "top": "-20px"
+    },
+    ".mt-marquee": {
+      "position": "absolute",
+      "top": "0",
+      "left": "0",
+      "border-radius": "2px",
+      "background": "color-mix(in oklab, var(--brand) 10%, transparent)",
+      "box-shadow": "inset 0 0 0 1px color-mix(in oklab, var(--brand) 70%, transparent)"
+    },
+    ".mt-hud": {
+      "position": "absolute",
+      "top": "0",
+      "left": "0",
+      "display": "inline-flex",
+      "align-items": "center",
+      "gap": "6px",
+      "height": "20px",
+      "padding": "0 7px",
+      "border-radius": "5px",
+      "white-space": "nowrap",
+      "font-size": "0.65625rem",
+      "font-weight": "500",
+      "color": "var(--background)",
+      "background": "var(--foreground)",
+      "box-shadow": "0 4px 12px -4px color-mix(in oklab, var(--shadow, var(--foreground)) 35%, transparent)",
+      "animation": "mt-surge var(--dur-fast) var(--ease-out)"
+    },
+    ".mt-hud > span:not(.mt-hud-delta):not(.mt-hud-sep)": {
+      "opacity": "0.72"
+    },
+    ".mt-hud-sep": {
+      "width": "1px",
+      "height": "9px",
+      "background": "currentColor",
+      "opacity": "0.25"
+    },
+    ".mt-hud-delta": {
+      "font-weight": "600"
+    },
+    ".mt-clip-tip": {
+      "position": "absolute",
+      "top": "0",
+      "left": "0",
+      "display": "inline-flex",
+      "flex-direction": "column",
+      "gap": "1px",
+      "translate": "-50% calc(-100% - 6px)",
+      "padding": "4px 8px",
+      "border-radius": "6px",
+      "white-space": "nowrap",
+      "font-size": "0.6875rem",
+      "line-height": "1.25",
+      "color": "var(--background)",
+      "background": "var(--foreground)",
+      "animation": "mt-surge var(--dur-fast) var(--ease-out)"
+    },
+    ".mt-clip-tip .mt-num": {
+      "opacity": "0.7",
+      "font-size": "0.625rem"
+    },
+    ".mt-clip-tip-name": {
+      "font-weight": "500",
+      "max-width": "16rem",
+      "overflow": "hidden",
+      "text-overflow": "ellipsis"
+    },
+    ".mt-empty-hint": {
+      "position": "absolute",
+      "top": "0",
+      "left": "16px",
+      "display": "flex",
+      "align-items": "center",
+      "font-size": "0.6875rem",
+      "color": "var(--muted-foreground)",
+      "opacity": "0.8",
+      "white-space": "nowrap"
+    },
+    "@keyframes mt-surge": {
+      "from": {
+        "opacity": "0"
+      }
+    },
+    ".mt-filmstrip": {
+      "position": "absolute",
+      "inset": "0",
+      "overflow": "hidden",
+      "border-radius": "inherit"
+    },
+    ".mt-filmstrip > span": {
+      "position": "absolute",
+      "top": "0",
+      "bottom": "0",
+      "background-repeat": "no-repeat"
+    },
+    ".mt-headers": {
+      "flex": "none",
+      "width": "9rem",
+      "height": "100%",
+      "overflow": "hidden",
+      "outline": "none",
+      "border-right": "1px solid var(--border)",
+      "font-size": "0.75rem",
+      "color": "var(--muted-foreground)"
+    },
+    ".mt-track-header": {
+      "--mt-bg": "var(--background)",
+      "background": "var(--mt-bg)",
+      "position": "relative",
+      "display": "flex",
+      "align-items": "center",
+      "gap": "6px",
+      "padding": "0 2px 0 10px",
+      "cursor": "default",
+      "outline": "none",
+      "transition": "background-color var(--dur-fast) ease, color var(--dur-fast) ease"
+    },
+    ".mt-track-header:hover, .mt-track-header[data-hover]": {
+      "--mt-bg": "color-mix(in oklab, var(--foreground) 4%, var(--background))",
+      "color": "var(--foreground)"
+    },
+    ".mt-track-header.is-nested": {
+      "padding-left": "20px"
+    },
+    ".mt-track-header.is-group": {
+      "padding-left": "4px",
+      "color": "var(--foreground)",
+      "font-weight": "500"
+    },
+    ".mt-track-header[aria-selected=\"true\"]": {
+      "--mt-bg": "color-mix(in oklab, var(--brand) 14%, var(--background))",
+      "color": "var(--foreground)"
+    },
+    ".mt-track-header:focus-visible": {
+      "box-shadow": "inset 0 0 0 1px var(--ring)"
+    },
+    ".mt-track-header.is-muted .mt-track-name": {
+      "opacity": "0.55"
+    },
+    ".mt-track-dot": {
+      "width": "7px",
+      "height": "7px",
+      "flex": "none",
+      "border-radius": "999px"
+    },
+    ".mt-track-name": {
+      "min-width": "0",
+      "flex": "1",
+      "overflow": "hidden",
+      "text-overflow": "ellipsis",
+      "white-space": "nowrap"
+    },
+    ".mt-track-count": {
+      "color": "var(--muted-foreground)",
+      "font-weight": "400"
+    },
+    ".mt-track-solo": {
+      "font-size": "10px",
+      "font-weight": "600"
+    },
+    ".mt-track-input": {
+      "width": "100%",
+      "height": "1.375rem",
+      "padding": "0 4px",
+      "border-radius": "4px",
+      "font": "inherit",
+      "color": "var(--foreground)",
+      "background": "var(--background)",
+      "box-shadow": "inset 0 0 0 1px var(--ring)",
+      "outline": "none"
+    },
+    ".mt-track-chevron": {
+      "display": "grid",
+      "place-items": "center",
+      "width": "16px",
+      "height": "16px",
+      "flex": "none",
+      "border-radius": "4px",
+      "color": "var(--muted-foreground)",
+      "outline": "none"
+    },
+    ".mt-track-chevron:hover, .mt-track-chevron:focus-visible": {
+      "color": "var(--foreground)",
+      "background": "var(--muted)"
+    },
+    ".mt-track-chevron svg": {
+      "width": "12px",
+      "height": "12px",
+      "transition": "transform var(--dur-fast) var(--ease-out)"
+    },
+    ".mt-track-actions": {
+      "position": "absolute",
+      "top": "0",
+      "right": "2px",
+      "bottom": "0",
+      "display": "flex",
+      "align-items": "center",
+      "padding-left": "12px"
+    },
+    ".mt-track-header:is(:hover, :focus-within, [data-hover]) .mt-track-actions, .mt-track-actions:has([aria-pressed=\"true\"])": {
+      "background": "linear-gradient(90deg, transparent, var(--mt-bg) 10px)"
+    },
+    ".mt-track-button": {
+      "display": "grid",
+      "place-items": "center",
+      "width": "20px",
+      "height": "20px",
+      "flex": "none",
+      "border-radius": "var(--r-control)",
+      "color": "var(--muted-foreground)",
+      "opacity": "0",
+      "outline": "none",
+      "transition": "opacity var(--dur-fast) ease, background-color var(--dur-fast) ease, color var(--dur-fast) ease"
+    },
+    ".mt-track-button[aria-pressed=\"false\"]": {
+      "display": "none"
+    },
+    ".mt-track-header:is(:hover, :focus-within, [data-hover]) .mt-track-button": {
+      "display": "grid",
+      "opacity": "0.7"
+    },
+    ".mt-track-button svg": {
+      "width": "13px",
+      "height": "13px"
+    },
+    ".mt-track-button:hover": {
+      "background": "var(--muted)",
+      "color": "var(--foreground)"
+    },
+    ".mt-track-button:focus-visible": {
+      "opacity": "1",
+      "box-shadow": "inset 0 0 0 1px var(--ring)"
+    },
+    ".mt-track-button[aria-pressed=\"true\"]": {
+      "opacity": "1",
+      "color": "var(--foreground)"
+    },
+    "@media (hover: none)": {
+      ".mt-track-button": {
+        "opacity": "0.7"
+      },
+      ".mt-track-button[aria-pressed=\"false\"]": {
+        "display": "grid"
+      },
+      ".mt-track-actions": {
+        "background": "linear-gradient(90deg, transparent, var(--mt-bg) 10px)"
+      }
+    },
+    "@media (prefers-reduced-motion: reduce)": {
+      ".mt-hud, .mt-ghost-time, .mt-razor-time, .mt-clip-tip": {
+        "animation": "none"
+      },
+      ".mt-playhead-head, .mt-track-header, .mt-track-chevron svg, .mt-track-button, .mt .timeline-editor-action-left-stretch, .mt .timeline-editor-action-right-stretch": {
+        "transition": "none"
+      }
+    }
+  },
+  "meta": {
+    "uso": {
+      "quando": "Editor de vídeo, som ou legenda no navegador: arrastar, aparar, cortar e selecionar clipes em faixas",
+      "evite": "Linha do tempo de conteúdo amarrada ao scroll (história, changelog): timeline"
+    }
+  },
+  "categories": [
+    "controles",
+    "edicao",
+    "video",
+    "audio",
+    "timeline"
+  ],
+  "type": "registry:block"
+}

@@ -510,6 +510,21 @@ Recolher depois de corrigir no app: `node scripts/colher-device-kit.mjs` (em `ja
 Regra de uso: o aparelho só entra onde o gesto físico é função (gravar, tocar, girar, acender,
 ligar); lista, tabela, formulário e navegação ficam sóbrios.
 
+### De `jaques-os/app` (Estúdio) — media-timeline PREPARADO, NÃO PUBLICADO (11/11/2026)
+
+A timeline do mini-editor de filmes virou bloco. Branch `media-timeline`, commit local, sem push
+e sem deploy: o dono quer no registry "quando estiver 100% burilada, nível CapCut, Premiere,
+Jitter". O nome `timeline` já é a linha do tempo amarrada ao scroll, por isso `media-timeline`.
+
+| Item | Origem | Usos | Por que vale |
+|---|---|---|---|
+| `media-timeline` | `app/src/components/ui/media-timeline/*` + `media-timeline.css` | Editor de filmes do Estúdio (`/editor/:id`) | Régua que vira quadros, agulha com scrub e ímã, seleção por área, navalha, HUD do arrasto, cabeçalhos de faixa (renomear, grupos, solo, calar, travar), zoom em gesto e só os clipes à vista no DOM. Dados por prop, mudança por callback, zero hex. Arrastar e aparar são da lib `@xzdarcy/react-timeline-editor` (npm) |
+
+Recolher depois de corrigir no app: `node scripts/colher-media-timeline.mjs` (em `jaques-os/app`).
+Limite conhecido: a lib re-renderiza todas as ações a cada passo de rolagem (`rowHeight` novo
+no `EditArea`); com 300 clipes à vista, a seleção por área fica em ~85 fps. Detalhe em
+`jaques-os/PLANO-editor-performance.md` §7.2.
+
 ### De `jaques-os/app` (Estúdio) — COLHIDO em 11/11/2026
 
 Os controles de trabalho do app do Estúdio: a lista que todo módulo filtra e o

@@ -814,5 +814,9 @@
   "voice-recorder": {
     "quando": "Gravar, pausar, ouvir e navegar notas de voz curtas, com a transcrição na lista ao lado",
     "evite": "Nota de voz dentro de chat: voice-note; editor de áudio com corte e busca na onda"
+  },
+  "media-timeline": {
+    "quando": "Editor de vídeo, som ou legenda no navegador: arrastar, aparar, cortar e selecionar clipes em faixas",
+    "evite": "Linha do tempo de conteúdo amarrada ao scroll (história, changelog): timeline"
   }
 }

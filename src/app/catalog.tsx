@@ -612,6 +612,7 @@ const ModeKeysLabDemo = React.lazy(() => import("./demos/mode-keys-demo"));
 const FolderTabsLabDemo = React.lazy(() => import("./demos/folder-tabs-demo"));
 const TicketStubLabDemo = React.lazy(() => import("./demos/ticket-stub-demo"));
 const ColorPickerDemo = React.lazy(() => import("./demos/color-picker-demo"));
+const MediaTimelineDemo = React.lazy(() => import("./demos/media-timeline-demo"));
 const DeviceFrameVidroDemo = React.lazy(() => import("./demos/device-frame-demo"));
 const TexturaTilesColheitaDemo = React.lazy(() => import("./demos/textura-tiles-demo"));
 const TexturaTwistColheitaDemo = React.lazy(() => import("./demos/textura-twist-demo"));
@@ -3048,6 +3049,17 @@ export const CATALOG: CatalogItem[] = [
     tags: ["mockup","celular","aparelho","3d","tela"],
     demo: DeviceFrameVidroDemo,
     preview: { w: 420, h: 640 },
+  },
+  {
+    name: "media-timeline",
+    title: "Media Timeline",
+    type: "block",
+    family: "controles",
+    description:
+      "Timeline de edição de mídia: arrastar, aparar, scrub na régua, seleção por área, navalha, faixas com solo, calar e travar, zoom em gesto. Só os clipes à vista vão para o DOM.",
+    tags: ["edição", "vídeo", "áudio", "timeline", "navalha"],
+    demo: MediaTimelineDemo,
+    preview: { w: 960, h: 420 },
   },
   {
     name: "use-idle",
