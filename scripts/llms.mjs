@@ -319,7 +319,9 @@ writeFileSync(join(DIST, "llms-full.txt"), completo.join("\n"));
  */
 const peca = (i) => {
   const npm = deps[i.name] ?? [];
-  const requer = i.registryDependencies ?? [];
+  // "utils" (o cn) entra em quase toda peça: vai uma vez no topo (`sempre`), não em cada item.
+  // Repetido 200 vezes custava ~4 KB do teto do índice.
+  const requer = (i.registryDependencies ?? []).filter((d) => d !== "utils");
   return {
     nome: i.name,
     tipo: i.type.replace("registry:", ""),
@@ -337,6 +339,7 @@ writeFileSync(
     total: itens.length,
     urls: { ficha: `${SITE}/r/{nome}.md`, json: `${SITE}/r/{nome}.json`, demo: `${SITE}/c/{nome}` },
     instalar: "npx shadcn@latest add @visant/{nome}",
+    sempre: ["utils"],
     itens: itens.map(peca),
   }),
 );
