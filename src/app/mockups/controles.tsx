@@ -1,5 +1,8 @@
 "use client";
 
+// Colhido para o registry: `@visant/inspector-controls` (registry/visant/blocks/inspector-controls) — a versão
+// canônica dos controles vive lá. Correção que valha para outros projetos deve ir no registry primeiro.
+
 /**
  * As linhas do painel. O controle tem a forma do dado: número limitado é a própria linha
  * virando slider, cor é amostra com hex, escolha com imagem é miniatura. Toda linha tem a

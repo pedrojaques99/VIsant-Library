@@ -613,6 +613,7 @@ const FolderTabsLabDemo = React.lazy(() => import("./demos/folder-tabs-demo"));
 const TicketStubLabDemo = React.lazy(() => import("./demos/ticket-stub-demo"));
 const ColorPickerDemo = React.lazy(() => import("./demos/color-picker-demo"));
 const MediaTimelineDemo = React.lazy(() => import("./demos/media-timeline-demo"));
+const InspectorControlsDemo = React.lazy(() => import("./demos/inspector-controls-demo"));
 const DeviceFrameVidroDemo = React.lazy(() => import("./demos/device-frame-demo"));
 const TexturaTilesColheitaDemo = React.lazy(() => import("./demos/textura-tiles-demo"));
 const TexturaTwistColheitaDemo = React.lazy(() => import("./demos/textura-twist-demo"));
@@ -3060,6 +3061,17 @@ export const CATALOG: CatalogItem[] = [
     tags: ["edição", "vídeo", "áudio", "timeline", "navalha"],
     demo: MediaTimelineDemo,
     preview: { w: 960, h: 420 },
+  },
+  {
+    name: "inspector-controls",
+    title: "Inspector Controls",
+    type: "block",
+    family: "controles",
+    description:
+      "As linhas de um painel de propriedades: slider que é a própria linha (arrastar, digitar, setas), segmentos, cor com paleta, vetor X/Y, miniaturas, interruptor e pasta com reset. Sem cor própria.",
+    tags: ["inspetor", "painel", "slider", "cor", "edição"],
+    demo: InspectorControlsDemo,
+    preview: { w: 360, h: 640 },
   },
   {
     name: "use-idle",

@@ -510,6 +510,20 @@ Recolher depois de corrigir no app: `node scripts/colher-device-kit.mjs` (em `ja
 Regra de uso: o aparelho só entra onde o gesto físico é função (gravar, tocar, girar, acender,
 ligar); lista, tabela, formulário e navegação ficam sóbrios.
 
+### Do estúdio de mockups da vitrine — inspector-controls PREPARADO, NÃO PUBLICADO (12/11/2026)
+
+Os controles do painel do estúdio de mockups (`src/app/mockups/controles.tsx` + `estudio.css`)
+viraram bloco, com API em inglês e CSS só de tokens. Branch `inspector-controls`, PR aberto, sem
+deploy. Segundo uso: o inspetor do editor de filmes do jaques-os (`app/src/components/ui/inspector-controls/`).
+
+| Item | Origem | Usos | Por que vale |
+|---|---|---|---|
+| `inspector-controls` | `src/app/mockups/controles.tsx` + `estudio.css` | Estúdio de mockups, editor de filmes do jaques-os (som, faixa, vídeo, preferências, exportar) | A linha que é slider (arrastar, clique digita, setas com Shift 10x, duplo clique no padrão, faixa que cruza o zero enche do zero), segmentos com setas, miniaturas, amostras com opção vazada, cor hex + poço, vetor X/Y com arrasto na letra, interruptor, pasta com reset que só aparece quando algo mudou. Zero hex, `--ic-row` e `--ic-surface` para o consumidor ajustar |
+
+O CSS mora em `registry/visant/blocks/inspector-controls/inspector-controls.css` e vai para o
+campo `css` do item por `node scripts/css-to-item.mjs inspector-controls <css>` (`--check` confere).
+O estúdio de mockups ainda usa a cópia dele (`mk-*`, `--casa-*`); trocar é opcional e fica sinalizado.
+
 ### De `jaques-os/app` (Estúdio) — media-timeline PREPARADO, NÃO PUBLICADO (11/11/2026)
 
 A timeline do mini-editor de filmes virou bloco. Branch `media-timeline`, commit local, sem push

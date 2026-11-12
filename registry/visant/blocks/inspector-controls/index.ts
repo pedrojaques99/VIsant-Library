@@ -1,0 +1,21 @@
+// O CSS vem pelo campo `css` do item: o `shadcn add` injeta no globals.css de quem instala.
+export {
+  formatNumber,
+  parseNumber,
+  InspectorColor,
+  InspectorHint,
+  InspectorRow,
+  InspectorSection,
+  InspectorSegments,
+  InspectorSlider,
+  InspectorSwatches,
+  InspectorThumb,
+  InspectorThumbs,
+  InspectorToggle,
+  InspectorVector,
+  type InspectorSectionProps,
+  type InspectorSliderProps,
+  type SegmentOption,
+  type SwatchOption,
+  type VectorPart,
+} from "./inspector-controls";
