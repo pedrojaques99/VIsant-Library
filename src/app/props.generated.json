@@ -16102,6 +16102,33 @@
       ]
     },
     {
+      "nome": "TrackButton",
+      "descricao": "Botão de estado da faixa (solo, calar, esconder, travar): desligado só aparece no hover da linha.",
+      "props": [
+        {
+          "nome": "active",
+          "tipo": "boolean",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onClick",
+          "tipo": "() => void",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    },
+    {
       "nome": "TrackHeaders",
       "descricao": null,
       "props": [
@@ -16791,6 +16818,33 @@
         {
           "nome": "src",
           "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        }
+      ]
+    },
+    {
+      "nome": "TrackButton",
+      "descricao": "Botão de estado da faixa (solo, calar, esconder, travar): desligado só aparece no hover da linha.",
+      "props": [
+        {
+          "nome": "active",
+          "tipo": "boolean",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "label",
+          "tipo": "string",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onClick",
+          "tipo": "() => void",
           "obrigatoria": true,
           "padrao": null,
           "descricao": null

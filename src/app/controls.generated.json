@@ -9408,6 +9408,20 @@
           "resumo": null
         }
       ],
+      "TrackButton": [
+        {
+          "prop": "active",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": null
+        },
+        {
+          "prop": "label",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null
+        }
+      ],
       "TrackHeaders": [
         {
           "prop": "top",
