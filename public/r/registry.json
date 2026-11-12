@@ -8425,6 +8425,9 @@
         ".mt .timeline-editor-edit-area .ReactVirtualized__Grid::-webkit-scrollbar-thumb": {
           "background": "var(--border)"
         },
+        ".mt .ReactVirtualized__Grid__innerScrollContainer": {
+          "pointer-events": "auto !important"
+        },
         ".mt .timeline-editor-action": {
           "background": "transparent",
           "border-radius": "4px",
@@ -8590,6 +8593,8 @@
           "position": "absolute",
           "top": "0",
           "left": "0",
+          "z-index": "6",
+          "pointer-events": "none",
           "border-radius": "2px",
           "background": "color-mix(in oklab, var(--brand) 10%, transparent)",
           "box-shadow": "inset 0 0 0 1px color-mix(in oklab, var(--brand) 70%, transparent)"

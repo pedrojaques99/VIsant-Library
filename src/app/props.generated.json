@@ -15593,7 +15593,7 @@
           "tipo": "(clip: MediaClip, track: string, info: { px: number; }) => any",
           "obrigatoria": true,
           "padrao": null,
-          "descricao": null
+          "descricao": "Mantenha a mesma função enquanto o desenho não muda (`useCallback`): uma função nova redesenha todos os clipes."
         },
         {
           "nome": "tracks",
@@ -15797,6 +15797,13 @@
           "obrigatoria": false,
           "padrao": null,
           "descricao": null
+        },
+        {
+          "nome": "selected",
+          "tipo": "ReadonlySet<string>",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Os clipes selecionados (ids). Marca no DOM (`.mt-clip[data-selected]`), sem redesenhar os clipes: com 300 clipes, cada troca de seleção pelos dados redesenhava todos, duas vezes."
         },
         {
           "nome": "selectedTracks",
@@ -16341,7 +16348,7 @@
           "tipo": "(clip: MediaClip, track: string, info: { px: number; }) => any",
           "obrigatoria": true,
           "padrao": null,
-          "descricao": null
+          "descricao": "Mantenha a mesma função enquanto o desenho não muda (`useCallback`): uma função nova redesenha todos os clipes."
         },
         {
           "nome": "tracks",
@@ -16545,6 +16552,13 @@
           "obrigatoria": false,
           "padrao": null,
           "descricao": null
+        },
+        {
+          "nome": "selected",
+          "tipo": "ReadonlySet<string>",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Os clipes selecionados (ids). Marca no DOM (`.mt-clip[data-selected]`), sem redesenhar os clipes: com 300 clipes, cada troca de seleção pelos dados redesenhava todos, duas vezes."
         },
         {
           "nome": "selectedTracks",

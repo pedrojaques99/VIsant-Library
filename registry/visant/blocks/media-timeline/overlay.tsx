@@ -4,7 +4,7 @@ import { useClockTime, type Clock } from "./clock";
 import { formatSeconds, rulerLabel } from "./ruler";
 
 // A camada por cima da timeline da lib: agulha própria, agulha fantasma da régua, faixa sob o
-// mouse, retângulo de seleção, linha da navalha, HUD do arrasto e dica do clipe estreito.
+// mouse, linha da navalha, HUD do arrasto e dica do clipe estreito.
 // A lib continua dona dos clipes (arrastar, aparar); isto só desenha. Guarda o próprio estado e
 // muda por `set`, sem renderizar quem usa a timeline a cada movimento do mouse.
 
@@ -19,7 +19,6 @@ export interface OverlayState {
   ghost: number | null;
   hoverTrack: string | null;
   scrub: { snapped: boolean } | null;
-  marquee: { x: number; y: number; w: number; h: number } | null;
   razor: { t: number; track: string } | null;
   hud: { track: string; start: number; duration: number; delta: number } | null;
   /** Dica do clipe estreito sob o mouse (nome, início, duração), presa no topo dele. */
@@ -27,7 +26,7 @@ export interface OverlayState {
 }
 export interface OverlayHandle { set: (p: Partial<OverlayState>) => void; get: () => OverlayState }
 export interface TrackGeometry { id: string; top: number; h: number }
-const EMPTY: OverlayState = { left: 0, top: 0, ghost: null, hoverTrack: null, scrub: null, marquee: null, razor: null, hud: null, tip: null };
+const EMPTY: OverlayState = { left: 0, top: 0, ghost: null, hoverTrack: null, scrub: null, razor: null, hud: null, tip: null };
 
 export const Overlay = React.forwardRef<OverlayHandle, {
   startLeft: number; pxPerSecond: number; duration: number; width: number; geometry: TrackGeometry[];
@@ -94,13 +93,12 @@ export const Overlay = React.forwardRef<OverlayHandle, {
         </div>
       ) : null}
       <Playhead clock={clock} x={xOf} width={width} duration={duration} scrub={s.scrub} formatTime={formatTime} />
-      {s.tip && !s.scrub && !s.marquee && !s.hud ? (
+      {s.tip && !s.scrub && !s.hud ? (
         <div className="mt-clip-tip" style={{ transform: `translate(${s.tip.x}px, ${s.tip.y}px)` }}>
           <span className="mt-clip-tip-name">{s.tip.name}</span>
           <span className="mt-num">{formatTime(s.tip.start)} · {formatSeconds(s.tip.duration)}</span>
         </div>
       ) : null}
-      {s.marquee ? <div className="mt-marquee" style={{ transform: `translate(${s.marquee.x}px, ${s.marquee.y}px)`, width: s.marquee.w, height: s.marquee.h }} /> : null}
       {s.hud && hudTrack ? (
         <div className="mt-hud mt-num" style={{ transform: `translate(${Math.max(4, xOf(s.hud.start))}px, ${below ? topOf(hudTrack) + hudTrack.h + 4 : hudY}px)` }}>
           <span>{formatTime(s.hud.start)}</span>

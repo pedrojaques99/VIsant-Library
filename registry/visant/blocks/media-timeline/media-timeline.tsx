@@ -28,6 +28,7 @@ export interface MediaClip {
   name?: string;
   movable?: boolean;
   resizable?: boolean;
+  /** Selecionado (ou passe `selected` na timeline: trocar a seleção por lá não redesenha clipe). */
   selected?: boolean;
   /** A seleção por área e a navalha pegam este clipe (padrão: sim). */
   selectable?: boolean;
@@ -52,6 +53,11 @@ export interface MediaTimelineProps {
   controller: MediaTimelineController;
   tracks: MediaTrack[];
   clock: Clock;
+  /** Os clipes selecionados (ids). Marca no DOM (`.mt-clip[data-selected]`), sem redesenhar os
+   *  clipes: com 300 clipes, cada troca de seleção pelos dados redesenhava todos, duas vezes. */
+  selected?: ReadonlySet<string>;
+  /** Mantenha a mesma função enquanto o desenho não muda (`useCallback`): uma função nova
+   *  redesenha todos os clipes. */
   renderClip: (clip: MediaClip, track: string, info: { px: number }) => React.ReactNode;
   /** Altura padrão de uma faixa (px). */
   trackHeight?: number;
@@ -109,7 +115,7 @@ const nada = () => {};
 
 export function MediaTimeline(props: MediaTimelineProps) {
   const {
-    controller: tl, tracks, clock, renderClip, trackHeight = 34, tool = "select", snap = true, snapPoints = [], snapPx = 8,
+    controller: tl, tracks, clock, selected, renderClip, trackHeight = 34, tool = "select", snap = true, snapPoints = [], snapPx = 8,
     formatTime: fmt, trackState = () => STATE_OFF, selectedTracks, editingTrack = null, headerLabels,
     onMove, onResize, onClipClick, onEmptyClick, onAreaSelect, expandArea, onCut, onScrubStart, onScrub, onScrubEnd, onScroll,
     emptyHints, keyboard = true, onToolChange, wrapHeaders, wrapArea, className, headersClassName, areaClassName,
@@ -121,6 +127,7 @@ export function MediaTimeline(props: MediaTimelineProps) {
   const marqueeAt = React.useRef(0);
   // O que a seleção por área marca agora: o clipe que entra na janela no meio do gesto já nasce marcado.
   const inMarquee = React.useRef<Set<string>>(new Set());
+  const areaActive = React.useRef(false);
 
   // ── Faixas e clipes → linhas da lib, com cache por array de clipes ──────────
   // A lib copia os dados para um estado e redesenha tudo quando o array muda; com o cache, um
@@ -135,7 +142,7 @@ export function MediaTimeline(props: MediaTimelineProps) {
       const row: TimelineRow = {
         id: t.id, rowHeight: h,
         actions: t.clips.map((k) => ({
-          id: k.id, start: k.start, end: k.end, effectId: k.kind ?? "clip", selected: k.selected,
+          id: k.id, start: k.start, end: k.end, effectId: k.kind ?? "clip",
           movable: !locked && k.movable !== false, flexible: !locked && k.resizable !== false,
           ...(k.min !== undefined ? { minStart: k.min } : {}), ...(k.max !== undefined ? { maxEnd: k.max } : {}),
         })),
@@ -146,11 +153,32 @@ export function MediaTimeline(props: MediaTimelineProps) {
     const same = out.length === prevRows.current.length && out.every((r, i) => r === prevRows.current[i]);
     return same ? prevRows.current : (prevRows.current = out);
   }, [tracks, trackHeight]);
+  // Pelas linhas, não pelas faixas: quem usa costuma montar as faixas a cada render, e um índice
+  // novo redesenharia todos os clipes. As linhas só mudam quando um array de clipes, a altura ou
+  // a trava mudam (o que o índice guarda da faixa: id e trava).
   const clipIndex = React.useMemo(() => {
     const m = new Map<string, { clip: MediaClip; track: MediaTrack }>();
     for (const t of tracks) for (const c of t.clips) m.set(c.id, { clip: c, track: t });
     return m;
-  }, [tracks]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows]);
+
+  // ── Seleção: atributo no DOM, não dado da lib ───────────────────────────────
+  const selectedIds = React.useMemo(() => {
+    const s = new Set(selected ?? []);
+    for (const t of tracks) for (const c of t.clips) if (c.selected) s.add(c.id);
+    return s;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected, rows]);
+  // O clipe desenhado depois (janela nova, rolagem) já nasce marcado pelo `getActionRender`.
+  const selectedNow = React.useRef(selectedIds);
+  selectedNow.current = selectedIds;
+  React.useLayoutEffect(() => {
+    tl.box.current?.querySelectorAll<HTMLElement>("[data-mt-clip]").forEach((el) => {
+      const on = selectedIds.has(el.dataset.mtClip!);
+      if (el.hasAttribute("data-selected") !== on) el.toggleAttribute("data-selected", on);
+    });
+  }, [selectedIds, tl.box]);
   const kinds = [...new Set(tracks.flatMap((t) => t.clips.map((c) => c.kind ?? "clip")))].sort().join(",");
   const effects = React.useMemo(() => Object.fromEntries(kinds.split(",").map((k) => [k, { id: k }])), [kinds]);
   const geometry = React.useMemo(() => {
@@ -219,17 +247,55 @@ export function MediaTimeline(props: MediaTimelineProps) {
     let marked = new Set<string>();
     let picked: Set<string> | null = null;
     const box = tl.box.current!;
-    const mark = (id: string, on: boolean) => box.querySelector(`[data-mt-clip="${CSS.escape(id)}"]`)?.toggleAttribute("data-in-marquee", on);
+    // Os clipes desenhados, indexados uma vez (uma busca no DOM por clipe custava ~8 ms ao soltar
+    // com 300 clipes). A rolagem real pode trocar a janela desenhada: aí o índice é refeito.
+    let drawn: Map<string, Element> | null = null;
+    const mark = (id: string, on: boolean) => {
+      if (!drawn) { drawn = new Map(); box.querySelectorAll<HTMLElement>("[data-mt-clip]").forEach((el) => drawn!.set(el.dataset.mtClip!, el)); }
+      drawn.get(id)?.toggleAttribute("data-in-marquee", on);
+    };
+    // O retângulo é um elemento só do DOM, criado no gesto: sem estado do React a cada movimento.
+    let rect: HTMLDivElement | null = null;
+    // Rolagem automática do gesto: o quanto a vista andou além da rolagem real (px). Rolar a grade
+    // da lib re-renderiza todas as ações a cada passo (o cache de células dela não vale, porque a
+    // lib clona cada linha); então o conteúdo anda por `translate` e a rolagem real só entra quando
+    // o desvio passa do limite (a janela desenhada tem folga para isso) ou ao soltar.
+    const grid = box.querySelector<HTMLElement>(".timeline-editor-edit-area .ReactVirtualized__Grid");
+    const maxX = grid ? grid.scrollWidth - grid.clientWidth : 0, maxY = grid ? grid.scrollHeight - grid.clientHeight : 0;
+    const off = { x: 0, y: 0 };
+    const sl = () => tl.scrollLeft.current + off.x, st = () => tl.scrollTop.current + off.y;
+    const shift = () => {
+      const on = off.x !== 0 || off.y !== 0;
+      const set = (el: Element | null | undefined, v: string) => { if (el) (el as HTMLElement).style.translate = on ? v : ""; };
+      set(grid?.firstElementChild, `${-off.x}px ${-off.y}px`);
+      set(box.querySelector(".timeline-editor-time-area .ReactVirtualized__Grid__innerScrollContainer"), `${-off.x}px 0`);
+      const over = box.querySelector(".mt-overlay");
+      set(over, `${-off.x}px 0`);
+      over?.querySelectorAll(".mt-empty-hint").forEach((h) => set(h, `${off.x}px ${-off.y}px`));
+      if (headers.current) headers.current.scrollTop = st();
+    };
+    const flush = () => {
+      if (!grid || (off.x === 0 && off.y === 0)) return;
+      const l = sl(), t = st();
+      off.x = 0; off.y = 0;
+      shift();
+      // As refs já valem a rolagem nova (o evento de rolagem chega depois e confirma).
+      tl.scrollLeft.current = l; tl.scrollTop.current = t;
+      grid.scrollLeft = l; grid.scrollTop = t;
+      drawn = null;
+    };
     const update = () => {
       const p = last;
-      const ax = ini.x - tl.scrollLeft.current, ay = ini.y - tl.scrollTop.current;
+      const ax = ini.x - sl(), ay = ini.y - st();
       const x = Math.max(0, Math.min(ax, p.x)), y = Math.max(TRACKS_TOP, Math.min(ay, p.y));
       const r = { x, y, w: Math.max(0, Math.min(width, Math.max(ax, p.x)) - x), h: Math.max(0, Math.max(ay, p.y) - y) };
-      overlay.current?.set({ marquee: r });
+      if (!rect) { rect = document.createElement("div"); rect.className = "mt-marquee"; rect.setAttribute("aria-hidden", ""); box.appendChild(rect); }
+      rect.style.transform = `translate(${r.x}px, ${r.y}px)`;
+      rect.style.width = `${r.w}px`; rect.style.height = `${r.h}px`;
       // Acertos pela geometria (faixas e tempos), sem ler o layout de cada clipe.
       const ids = new Set<string>();
-      const cx0 = r.x + tl.scrollLeft.current, cx1 = cx0 + r.w;
-      const cy0 = r.y - TRACKS_TOP + tl.scrollTop.current, cy1 = cy0 + r.h;
+      const cx0 = r.x + sl(), cx1 = cx0 + r.w;
+      const cy0 = r.y - TRACKS_TOP + st(), cy1 = cy0 + r.h;
       tracks.forEach((t, i) => {
         const g = geometry[i];
         if (g.top >= cy1 || g.top + g.h <= cy0 || t.locked) return;
@@ -248,18 +314,23 @@ export function MediaTimeline(props: MediaTimelineProps) {
       inMarquee.current = now;
       picked = ids;
     };
-    // Rolagem automática perto da borda. Rola o elemento da grade, não o estado da lib: rolagem
-    // por código re-renderizava todas as ações a cada passo.
+    // Rolagem automática perto da borda (pelo desvio `off`, ver acima).
     const roll = () => {
       const p = last, edge = 28, high = box.clientHeight;
       const dx = p.x < edge ? p.x - edge : p.x > width - edge ? p.x - (width - edge) : 0;
-      const dy = p.y < TRACKS_TOP + edge && p.y < ini.y - tl.scrollTop.current ? p.y - TRACKS_TOP - edge : p.y > high - edge ? p.y - (high - edge) : 0;
-      const grid = box.querySelector<HTMLElement>(".timeline-editor-edit-area .ReactVirtualized__Grid");
+      const dy = p.y < TRACKS_TOP + edge && p.y < ini.y - st() ? p.y - TRACKS_TOP - edge : p.y > high - edge ? p.y - (high - edge) : 0;
       const step = (d: number) => Math.sign(d) * Math.max(1, Math.abs(d * 0.4));
-      if (grid && dx) grid.scrollLeft = Math.max(0, grid.scrollLeft + step(dx));
-      if (grid && dy) grid.scrollTop = Math.max(0, grid.scrollTop + step(dy));
+      const clamp = (v: number, real: number, max: number) => Math.max(-real, Math.min(max - real, v));
+      const nx = dx ? clamp(off.x + step(dx), tl.scrollLeft.current, maxX) : off.x;
+      const ny = dy ? clamp(off.y + step(dy), tl.scrollTop.current, maxY) : off.y;
+      const rolled = nx !== off.x || ny !== off.y;
+      if (rolled) {
+        off.x = nx; off.y = ny;
+        // Na horizontal a régua da lib só desenha as marcas à vista: o desvio fica curto.
+        if (Math.abs(off.x) > 64 || Math.abs(off.y) > (high - TRACKS_TOP) / 2) flush(); else shift();
+      }
       // No máximo uma conta por quadro, mesmo com o mouse mandando vários movimentos.
-      if (dx || dy || dirty) { dirty = false; update(); }
+      if (rolled || dirty) { dirty = false; update(); }
       frame = requestAnimationFrame(roll);
     };
     const move = (ev: PointerEvent) => {
@@ -267,15 +338,18 @@ export function MediaTimeline(props: MediaTimelineProps) {
       if (!moved && Math.hypot(last.x - p0.x, last.y - p0.y) < 4) return;
       if (!moved) { clearHover(); frame = requestAnimationFrame(roll); }
       moved = true;
+      areaActive.current = true;
       dirty = true;
     };
     const up = () => {
       cancelAnimationFrame(frame);
       if (dirty) update();
+      flush();
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
       window.removeEventListener("pointercancel", up);
-      overlay.current?.set({ marquee: null });
+      rect?.remove();
+      areaActive.current = false;
       inMarquee.current = new Set();
       for (const k of marked) mark(k, false);
       if (moved) marqueeAt.current = performance.now();
@@ -305,7 +379,7 @@ export function MediaTimeline(props: MediaTimelineProps) {
     },
     onPointerMove: (e: React.PointerEvent) => {
       const now = overlay.current?.get();
-      if (e.buttons && (now?.scrub || now?.marquee || now?.hud)) return;
+      if (e.buttons && (now?.scrub || areaActive.current || now?.hud)) return;
       const p = local(e);
       const onRuler = p.y < RULER_HEIGHT;
       const t = onRuler ? null : trackAtY(p.y);
@@ -352,16 +426,40 @@ export function MediaTimeline(props: MediaTimelineProps) {
     return () => window.removeEventListener("keydown", key);
   });
 
-  const head = (
-    <TrackHeaders ref={headers} top={TRACKS_TOP} className={headersClassName} labels={headerLabels}
-      tracks={tracks.map((t) => ({ ...t, height: t.height ?? trackHeight }))} state={trackState}
-      selected={selectedTracks ?? new Set()} editing={editingTrack}
-      onEdit={props.onTrackEdit ?? nada} onRename={props.onTrackRename ?? nada} onSelect={props.onTrackSelect ?? nada}
-      onLock={props.onTrackLock ?? nada} onMute={props.onTrackMute ?? nada} onSolo={props.onTrackSolo ?? nada}
-      onCollapse={props.onTrackCollapse ?? nada} onHide={props.onTrackHide} />
-  );
-  const area = (
-    <div ref={tl.box} className={cn("mt-viewport", tool === "razor" && "is-razor", areaClassName)} {...pointer}>
+  // Os eventos da lib passam por uma ref: o elemento da lib fica memorizado (abaixo) e não pode
+  // segurar funções de um render velho.
+  const live = {
+    clickAction: (e: React.MouseEvent<HTMLElement, MouseEvent>, action: TimelineAction, row: TimelineRow) => { const hit = clipIndex.get(action.id); if (hit) onClipClick?.(hit.clip, row.id, e); },
+    clickRow: (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+      // Clique no vazio da faixa (menos logo depois de uma seleção por área).
+      if (performance.now() - marqueeAt.current < 300) return;
+      if (!(e.target as HTMLElement).closest(".mt-clip")) onEmptyClick?.(e);
+    },
+    moving: (action: TimelineAction, row: TimelineRow, start: number, end: number) => { showHud(action, row.id, start, end); },
+    resizing: (action: TimelineAction, row: TimelineRow, start: number, end: number, dir: "left" | "right") => { showHud(action, row.id, start, end, dir); },
+    moveEnd: (action: TimelineAction, row: TimelineRow, start: number, end: number) => {
+      overlay.current?.set({ hud: null });
+      const hit = clipIndex.get(action.id);
+      if (hit) onMove?.({ clip: hit.clip, track: row.id, start, end });
+    },
+    resizeEnd: (action: TimelineAction, row: TimelineRow, start: number, end: number, dir: "left" | "right") => {
+      overlay.current?.set({ hud: null });
+      const hit = clipIndex.get(action.id);
+      if (hit) onResize?.({ clip: hit.clip, track: row.id, start, end, edge: dir });
+    },
+    scroll: (scrollTop: number, scrollLeft: number) => {
+      tl.scrollLeft.current = scrollLeft; tl.scrollTop.current = scrollTop;
+      overlay.current?.set({ left: scrollLeft, top: scrollTop });
+      if (headers.current) headers.current.scrollTop = scrollTop;
+      onScroll?.({ left: scrollLeft, top: scrollTop });
+    },
+  };
+  const liveRef = React.useRef(live);
+  liveRef.current = live;
+  // A lib re-renderiza todas as ações a cada render de quem a contém (não é memorizada): o
+  // elemento dela só muda quando muda o que ela desenha. Um render de quem usa que só trocou a
+  // seleção, o painel ou o HUD não chega às 300 ações.
+  const lib = React.useMemo(() => (
       <VisibleTimeline ref={tl.timeline} anchor={tl.anchor.current} style={{ width: "100%", height: "100%" }} editorData={rows} effects={effects}
         // Régua que se adapta ao zoom: segundos longe, meio segundo, quadros de perto.
         scale={ruler.step} scaleWidth={pxPerSecond * ruler.step} scaleSplitCount={ruler.divisions} startLeft={startLeft} rowHeight={trackHeight}
@@ -373,35 +471,34 @@ export function MediaTimeline(props: MediaTimelineProps) {
           const hit = clipIndex.get(a.id);
           if (!hit) return null;
           return (
-            <span className="mt-clip" data-mt-clip={a.id} data-in-marquee={inMarquee.current.has(a.id) ? "" : undefined}>
+            <span className="mt-clip" data-mt-clip={a.id} data-selected={selectedNow.current.has(a.id) ? "" : undefined}
+              data-in-marquee={inMarquee.current.has(a.id) ? "" : undefined}>
               {renderClip(hit.clip, row.id, { px: (a.end - a.start) * pxPerSecond })}
             </span>
           );
         }}
-        onClickActionOnly={(e, { action, row }) => { const hit = clipIndex.get(action.id); if (hit) onClipClick?.(hit.clip, row.id, e); }}
-        onClickRow={(e) => {
-          // Clique no vazio da faixa (menos logo depois de uma seleção por área).
-          if (performance.now() - marqueeAt.current < 300) return;
-          if (!(e.target as HTMLElement).closest(".mt-clip")) onEmptyClick?.(e);
-        }}
-        onActionMoving={({ action, row, start, end }) => { showHud(action, row.id, start, end); }}
-        onActionResizing={({ action, row, start, end, dir }) => { showHud(action, row.id, start, end, dir); }}
-        onActionMoveEnd={({ action, row, start, end }) => {
-          overlay.current?.set({ hud: null });
-          const hit = clipIndex.get(action.id);
-          if (hit) onMove?.({ clip: hit.clip, track: row.id, start, end });
-        }}
-        onActionResizeEnd={({ action, row, start, end, dir }) => {
-          overlay.current?.set({ hud: null });
-          const hit = clipIndex.get(action.id);
-          if (hit) onResize?.({ clip: hit.clip, track: row.id, start, end, edge: dir });
-        }}
-        onScroll={({ scrollTop, scrollLeft }) => {
-          tl.scrollLeft.current = scrollLeft; tl.scrollTop.current = scrollTop;
-          overlay.current?.set({ left: scrollLeft, top: scrollTop });
-          if (headers.current) headers.current.scrollTop = scrollTop;
-          onScroll?.({ left: scrollLeft, top: scrollTop });
-        }} />
+        onClickActionOnly={(e, { action, row }) => liveRef.current.clickAction(e, action, row)}
+        onClickRow={(e) => liveRef.current.clickRow(e)}
+        onActionMoving={({ action, row, start, end }) => { liveRef.current.moving(action, row, start, end); }}
+        onActionResizing={({ action, row, start, end, dir }) => { liveRef.current.resizing(action, row, start, end, dir); }}
+        onActionMoveEnd={({ action, row, start, end }) => liveRef.current.moveEnd(action, row, start, end)}
+        onActionResizeEnd={({ action, row, start, end, dir }) => liveRef.current.resizeEnd(action, row, start, end, dir)}
+        onScroll={({ scrollTop, scrollLeft }) => liveRef.current.scroll(scrollTop, scrollLeft)} />
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [rows, effects, ruler.step, ruler.divisions, ruler.count, pxPerSecond, startLeft, trackHeight, snap, tool, fps, clipIndex, renderClip]);
+  // (A âncora do zoom só vale no render da escala nova, e `pxPerSecond` já está nas dependências.)
+
+  const head = (
+    <TrackHeaders ref={headers} top={TRACKS_TOP} className={headersClassName} labels={headerLabels}
+      tracks={tracks.map((t) => ({ ...t, height: t.height ?? trackHeight }))} state={trackState}
+      selected={selectedTracks ?? new Set()} editing={editingTrack}
+      onEdit={props.onTrackEdit ?? nada} onRename={props.onTrackRename ?? nada} onSelect={props.onTrackSelect ?? nada}
+      onLock={props.onTrackLock ?? nada} onMute={props.onTrackMute ?? nada} onSolo={props.onTrackSolo ?? nada}
+      onCollapse={props.onTrackCollapse ?? nada} onHide={props.onTrackHide} />
+  );
+  const area = (
+    <div ref={tl.box} className={cn("mt-viewport", tool === "razor" && "is-razor", areaClassName)} {...pointer}>
+      {lib}
       <Overlay ref={overlay} startLeft={startLeft} pxPerSecond={pxPerSecond} clock={clock} duration={duration} width={width} geometry={geometry}
         step={ruler.step} fps={fps} formatTime={formatTime} hints={emptyHints} />
     </div>
