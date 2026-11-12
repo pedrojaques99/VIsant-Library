@@ -3,7 +3,7 @@
   "name": "device-kit",
   "title": "Device Kit",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Aparelho y2k industrial em peças: carcaça de alumínio escovado, display LCD na luz da marca, LED de estado, encoder com detentes, tecla que afunda e chave de ligar.",
+  "description": "Aparelho y2k industrial em peças: carcaça de alumínio, LCD na luz da marca, LED, encoder e chave.",
   "registryDependencies": [
     "utils"
   ],

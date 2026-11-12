@@ -3,7 +3,7 @@
   "name": "frame-markup",
   "title": "Frame Markup",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Rabisco por cima de um quadro de vídeo ou imagem que sai como PNG, com a tinta da marca, desfazer e Esc para cancelar.",
+  "description": "Rabisco sobre um quadro de vídeo ou imagem que sai como PNG, com desfazer.",
   "dependencies": [
     "lucide-react"
   ],

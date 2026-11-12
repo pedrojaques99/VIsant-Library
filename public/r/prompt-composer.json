@@ -3,7 +3,7 @@
   "name": "prompt-composer",
   "title": "Prompt Composer",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "O campo de um painel de agente: texto que cresce, anexos com prévia, ferramentas como falar e rabiscar, Enviar que vira Parar. Só apresentação.",
+  "description": "Campo de agente: texto que cresce, anexos com prévia, ferramentas e Enviar/Parar.",
   "dependencies": [
     "lucide-react"
   ],

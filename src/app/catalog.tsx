@@ -2330,7 +2330,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "controles",
     description:
-      "Rabisco por cima de um quadro de vídeo ou imagem que sai como PNG, com a tinta da marca, desfazer e Esc para cancelar.",
+      "Rabisco sobre um quadro de vídeo ou imagem que sai como PNG, com desfazer.",
     tags: ["desenho", "anotação", "vídeo", "revisão", "feedback"],
     demo: FrameMarkupDemo,
     preview: { w: 560, h: 400 },
@@ -2341,7 +2341,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "controles",
     description:
-      "O campo de um painel de agente: texto que cresce, anexos com prévia, ferramentas como falar e rabiscar, Enviar que vira Parar. Só apresentação.",
+      "Campo de agente: texto que cresce, anexos com prévia, ferramentas e Enviar/Parar.",
     tags: ["chat", "agente", "ia", "prompt", "anexo"],
     demo: PromptComposerDemo,
     preview: { w: 520, h: 380 },
@@ -2352,7 +2352,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "controles",
     description:
-      "Aparelho y2k industrial em peças: carcaça de alumínio escovado, display LCD na luz da marca, LED de estado, encoder com detentes, tecla que afunda e chave de ligar.",
+      "Aparelho y2k industrial em peças: carcaça de alumínio, LCD na luz da marca, LED, encoder e chave.",
     tags: ["aparelho", "hardware", "led", "encoder", "knob", "switch", "lcd", "rack"],
     demo: DeviceKitDemo,
     preview: { w: 520, h: 560 },
@@ -2363,7 +2363,7 @@ export const CATALOG: CatalogItem[] = [
     type: "ui",
     family: "controles",
     description:
-      "Gravador de voz de bolso montado com o Device Kit: REC que trava afundado, display com timecode e onda, encoder lateral que navega entre as notas ou vira volume, e a lista das notas ao lado.",
+      "Gravador de voz de bolso feito com o Device Kit: REC que trava, timecode, onda e encoder.",
     tags: ["áudio", "gravador", "voz", "nota", "aparelho", "transcrição"],
     demo: VoiceRecorderDemo,
     preview: { w: 860, h: 520 },
@@ -2374,7 +2374,7 @@ export const CATALOG: CatalogItem[] = [
     type: "lib",
     family: "fundacao",
     description:
-      "Busca, facetas, ordem e agrupamento de qualquer lista num estado que mora na URL, com a barra de filtro pronta. Sem router, ou com o seu por adaptador.",
+      "Busca, facetas, ordem e grupos de uma lista com o estado na URL, com ou sem router.",
     tags: ["busca", "filtro", "ordem", "agrupamento", "url", "catálogo"],
     demo: UseCatalogDemo,
     preview: { w: 620, h: 520 },

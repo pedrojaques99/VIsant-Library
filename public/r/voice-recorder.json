@@ -3,7 +3,7 @@
   "name": "voice-recorder",
   "title": "Voice Recorder",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Gravador de voz de bolso montado com o Device Kit: REC que trava afundado, display com timecode e onda, encoder lateral que navega entre as notas ou vira volume, e a lista das notas ao lado.",
+  "description": "Gravador de voz de bolso feito com o Device Kit: REC que trava, timecode, onda e encoder.",
   "dependencies": [
     "lucide-react",
     "motion"

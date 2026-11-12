@@ -8826,7 +8826,7 @@
       "name": "use-catalog",
       "type": "registry:lib",
       "title": "useCatalog",
-      "description": "Busca, facetas, ordem e agrupamento de qualquer lista num estado que mora na URL, com a barra de filtro pronta. Sem router, ou com o seu por adaptador.",
+      "description": "Busca, facetas, ordem e grupos de uma lista com o estado na URL, com ou sem router.",
       "author": "Visant Labs <visantsupply@gmail.com>",
       "dependencies": [
         "react"
@@ -8862,7 +8862,7 @@
       "name": "prompt-composer",
       "type": "registry:ui",
       "title": "Prompt Composer",
-      "description": "O campo de um painel de agente: texto que cresce, anexos com prévia, ferramentas como falar e rabiscar, Enviar que vira Parar. Só apresentação.",
+      "description": "Campo de agente: texto que cresce, anexos com prévia, ferramentas e Enviar/Parar.",
       "author": "Visant Labs <visantsupply@gmail.com>",
       "dependencies": [
         "lucide-react"
@@ -8918,7 +8918,7 @@
       "name": "frame-markup",
       "type": "registry:ui",
       "title": "Frame Markup",
-      "description": "Rabisco por cima de um quadro de vídeo ou imagem que sai como PNG, com a tinta da marca, desfazer e Esc para cancelar.",
+      "description": "Rabisco sobre um quadro de vídeo ou imagem que sai como PNG, com desfazer.",
       "author": "Visant Labs <visantsupply@gmail.com>",
       "dependencies": [
         "lucide-react"
@@ -8953,7 +8953,7 @@
       "name": "device-kit",
       "type": "registry:ui",
       "title": "Device Kit",
-      "description": "Aparelho y2k industrial em peças: carcaça de alumínio escovado, display LCD na luz da marca, LED de estado, encoder com detentes, tecla que afunda e chave de ligar.",
+      "description": "Aparelho y2k industrial em peças: carcaça de alumínio, LCD na luz da marca, LED, encoder e chave.",
       "author": "Visant Labs <visantsupply@gmail.com>",
       "registryDependencies": [
         "utils"
@@ -9492,7 +9492,7 @@
       "name": "voice-recorder",
       "type": "registry:ui",
       "title": "Voice Recorder",
-      "description": "Gravador de voz de bolso montado com o Device Kit: REC que trava afundado, display com timecode e onda, encoder lateral que navega entre as notas ou vira volume, e a lista das notas ao lado.",
+      "description": "Gravador de voz de bolso feito com o Device Kit: REC que trava, timecode, onda e encoder.",
       "author": "Visant Labs <visantsupply@gmail.com>",
       "dependencies": [
         "lucide-react",

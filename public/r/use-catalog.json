@@ -3,7 +3,7 @@
   "name": "use-catalog",
   "title": "useCatalog",
   "author": "Visant Labs <visantsupply@gmail.com>",
-  "description": "Busca, facetas, ordem e agrupamento de qualquer lista num estado que mora na URL, com a barra de filtro pronta. Sem router, ou com o seu por adaptador.",
+  "description": "Busca, facetas, ordem e grupos de uma lista com o estado na URL, com ou sem router.",
   "dependencies": [
     "react"
   ],
