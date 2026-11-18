@@ -242,21 +242,21 @@ export const PromptComposer = React.forwardRef<HTMLTextAreaElement, PromptCompos
   React.useEffect(() => {
     if (!mencao || !mentions?.length) return setAchados([]);
     let vivo = true;
-    const t = window.setTimeout(async () => {
-      const grupos = await Promise.all(
-        mentions.map(async (source) => {
-          try {
-            const itens = await source.search(mencao.termo);
-            return itens.slice(0, source.limit ?? 6).map((item) => ({ source, item }));
-          } catch {
-            return [];
-          }
-        }),
-      );
-      // A resposta de um termo velho chega depois da do novo: descarta.
-      if (vivo) {
-        setAchados(grupos.flat());
-        setAtivo(0);
+    // Cada fonte aparece quando responde: a de rede não segura a que é local. A ordem dos
+    // grupos é a das `mentions`, não a de chegada, para a lista não pular de lugar.
+    const t = window.setTimeout(() => {
+      const por = new Map<string, { source: PromptMentionSource; item: PromptMentionItem }[]>();
+      setAtivo(0);
+      for (const source of mentions) {
+        Promise.resolve()
+          .then(() => source.search(mencao.termo))
+          .then((itens) => {
+            // A resposta de um termo velho chega depois da do novo: descarta.
+            if (!vivo) return;
+            por.set(source.id, itens.slice(0, source.limit ?? 6).map((item) => ({ source, item })));
+            setAchados(mentions.flatMap((s) => por.get(s.id) ?? []));
+          })
+          .catch(() => {});
       }
     }, 90);
     return () => {
@@ -268,17 +268,28 @@ export const PromptComposer = React.forwardRef<HTMLTextAreaElement, PromptCompos
     const a = achados[i];
     const el = campo.current;
     if (!a || !mencao || !el) return;
+    // O texto do DOM, não o `value` da última renderização: numa tela pesada o pai pode
+    // ainda não ter devolvido a última letra.
+    const atual = el.value;
     const fim = mencao.inicio + 1 + mencao.termo.length;
     const nome = `@${a.item.label} `;
-    onValueChange(value.slice(0, mencao.inicio) + nome + value.slice(fim));
+    cursorPendente.current = mencao.inicio + nome.length;
+    onValueChange(atual.slice(0, mencao.inicio) + nome + atual.slice(fim));
     onMention?.(a.item, a.source);
     setMencao(null);
-    const cursor = mencao.inicio + nome.length;
-    requestAnimationFrame(() => {
-      el.focus();
-      el.setSelectionRange(cursor, cursor);
-    });
   };
+  // O cursor volta para depois do nome assim que o texto novo é gravado, antes de qualquer
+  // tecla. Com requestAnimationFrame havia corrida: numa tela pesada as letras seguintes já
+  // tinham chegado e o cursor pulava para trás delas.
+  const cursorPendente = React.useRef<number | null>(null);
+  React.useLayoutEffect(() => {
+    const el = campo.current;
+    const c = cursorPendente.current;
+    if (!el || c == null) return;
+    cursorPendente.current = null;
+    el.focus();
+    el.setSelectionRange(c, c);
+  }, [value]);
   const listaAberta = !!mencao && achados.length > 0;
 
   // Cresce com o texto até maxRows; depois rola. Recalcula também quando o valor
