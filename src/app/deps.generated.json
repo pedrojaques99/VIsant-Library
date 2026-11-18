@@ -434,6 +434,13 @@
     "motion",
     "react"
   ],
+  "software-glyph": [
+    "lucide-react",
+    "simple-icons"
+  ],
+  "context-chip": [
+    "lucide-react"
+  ],
   "prompt-composer": [
     "lucide-react"
   ],

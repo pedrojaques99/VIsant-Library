@@ -800,7 +800,7 @@
     "evite": "Filtro no servidor: filter-bar direto; só busca: use-local-search"
   },
   "prompt-composer": {
-    "quando": "Campo de chat ou agente de IA, com anexos, ferramentas e parar",
+    "quando": "Campo de chat ou agente de IA, com anexos, menções, fila e parar",
     "evite": "Texto comum de formulário: textarea; comando curto: command-search"
   },
   "frame-markup": {
@@ -818,5 +818,13 @@
   "media-timeline": {
     "quando": "Editor de vídeo ou som no navegador: arrastar, aparar, cortar e selecionar clipes em faixas",
     "evite": "Linha do tempo de conteúdo no scroll: timeline"
+  },
+  "context-chip": {
+    "quando": "Referência a arquivo, mídia, link ou software dentro de chat, campo ou texto",
+    "evite": "Filtro liga/desliga: chip; tag de status: badge"
+  },
+  "software-glyph": {
+    "quando": "Mostrar qual software está por trás de uma ação de agente ou de um link colado",
+    "evite": "Parede de logos de cliente: logo-wall"
   }
 }

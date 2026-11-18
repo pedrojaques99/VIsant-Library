@@ -1,17 +1,27 @@
 "use client";
 
 /**
- * O campo do agente de um editor de vídeo: falar, rabiscar e comentar no tempo.
+ * O campo do agente de um editor de vídeo: falar, rabiscar, comentar no tempo,
+ * mencionar com @ e enfileirar enquanto ele trabalha.
  *
  * Tudo aqui é de mentira de propósito: o "ditado" devolve uma frase depois de
- * um instante e a "resposta" corre por dois segundos. O componente não sabe
- * disso; ele só recebe o estado.
+ * um instante, a "resposta" corre por três segundos e a fila anda sozinha. O
+ * componente não sabe disso; ele só recebe o estado.
  */
 
 import * as React from "react";
-import { MessageSquareText, Mic, PenLine } from "lucide-react";
+import { FileVideo, MessageSquareText, Mic, PenLine } from "lucide-react";
 
-import { PromptComposer, type PromptAttachment, type PromptStatus } from "../../../registry/visant/ui/prompt-composer";
+import {
+  PromptComposer,
+  type PromptAttachment,
+  type PromptMentionSource,
+  type PromptQueuedItem,
+  type PromptStatus,
+} from "../../../registry/visant/ui/prompt-composer";
+import { SoftwareGlyph, SOFTWARE, softwareFromLink } from "../../../registry/visant/ui/software-glyph";
+
+const ARQUIVOS = ["abertura.mp4", "fecho-logo.mp4", "trilha-v3.wav", "roteiro.md", "capa-reels.png"];
 
 export default function PromptComposerDemo() {
   const [texto, setTexto] = React.useState("");
@@ -19,27 +29,70 @@ export default function PromptComposerDemo() {
     { id: "r1", label: "rabisco", detail: "em 00:12:04" },
   ]);
   const [status, setStatus] = React.useState<PromptStatus>("ready");
+  const [fila, setFila] = React.useState<PromptQueuedItem[]>([]);
   const [mic, setMic] = React.useState<"parado" | "gravando" | "mandando">("parado");
   const [enviadas, setEnviadas] = React.useState<string[]>([]);
   const timer = React.useRef<number>(0);
+  const filaRef = React.useRef(fila);
+  filaRef.current = fila;
   React.useEffect(() => () => window.clearTimeout(timer.current), []);
 
-  const enviar = () => {
-    setEnviadas((l) => [...l, texto.trim() || `${anexos.length} anexo(s)`].slice(-2));
+  const responder = (m: string) => {
+    setEnviadas((l) => [...l, m].slice(-2));
+    setStatus("streaming");
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => {
+      const [prox, ...resto] = filaRef.current;
+      if (prox) {
+        setFila(resto);
+        responder(prox.text);
+      } else setStatus("ready");
+    }, 3000);
+  };
+
+  const enviar = ({ now }: { now: boolean }) => {
+    const m = texto.trim() || `${anexos.length} anexo(s)`;
     setTexto("");
     setAnexos([]);
-    setStatus("streaming");
-    timer.current = window.setTimeout(() => setStatus("ready"), 2200);
+    if (status === "ready" || now) responder(m);
+    else setFila((l) => [...l, { id: `f${Date.now()}`, text: m }]);
   };
 
   const falar = () => {
     if (mic === "parado") return setMic("gravando");
     setMic("mandando");
-    timer.current = window.setTimeout(() => {
+    window.setTimeout(() => {
       setMic("parado");
       setTexto((v) => (v.trim() ? `${v.trim()} ` : "") + "deixa o som da porta mais baixo");
     }, 700);
   };
+
+  const fontes = React.useMemo<PromptMentionSource[]>(
+    () => [
+      {
+        id: "arquivos",
+        label: "Arquivos da pasta",
+        search: (q) =>
+          ARQUIVOS.filter((a) => a.includes(q.toLowerCase())).map((a) => ({
+            id: a,
+            label: a,
+            icon: <FileVideo className="size-3.5" aria-hidden="true" />,
+          })),
+      },
+      {
+        id: "ferramentas",
+        label: "Ferramentas",
+        search: (q) =>
+          SOFTWARE.filter((s) => (s.icon || s.mono) && s.name.toLowerCase().includes(q.toLowerCase())).map((s) => ({
+            id: s.id,
+            label: s.name,
+            icon: <SoftwareGlyph software={s} size={14} />,
+          })),
+        limit: 4,
+      },
+    ],
+    [],
+  );
 
   let n = 0;
   return (
@@ -61,7 +114,28 @@ export default function PromptComposerDemo() {
             setStatus("ready");
           }}
           status={status}
-          placeholder="O que fazer nesta peça?"
+          queueWhileBusy
+          queue={fila}
+          onQueueSendNow={(id) => {
+            const item = fila.find((q) => q.id === id);
+            setFila((l) => l.filter((q) => q.id !== id));
+            if (item) responder(item.text);
+          }}
+          onQueueEdit={(id) => {
+            const item = fila.find((q) => q.id === id);
+            setFila((l) => l.filter((q) => q.id !== id));
+            if (item) setTexto(item.text);
+          }}
+          onQueueRemove={(id) => setFila((l) => l.filter((q) => q.id !== id))}
+          mentions={fontes}
+          onMention={(item) => setAnexos((l) => [...l, { id: `m${Date.now()}`, label: item.label, icon: item.icon }])}
+          onPasteText={(t) => {
+            const link = softwareFromLink(t);
+            if (!link) return false;
+            setAnexos((l) => [...l, { id: `l${Date.now()}`, label: link.label, icon: <SoftwareGlyph software={link.software} size={14} /> }]);
+            return true;
+          }}
+          placeholder="O que fazer nesta peça? @ menciona"
           label="Mensagem para o agente"
           attachments={anexos}
           onRemoveAttachment={(id) => setAnexos((l) => l.filter((a) => a.id !== id))}

@@ -552,6 +552,8 @@ const PullToRefreshColheitaDemo = React.lazy(() => import("./demos/pull-to-refre
 const ReactionsColheitaDemo = React.lazy(() => import("./demos/reactions-demo"));
 const SignaturePadColheitaDemo = React.lazy(() => import("./demos/signature-pad-demo"));
 const PromptComposerDemo = React.lazy(() => import("./demos/prompt-composer-demo"));
+const ContextChipDemo = React.lazy(() => import("./demos/context-chip-demo"));
+const SoftwareGlyphDemo = React.lazy(() => import("./demos/software-glyph-demo"));
 const FrameMarkupDemo = React.lazy(() => import("./demos/frame-markup-demo"));
 const UseCatalogDemo = React.lazy(() => import("./demos/use-catalog-demo"));
 const DeviceKitDemo = React.lazy(() => import("./demos/device-kit-demo"));
@@ -2337,13 +2339,35 @@ export const CATALOG: CatalogItem[] = [
     preview: { w: 560, h: 400 },
   },
   {
+    name: "context-chip",
+    title: "Context Chip",
+    type: "ui",
+    family: "controles",
+    description:
+      "Pastilha de referência com mini thumb (capa, logo de software), detalhe e tirar.",
+    tags: ["chat", "agente", "anexo", "referência", "arquivo"],
+    demo: ContextChipDemo,
+    preview: { w: 520, h: 300 },
+  },
+  {
+    name: "software-glyph",
+    title: "Software Glyph",
+    type: "ui",
+    family: "controles",
+    description:
+      "Logo de software em uma cor e leitores de nome de ferramenta e de link.",
+    tags: ["agente", "ia", "logo", "link", "ferramenta"],
+    demo: SoftwareGlyphDemo,
+    preview: { w: 440, h: 320 },
+  },
+  {
     name: "prompt-composer",
     title: "Prompt Composer",
     type: "ui",
     family: "controles",
     description:
-      "Campo de agente: texto que cresce, anexos com prévia, ferramentas e Enviar/Parar.",
-    tags: ["chat", "agente", "ia", "prompt", "anexo"],
+      "Campo de agente: texto que cresce, anexos com thumb, menções @, fila de mensagens e Enviar/Parar.",
+    tags: ["chat", "agente", "ia", "prompt", "anexo", "menção", "fila"],
     demo: PromptComposerDemo,
     preview: { w: 520, h: 380 },
   },

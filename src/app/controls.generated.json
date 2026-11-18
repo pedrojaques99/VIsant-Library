@@ -9687,6 +9687,74 @@
       ]
     }
   },
+  "software-glyph": {
+    "componentes": {
+      "SoftwareGlyph": [
+        {
+          "prop": "size",
+          "tipo": "numero",
+          "min": 1,
+          "max": 40,
+          "step": 1,
+          "padrao": 14,
+          "resumo": "Lado em px."
+        }
+      ]
+    }
+  },
+  "context-chip": {
+    "componentes": {
+      "ContextChip": [
+        {
+          "prop": "size",
+          "tipo": "escolha",
+          "valores": [
+            "sm",
+            "md"
+          ],
+          "padrao": "md",
+          "resumo": null
+        },
+        {
+          "prop": "external",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Link externo: nova aba."
+        },
+        {
+          "prop": "inline",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Dentro de um parágrafo: alinha na linha de base."
+        },
+        {
+          "prop": "portrait",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Thumb 9:16 (vídeo vertical) em vez de quadrada."
+        },
+        {
+          "prop": "href",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "Abre num link."
+        },
+        {
+          "prop": "image",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": "URL da miniatura."
+        },
+        {
+          "prop": "removeLabel",
+          "tipo": "texto",
+          "padrao": null,
+          "resumo": null,
+          "secundario": true
+        }
+      ]
+    }
+  },
   "prompt-composer": {
     "componentes": {
       "PromptComposer": [
@@ -9720,6 +9788,12 @@
           "resumo": null
         },
         {
+          "prop": "queueWhileBusy",
+          "tipo": "chave",
+          "padrao": false,
+          "resumo": "Enquanto a resposta corre, Enter ainda envia (a tela enfileira) e o botão vira \"Na fila\"."
+        },
+        {
           "prop": "maxRows",
           "tipo": "numero",
           "min": 1,
@@ -9735,7 +9809,8 @@
           "max": 20,
           "step": 1,
           "padrao": 2,
-          "resumo": null
+          "resumo": null,
+          "secundario": true
         },
         {
           "prop": "accept",
@@ -9762,6 +9837,13 @@
           "prop": "placeholder",
           "tipo": "texto",
           "padrao": "Escreva uma mensagem",
+          "resumo": null,
+          "secundario": true
+        },
+        {
+          "prop": "queueLabel",
+          "tipo": "texto",
+          "padrao": "Na fila",
           "resumo": null,
           "secundario": true
         },

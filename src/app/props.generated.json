@@ -17532,6 +17532,134 @@
       "props": []
     }
   ],
+  "software-glyph": [
+    {
+      "nome": "softwareFromTool",
+      "descricao": "`mcp__claude_ai_Figma__get_metadata` → Figma, \"get metadata\". `Bash` → Terminal, \"rodar comando\".",
+      "props": []
+    },
+    {
+      "nome": "softwareFromLink",
+      "descricao": "Um link ou caminho colado vira { software, label } curto para um chip. Devolve null quando o texto não é um link nem um caminho inteiro. Nada é buscado: só o endereço.",
+      "props": []
+    },
+    {
+      "nome": "SoftwareGlyph",
+      "descricao": "O logo em `currentColor`, num quadrado de `size`. Decorativo: o nome vai no texto ao lado.",
+      "props": [
+        {
+          "nome": "software",
+          "tipo": "string | Software",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "size",
+          "tipo": "number",
+          "obrigatoria": false,
+          "padrao": "14",
+          "descricao": "Lado em px."
+        }
+      ]
+    }
+  ],
+  "context-chip": [
+    {
+      "nome": "ContextChip",
+      "descricao": null,
+      "props": [
+        {
+          "nome": "label",
+          "tipo": "any",
+          "obrigatoria": true,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "detail",
+          "tipo": "any",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Complemento curto: \"em 00:12:04\", \"3,2 MB\"."
+        },
+        {
+          "nome": "external",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Link externo: nova aba."
+        },
+        {
+          "nome": "href",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Abre num link."
+        },
+        {
+          "nome": "icon",
+          "tipo": "any",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Logo ou ícone; também é o que fica se a imagem falhar."
+        },
+        {
+          "nome": "image",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "URL da miniatura."
+        },
+        {
+          "nome": "inline",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Dentro de um parágrafo: alinha na linha de base."
+        },
+        {
+          "nome": "onClick",
+          "tipo": "MouseEventHandler<HTMLElement>",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onRemove",
+          "tipo": "() => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "portrait",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Thumb 9:16 (vídeo vertical) em vez de quadrada."
+        },
+        {
+          "nome": "removeLabel",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "size",
+          "tipo": "enum",
+          "obrigatoria": false,
+          "padrao": "md",
+          "descricao": null,
+          "valores": [
+            "sm",
+            "md"
+          ]
+        }
+      ]
+    }
+  ],
   "prompt-composer": [
     {
       "nome": "PromptComposer",
@@ -17539,10 +17667,10 @@
       "props": [
         {
           "nome": "onSubmit",
-          "tipo": "() => void",
+          "tipo": "(how: { now: boolean; }) => void",
           "obrigatoria": true,
           "padrao": null,
-          "descricao": null
+          "descricao": "`now`: Ctrl/⌘+Enter com a resposta correndo, interromper e mandar já."
         },
         {
           "nome": "onValueChange",
@@ -17629,6 +17757,13 @@
           "descricao": null
         },
         {
+          "nome": "mentions",
+          "tipo": "PromptMentionSource[]",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Fontes do `@`."
+        },
+        {
           "nome": "minRows",
           "tipo": "number",
           "obrigatoria": false,
@@ -17641,6 +17776,41 @@
           "obrigatoria": false,
           "padrao": null,
           "descricao": "Com isto aparece o clipe, e colar imagem vira anexo."
+        },
+        {
+          "nome": "onMention",
+          "tipo": "(item: PromptMentionItem, source: PromptMentionSource) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onPasteText",
+          "tipo": "(text: string) => boolean",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": "Texto colado. Devolva true se virou outra coisa (chip) e não deve entrar no campo."
+        },
+        {
+          "nome": "onQueueEdit",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onQueueRemove",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
+        },
+        {
+          "nome": "onQueueSendNow",
+          "tipo": "(id: string) => void",
+          "obrigatoria": false,
+          "padrao": null,
+          "descricao": null
         },
         {
           "nome": "onRemoveAttachment",
@@ -17662,6 +17832,27 @@
           "obrigatoria": false,
           "padrao": "Escreva uma mensagem",
           "descricao": null
+        },
+        {
+          "nome": "queue",
+          "tipo": "PromptQueuedItem[]",
+          "obrigatoria": false,
+          "padrao": "[]",
+          "descricao": "As mensagens esperando, de cima (próxima) para baixo."
+        },
+        {
+          "nome": "queueLabel",
+          "tipo": "string",
+          "obrigatoria": false,
+          "padrao": "Na fila",
+          "descricao": null
+        },
+        {
+          "nome": "queueWhileBusy",
+          "tipo": "boolean",
+          "obrigatoria": false,
+          "padrao": "false",
+          "descricao": "Enquanto a resposta corre, Enter ainda envia (a tela enfileira) e o botão vira \"Na fila\"."
         },
         {
           "nome": "removeLabel",

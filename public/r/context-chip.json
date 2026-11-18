@@ -1,0 +1,56 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "context-chip",
+  "title": "Context Chip",
+  "author": "Visant Labs <visantsupply@gmail.com>",
+  "description": "Pastilha de referência com mini thumb (capa, logo de software), detalhe e tirar.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "registry/visant/ui/context-chip.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { X } from \"lucide-react\";\n\nimport { cn } from \"@/lib/utils\";\n\n/**\n * Context Chip — a pastilha de uma referência: um arquivo, um corte, um link,\n * um software. Mini thumb, nome curto, detalhe opcional (timecode) e tirar.\n *\n * Colhido do painel do agente do Estúdio (jaques-os). Lá havia quatro chips\n * diferentes para a mesma ideia: o do corte no Markdown, o do corte no campo,\n * o do anexo no campo e o texto \"mídia, rabisco\" na bolha. Agora é este.\n *\n * Não é o `chip` (pastilha de filtro): aquele liga e desliga uma faceta. Este\n * aponta para uma coisa, e a coisa tem cara.\n *\n * ── O que não é óbvio ──────────────────────────────────────────────────────\n *\n * 1. **A thumb tem três formas.** `image` (capa, quadro do vídeo), `icon`\n *    (logo do software em `currentColor`) e nada. Thumb que não carrega some\n *    e deixa o `icon` no lugar, em vez de um quadrado quebrado.\n * 2. **`portrait` para vídeo vertical.** Corte de Reels em quadrado vira um\n *    recorte da cara de alguém; a proporção 9:16 mostra o quadro inteiro.\n * 3. **Tirar é um botão ao lado, não o chip inteiro.** O chip pode abrir a\n *    coisa (link, corte); clicar para ver não pode apagar. E fica FORA do\n *    link: botão dentro de `<a>` é HTML inválido e o leitor de tela se perde.\n * 4. **`inline` para dentro do texto.** Na linha de um parágrafo o chip desce\n *    para a linha de base e não empurra a entrelinha.\n */\n\nexport interface ContextChipProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, \"children\" | \"onClick\"> {\n  onClick?: React.MouseEventHandler<HTMLElement>;\n  label: React.ReactNode;\n  /** Complemento curto: \"em 00:12:04\", \"3,2 MB\". */\n  detail?: React.ReactNode;\n  /** URL da miniatura. */\n  image?: string;\n  /** Logo ou ícone; também é o que fica se a imagem falhar. */\n  icon?: React.ReactNode;\n  /** Thumb 9:16 (vídeo vertical) em vez de quadrada. */\n  portrait?: boolean;\n  /** Abre num link. */\n  href?: string;\n  /** Link externo: nova aba. */\n  external?: boolean;\n  onRemove?: () => void;\n  removeLabel?: string;\n  size?: \"sm\" | \"md\";\n  /** Dentro de um parágrafo: alinha na linha de base. */\n  inline?: boolean;\n}\n\nconst foco = \"focus-visible:outline-none focus-visible:[box-shadow:var(--focus)]\";\n\nexport const ContextChip = React.forwardRef<HTMLSpanElement, ContextChipProps>(function ContextChip(\n  { label, detail, image, icon, portrait, href, external, onRemove, removeLabel, size = \"md\", inline, className, title, onClick, ...rest },\n  ref,\n) {\n  const [falhou, setFalhou] = React.useState(false);\n  React.useEffect(() => setFalhou(false), [image]);\n  const sm = size === \"sm\";\n  const temImagem = !!image && !falhou;\n\n  const thumb = temImagem ? (\n    <img\n      src={image}\n      alt=\"\"\n      loading=\"lazy\"\n      onError={() => setFalhou(true)}\n      className={cn(\n        \"shrink-0 rounded-[calc(var(--r-control)/2)] bg-background object-cover\",\n        portrait ? (sm ? \"h-5 w-[0.7rem]\" : \"h-7 w-4\") : sm ? \"size-4\" : \"size-6\",\n      )}\n    />\n  ) : icon ? (\n    <span\n      className={cn(\n        \"grid shrink-0 place-items-center rounded-[calc(var(--r-control)/2)] text-foreground/80\",\n        sm ? \"size-4\" : \"size-6 bg-background\",\n      )}\n    >\n      {icon}\n    </span>\n  ) : null;\n\n  const corpo = (\n    <>\n      {thumb}\n      <span className=\"min-w-0 truncate\">\n        {label}\n        {detail ? <span className=\"text-muted-foreground\"> {detail}</span> : null}\n      </span>\n    </>\n  );\n\n  const casca = cn(\n    \"visant-context-chip inline-flex min-w-0 max-w-full items-center rounded-[var(--r-control)] bg-muted text-foreground\",\n    \"[transition:background-color_var(--dur-fast)_var(--ease-out)] motion-reduce:transition-none\",\n    sm ? \"h-6 text-[0.8125rem] leading-5\" : \"h-8 text-xs\",\n    inline && \"mx-0.5 translate-y-[3px] align-baseline\",\n    (href || onClick) && \"has-[[data-alvo]:hover]:bg-accent\",\n    className,\n  );\n  // O alvo (link, botão ou texto) e o tirar ficam lado a lado: botão dentro de link é HTML inválido.\n  const alvo = cn(\n    \"inline-flex min-w-0 items-center self-stretch rounded-[var(--r-control)] border-0 bg-transparent p-0 text-inherit no-underline\",\n    sm ? \"gap-1 pl-1 pr-1.5\" : \"gap-1.5 pl-1 pr-2\",\n    onRemove && (sm ? \"pr-0.5\" : \"pr-1\"),\n    (href || onClick) && cn(\"cursor-pointer\", foco),\n  );\n\n  const tirar = onRemove ? (\n    <button\n      type=\"button\"\n      aria-label={removeLabel ?? (typeof label === \"string\" ? `Tirar ${label}` : \"Tirar\")}\n      title={removeLabel ?? (typeof label === \"string\" ? `Tirar ${label}` : \"Tirar\")}\n      onClick={onRemove}\n      className={cn(\n        \"mr-0.5 grid shrink-0 cursor-pointer place-items-center rounded-[calc(var(--r-control)/2)] border-0 bg-transparent p-0 text-muted-foreground hover:bg-background hover:text-foreground pointer-coarse:size-8\",\n        sm ? \"size-4\" : \"size-6\",\n        foco,\n      )}\n    >\n      <X className=\"size-3\" aria-hidden=\"true\" />\n    </button>\n  ) : null;\n\n  return (\n    <span ref={ref as React.Ref<HTMLSpanElement>} className={casca} {...rest}>\n      {href ? (\n        <a data-alvo=\"\" href={href} title={title} onClick={onClick} {...(external ? { target: \"_blank\", rel: \"noreferrer\" } : null)} className={alvo}>\n          {corpo}\n        </a>\n      ) : onClick ? (\n        <button data-alvo=\"\" type=\"button\" title={title} onClick={onClick} className={alvo}>\n          {corpo}\n        </button>\n      ) : (\n        <span title={title} className={alvo}>\n          {corpo}\n        </span>\n      )}\n      {tirar}\n    </span>\n  );\n});\n",
+      "type": "registry:ui"
+    }
+  ],
+  "css": {
+    "@keyframes visant-context-chip": {
+      "from": {
+        "opacity": "0",
+        "transform": "translateY(2px) scale(0.98)"
+      },
+      "to": {
+        "opacity": "1",
+        "transform": "none"
+      }
+    },
+    "@layer components": {
+      ".visant-context-chip": {
+        "animation": "visant-context-chip var(--dur-fast, 160ms) var(--ease-out, ease-out) both"
+      }
+    },
+    "@media (prefers-reduced-motion: reduce)": {
+      ".visant-context-chip": {
+        "animation": "none"
+      }
+    }
+  },
+  "meta": {
+    "uso": {
+      "quando": "Referência a arquivo, mídia, link ou software dentro de chat, campo ou texto",
+      "evite": "Filtro liga/desliga: chip; tag de status: badge"
+    }
+  },
+  "categories": [
+    "chat",
+    "agente",
+    "anexo",
+    "referencia",
+    "arquivo"
+  ],
+  "type": "registry:ui"
+}
