@@ -616,6 +616,8 @@ export function Estudio({ onSair, telaInicial, aoExportar }: {
   /* ── Teclado ────────────────────────────────────────────────────────── */
   React.useEffect(() => {
     const on = (e: KeyboardEvent) => {
+      // Estúdio montado dentro de algo inerte (uma aba escondida do app que hospeda): o teclado não é dele.
+      if (palco.current?.closest("[inert]")) return;
       const alvo = e.target as HTMLElement;
       if (alvo.closest("input, textarea, [role=slider]")) return;
       const passoDeRolagem = ({ ArrowDown: 3, ArrowUp: -3, PageDown: 15, PageUp: -15, Home: -100, End: 100 } as Record<string, number>)[e.key];
